@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth/auth'
 import { getOrdersByTenant, getOrderStats } from '@/lib/db/orders'
 import { OrderFilterSchema } from '@/lib/security/schemas/order-schemas'
-import { UserRole } from '@prisma/client'
+import { USER_ROLES } from '@/lib/types/user-role'
 
 /**
  * GET /api/admin/orders
@@ -41,7 +41,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Check if user has permission to view all orders
-    if (role !== UserRole.STORE_OWNER && role !== UserRole.SUPER_ADMIN) {
+    if (role !== USER_ROLES.STORE_OWNER && role !== USER_ROLES.SUPER_ADMIN) {
       return NextResponse.json(
         { error: 'Forbidden - Only STORE_OWNER or SUPER_ADMIN can view all orders' },
         { status: 403 }
