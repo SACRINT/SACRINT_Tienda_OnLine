@@ -195,6 +195,8 @@ model Product {
   cartItems             CartItem[]
   orderItems            OrderItem[]
   reviews               Review[]
+  reservationItems      ReservationItem[]
+  inventoryLogs         InventoryLog[]
 
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
@@ -228,6 +230,7 @@ model ProductVariant {
   image                 ProductImage? @relation(fields: [imageId], references: [id])
   cartItems             CartItem[]
   orderItems            OrderItem[]
+  reservationItems      ReservationItem[]
 
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
@@ -336,6 +339,7 @@ model Order {
   items                 OrderItem[]
   shippingAddress       Address  @relation("ShippingAddress", fields: [shippingAddressId], references: [id])
   billingAddress        Address? @relation("BillingAddress", fields: [billingAddressId], references: [id])
+  inventoryReservation  InventoryReservation?
 
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
@@ -493,4 +497,71 @@ model Coupon {
 enum CouponType {
   PERCENTAGE
   FIXED
+}
+
+// ============ INVENTORY MANAGEMENT ============
+
+model InventoryReservation {
+  id                    String   @id @default(cuid())
+  orderId               String   @unique
+  status                ReservationStatus @default(RESERVED)
+
+  reservedAt            DateTime @default(now())
+  confirmedAt           DateTime?
+
+  // Relations
+  order                 Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  items                 ReservationItem[]
+
+  @@index([orderId])
+  @@index([status])
+}
+
+model ReservationItem {
+  id                    String   @id @default(cuid())
+  reservationId         String
+  productId             String
+  variantId             String?
+
+  reservedQuantity      Int
+
+  // Relations
+  reservation           InventoryReservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  product               Product  @relation(fields: [productId], references: [id])
+  variant               ProductVariant? @relation(fields: [variantId], references: [id])
+
+  @@index([reservationId])
+  @@index([productId])
+}
+
+model InventoryLog {
+  id                    String   @id @default(cuid())
+  productId             String
+
+  adjustment            Int      // Positive or negative
+  reason                InventoryReason
+  previousStock         Int
+  newStock              Int
+
+  createdAt             DateTime @default(now())
+
+  // Relations
+  product               Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([createdAt])
+}
+
+enum ReservationStatus {
+  RESERVED
+  CONFIRMED
+  CANCELLED
+}
+
+enum InventoryReason {
+  RECOUNT
+  RETURN
+  DAMAGE
+  PURCHASE
+  OTHER
 }
