@@ -3,7 +3,7 @@
 
 import { db } from './client'
 import { Prisma } from '@prisma/client'
-import { auth } from '@/app/api/auth/[...nextauth]/route'
+import { auth } from '@/lib/auth/auth'
 
 /**
  * Get current user's tenant ID from session

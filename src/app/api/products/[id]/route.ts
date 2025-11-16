@@ -4,7 +4,7 @@
 // DELETE /api/products/[id] - Delete product (STORE_OWNER only, soft delete)
 
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/app/api/auth/[...nextauth]/route'
+import { auth } from '@/lib/auth/auth'
 import {
   getProductById,
   updateProduct,

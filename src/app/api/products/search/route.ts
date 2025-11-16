@@ -2,7 +2,7 @@
 // GET /api/products/search - Advanced product search with filters
 
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/app/api/auth/[...nextauth]/route'
+import { auth } from '@/lib/auth/auth'
 import { searchProducts } from '@/lib/db/products'
 import { ProductSearchSchema } from '@/lib/security/schemas/product-schemas'
 

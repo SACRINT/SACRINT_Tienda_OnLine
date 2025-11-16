@@ -2,7 +2,7 @@
 // Central export point for authentication-related modules
 
 export { authConfig } from './auth.config'
-export { auth, signIn, signOut } from '@/app/api/auth/[...nextauth]/route'
+export { auth, signIn, signOut } from './auth'
 
 // Auth helpers
 export { hasPermission } from '@/lib/db/users'
