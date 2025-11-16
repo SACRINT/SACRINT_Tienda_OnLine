@@ -3,7 +3,6 @@
 
 import { db } from './client'
 import { ensureTenantAccess } from './tenant'
-import { confirmStockDeduction } from './products'
 import { getCartById, clearCart } from './cart'
 import type { Prisma, OrderStatus, PaymentStatus, PaymentMethod } from '@prisma/client'
 
@@ -153,7 +152,11 @@ export async function createOrder(data: {
       },
     })
 
-    // Create order items and confirm stock deduction
+    // Create order items
+    // NOTE: Stock is NO LONGER deducted here
+    // Stock management now uses the inventory reservation system:
+    // 1. Reserve inventory after order creation (checkout route)
+    // 2. Confirm reservation after payment success
     for (const cartItem of cart.items) {
       // Create order item
       await tx.orderItem.create({
@@ -165,10 +168,6 @@ export async function createOrder(data: {
           priceAtPurchase: cartItem.priceSnapshot,
         },
       })
-
-      // Confirm stock deduction (outside transaction to use existing function)
-      // This will fail if stock is insufficient
-      await confirmStockDeduction(cartItem.productId, cartItem.quantity)
     }
 
     // Clear cart
