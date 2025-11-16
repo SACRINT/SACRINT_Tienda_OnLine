@@ -1,7 +1,7 @@
 // Middleware - Route Protection and Security Headers
 // Protects routes and adds security headers to all responses
 
-import { auth } from '@/app/api/auth/[...nextauth]/route'
+import { auth } from '@/lib/auth/auth'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 

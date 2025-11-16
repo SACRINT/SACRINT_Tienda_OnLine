@@ -3,7 +3,7 @@
 // POST /api/tenants - Create new tenant (STORE_OWNER only)
 
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/app/api/auth/[...nextauth]/route'
+import { auth } from '@/lib/auth/auth'
 import { db } from '@/lib/db/client'
 import { z } from 'zod'
 import { UserRole } from '@prisma/client'

@@ -134,13 +134,12 @@ export const authConfig = {
         // Initial sign in
         const dbUser = await db.user.findUnique({
           where: { id: user.id },
-          select: { role: true, tenantId: true, isActive: true },
+          select: { role: true, tenantId: true },
         })
 
         if (dbUser) {
           token.role = dbUser.role
           token.tenantId = dbUser.tenantId
-          token.isActive = dbUser.isActive
         }
       }
 
@@ -157,27 +156,11 @@ export const authConfig = {
         session.user.id = token.sub!
         session.user.role = token.role as UserRole
         session.user.tenantId = token.tenantId as string | null
-        session.user.isActive = token.isActive as boolean
       }
       return session
     },
-    async signIn({ user, account, profile }) {
-      // Allow OAuth sign ins
-      if (account?.provider !== 'credentials') {
-        return true
-      }
-
-      // For credentials, check if user is active
-      const dbUser = await db.user.findUnique({
-        where: { id: user.id },
-        select: { isActive: true },
-      })
-
-      if (!dbUser?.isActive) {
-        console.error('[AUTH] User is not active:', user.id)
-        return false
-      }
-
+    async signIn(params) {
+      // Allow all sign ins (can add additional checks here if needed)
       return true
     },
   },
@@ -200,7 +183,7 @@ export const authConfig = {
     updateAge: 24 * 60 * 60, // 1 day
   },
   debug: process.env.NODE_ENV === 'development',
-} satisfies NextAuthConfig
+} as const
 
 // Type augmentation for NextAuth
 declare module 'next-auth' {
@@ -212,21 +195,18 @@ declare module 'next-auth' {
       image?: string | null
       role: UserRole
       tenantId: string | null
-      isActive: boolean
     }
   }
 
   interface User {
-    role: UserRole
-    tenantId: string | null
-    isActive?: boolean
+    role?: UserRole
+    tenantId?: string | null
   }
 }
 
 declare module 'next-auth/jwt' {
   interface JWT {
-    role: UserRole
-    tenantId: string | null
-    isActive: boolean
+    role?: UserRole
+    tenantId?: string | null
   }
 }
