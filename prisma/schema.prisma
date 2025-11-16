@@ -28,6 +28,7 @@ model Tenant {
   users                 User[]
   products              Product[]
   categories            Category[]
+  carts                 Cart[]
   orders                Order[]
   coupons               Coupon[]
 
@@ -66,6 +67,7 @@ model User {
   tenant                Tenant?  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   accounts              Account[]
   sessions              Session[]
+  carts                 Cart[]
   orders                Order[]
   reviews               Review[]
 
@@ -190,6 +192,7 @@ model Product {
   category              Category @relation(fields: [categoryId], references: [id])
   variants              ProductVariant[]
   images                ProductImage[]
+  cartItems             CartItem[]
   orderItems            OrderItem[]
   reviews               Review[]
 
@@ -223,6 +226,7 @@ model ProductVariant {
   // Relations
   product               Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   image                 ProductImage? @relation(fields: [imageId], references: [id])
+  cartItems             CartItem[]
   orderItems            OrderItem[]
 
   createdAt             DateTime @default(now())
@@ -248,7 +252,49 @@ model ProductImage {
   @@index([productId])
 }
 
-// ============ CARRITO & ÓRDENES ============
+// ============ CARRITO ============
+
+model Cart {
+  id                    String   @id @default(cuid())
+  userId                String
+  tenantId              String
+
+  // Relations
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant                Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  items                 CartItem[]
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@unique([userId, tenantId]) // Un carrito por usuario por tenant
+  @@index([userId])
+  @@index([tenantId])
+}
+
+model CartItem {
+  id                    String   @id @default(cuid())
+  cartId                String
+  productId             String
+  variantId             String?
+
+  quantity              Int
+  priceSnapshot         Decimal  @db.Decimal(10, 2) // Precio al momento de agregar
+
+  // Relations
+  cart                  Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product               Product  @relation(fields: [productId], references: [id])
+  variant               ProductVariant? @relation(fields: [variantId], references: [id])
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@unique([cartId, productId, variantId]) // Un item único por combinación
+  @@index([cartId])
+  @@index([productId])
+}
+
+// ============ ÓRDENES ============
 
 model Order {
   id                    String   @id @default(cuid())
