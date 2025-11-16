@@ -90,7 +90,7 @@ export async function GET(req: NextRequest) {
     }
 
     return NextResponse.json({
-      orders: result.orders.map((order) => ({
+      orders: result.orders.map((order: any) => ({
         id: order.id,
         orderNumber: order.orderNumber,
         status: order.status,
@@ -107,7 +107,7 @@ export async function GET(req: NextRequest) {
           name: order.user.name,
           email: order.user.email,
         },
-        items: order.items.map((item) => ({
+        items: order.items.map((item: any) => ({
           id: item.id,
           quantity: item.quantity,
           priceAtPurchase: Number(item.priceAtPurchase),
