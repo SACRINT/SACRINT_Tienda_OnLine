@@ -1,58 +1,122 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-generator client {
-  provider = "prisma-client-js"
-}
+// Prisma Schema - Tienda Online 2025
+// Multi-tenant E-commerce SaaS Platform
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-// ==================== TENANT & MULTI-TENANCY ====================
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ============ MULTI-TENANCY ============
 
 model Tenant {
-  id                String   @id @default(cuid())
-  name              String
-  slug              String   @unique
-  domain            String?  @unique
-  logo              String?
-  primaryColor      String   @default("#0A1128")
-  accentColor       String   @default("#D4AF37")
-  featureFlags      Json     @default("{}")
-  isActive          Boolean  @default(true)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  id                    String   @id @default(cuid())
+  name                  String
+  slug                  String   @unique
+  logo                  String?
+  primaryColor          String   @default("#0A1128") // Azul Marino
+  accentColor           String   @default("#D4AF37")  // Dorado
+  domain                String?  @unique
 
-  // Relations
-  users             User[]
-  products          Product[]
-  categories        Category[]
-  orders            Order[]
-  coupons           Coupon[]
-  settings          TenantSettings?
+  // Configuración de negocio
+  featureFlags          Json     @default("{}")
+
+  // Relaciones
+  users                 User[]
+  products              Product[]
+  categories            Category[]
+  orders                Order[]
+  coupons               Coupon[]
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 
   @@index([slug])
   @@index([domain])
 }
 
-model TenantSettings {
-  id                String   @id @default(cuid())
-  tenantId          String   @unique
-  currency          String   @default("USD")
-  taxRate           Decimal  @default(0) @db.Decimal(5, 2)
-  shippingCost      Decimal  @default(0) @db.Decimal(10, 2)
-  emailNotifications Boolean @default(true)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+// ============ AUTENTICACIÓN ============
 
-  tenant            Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+model User {
+  id                    String   @id @default(cuid())
+  email                 String
+  emailVerified         DateTime?
+  password              String?  // null si usa OAuth
+  name                  String?
+  image                 String?
 
+  // Tenant & Role
+  tenantId              String?  // null para SUPER_ADMIN
+  role                  UserRole @default(CUSTOMER)
+
+  // OAuth
+  googleId              String?  @unique
+  googleAccessToken     String?
+  googleRefreshToken    String?
+
+  // Profile
+  phone                 String?
+  birthDate             DateTime?
+  addresses             Address[]
+
+  // Relations
+  tenant                Tenant?  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  accounts              Account[]
+  sessions              Session[]
+  orders                Order[]
+  reviews               Review[]
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@unique([email, tenantId]) // Email único por tenant
   @@index([tenantId])
+  @@index([role])
 }
 
-// ==================== AUTHENTICATION & USERS ====================
+// Auth.js models
+model Account {
+  id                    String   @id @default(cuid())
+  userId                String
+  type                  String
+  provider              String
+  providerAccountId     String
+  refresh_token         String?  @db.Text
+  access_token          String?  @db.Text
+  expires_at            Int?
+  token_type            String?
+  scope                 String?
+  id_token              String?  @db.Text
+  session_state         String?
+
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id                    String   @id @default(cuid())
+  sessionToken          String   @unique
+  userId                String
+  expires               DateTime
+
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier            String
+  token                 String   @unique
+  expires               DateTime
+
+  @@unique([identifier, token])
+  @@index([token])
+}
 
 enum UserRole {
   SUPER_ADMIN
@@ -60,93 +124,25 @@ enum UserRole {
   CUSTOMER
 }
 
-model User {
-  id                String    @id @default(cuid())
-  email             String    @unique
-  emailVerified     DateTime?
-  password          String?
-  name              String?
-  image             String?
-  phone             String?
-  role              UserRole  @default(CUSTOMER)
-  tenantId          String?
-  isActive          Boolean   @default(true)
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-
-  // Relations
-  tenant            Tenant?   @relation(fields: [tenantId], references: [id], onDelete: SetNull)
-  accounts          Account[]
-  sessions          Session[]
-  orders            Order[]
-  reviews           Review[]
-  addresses         Address[]
-
-  @@index([email])
-  @@index([tenantId])
-}
-
-model Account {
-  id                String  @id @default(cuid())
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String? @db.Text
-  session_state     String?
-
-  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([provider, providerAccountId])
-  @@index([userId])
-}
-
-model Session {
-  id                String   @id @default(cuid())
-  sessionToken      String   @unique
-  userId            String
-  expires           DateTime
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-}
-
-model VerificationToken {
-  identifier        String
-  token             String   @unique
-  expires           DateTime
-
-  @@unique([identifier, token])
-}
-
-// ==================== PRODUCTS & CATEGORIES ====================
+// ============ PRODUCTOS ============
 
 model Category {
-  id                String   @id @default(cuid())
-  tenantId          String
-  name              String
-  slug              String
-  description       String?  @db.Text
-  image             String?
-  parentId          String?
-  isActive          Boolean  @default(true)
-  seoTitle          String?
-  seoDescription    String?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  id                    String   @id @default(cuid())
+  tenantId              String
+  name                  String
+  slug                  String
+  description           String?  @db.Text
+  image                 String?
+  parentId              String?
 
-  tenant            Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  parent            Category? @relation("CategoryToParent", fields: [parentId], references: [id])
-  children          Category[] @relation("CategoryToParent")
-  products          Product[]
+  // Relations
+  tenant                Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  parent                Category? @relation("SubCategories", fields: [parentId], references: [id], onDelete: SetNull)
+  subcategories         Category[] @relation("SubCategories")
+  products              Product[]
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 
   @@unique([tenantId, slug])
   @@index([tenantId])
@@ -154,197 +150,301 @@ model Category {
 }
 
 model Product {
-  id                String   @id @default(cuid())
-  tenantId          String
-  categoryId        String
-  name              String
-  slug              String
-  description       String   @db.Text
-  shortDescription  String?
-  sku               String
-  basePrice         Decimal  @db.Decimal(10, 2)
-  salePrice         Decimal? @db.Decimal(10, 2)
-  stock             Int      @default(0)
-  reserved          Int      @default(0)
-  weight            Decimal  @db.Decimal(8, 2)
-  length            Decimal  @db.Decimal(8, 2)
-  width             Decimal  @db.Decimal(8, 2)
-  height            Decimal  @db.Decimal(8, 2)
-  tags              String[] @default([])
-  seo               Json     @default("{}")
-  published         Boolean  @default(false)
-  featured          Boolean  @default(false)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  id                    String   @id @default(cuid())
+  tenantId              String
+  categoryId            String
 
-  tenant            Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  category          Category @relation(fields: [categoryId], references: [id])
-  variants          ProductVariant[]
-  images            ProductImage[]
-  orderItems        OrderItem[]
-  reviews           Review[]
+  // Info básica
+  name                  String
+  slug                  String
+  description           String   @db.Text
+  shortDescription      String?
+  sku                   String
+
+  // Precios
+  basePrice             Decimal  @db.Decimal(10, 2)
+  salePrice             Decimal? @db.Decimal(10, 2)
+  salePriceExpiresAt    DateTime?
+
+  // Inventario
+  stock                 Int      @default(0)
+  reserved              Int      @default(0) // Para órdenes pendientes de pago
+  lowStockThreshold     Int      @default(5)
+
+  // Logística
+  weight                Decimal  @db.Decimal(8, 2) // kg
+  length                Decimal  @db.Decimal(8, 2) // cm
+  width                 Decimal  @db.Decimal(8, 2)
+  height                Decimal  @db.Decimal(8, 2)
+
+  // Metadata
+  tags                  String[] @default([])
+  seo                   Json     @default("{}")
+
+  // Estados
+  published             Boolean  @default(false)
+  featured              Boolean  @default(false)
+
+  // Relations
+  tenant                Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  category              Category @relation(fields: [categoryId], references: [id])
+  variants              ProductVariant[]
+  images                ProductImage[]
+  orderItems            OrderItem[]
+  reviews               Review[]
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 
   @@unique([tenantId, sku])
   @@index([tenantId])
   @@index([categoryId])
-  @@index([slug])
+  @@index([published])
+  @@index([featured])
 }
 
 model ProductVariant {
-  id                String   @id @default(cuid())
-  productId         String
-  name              String
-  sku               String
-  price             Decimal  @db.Decimal(10, 2)
-  stock             Int      @default(0)
-  color             String?
-  size              String?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  id                    String   @id @default(cuid())
+  productId             String
 
-  product           Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  orderItems        OrderItem[]
+  // Atributos
+  size                  String?
+  color                 String?
+  model                 String?
 
+  // Stock & Precio específico
+  sku                   String
+  price                 Decimal? @db.Decimal(10, 2) // null = usar price del producto
+  stock                 Int
+
+  // Media
+  imageId               String?
+
+  // Relations
+  product               Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  image                 ProductImage? @relation(fields: [imageId], references: [id])
+  orderItems            OrderItem[]
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@unique([productId, sku])
   @@index([productId])
 }
 
 model ProductImage {
-  id                String   @id @default(cuid())
-  productId         String
-  url               String
-  altText           String?
-  displayOrder      Int      @default(0)
-  createdAt         DateTime @default(now())
+  id                    String   @id @default(cuid())
+  productId             String
 
-  product           Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url                   String
+  alt                   String?
+  order                 Int      @default(0)
+  isVideo               Boolean  @default(false)
+
+  // Relations
+  product               Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variants              ProductVariant[]
 
   @@index([productId])
 }
 
-// ==================== ORDERS & CHECKOUT ====================
-
-enum OrderStatus {
-  PENDING
-  CONFIRMED
-  SHIPPED
-  DELIVERED
-  CANCELLED
-  REFUNDED
-}
+// ============ CARRITO & ÓRDENES ============
 
 model Order {
-  id                String   @id @default(cuid())
-  tenantId          String
-  userId            String
-  orderNumber       String   @unique
-  status            OrderStatus @default(PENDING)
-  subtotal          Decimal  @db.Decimal(10, 2)
-  taxAmount         Decimal  @db.Decimal(10, 2)
-  shippingCost      Decimal  @db.Decimal(10, 2)
-  discount          Decimal  @default(0) @db.Decimal(10, 2)
-  total             Decimal  @db.Decimal(10, 2)
-  notes             String?  @db.Text
-  stripePaymentId   String?
-  couponId          String?
-  trackingNumber    String?
-  estimatedDelivery DateTime?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  id                    String   @id @default(cuid())
+  tenantId              String
+  userId                String
 
-  tenant            Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  coupon            Coupon?  @relation(fields: [couponId], references: [id], onDelete: SetNull)
-  items             OrderItem[]
-  shippingAddress   Address?
+  // Números únicos
+  orderNumber           String   @unique // ej: ORD-2025-001234
+
+  // Subtotales
+  subtotal              Decimal  @db.Decimal(12, 2)
+  shippingCost          Decimal  @db.Decimal(10, 2) @default(0)
+  tax                   Decimal  @db.Decimal(10, 2)
+  discount              Decimal  @db.Decimal(10, 2) @default(0)
+  total                 Decimal  @db.Decimal(12, 2)
+
+  // Dirección & Envío
+  shippingAddressId     String
+  billingAddressId      String?
+  shippingMethod        String   @default("standard")
+  trackingNumber        String?
+
+  // Pago
+  paymentMethod         PaymentMethod
+  paymentStatus         PaymentStatus @default(PENDING)
+  paymentId             String?  // Stripe/Mercado Pago ID
+
+  // Estado general
+  status                OrderStatus @default(PENDING)
+  notes                 String?  @db.Text
+  adminNotes            String?  @db.Text
+
+  // Cupones
+  couponCode            String?
+
+  // Relations
+  tenant                Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user                  User     @relation(fields: [userId], references: [id])
+  items                 OrderItem[]
+  shippingAddress       Address  @relation("ShippingAddress", fields: [shippingAddressId], references: [id])
+  billingAddress        Address? @relation("BillingAddress", fields: [billingAddressId], references: [id])
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 
   @@index([tenantId])
   @@index([userId])
   @@index([status])
+  @@index([paymentStatus])
+  @@index([createdAt])
 }
 
 model OrderItem {
-  id                String   @id @default(cuid())
-  orderId           String
-  productId         String
-  variantId         String?
-  quantity          Int
-  unitPrice         Decimal  @db.Decimal(10, 2)
-  subtotal          Decimal  @db.Decimal(10, 2)
-  createdAt         DateTime @default(now())
+  id                    String   @id @default(cuid())
+  orderId               String
+  productId             String
+  variantId             String?
 
-  order             Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product           Product  @relation(fields: [productId], references: [id])
-  variant           ProductVariant? @relation(fields: [variantId], references: [id])
+  quantity              Int
+  priceAtPurchase       Decimal  @db.Decimal(10, 2)
+
+  // Relations
+  order                 Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product               Product  @relation(fields: [productId], references: [id])
+  variant               ProductVariant? @relation(fields: [variantId], references: [id])
 
   @@index([orderId])
   @@index([productId])
 }
 
-// ==================== PROMOTIONS ====================
+model Address {
+  id                    String   @id @default(cuid())
+  userId                String
+
+  name                  String
+  email                 String
+  phone                 String
+
+  street                String
+  city                  String
+  state                 String
+  postalCode            String
+  country               String   @default("MX")
+
+  isDefault             Boolean  @default(false)
+
+  // Relations
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ordersAsShipping      Order[]  @relation("ShippingAddress")
+  ordersAsBilling       Order[]  @relation("BillingAddress")
+
+  @@index([userId])
+}
+
+enum PaymentMethod {
+  CREDIT_CARD
+  STRIPE
+  MERCADO_PAGO
+  PAYPAL
+  OXXO
+  BANK_TRANSFER
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum OrderStatus {
+  PENDING        // Aguardando pago
+  PROCESSING     // Pagado, preparando envío
+  SHIPPED        // En tránsito
+  DELIVERED      // Entregado
+  CANCELLED      // Cancelado
+  REFUNDED       // Reembolsado
+}
+
+// ============ RESEÑAS ============
+
+model Review {
+  id                    String   @id @default(cuid())
+  productId             String
+  userId                String
+  orderId               String?  // Compra verificada
+
+  rating                Int      // 1-5
+  title                 String
+  content               String   @db.Text
+
+  status                ReviewStatus @default(PENDING)
+
+  // Relations
+  product               Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@unique([productId, userId]) // Un review por producto por usuario
+  @@index([productId])
+  @@index([userId])
+  @@index([status])
+}
+
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// ============ CUPONES ============
 
 model Coupon {
-  id                String   @id @default(cuid())
-  tenantId          String
-  code              String
-  description       String?
-  discountType      String   @default("PERCENTAGE") // PERCENTAGE or FIXED
-  discountValue     Decimal  @db.Decimal(10, 2)
-  maxUses           Int?
-  currentUses       Int      @default(0)
-  minOrderAmount    Decimal? @db.Decimal(10, 2)
-  validFrom         DateTime
-  validUntil        DateTime
-  isActive          Boolean  @default(true)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  id                    String   @id @default(cuid())
+  tenantId              String
 
-  tenant            Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  orders            Order[]
+  code                  String
+  description           String?
+
+  // Tipo de descuento
+  type                  CouponType // PERCENTAGE | FIXED
+  value                 Decimal  @db.Decimal(10, 2)
+
+  // Condiciones
+  minPurchase           Decimal? @db.Decimal(12, 2)
+  maxDiscount           Decimal? @db.Decimal(10, 2)
+
+  // Aplicabilidad
+  applicableToAll       Boolean  @default(true)
+  applicableProducts    String[] @default([]) // Product IDs
+  applicableCategories  String[] @default([]) // Category IDs
+
+  // Uso
+  maxUses               Int?
+  usedCount             Int      @default(0)
+  maxUsesPerUser        Int      @default(1)
+
+  // Validez
+  startDate             DateTime
+  expiresAt             DateTime
+
+  // Relations
+  tenant                Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 
   @@unique([tenantId, code])
   @@index([tenantId])
+  @@index([expiresAt])
 }
 
-// ==================== REVIEWS & RATINGS ====================
-
-model Review {
-  id                String   @id @default(cuid())
-  productId         String
-  userId            String
-  rating            Int      // 1-5 stars
-  title             String
-  content           String   @db.Text
-  isVerifiedPurchase Boolean @default(false)
-  helpful           Int      @default(0)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-
-  product           Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([productId])
-  @@index([userId])
-}
-
-// ==================== SHIPPING & ADDRESSES ====================
-
-model Address {
-  id                String   @id @default(cuid())
-  userId            String
-  type              String   @default("SHIPPING") // SHIPPING or BILLING
-  fullName          String
-  street            String
-  city              String
-  state             String
-  postalCode        String
-  country           String
-  phone             String
-  isDefault         Boolean  @default(false)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  order             Order?   @relation(fields: [id], references: [id])
-
-  @@index([userId])
+enum CouponType {
+  PERCENTAGE
+  FIXED
 }
