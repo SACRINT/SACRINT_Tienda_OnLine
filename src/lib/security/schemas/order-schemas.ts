@@ -33,9 +33,7 @@ export const CheckoutSchema = z.object({
     .uuid('Invalid billing address ID')
     .optional()
     .nullable(),
-  paymentMethod: z.enum(['CREDIT_CARD', 'DEBIT_CARD', 'STRIPE', 'PAYPAL'], {
-    errorMap: () => ({ message: 'Invalid payment method' }),
-  }),
+  paymentMethod: z.enum(['CREDIT_CARD', 'STRIPE', 'MERCADO_PAGO', 'PAYPAL', 'OXXO', 'BANK_TRANSFER'] as const),
   couponCode: z
     .string()
     .min(3, 'Coupon code must be at least 3 characters')

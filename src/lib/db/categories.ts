@@ -55,7 +55,7 @@ export async function getCategoryById(categoryId: string) {
         },
       },
       _count: {
-        select: { products: true },
+        select: { products: true, subcategories: true },
       },
     },
   })

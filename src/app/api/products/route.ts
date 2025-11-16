@@ -194,7 +194,6 @@ export async function POST(req: NextRequest) {
       seo,
       published,
       featured,
-      images,
     } = validation.data
 
     // Verify category exists and belongs to tenant
@@ -251,15 +250,6 @@ export async function POST(req: NextRequest) {
       category: {
         connect: { id: categoryId },
       },
-      ...(images && images.length > 0 && {
-        images: {
-          create: images.map((img: any, index: number) => ({
-            url: img.url,
-            alt: img.alt || name,
-            order: img.order !== undefined ? img.order : index,
-          })),
-        },
-      }),
     })
 
     console.log('[PRODUCTS] Created new product:', product.id, 'by user:', session.user.id)

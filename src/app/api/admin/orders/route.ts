@@ -2,7 +2,7 @@
 // GET /api/admin/orders - Get all orders for tenant (STORE_OWNER only)
 
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/app/api/auth/[...nextauth]/route'
+import { auth } from '@/lib/auth/auth'
 import { getOrdersByTenant, getOrderStats } from '@/lib/db/orders'
 import { OrderFilterSchema } from '@/lib/security/schemas/order-schemas'
 import { UserRole } from '@prisma/client'

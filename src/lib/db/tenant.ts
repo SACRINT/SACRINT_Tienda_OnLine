@@ -42,7 +42,6 @@ export async function getTenantById(tenantId: string) {
   return db.tenant.findUnique({
     where: { id: tenantId },
     include: {
-      settings: true,
       _count: {
         select: {
           users: true,
@@ -60,9 +59,6 @@ export async function getTenantById(tenantId: string) {
 export async function getTenantBySlug(slug: string) {
   return db.tenant.findUnique({
     where: { slug },
-    include: {
-      settings: true,
-    },
   })
 }
 
@@ -83,7 +79,6 @@ export async function createTenant(data: {
       logo: data.logo,
       primaryColor: data.primaryColor || '#0A1128',
       accentColor: data.accentColor || '#D4AF37',
-      isActive: true,
     },
   })
 }
@@ -105,56 +100,14 @@ export async function updateTenant(
 }
 
 /**
- * Delete tenant (soft delete by setting isActive to false)
+ * Delete tenant
  */
-export async function deactivateTenant(tenantId: string) {
+export async function deleteTenant(tenantId: string) {
   // Ensure user has access to this tenant
   await ensureTenantAccess(tenantId)
 
-  return db.tenant.update({
+  return db.tenant.delete({
     where: { id: tenantId },
-    data: { isActive: false },
-  })
-}
-
-/**
- * Get tenant settings
- */
-export async function getTenantSettings(tenantId: string) {
-  await ensureTenantAccess(tenantId)
-
-  return db.tenantSettings.findUnique({
-    where: { tenantId },
-  })
-}
-
-/**
- * Update tenant settings
- */
-export async function updateTenantSettings(
-  tenantId: string,
-  data: Prisma.TenantSettingsUpdateInput
-) {
-  await ensureTenantAccess(tenantId)
-
-  // Check if settings exist
-  const existingSettings = await db.tenantSettings.findUnique({
-    where: { tenantId },
-  })
-
-  if (!existingSettings) {
-    // Create settings if they don't exist
-    return db.tenantSettings.create({
-      data: {
-        tenantId,
-        ...data,
-      },
-    })
-  }
-
-  return db.tenantSettings.update({
-    where: { tenantId },
-    data,
   })
 }
 
@@ -175,7 +128,7 @@ export async function getTenantStats(tenantId: string) {
     db.product.count({ where: { tenantId, published: true } }),
     db.order.count({ where: { tenantId } }),
     db.order.aggregate({
-      where: { tenantId, status: 'CONFIRMED' },
+      where: { tenantId, status: 'DELIVERED' },
       _sum: { total: true },
     }),
     db.user.count({ where: { tenantId, role: 'CUSTOMER' } }),

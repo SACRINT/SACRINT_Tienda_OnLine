@@ -18,10 +18,10 @@ export async function getUserById(userId: string) {
 }
 
 /**
- * Get user by email
+ * Get user by email (uses findFirst due to composite unique constraint email_tenantId)
  */
 export async function getUserByEmail(email: string) {
-  return db.user.findUnique({
+  return db.user.findFirst({
     where: { email },
     include: {
       tenant: true,
@@ -48,7 +48,6 @@ export async function createUser(data: {
       tenantId: data.tenantId,
       role: data.role || UserRole.CUSTOMER,
       image: data.image,
-      isActive: true,
     },
   })
 }
@@ -67,12 +66,11 @@ export async function updateUser(
 }
 
 /**
- * Delete user (soft delete by setting isActive to false)
+ * Delete user
  */
-export async function deactivateUser(userId: string) {
-  return db.user.update({
+export async function deleteUser(userId: string) {
+  return db.user.delete({
     where: { id: userId },
-    data: { isActive: false },
   })
 }
 
@@ -88,7 +86,6 @@ export async function getUsersByTenant(tenantId: string) {
       name: true,
       role: true,
       image: true,
-      isActive: true,
       createdAt: true,
     },
     orderBy: { createdAt: 'desc' },
@@ -100,7 +97,7 @@ export async function getUsersByTenant(tenantId: string) {
  */
 export async function countUsersByTenant(tenantId: string) {
   return db.user.count({
-    where: { tenantId, isActive: true },
+    where: { tenantId },
   })
 }
 
@@ -142,17 +139,28 @@ export async function getUserAddresses(userId: string) {
  */
 export async function createUserAddress(data: {
   userId: string
-  type: string
   fullName: string
+  email: string
   street: string
   city: string
   state: string
   postalCode: string
-  country: string
+  country?: string
   phone: string
   isDefault?: boolean
 }) {
   return db.address.create({
-    data,
+    data: {
+      userId: data.userId,
+      name: data.fullName,
+      email: data.email,
+      street: data.street,
+      city: data.city,
+      state: data.state,
+      postalCode: data.postalCode,
+      country: data.country || 'MX',
+      phone: data.phone,
+      isDefault: data.isDefault || false,
+    },
   })
 }

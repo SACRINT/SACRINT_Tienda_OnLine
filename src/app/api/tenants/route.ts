@@ -48,7 +48,6 @@ export async function GET(req: NextRequest) {
     const tenant = await db.tenant.findUnique({
       where: { id: tenantId },
       include: {
-        settings: true,
         _count: {
           select: {
             users: true,
@@ -75,8 +74,6 @@ export async function GET(req: NextRequest) {
         logo: tenant.logo,
         primaryColor: tenant.primaryColor,
         accentColor: tenant.accentColor,
-        isActive: tenant.isActive,
-        settings: tenant.settings,
         stats: {
           totalUsers: tenant._count.users,
           totalProducts: tenant._count.products,
@@ -157,23 +154,11 @@ export async function POST(req: NextRequest) {
         logo,
         primaryColor: primaryColor || '#0A1128',
         accentColor: accentColor || '#D4AF37',
-        isActive: true,
         users: {
           connect: {
             id: session.user.id,
           },
         },
-        settings: {
-          create: {
-            currency: 'USD',
-            taxRate: 0,
-            shippingCost: 0,
-            emailNotifications: true,
-          },
-        },
-      },
-      include: {
-        settings: true,
       },
     })
 
@@ -189,7 +174,6 @@ export async function POST(req: NextRequest) {
           logo: tenant.logo,
           primaryColor: tenant.primaryColor,
           accentColor: tenant.accentColor,
-          settings: tenant.settings,
         },
       },
       { status: 201 }

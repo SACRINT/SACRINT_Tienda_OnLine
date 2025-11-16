@@ -2,7 +2,7 @@
 // POST /api/checkout - Process checkout and create order with payment
 
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/app/api/auth/[...nextauth]/route'
+import { auth } from '@/lib/auth/auth'
 import { createOrder } from '@/lib/db/orders'
 import { validateCartBeforeCheckout, getCartTotal } from '@/lib/db/cart'
 import { createPaymentIntent } from '@/lib/payment/stripe'

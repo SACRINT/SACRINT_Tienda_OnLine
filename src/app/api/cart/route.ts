@@ -3,7 +3,7 @@
 // POST /api/cart/items - Add item to cart
 
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/app/api/auth/[...nextauth]/route'
+import { auth } from '@/lib/auth/auth'
 import {
   getOrCreateCart,
   getUserCart,
@@ -137,7 +137,7 @@ export async function POST(req: NextRequest) {
       )
 
       console.log(
-        `[CART] Added ${quantity}x ${cartItem.product.name} to cart ${cart.id}`
+        `[CART] Added ${quantity}x product ${cartItem.productId} to cart ${cart.id}`
       )
 
       return NextResponse.json(
@@ -149,13 +149,6 @@ export async function POST(req: NextRequest) {
             variantId: cartItem.variantId,
             quantity: cartItem.quantity,
             priceSnapshot: Number(cartItem.priceSnapshot),
-            product: {
-              id: cartItem.product.id,
-              name: cartItem.product.name,
-              slug: cartItem.product.slug,
-              image: cartItem.product.images[0]?.url || null,
-            },
-            variant: cartItem.variant || null,
           },
         },
         { status: 201 }

@@ -206,13 +206,13 @@ export async function addItemToCart(
   }
 
   // Check if item already exists
-  const existingItem = await db.cartItem.findUnique({
+  // Note: Prisma has a known issue with nullable fields in composite unique constraints
+  // We work around this by using 'findFirst' instead
+  const existingItem = await db.cartItem.findFirst({
     where: {
-      cartId_productId_variantId: {
-        cartId,
-        productId,
-        variantId: variantId || null,
-      },
+      cartId,
+      productId,
+      variantId: variantId ?? null,
     },
   })
 
@@ -235,26 +235,17 @@ export async function addItemToCart(
     currentPrice = product.variants[0].price
   }
 
-  // Upsert cart item
-  const cartItem = await db.cartItem.upsert({
-    where: {
-      cartId_productId_variantId: {
-        cartId,
-        productId,
-        variantId: variantId || null,
+  // Update or create cart item
+  let cartItem
+  if (existingItem) {
+    cartItem = await db.cartItem.update({
+      where: {
+        id: existingItem.id,
       },
-    },
-    update: {
-      quantity: newQuantity,
-      priceSnapshot: currentPrice,
-    },
-    create: {
-      cartId,
-      productId,
-      variantId: variantId || null,
-      quantity,
-      priceSnapshot: currentPrice,
-    },
+      data: {
+        quantity: newQuantity,
+        priceSnapshot: currentPrice,
+      },
     include: {
       product: {
         select: {
@@ -272,7 +263,35 @@ export async function addItemToCart(
       },
       variant: true,
     },
-  })
+    })
+  } else {
+    cartItem = await db.cartItem.create({
+      data: {
+        cartId,
+        productId,
+        variantId: variantId ?? null,
+        quantity,
+        priceSnapshot: currentPrice,
+      },
+      include: {
+        product: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            basePrice: true,
+            salePrice: true,
+            stock: true,
+            images: {
+              take: 1,
+              orderBy: { order: 'asc' },
+            },
+          },
+        },
+        variant: true,
+      },
+    })
+  }
 
   return cartItem
 }
@@ -481,13 +500,13 @@ export async function validateCartBeforeCheckout(cartId: string) {
 
     // Check stock
     let availableStock: number
-    let currentPrice: number | string = product.salePrice || product.basePrice
+    let currentPrice: number = Number(product.salePrice || product.basePrice)
 
     if (item.variant && product.variants.length > 0) {
       const variant = product.variants[0]
       availableStock = variant.stock
       if (variant.price) {
-        currentPrice = variant.price
+        currentPrice = Number(variant.price)
       }
     } else {
       const stockInfo = await checkProductStock(product.id)

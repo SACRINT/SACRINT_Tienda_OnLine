@@ -34,7 +34,7 @@ export const authConfig = {
         console.log('[AUTH] Google profile:', profile.email)
 
         // Check if user already exists
-        let user = await db.user.findUnique({
+        let user = await db.user.findFirst({
           where: { email: profile.email },
           include: { tenant: true },
         })
@@ -87,7 +87,7 @@ export const authConfig = {
 
         const { email, password } = validation.data
 
-        const user = await db.user.findUnique({
+        const user = await db.user.findFirst({
           where: { email },
         })
 
@@ -129,7 +129,7 @@ export const authConfig = {
   },
   callbacks: {
     // CRITICAL: Pass role and tenantId to token and session
-    async jwt({ token, user, trigger, session }) {
+    async jwt({ token, user, trigger, session }: any) {
       if (user) {
         // Initial sign in
         const dbUser = await db.user.findUnique({
@@ -151,7 +151,7 @@ export const authConfig = {
 
       return token
     },
-    async session({ session, token }) {
+    async session({ session, token }: any) {
       if (session.user) {
         session.user.id = token.sub!
         session.user.role = token.role as UserRole
@@ -159,13 +159,13 @@ export const authConfig = {
       }
       return session
     },
-    async signIn(params) {
+    async signIn(params: any) {
       // Allow all sign ins (can add additional checks here if needed)
       return true
     },
   },
   events: {
-    async signIn({ user, isNewUser }) {
+    async signIn({ user, isNewUser }: any) {
       console.log(`[AUTH] User signed in: ${user.email}, new: ${isNewUser}`)
 
       if (isNewUser) {
@@ -173,17 +173,17 @@ export const authConfig = {
         console.log('[AUTH] New user - welcome email would be sent')
       }
     },
-    async signOut({ session, token }) {
+    async signOut({ session, token }: any) {
       console.log('[AUTH] User signed out:', session?.user?.email || token?.email)
     },
   },
   session: {
-    strategy: 'jwt',
+    strategy: 'jwt' as const,
     maxAge: 30 * 24 * 60 * 60, // 30 days
     updateAge: 24 * 60 * 60, // 1 day
   },
   debug: process.env.NODE_ENV === 'development',
-} as const
+}
 
 // Type augmentation for NextAuth
 declare module 'next-auth' {
@@ -199,13 +199,6 @@ declare module 'next-auth' {
   }
 
   interface User {
-    role?: UserRole
-    tenantId?: string | null
-  }
-}
-
-declare module 'next-auth/jwt' {
-  interface JWT {
     role?: UserRole
     tenantId?: string | null
   }

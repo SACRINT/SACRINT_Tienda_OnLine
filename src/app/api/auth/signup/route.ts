@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
     const { email, password, name, storeName } = validation.data
 
     // Check if user already exists
-    const existingUser = await db.user.findUnique({
+    const existingUser = await db.user.findFirst({
       where: { email },
     })
 
@@ -76,7 +76,6 @@ export async function POST(req: NextRequest) {
           name,
           tenantId: tenant.id,
           role: UserRole.STORE_OWNER, // First user becomes STORE_OWNER
-          isActive: true,
         },
         select: {
           id: true,
