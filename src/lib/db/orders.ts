@@ -4,6 +4,7 @@
 import { db } from './client'
 import { ensureTenantAccess } from './tenant'
 import { getCartById, clearCart } from './cart'
+import { validateCoupon, calculateDiscount, incrementCouponUsage } from './coupons'
 import type { Prisma } from '@prisma/client'
 import type { OrderStatus, PaymentStatus, PaymentMethod } from '@/lib/types/user-role'
 
@@ -121,8 +122,41 @@ export async function createOrder(data: {
   // Tax rate 16%
   const tax = subtotal * 0.16
 
-  // Discount from coupon (TODO: implement coupon validation)
-  const discount = 0
+  // Discount from coupon
+  let discount = 0
+  let validatedCoupon = null
+
+  if (data.couponCode) {
+    try {
+      // Validate coupon before applying discount
+      validatedCoupon = await validateCoupon(
+        data.tenantId,
+        data.couponCode,
+        subtotal + shippingCost + tax
+      )
+
+      // Calculate discount amount
+      discount = calculateDiscount(
+        {
+          type: validatedCoupon.type,
+          discount: validatedCoupon.discount,
+          maxDiscount: validatedCoupon.maxDiscount,
+        },
+        subtotal + shippingCost + tax
+      )
+
+      console.log(
+        `[ORDERS] Coupon ${data.couponCode} applied, discount: $${discount.toFixed(2)}`
+      )
+    } catch (error) {
+      console.warn(
+        `[ORDERS] Coupon validation failed for ${data.couponCode}:`,
+        error instanceof Error ? error.message : 'Unknown error'
+      )
+      // Continue without discount if coupon is invalid
+      // The API layer should validate before calling this, but we handle it gracefully
+    }
+  }
 
   const total = subtotal + shippingCost + tax - discount
 
@@ -182,6 +216,20 @@ export async function createOrder(data: {
   console.log(
     `[ORDERS] Created order ${orderNumber} for user ${data.userId}, total: $${total.toFixed(2)}`
   )
+
+  // Increment coupon usage count if coupon was used
+  if (validatedCoupon) {
+    try {
+      await incrementCouponUsage(validatedCoupon.id)
+      console.log(`[ORDERS] Incremented usage count for coupon ${data.couponCode}`)
+    } catch (error) {
+      console.error(
+        `[ORDERS] Failed to increment coupon usage for ${data.couponCode}:`,
+        error
+      )
+      // Don't fail the order if coupon increment fails
+    }
+  }
 
   // Return order with items
   return await getOrderById(order.id, data.tenantId)
