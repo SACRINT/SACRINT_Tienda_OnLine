@@ -4,7 +4,8 @@
 import { db } from './client'
 import { ensureTenantAccess } from './tenant'
 import { getCartById, clearCart } from './cart'
-import type { Prisma, OrderStatus, PaymentStatus, PaymentMethod } from '@prisma/client'
+import type { Prisma } from '@prisma/client'
+import type { OrderStatus, PaymentStatus, PaymentMethod } from '@/lib/types/user-role'
 
 /**
  * Generates a unique order number
