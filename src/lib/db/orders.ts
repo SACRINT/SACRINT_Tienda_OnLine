@@ -129,7 +129,7 @@ export async function createOrder(data: {
   const orderNumber = await generateOrderNumber()
 
   // Create order with transaction
-  const order = await db.$transaction(async (tx) => {
+  const order = await db.$transaction(async (tx: any) => {
     // Create order
     const newOrder = await tx.order.create({
       data: {
@@ -500,7 +500,7 @@ export async function cancelOrder(orderId: string) {
   }
 
   // Restore stock for all items
-  await db.$transaction(async (tx) => {
+  await db.$transaction(async (tx: any) => {
     for (const item of order.items) {
       await tx.product.update({
         where: { id: item.productId },
