@@ -75,10 +75,10 @@ export async function createOrder(data: {
   await ensureTenantAccess(data.tenantId)
 
   // Get cart with items
-  const cart = await getCartById(data.cartId)
+  const cart = await getCartById(data.tenantId, data.cartId)
 
   if (!cart) {
-    throw new Error('Cart not found')
+    throw new Error('Cart not found or does not belong to tenant')
   }
 
   if (cart.items.length === 0) {
@@ -188,7 +188,7 @@ export async function createOrder(data: {
 }
 
 /**
- * Gets order by ID with full details
+ * Gets order by ID with full details and tenant validation
  * @param orderId - Order ID
  * @param tenantId - Tenant ID for validation
  * @returns Order with items and addresses
@@ -196,8 +196,11 @@ export async function createOrder(data: {
 export async function getOrderById(orderId: string, tenantId: string) {
   await ensureTenantAccess(tenantId)
 
-  const order = await db.order.findUnique({
-    where: { id: orderId },
+  const order = await db.order.findFirst({
+    where: {
+      id: orderId,
+      tenantId
+    },
     include: {
       items: {
         include: {
@@ -234,15 +237,6 @@ export async function getOrderById(orderId: string, tenantId: string) {
       },
     },
   })
-
-  if (!order) {
-    return null
-  }
-
-  // Verify tenant access
-  if (order.tenantId !== tenantId) {
-    throw new Error('Forbidden - Order does not belong to your tenant')
-  }
 
   return order
 }
