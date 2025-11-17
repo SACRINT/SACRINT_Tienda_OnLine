@@ -12,10 +12,10 @@ export const CreateCouponSchema = z.object({
     .max(50, 'Coupon code must be at most 50 characters')
     .regex(/^[A-Z0-9_-]+$/, 'Coupon code must contain only uppercase letters, numbers, hyphens, and underscores'),
 
-  type: z.enum(['PERCENTAGE', 'FIXED_AMOUNT'] as const),
+  type: z.enum(['PERCENTAGE', 'FIXED'] as const),
 
-  discount: z.number()
-    .positive('Discount must be positive'),
+  value: z.number()
+    .positive('Value must be positive'),
 
   maxDiscount: z.number()
     .positive('Max discount must be positive')
@@ -32,6 +32,11 @@ export const CreateCouponSchema = z.object({
     .positive('Max uses must be positive')
     .optional()
     .nullable(),
+
+  startDate: z.string()
+    .datetime('Invalid date format')
+    .transform((str) => new Date(str))
+    .optional(),
 
   expiresAt: z.string()
     .datetime('Invalid date format')
@@ -53,10 +58,8 @@ export const CreateCouponSchema = z.object({
  * Schema for updating a coupon
  */
 export const UpdateCouponSchema = z.object({
-  isActive: z.boolean().optional(),
-
-  discount: z.number()
-    .positive('Discount must be positive')
+  value: z.number()
+    .positive('Value must be positive')
     .optional(),
 
   maxDiscount: z.number()

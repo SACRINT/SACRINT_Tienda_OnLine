@@ -154,7 +154,6 @@ export async function POST(req: NextRequest) {
           postalCode: address.postalCode,
           country: address.country,
           isDefault: address.isDefault,
-          createdAt: address.createdAt,
         },
       },
       { status: 201 }

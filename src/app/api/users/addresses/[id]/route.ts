@@ -130,7 +130,6 @@ export async function PATCH(
         postalCode: updatedAddress.postalCode,
         country: updatedAddress.country,
         isDefault: updatedAddress.isDefault,
-        updatedAt: updatedAddress.updatedAt,
       },
     })
   } catch (error) {

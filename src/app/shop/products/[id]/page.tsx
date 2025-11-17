@@ -55,10 +55,6 @@ export default function ProductDetailPage() {
 
   const addItem = useCart((state) => state.addItem)
 
-  useEffect(() => {
-    fetchProduct()
-  }, [productId])
-
   const fetchProduct = async () => {
     setLoading(true)
     setError(null)
@@ -82,6 +78,11 @@ export default function ProductDetailPage() {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    fetchProduct()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [productId])
 
   const handleAddToCart = () => {
     if (!product || !isInStock) return

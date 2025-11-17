@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import { auth } from '@/lib/auth/auth'
 import { getDashboardMetrics, getSalesData, getTopProducts } from '@/lib/db/dashboard'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -193,9 +194,11 @@ export default async function AnalyticsPage({
                 >
                   <div className="flex items-center space-x-4">
                     {product.images[0] && (
-                      <img
+                      <Image
                         src={product.images[0].url}
                         alt={product.name}
+                        width={48}
+                        height={48}
                         className="h-12 w-12 rounded object-cover"
                       />
                     )}

@@ -36,10 +36,6 @@ export default function ShopPage() {
   const categoryFilter = searchParams.get('category') || ''
   const sortFilter = searchParams.get('sort') || 'newest'
 
-  useEffect(() => {
-    fetchProducts()
-  }, [currentPage, searchQuery, categoryFilter, sortFilter])
-
   const fetchProducts = async () => {
     setLoading(true)
     setError(null)
@@ -71,6 +67,11 @@ export default function ShopPage() {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    fetchProducts()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage, searchQuery, categoryFilter, sortFilter])
 
   const handlePageChange = (newPage: number) => {
     const params = new URLSearchParams(searchParams.toString())

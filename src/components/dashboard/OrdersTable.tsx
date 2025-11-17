@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 interface Order {
   id: string
   orderNumber: string
-  total: number
+  total: any // Handles Decimal type from Prisma, can be number, string, or Decimal
   status: string
   createdAt: Date
   user: {
@@ -141,7 +141,7 @@ export function OrdersTable({ orders, currentPage }: OrdersTableProps) {
                     <div className="text-sm text-gray-500">{order.user.email}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    ${order.total.toFixed(2)}
+                    ${parseFloat(String(order.total)).toFixed(2)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span

@@ -75,11 +75,7 @@ export async function POST(req: NextRequest) {
         const order = await db.order.findUnique({
           where: { id: orderId },
           include: {
-            inventoryReservations: {
-              where: { status: 'PENDING' },
-              orderBy: { createdAt: 'desc' },
-              take: 1,
-            },
+            inventoryReservation: true,
           },
         })
 
@@ -91,7 +87,7 @@ export async function POST(req: NextRequest) {
           )
         }
 
-        const reservationId = order.inventoryReservations[0]?.id
+        const reservationId = order.inventoryReservation?.id
 
         if (!reservationId) {
           console.error(`[WEBHOOK] No pending inventory reservation found for order: ${orderId}`)
@@ -138,12 +134,12 @@ export async function POST(req: NextRequest) {
                 orderNumber: fullOrder.orderNumber,
                 customerName: fullOrder.user.name || 'Customer',
                 customerEmail: fullOrder.user.email,
-                orderTotal: Math.round(fullOrder.total * 100),
+                orderTotal: Math.round(parseFloat(String(fullOrder.total)) * 100),
                 orderDate: fullOrder.createdAt.toLocaleDateString(),
                 items: fullOrder.items.map((item: any) => ({
                   name: item.product.name,
                   quantity: item.quantity,
-                  price: Math.round(item.priceAtPurchase * 100),
+                  price: Math.round(parseFloat(String(item.priceAtPurchase)) * 100),
                 })),
                 shippingAddress: {
                   street: fullOrder.shippingAddress.street,
@@ -199,11 +195,7 @@ export async function POST(req: NextRequest) {
         const order = await db.order.findUnique({
           where: { id: orderId },
           include: {
-            inventoryReservations: {
-              where: { status: 'PENDING' },
-              orderBy: { createdAt: 'desc' },
-              take: 1,
-            },
+            inventoryReservation: true,
           },
         })
 
@@ -215,7 +207,7 @@ export async function POST(req: NextRequest) {
           )
         }
 
-        const reservationId = order.inventoryReservations[0]?.id
+        const reservationId = order.inventoryReservation?.id
 
         try {
           // Cancel inventory reservation (releases reserved stock)
@@ -251,7 +243,7 @@ export async function POST(req: NextRequest) {
                 orderNumber: fullOrder.orderNumber,
                 customerName: fullOrder.user.name || 'Customer',
                 customerEmail: fullOrder.user.email,
-                orderTotal: Math.round(fullOrder.total * 100),
+                orderTotal: Math.round(parseFloat(String(fullOrder.total)) * 100),
                 failureReason: errorMessage,
                 retryUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://yourdomain.com'}/shop`,
               })

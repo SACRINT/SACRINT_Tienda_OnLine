@@ -17,11 +17,13 @@ interface ProductFormProps {
     id: string
     name: string
     description: string | null
-    price: number
+    basePrice: number | any
+    salePrice?: number | any | null
     stock: number
     sku: string | null
     categoryId: string | null
-    isActive: boolean
+    published: boolean
+    featured?: boolean
   }
   categories: Category[]
 }
@@ -32,11 +34,13 @@ export function ProductForm({ product, categories }: ProductFormProps) {
   const [formData, setFormData] = useState({
     name: product?.name || '',
     description: product?.description || '',
-    price: product?.price || 0,
+    basePrice: product?.basePrice || 0,
+    salePrice: product?.salePrice || '',
     stock: product?.stock || 0,
     sku: product?.sku || '',
     categoryId: product?.categoryId || '',
-    isActive: product?.isActive !== undefined ? product.isActive : true,
+    published: product?.published !== undefined ? product.published : false,
+    featured: product?.featured !== undefined ? product.featured : false,
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -147,20 +151,36 @@ export function ProductForm({ product, categories }: ProductFormProps) {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="price">Precio *</Label>
+              <Label htmlFor="basePrice">Precio Base *</Label>
               <Input
-                id="price"
-                name="price"
+                id="basePrice"
+                name="basePrice"
                 type="number"
                 step="0.01"
                 min="0"
-                value={formData.price}
+                value={formData.basePrice}
                 onChange={handleChange}
                 required
                 placeholder="0.00"
               />
             </div>
 
+            <div>
+              <Label htmlFor="salePrice">Precio de Venta (Descuento)</Label>
+              <Input
+                id="salePrice"
+                name="salePrice"
+                type="number"
+                step="0.01"
+                min="0"
+                value={formData.salePrice}
+                onChange={handleChange}
+                placeholder="Dejar vacío si no hay descuento"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="stock">Stock *</Label>
               <Input
@@ -176,18 +196,34 @@ export function ProductForm({ product, categories }: ProductFormProps) {
             </div>
           </div>
 
-          <div className="flex items-center space-x-2">
-            <input
-              id="isActive"
-              name="isActive"
-              type="checkbox"
-              checked={formData.isActive}
-              onChange={handleChange}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            />
-            <Label htmlFor="isActive" className="cursor-pointer">
-              Producto activo (visible en la tienda)
-            </Label>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex items-center space-x-2">
+              <input
+                id="published"
+                name="published"
+                type="checkbox"
+                checked={formData.published}
+                onChange={handleChange}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <Label htmlFor="published" className="cursor-pointer">
+                Publicado (visible en la tienda)
+              </Label>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <input
+                id="featured"
+                name="featured"
+                type="checkbox"
+                checked={formData.featured}
+                onChange={handleChange}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <Label htmlFor="featured" className="cursor-pointer">
+                Destacado
+              </Label>
+            </div>
           </div>
         </CardContent>
       </Card>

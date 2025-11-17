@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -9,9 +10,11 @@ interface Product {
   id: string
   name: string
   sku: string | null
-  price: number
+  basePrice: number | any
+  salePrice?: number | any | null
   stock: number
-  isActive: boolean
+  published: boolean
+  featured?: boolean
   images: { url: string }[]
   category: { name: string } | null
 }
@@ -147,9 +150,11 @@ export function ProductsTable({ products, currentPage }: ProductsTableProps) {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       {product.images[0] && (
-                        <img
+                        <Image
                           src={product.images[0].url}
                           alt={product.name}
+                          width={40}
+                          height={40}
                           className="h-10 w-10 rounded object-cover mr-3"
                         />
                       )}
@@ -165,7 +170,7 @@ export function ProductsTable({ products, currentPage }: ProductsTableProps) {
                     {product.category?.name || '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    ${product.price.toFixed(2)}
+                    ${parseFloat(String(product.basePrice)).toFixed(2)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {product.stock}
@@ -173,12 +178,12 @@ export function ProductsTable({ products, currentPage }: ProductsTableProps) {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
                       className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        product.isActive
+                        product.published
                           ? 'bg-green-100 text-green-800'
                           : 'bg-red-100 text-red-800'
                       }`}
                     >
-                      {product.isActive ? 'Activo' : 'Inactivo'}
+                      {product.published ? 'Publicado' : 'Borrador'}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">

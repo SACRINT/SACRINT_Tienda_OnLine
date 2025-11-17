@@ -148,7 +148,7 @@ export async function POST(req: NextRequest) {
           id: coupon.id,
           code: coupon.code,
           type: coupon.type,
-          discount: coupon.discount,
+          value: coupon.value,
           maxDiscount: coupon.maxDiscount,
           minPurchase: coupon.minPurchase,
           maxUses: coupon.maxUses,

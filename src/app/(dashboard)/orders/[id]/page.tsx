@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation'
+import Image from 'next/image'
 import { auth } from '@/lib/auth/auth'
 import { getOrderById } from '@/lib/db/orders'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -58,9 +59,11 @@ export default async function OrderDetailPage({
                   >
                     <div className="flex items-center space-x-4">
                       {item.product.images[0] && (
-                        <img
+                        <Image
                           src={item.product.images[0].url}
                           alt={item.product.name}
+                          width={64}
+                          height={64}
                           className="h-16 w-16 rounded object-cover"
                         />
                       )}
@@ -90,14 +93,11 @@ export default async function OrderDetailPage({
             <CardContent>
               {order.shippingAddress ? (
                 <div className="text-sm space-y-1">
-                  <p className="font-medium">{order.shippingAddress.fullName}</p>
-                  <p>{order.shippingAddress.addressLine1}</p>
-                  {order.shippingAddress.addressLine2 && (
-                    <p>{order.shippingAddress.addressLine2}</p>
-                  )}
+                  <p className="font-medium">{order.shippingAddress.name}</p>
+                  <p>{order.shippingAddress.street}</p>
                   <p>
                     {order.shippingAddress.city}, {order.shippingAddress.state}{' '}
-                    {order.shippingAddress.zipCode}
+                    {order.shippingAddress.postalCode}
                   </p>
                   <p>{order.shippingAddress.country}</p>
                   {order.shippingAddress.phone && (
@@ -120,19 +120,19 @@ export default async function OrderDetailPage({
             <CardContent className="space-y-2">
               <div className="flex justify-between">
                 <span className="text-gray-600">Subtotal:</span>
-                <span className="font-medium">${order.subtotal.toFixed(2)}</span>
+                <span className="font-medium">${parseFloat(String(order.subtotal)).toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Envío:</span>
-                <span className="font-medium">${order.shipping.toFixed(2)}</span>
+                <span className="font-medium">${parseFloat(String(order.shippingCost)).toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Impuestos:</span>
-                <span className="font-medium">${order.tax.toFixed(2)}</span>
+                <span className="font-medium">${parseFloat(String(order.tax)).toFixed(2)}</span>
               </div>
               <div className="flex justify-between pt-2 border-t">
                 <span className="font-bold">Total:</span>
-                <span className="font-bold text-lg">${order.total.toFixed(2)}</span>
+                <span className="font-bold text-lg">${parseFloat(String(order.total)).toFixed(2)}</span>
               </div>
             </CardContent>
           </Card>

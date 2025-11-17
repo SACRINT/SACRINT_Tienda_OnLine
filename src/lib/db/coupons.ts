@@ -93,21 +93,23 @@ export async function validateCoupon(
 ) {
   await ensureTenantAccess(tenantId)
 
+  const now = new Date()
+
   const coupon = await db.coupon.findFirst({
     where: {
       code: code.toUpperCase(),
       tenantId,
-      isActive: true,
+      startDate: {
+        lte: now,
+      },
+      expiresAt: {
+        gte: now,
+      },
     },
   })
 
   if (!coupon) {
-    throw new Error('Coupon not found or inactive')
-  }
-
-  // Check if expired
-  if (coupon.expiresAt && coupon.expiresAt < new Date()) {
-    throw new Error('Coupon has expired')
+    throw new Error('Coupon not found or expired')
   }
 
   // Check if usage limit reached
@@ -132,22 +134,26 @@ export async function validateCoupon(
 export function calculateDiscount(
   coupon: {
     type: string
-    discount: number
-    maxDiscount?: number | null
+    value: number | any
+    maxDiscount?: number | any | null
   },
   orderTotal: number
 ): number {
   let discountAmount = 0
+  const value = parseFloat(String(coupon.value))
 
   if (coupon.type === 'PERCENTAGE') {
-    discountAmount = (orderTotal * coupon.discount) / 100
+    discountAmount = (orderTotal * value) / 100
 
     // Apply max discount limit if set
-    if (coupon.maxDiscount && discountAmount > coupon.maxDiscount) {
-      discountAmount = coupon.maxDiscount
+    if (coupon.maxDiscount) {
+      const maxDiscountValue = parseFloat(String(coupon.maxDiscount))
+      if (discountAmount > maxDiscountValue) {
+        discountAmount = maxDiscountValue
+      }
     }
-  } else if (coupon.type === 'FIXED_AMOUNT') {
-    discountAmount = coupon.discount
+  } else if (coupon.type === 'FIXED') {
+    discountAmount = value
 
     // Discount cannot exceed order total
     if (discountAmount > orderTotal) {
@@ -166,11 +172,12 @@ export function calculateDiscount(
 export async function createCoupon(tenantId: string, data: {
   code: string
   type: CouponType
-  discount: number
+  value: number
   maxDiscount?: number | null
   minPurchase?: number | null
   maxUses?: number | null
-  expiresAt?: Date | null
+  startDate?: Date
+  expiresAt?: Date
   description?: string | null
 }) {
   await ensureTenantAccess(tenantId)
@@ -189,10 +196,16 @@ export async function createCoupon(tenantId: string, data: {
 
   return db.coupon.create({
     data: {
-      ...data,
       code: data.code.toUpperCase(),
       tenantId,
-      isActive: true,
+      type: data.type,
+      value: data.value,
+      maxDiscount: data.maxDiscount || null,
+      minPurchase: data.minPurchase || null,
+      maxUses: data.maxUses || null,
+      startDate: data.startDate || new Date(),
+      expiresAt: data.expiresAt || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+      description: data.description || null,
       usedCount: 0,
     },
   })
