@@ -1,0 +1,255 @@
+═══════════════════════════════════════════════════════════════════════════════
+                      🚀 NUEVA SESIÓN - SPRINT 6
+                    Dashboard UI Implementation
+═══════════════════════════════════════════════════════════════════════════════
+
+BIENVENIDO DE VUELTA!
+
+Excelente trabajo en las Semanas 1-5 (60 horas).
+Todo ha sido mergeado a develop y listo para Sprint 6.
+
+═══════════════════════════════════════════════════════════════════════════════
+📊 ESTADO ACTUAL
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ Weeks 1-5: COMPLETADAS
+├─ Security: Tenant isolation (36 funciones refactorizadas)
+├─ Core: User profiles, Stripe webhooks, Email
+├─ Advanced: Coupons, Search, Image upload
+├─ Testing: 35 test cases, 70% coverage
+└─ Docs: API, Performance, Security guides
+
+📍 AHORA: Semana 6 - Dashboard UI (40 horas)
+└─ Branch: feature/sprint-6-dashboard-ui (NUEVA, LIMPIA)
+
+═══════════════════════════════════════════════════════════════════════════════
+🎯 QUÉ HACES AHORA (PRIMEROS PASOS)
+═══════════════════════════════════════════════════════════════════════════════
+
+PASO 1: Verifica que estés en la rama correcta
+  git status
+  >>> Debe decir: "On branch feature/sprint-6-dashboard-ui"
+
+PASO 2: Lee las instrucciones para Semanas 6-12
+  Archivo: INSTRUCCIONES-SEMANAS-6-12-ARQUITECTO-A.md
+  Tiempo: 30 minutos
+  └─ Especificaciones completas de todo lo que viene
+
+PASO 3: Comienza Tarea 6.1 (12 horas)
+  Crear componentes del dashboard:
+  ├─ src/components/dashboard/DashboardSidebar.tsx (10h)
+  ├─ src/components/dashboard/DashboardHeader.tsx (4h)
+  ├─ src/app/(dashboard)/layout.tsx updates (8h)
+  └─ Tests & styling
+
+═══════════════════════════════════════════════════════════════════════════════
+📋 TAREAS DE SPRINT 6 (SEMANA 6 = 40 HORAS)
+═══════════════════════════════════════════════════════════════════════════════
+
+TAREA 6.1: Dashboard Layout Components (12h)
+  ├─ DashboardSidebar.tsx
+  │  ├─ Navigation links (home, products, orders, analytics)
+  │  ├─ Responsive mobile menu
+  │  ├─ User menu (profile, logout)
+  │  └─ Active route highlighting
+  ├─ DashboardHeader.tsx
+  │  ├─ Store name/logo
+  │  ├─ Search bar
+  │  ├─ Notifications bell
+  │  └─ User profile dropdown
+  └─ Update layout.tsx
+     ├─ Wrapper for all dashboard pages
+     ├─ RBAC check: redirect if not STORE_OWNER
+     └─ Responsive design
+
+TAREA 6.2: Product Management Interface (14h)
+  ├─ app/(dashboard)/products/page.tsx (List)
+  │  ├─ Table with Name, SKU, Price, Stock, Status
+  │  ├─ Pagination, Sorting, Filtering
+  │  ├─ Search bar
+  │  └─ "Add Product" button
+  ├─ app/(dashboard)/products/[id]/page.tsx (Detail/Edit)
+  │  ├─ Edit form with all fields
+  │  ├─ Save button (PUT endpoint)
+  │  ├─ Delete button
+  │  └─ Preview link
+  └─ app/(dashboard)/products/new/page.tsx (Create)
+     └─ Same form as edit, Create button (POST endpoint)
+
+TAREA 6.3: Order Management Interface (14h)
+  ├─ app/(dashboard)/orders/page.tsx (List)
+  │  ├─ Table with Order ID, Customer, Total, Status, Date
+  │  ├─ Pagination, Filtering by status
+  │  ├─ Search by order ID or customer
+  │  └─ Date range filter
+  └─ app/(dashboard)/orders/[id]/page.tsx (Detail)
+     ├─ Order summary & customer info
+     ├─ Items list & total breakdown
+     ├─ Status timeline & change dropdown
+     ├─ Print invoice & Refund buttons
+     └─ Customer notes section
+
+═══════════════════════════════════════════════════════════════════════════════
+🛠️ TECH STACK PARA SPRINT 6
+═══════════════════════════════════════════════════════════════════════════════
+
+UI Framework: shadcn/ui components (already installed)
+Styling: Tailwind CSS (already configured)
+Icons: lucide-react (for sidebar icons, buttons)
+Forms: React Hook Form + Zod (already set up)
+State: NextAuth for auth, React Context for dashboard state
+API: Use existing endpoints (created in Weeks 1-5)
+
+═══════════════════════════════════════════════════════════════════════════════
+📝 GIT WORKFLOW PARA ESTA SESIÓN
+═══════════════════════════════════════════════════════════════════════════════
+
+Branch: feature/sprint-6-dashboard-ui (YA CREADA)
+
+Commits:
+├─ Day 1-2: Dashboard components + styling
+├─ Day 3-4: Product management interface
+├─ Day 5: Order management interface
+└─ Day 6-7: Tests, documentation, polish
+
+Patrón de commit:
+  git add src/components/dashboard/DashboardSidebar.tsx
+  git commit -m "feat(dashboard): Create sidebar with navigation
+
+  - Responsive navigation with active route highlighting
+  - Mobile menu toggle
+  - User profile dropdown with logout
+  - Styling with Tailwind CSS
+
+  🚀 Generated with Claude Code"
+
+Push diario:
+  git push origin feature/sprint-6-dashboard-ui
+
+═══════════════════════════════════════════════════════════════════════════════
+✅ APIs DISPONIBLES PARA USAR
+═══════════════════════════════════════════════════════════════════════════════
+
+User Management:
+  GET /api/users/profile - Current user
+  PUT /api/users/profile - Update profile
+  GET /api/users/addresses - User addresses
+
+Products:
+  GET /api/products?tenantId=X - List
+  POST /api/products - Create
+  PUT /api/products/[id] - Update
+  DELETE /api/products/[id] - Delete
+  GET /api/products/[id] - Detail
+  POST /api/products/[id]/images - Upload images
+
+Orders:
+  GET /api/admin/orders - List
+  GET /api/admin/orders/[id] - Detail
+  PUT /api/admin/orders/[id]/status - Update status
+  POST /api/admin/orders/[id]/refund - Refund
+
+Categories:
+  GET /api/categories - List (for dropdowns)
+
+All documented in: docs/API_DOCUMENTATION.md
+
+═══════════════════════════════════════════════════════════════════════════════
+🎯 SUCCESS CRITERIA PARA SPRINT 6
+═══════════════════════════════════════════════════════════════════════════════
+
+✓ Dashboard layout components fully functional
+✓ Product management interface with CRUD
+✓ Order management interface with status tracking
+✓ Responsive design (desktop, tablet, mobile)
+✓ All tests passing
+✓ RBAC protecting admin routes
+✓ 0 ESLint warnings
+✓ TypeScript strict mode
+✓ Code review approved
+
+═══════════════════════════════════════════════════════════════════════════════
+📞 DAILY CADENCE
+═══════════════════════════════════════════════════════════════════════════════
+
+09:00-09:15: Standup
+  ├─ What I completed yesterday
+  ├─ What I'm doing today
+  └─ Any blockers
+
+09:15-12:00: Development (3h)
+12:00-13:00: Lunch break
+13:00-17:00: Development (4h)
+17:00-17:30: Commit + Status update
+
+═══════════════════════════════════════════════════════════════════════════════
+⚡ QUICK START
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Verify branch:
+   git status
+   >>> "On branch feature/sprint-6-dashboard-ui"
+
+2. Verify you're updated:
+   git pull origin feature/sprint-6-dashboard-ui
+   >>> "Already up to date"
+
+3. Create src/components/dashboard directory:
+   mkdir -p src/components/dashboard
+
+4. Create DashboardSidebar.tsx
+   Start with basic structure:
+   - Import React, NextAuth, usePathname
+   - Create Sidebar component
+   - Add navigation links
+   - Style with Tailwind
+
+5. Commit daily with clear messages
+
+6. Standup each morning at 09:00
+
+═══════════════════════════════════════════════════════════════════════════════
+📖 REFERENCE DOCUMENTS
+═══════════════════════════════════════════════════════════════════════════════
+
+Instructions (complete for all 12 weeks):
+  INSTRUCCIONES-SEMANAS-6-12-ARQUITECTO-A.md
+
+API Documentation:
+  docs/API_DOCUMENTATION.md
+
+Security Guide:
+  docs/SECURITY_GUIDE.md
+
+Previous Work Summary:
+  PROGRESS_SUMMARY.md
+
+═══════════════════════════════════════════════════════════════════════════════
+🚀 YOU'VE GOT THIS!
+═══════════════════════════════════════════════════════════════════════════════
+
+You already:
+✓ Implemented complete backend (Weeks 1-5)
+✓ 60 hours of excellent code
+✓ Full test coverage
+✓ Production-grade documentation
+
+Now:
+→ Build the UI that your users will see
+→ 6 more weeks until production
+→ Follow the specs exactly
+→ Commit daily
+→ Ask if blocked
+
+Let's ship this! 🎉
+
+═══════════════════════════════════════════════════════════════════════════════
+
+Questions? Check:
+1. INSTRUCCIONES-SEMANAS-6-12-ARQUITECTO-A.md
+2. docs/API_DOCUMENTATION.md
+3. Ask in standup
+
+Ready? Create your first component! 💪
+
+═══════════════════════════════════════════════════════════════════════════════
