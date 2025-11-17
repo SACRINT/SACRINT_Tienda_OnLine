@@ -38,24 +38,8 @@ export function initSentry() {
         return event
       },
 
-      // Integrations
-      integrations: [
-        new Sentry.BrowserTracing({
-          tracePropagationTargets: [
-            'localhost',
-            /^https:\/\/your-domain\.com/,
-          ],
-        }),
-        new Sentry.Replay({
-          maskAllText: true,
-          blockAllMedia: true,
-          maskAllInputs: true,
-        }),
-      ],
-
-      // Session Replay
-      replaysSessionSampleRate: 0.01, // 1% of sessions
-      replaysOnErrorSampleRate: 1.0, // 100% on errors
+      // Integrations (BrowserTracing and Replay only available on client-side)
+      integrations: [],
     })
   }
 }

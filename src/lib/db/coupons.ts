@@ -303,13 +303,6 @@ export async function getCouponStats(tenantId: string, couponId: string) {
 
   const coupon = await db.coupon.findFirst({
     where: { id: couponId, tenantId },
-    include: {
-      _count: {
-        select: {
-          orders: true,
-        },
-      },
-    },
   })
 
   if (!coupon) {
@@ -329,18 +322,18 @@ export async function getCouponStats(tenantId: string, couponId: string) {
   })
 
   const totalDiscountGiven = ordersWithCoupon.reduce(
-    (sum: number, order: any) => sum + order.discount,
+    (sum: number, order: any) => sum + parseFloat(String(order.discount || 0)),
     0
   )
 
   const totalRevenue = ordersWithCoupon.reduce(
-    (sum: number, order: any) => sum + order.total,
+    (sum: number, order: any) => sum + parseFloat(String(order.total || 0)),
     0
   )
 
   return {
     coupon,
-    usageCount: coupon._count.orders,
+    usageCount: ordersWithCoupon.length,
     totalDiscountGiven,
     totalRevenue,
     averageOrderValue: ordersWithCoupon.length > 0 ? totalRevenue / ordersWithCoupon.length : 0,
