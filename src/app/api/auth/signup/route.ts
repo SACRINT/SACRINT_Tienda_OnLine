@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
     const tenantSlug = `${baseSlug}-${Date.now()}`
 
     // Create tenant and user in a transaction
-    const result = await db.$transaction(async (tx) => {
+    const result = await db.$transaction(async (tx: any) => {
       // Create tenant
       const tenant = await tx.tenant.create({
         data: {
