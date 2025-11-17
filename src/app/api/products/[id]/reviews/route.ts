@@ -71,7 +71,7 @@ export async function GET(
     let filteredReviews = result.reviews
     if (minRating !== undefined) {
       filteredReviews = result.reviews.filter(
-        (review) => review.rating >= minRating
+        (review: any) => review.rating >= minRating
       )
     }
 
