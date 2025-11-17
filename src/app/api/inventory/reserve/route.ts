@@ -84,9 +84,16 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    // Convert null variantId to undefined for type compatibility
+    const normalizedItems = items.map((item: any) => ({
+      productId: item.productId,
+      variantId: item.variantId || undefined,
+      quantity: item.quantity,
+    }))
+
     // Reserve inventory (this validates stock availability)
     try {
-      const reservationId = await reserveInventory(orderId, items)
+      const reservationId = await reserveInventory(orderId, normalizedItems)
 
       console.log(
         `[INVENTORY] Reserved inventory for order ${orderId}: reservation ${reservationId}`
@@ -97,7 +104,7 @@ export async function POST(req: NextRequest) {
           message: 'Inventory reserved successfully',
           reservationId,
           orderId,
-          items: items.map((item: any) => ({
+          items: normalizedItems.map((item: any) => ({
             productId: item.productId,
             variantId: item.variantId || null,
             quantity: item.quantity,
