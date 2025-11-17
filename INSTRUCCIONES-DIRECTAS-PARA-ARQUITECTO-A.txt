@@ -1,0 +1,212 @@
+═══════════════════════════════════════════════════════════════════════════════
+  INSTRUCCIONES DIRECTAS PARA ARQUITECTO A - SPRINT 6
+═══════════════════════════════════════════════════════════════════════════════
+
+FECHA: 17 de Noviembre, 2025
+PRIORIDAD: CRÍTICA
+RAMA: develop → main
+TIEMPO: 4-5 horas
+
+─────────────────────────────────────────────────────────────────────────────
+RESUMEN EJECUTIVO
+─────────────────────────────────────────────────────────────────────────────
+
+Debes ejecutar 3 tareas SECUENCIALMENTE (sin saltear):
+
+1. AUDITORÍA DE SEGURIDAD (2-2.5 horas)
+   → Revisar código buscando vulnerabilidades
+
+2. GENERAR REPORTE DE AUDITORÍA (30 min)
+   → Documentar hallazgos encontrados
+
+3. PLANNING SPRINT 6 (1.5-2 horas)
+   → Especificar features para próxima fase
+
+NO avances a la siguiente tarea sin completar la anterior.
+
+─────────────────────────────────────────────────────────────────────────────
+PASO 1: PREPARACIÓN
+─────────────────────────────────────────────────────────────────────────────
+
+Ejecuta estos comandos:
+
+  cd C:\03_Tienda digital
+  git checkout develop
+  git pull origin develop
+
+─────────────────────────────────────────────────────────────────────────────
+PASO 2: LEE LOS DOCUMENTOS (EN ESTE ORDEN)
+─────────────────────────────────────────────────────────────────────────────
+
+1. PRIMERO (5 min - Visión general):
+   Archivo: RESUMEN-SPRINT-6-PARA-ARQUITECTO-A.md
+
+2. SEGUNDO (30+ min - Instrucciones detalladas):
+   Archivo: INSTRUCCIONES-ARQUITECTO-A-SPRINT-6-AUDITORIA-Y-PLANNING.md
+
+Los archivos están en la RAÍZ del proyecto. Abrelos en tu editor.
+
+─────────────────────────────────────────────────────────────────────────────
+PASO 3: EJECUTA TAREA 1 - AUDITORÍA DE SEGURIDAD
+─────────────────────────────────────────────────────────────────────────────
+
+Sigue los checklists en el documento. Revisa estos archivos:
+
+A) TENANT ISOLATION (Busca en src/lib/db/):
+   ✓ users.ts
+   ✓ tenant.ts
+   ✓ products.ts
+   ✓ categories.ts
+   ✓ cart.ts
+   ✓ orders.ts
+   ✓ reviews.ts
+   ✓ inventory.ts
+
+   Para cada función, verifica que las queries filtren por tenantId:
+   ✓ where: { tenantId: currentUserTenantId, ...filters }
+
+B) RBAC (Busca en src/app/api/):
+   ✓ Cada endpoint valida rol: if (session.user.role !== 'REQUIRED_ROLE')
+   ✓ Admin endpoints: STORE_OWNER o SUPER_ADMIN
+   ✓ Customer endpoints: CUSTOMER
+
+C) VALIDACIÓN ZOD:
+   ✓ POST/PUT routes validan con Schema.parse()
+
+D) SECRETS:
+   Ejecuta estos comandos:
+   grep -r "sk_test\|pk_test\|whsec_\|STRIPE\|NEXTAUTH_SECRET" src/ --include="*.ts" | grep -v "process.env"
+   grep -r "password\|secret\|token\|api.key" src/ --include="*.ts" -i | grep "=" | grep -v "process.env"
+
+   Si encuentran algo, es vulnerabilidad.
+
+E) SQL INJECTION:
+   Ejecuta:
+   grep -r "\$queryRaw\|\$executeRaw" src/ --include="*.ts"
+
+   Si usa $queryRaw, verifica que tenga ${} (prepared statements).
+
+F) HEADERS DE SEGURIDAD:
+   Abre: src/middleware.ts
+   Verifica que tenga:
+   - X-Content-Type-Options: nosniff
+   - X-Frame-Options: DENY
+   - X-XSS-Protection: 1; mode=block
+
+─────────────────────────────────────────────────────────────────────────────
+PASO 4: EJECUTA TAREA 2 - GENERAR REPORTE
+─────────────────────────────────────────────────────────────────────────────
+
+Crea archivo: AUDITORIA-SEGURIDAD-SPRINT-6.md
+
+Template incluido en INSTRUCCIONES-ARQUITECTO-A-SPRINT-6-AUDITORIA-Y-PLANNING.md
+(Busca sección "TAREA 2: GENERAR REPORTE DE AUDITORÍA")
+
+Documenta:
+- Vulnerabilidades encontradas (si hay)
+- Severidad: CRÍTICA / ALTA / MEDIA / BAJA
+- Conclusión: ¿Seguro para producción?
+
+─────────────────────────────────────────────────────────────────────────────
+PASO 5: EJECUTA TAREA 3 - PLANNING SPRINT 6
+─────────────────────────────────────────────────────────────────────────────
+
+Crea archivo: SPRINT-6-SPECIFICATIONS.md
+
+Template incluido en INSTRUCCIONES-ARQUITECTO-A-SPRINT-6-AUDITORIA-Y-PLANNING.md
+(Busca sección "TAREA 3: PLANNING SPRINT 6")
+
+Debes analizar:
+- ¿Qué features faltan para MVP?
+- ¿Cuántas horas de trabajo?
+- ¿Cuál es el orden prioritario?
+
+Revisa qué existe:
+  git log --oneline | head -20 (ver commits)
+  ls -la src/app/api/ (ver endpoints)
+
+Propón qué hacer en Sprint 6 con estimaciones de horas.
+
+─────────────────────────────────────────────────────────────────────────────
+PASO 6: COMMIT FINAL
+─────────────────────────────────────────────────────────────────────────────
+
+Cuando termines TODO, ejecuta:
+
+  git add AUDITORIA-SEGURIDAD-SPRINT-6.md SPRINT-6-SPECIFICATIONS.md
+  git commit -m "docs: Complete security audit and Sprint 6 planning
+
+- Comprehensive security audit covering:
+  * Tenant isolation verification (8 DAL files)
+  * RBAC implementation across 10+ endpoints
+  * Zod validation in all POST/PUT routes
+  * Secrets management verification
+  * SQL injection prevention checks
+  * Security headers implementation
+  * Rate limiting analysis
+
+- Security assessment: [SAFE FOR PRODUCTION / FIXES REQUIRED]
+- Vulnerabilities found: [X critical, Y high, Z medium]
+
+- Sprint 6 specifications:
+  * Identified [X] features for MVP completion
+  * Estimated effort: [X] hours
+  * Proposed timeline: [X] weeks
+  * Priority backlog: 7 features categorized
+
+🔐 Generated with [Claude Code](https://claude.com/claude-code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
+
+  git push origin develop
+
+─────────────────────────────────────────────────────────────────────────────
+PASO 7: NOTIFICA A LA DIRECTORA
+─────────────────────────────────────────────────────────────────────────────
+
+Cuando termines, di:
+
+"Completed Sprint 6 security audit and planning:
+- Audit status: [SAFE / VULNERABILITIES FOUND]
+- [Number] vulnerabilities identified (if any)
+- Report: AUDITORIA-SEGURIDAD-SPRINT-6.md
+- Specifications: SPRINT-6-SPECIFICATIONS.md
+- Total time: [X] hours"
+
+─────────────────────────────────────────────────────────────────────────────
+TIMELINE ESTIMADO
+─────────────────────────────────────────────────────────────────────────────
+
+Auditoría:          2-2.5 horas
+Reporte:            30 min
+Planning:           1.5-2 horas
+Documentación:      20 min
+─────────────────────────────────────────────────────────────────────────────
+TOTAL:              4.5-5.5 horas
+
+─────────────────────────────────────────────────────────────────────────────
+NOTAS IMPORTANTES
+─────────────────────────────────────────────────────────────────────────────
+
+1. NO saltes tareas
+2. Documenta CADA hallazgo (aún los pequeños)
+3. SÉ ESPECÍFICO: archivo, línea, descripción
+4. NO corrijas vulnerabilidades aún - solo reporta
+5. Si toma más de 6 horas, notifica a la directora
+
+─────────────────────────────────────────────────────────────────────────────
+ARCHIVOS DE REFERENCIA
+─────────────────────────────────────────────────────────────────────────────
+
+Instrucciones completas:
+  C:\03_Tienda digital\INSTRUCCIONES-ARQUITECTO-A-SPRINT-6-AUDITORIA-Y-PLANNING.md
+
+Resumen ejecutivo:
+  C:\03_Tienda digital\RESUMEN-SPRINT-6-PARA-ARQUITECTO-A.md
+
+Estas instrucciones:
+  C:\03_Tienda digital\INSTRUCCIONES-DIRECTAS-PARA-ARQUITECTO-A.txt
+
+─────────────────────────────────────────────────────────────────────────────
+¡ADELANTE! 🚀
+─────────────────────────────────────────────────────────────────────────────
