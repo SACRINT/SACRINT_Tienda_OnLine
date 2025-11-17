@@ -1,0 +1,9 @@
+Solution: Next.js doesn't allow export const dynamic = 'force-dynamic' and 'use client' in the same file.
+The layout is already using 'use client', so it's already inherently dynamic.
+The issue is that Next.js still tries to export pages - we need to skip the export completely.
+
+Option 1: Move dynamic export to a parent layout (before 'use client')  
+Option 2: Use output: 'standalone' or output: 'export' in next.config.js
+
+For development/Vercel deployment, we don't need static export.
+For Vercel, dynamic pages are fine and will be rendered on-demand.
