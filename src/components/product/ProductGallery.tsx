@@ -5,18 +5,15 @@ import Image from 'next/image'
 import { ChevronLeft, ChevronRight, X, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-// Mantener compatibilidad con el código existente
-export interface GalleryImage {
+export interface ProductImage {
   id: string
   url: string
-  alt?: string
-  isVideo?: boolean
+  alt: string
 }
 
-export interface ProductGalleryProps {
-  images: GalleryImage[]
+interface ProductGalleryProps {
+  images: ProductImage[]
   productName: string
-  className?: string
 }
 
 export function ProductGallery({ images, productName }: ProductGalleryProps) {
