@@ -209,7 +209,7 @@ export async function adjustProductStock(
   }
 
   // Use transaction to update stock and create log
-  const updated = await db.$transaction(async (tx) => {
+  const updated = await db.$transaction(async (tx: any) => {
     // Update product stock
     const updatedProduct = await tx.product.update({
       where: { id: productId },
