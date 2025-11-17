@@ -69,7 +69,7 @@ export async function GET(req: NextRequest) {
     const result = await searchProducts(tenantId, validatedInput)
 
     return NextResponse.json({
-      products: result.products.map(product => ({
+      products: result.products.map((product: any) => ({
         id: product.id,
         name: product.name,
         slug: product.slug,
@@ -82,7 +82,7 @@ export async function GET(req: NextRequest) {
         featured: product.featured,
         tags: product.tags,
         category: product.category,
-        images: product.images.map(img => ({
+        images: product.images.map((img: any) => ({
           id: img.id,
           url: img.url,
           alt: img.alt,
