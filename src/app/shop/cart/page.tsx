@@ -3,9 +3,6 @@
 // Cart Page - Página del carrito de compras
 // Muestra items del carrito, permite editar cantidades, y mostrar resumen
 
-export const dynamic = 'force-dynamic'
-export const revalidate = 0
-
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
