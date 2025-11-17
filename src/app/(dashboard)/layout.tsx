@@ -11,11 +11,13 @@
  */
 
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import { ReactNode } from 'react'
 import { auth } from '@/lib/auth/auth'
 import { USER_ROLES } from '@/lib/types/user-role'
-import DashboardSidebar from '@/components/dashboard/DashboardSidebar'
-import DashboardHeader from '@/components/dashboard/DashboardHeader'
+import { LogoutButton } from '@/components/auth/LogoutButton'
+import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar'
+import { DashboardHeader } from '@/components/dashboard/DashboardHeader'
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
   const session = await auth()
