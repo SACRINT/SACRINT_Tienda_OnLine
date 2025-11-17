@@ -4,8 +4,9 @@
 'use client'
 
 import { useState } from 'react'
-import { AccountLayout, OrderCard } from '@/components/account'
+import { AccountLayout, LazyOrderCard } from '@/components/account'
 import type { Order } from '@/components/account'
+import { LazyLoad, OrderCardSkeleton } from '@/components/shared/LazyLoad'
 import { Search, Filter, Download, ChevronDown } from 'lucide-react'
 
 // Mock data - In production, fetch from API
@@ -288,24 +289,34 @@ export default function OrdersPage() {
 
         {/* Orders List */}
         {filteredOrders.length > 0 ? (
-          <div className="space-y-4">
-            {filteredOrders.map((order) => (
-              <OrderCard
-                key={order.id}
-                order={order}
-                variant="compact"
-                onViewDetails={(id) =>
-                  (window.location.href = `/account/orders/${id}`)
-                }
-                onDownloadInvoice={(id) =>
-                  console.log('Download invoice:', id)
-                }
-                onRequestReturn={(id) =>
-                  console.log('Request return for:', id)
-                }
-              />
-            ))}
-          </div>
+          <LazyLoad
+            fallback={
+              <div className="space-y-4">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <OrderCardSkeleton key={i} />
+                ))}
+              </div>
+            }
+          >
+            <div className="space-y-4">
+              {filteredOrders.map((order) => (
+                <LazyOrderCard
+                  key={order.id}
+                  order={order}
+                  variant="compact"
+                  onViewDetails={(id) =>
+                    (window.location.href = `/account/orders/${id}`)
+                  }
+                  onDownloadInvoice={(id) =>
+                    console.log('Download invoice:', id)
+                  }
+                  onRequestReturn={(id) =>
+                    console.log('Request return for:', id)
+                  }
+                />
+              ))}
+            </div>
+          </LazyLoad>
         ) : (
           <div className="rounded-lg border-2 border-dashed border-gray-300 p-12 text-center">
             <Filter className="mx-auto h-12 w-12 text-gray-400" />

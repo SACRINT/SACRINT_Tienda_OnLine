@@ -21,3 +21,7 @@ export type { ReviewFormProps, ReviewFormData } from './ReviewForm'
 
 export { RefundRequest } from './RefundRequest'
 export type { RefundRequestProps, RefundRequestData } from './RefundRequest'
+
+// Lazy-loaded versions para mejor performance
+// Usar estos en páginas que no necesitan cargar todo inmediatamente
+export * from './lazy'

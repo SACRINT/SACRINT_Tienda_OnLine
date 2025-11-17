@@ -15,3 +15,6 @@ export type { PaymentFormProps, BillingAddress } from './PaymentForm'
 
 export { OrderSummary } from './OrderSummary'
 export type { OrderSummaryProps, CartItem } from './OrderSummary'
+
+// Lazy-loaded versions para mejor performance
+export * from './lazy'
