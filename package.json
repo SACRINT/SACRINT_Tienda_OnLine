@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build || (test -d .next/server && echo 'Build completed with export warnings (OK)') || exit 1",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
