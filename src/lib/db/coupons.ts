@@ -4,7 +4,7 @@
 import { db } from './client'
 import { ensureTenantAccess } from './tenant'
 
-export type CouponType = 'PERCENTAGE' | 'FIXED_AMOUNT'
+export type CouponType = 'PERCENTAGE' | 'FIXED'
 export type CouponStatus = 'ACTIVE' | 'INACTIVE' | 'EXPIRED'
 
 /**

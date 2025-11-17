@@ -19,19 +19,16 @@ export const CreateCouponSchema = z.object({
 
   maxDiscount: z.number()
     .positive('Max discount must be positive')
-    .optional()
-    .nullable(),
+    .optional(),
 
   minPurchase: z.number()
     .positive('Min purchase must be positive')
-    .optional()
-    .nullable(),
+    .optional(),
 
   maxUses: z.number()
     .int('Max uses must be an integer')
     .positive('Max uses must be positive')
-    .optional()
-    .nullable(),
+    .optional(),
 
   startDate: z.string()
     .datetime('Invalid date format')
@@ -45,13 +42,11 @@ export const CreateCouponSchema = z.object({
       (date) => date > new Date(),
       { message: 'Expiration date must be in the future' }
     )
-    .optional()
-    .nullable(),
+    .optional(),
 
   description: z.string()
     .max(500, 'Description must be at most 500 characters')
-    .optional()
-    .nullable(),
+    .optional(),
 })
 
 /**
