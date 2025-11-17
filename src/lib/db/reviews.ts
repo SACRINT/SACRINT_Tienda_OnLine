@@ -2,19 +2,35 @@
 // CRUD and validation functions for product reviews
 
 import { db } from './client'
+import { ensureTenantAccess } from './tenant'
 
 /**
- * Creates a new review for a product
+ * Creates a new review for a product with tenant validation
+ * @param tenantId - Tenant ID to validate access
  * @param data - Review data (productId, userId, rating, title, comment)
  * @returns Created review with user info
  */
-export async function createReview(data: {
+export async function createReview(tenantId: string, data: {
   productId: string
   userId: string
   rating: number
   title: string
   comment: string
 }) {
+  await ensureTenantAccess(tenantId)
+
+  // Verify product belongs to tenant
+  const product = await db.product.findFirst({
+    where: {
+      id: data.productId,
+      tenantId
+    }
+  })
+
+  if (!product) {
+    throw new Error('Product not found or does not belong to tenant')
+  }
+
   // Validate rating is between 1-5
   if (data.rating < 1 || data.rating > 5) {
     throw new Error('Rating must be between 1 and 5')
@@ -59,17 +75,33 @@ export async function createReview(data: {
 }
 
 /**
- * Gets reviews for a product with pagination
+ * Gets reviews for a product with pagination and tenant validation
+ * @param tenantId - Tenant ID to validate access
  * @param productId - Product ID
  * @param page - Page number (default 1)
  * @param limit - Results per page (default 10)
  * @returns Reviews array with pagination metadata
  */
 export async function getProductReviews(
+  tenantId: string,
   productId: string,
   page: number = 1,
   limit: number = 10
 ) {
+  await ensureTenantAccess(tenantId)
+
+  // Verify product belongs to tenant
+  const product = await db.product.findFirst({
+    where: {
+      id: productId,
+      tenantId
+    }
+  })
+
+  if (!product) {
+    throw new Error('Product not found or does not belong to tenant')
+  }
+
   const skip = (page - 1) * limit
 
   const [reviews, total] = await Promise.all([
@@ -113,11 +145,26 @@ export async function getProductReviews(
 }
 
 /**
- * Gets review statistics for a product
+ * Gets review statistics for a product with tenant validation
+ * @param tenantId - Tenant ID to validate access
  * @param productId - Product ID
  * @returns Average rating, total reviews, and rating distribution
  */
-export async function getReviewStats(productId: string) {
+export async function getReviewStats(tenantId: string, productId: string) {
+  await ensureTenantAccess(tenantId)
+
+  // Verify product belongs to tenant
+  const product = await db.product.findFirst({
+    where: {
+      id: productId,
+      tenantId
+    }
+  })
+
+  if (!product) {
+    throw new Error('Product not found or does not belong to tenant')
+  }
+
   // Get all approved reviews for this product
   const reviews = await db.review.findMany({
     where: {
@@ -170,12 +217,15 @@ export async function getReviewStats(productId: string) {
 }
 
 /**
- * Gets a single review by ID
+ * Gets a single review by ID with tenant validation
+ * @param tenantId - Tenant ID to validate access
  * @param reviewId - Review ID
  * @returns Review with user info or null
  */
-export async function getReviewById(reviewId: string) {
-  return await db.review.findUnique({
+export async function getReviewById(tenantId: string, reviewId: string) {
+  await ensureTenantAccess(tenantId)
+
+  const review = await db.review.findUnique({
     where: { id: reviewId },
     include: {
       user: {
@@ -185,18 +235,36 @@ export async function getReviewById(reviewId: string) {
           image: true,
         },
       },
+      product: {
+        select: {
+          tenantId: true,
+        },
+      },
     },
   })
+
+  if (!review) {
+    return null
+  }
+
+  // Verify review's product belongs to tenant
+  if (review.product.tenantId !== tenantId) {
+    throw new Error('Review does not belong to tenant')
+  }
+
+  return review
 }
 
 /**
- * Updates a review
+ * Updates a review with tenant validation
+ * @param tenantId - Tenant ID to validate access
  * @param reviewId - Review ID
  * @param userId - User ID (must be author)
  * @param data - Fields to update
  * @returns Updated review
  */
 export async function updateReview(
+  tenantId: string,
   reviewId: string,
   userId: string,
   data: {
@@ -205,13 +273,27 @@ export async function updateReview(
     comment?: string
   }
 ) {
-  // Get existing review
+  await ensureTenantAccess(tenantId)
+
+  // Get existing review with product
   const review = await db.review.findUnique({
     where: { id: reviewId },
+    include: {
+      product: {
+        select: {
+          tenantId: true,
+        },
+      },
+    },
   })
 
   if (!review) {
     throw new Error('Review not found')
+  }
+
+  // Verify review's product belongs to tenant
+  if (review.product.tenantId !== tenantId) {
+    throw new Error('Review does not belong to tenant')
   }
 
   // Verify user is the author
@@ -247,18 +329,33 @@ export async function updateReview(
 }
 
 /**
- * Deletes a review
+ * Deletes a review with tenant validation
+ * @param tenantId - Tenant ID to validate access
  * @param reviewId - Review ID
  * @param userId - User ID (must be author)
  */
-export async function deleteReview(reviewId: string, userId: string) {
-  // Get existing review
+export async function deleteReview(tenantId: string, reviewId: string, userId: string) {
+  await ensureTenantAccess(tenantId)
+
+  // Get existing review with product
   const review = await db.review.findUnique({
     where: { id: reviewId },
+    include: {
+      product: {
+        select: {
+          tenantId: true,
+        },
+      },
+    },
   })
 
   if (!review) {
     throw new Error('Review not found')
+  }
+
+  // Verify review's product belongs to tenant
+  if (review.product.tenantId !== tenantId) {
+    throw new Error('Review does not belong to tenant')
   }
 
   // Verify user is the author
@@ -275,15 +372,31 @@ export async function deleteReview(reviewId: string, userId: string) {
 }
 
 /**
- * Checks if a user has already reviewed a product
+ * Checks if a user has already reviewed a product with tenant validation
+ * @param tenantId - Tenant ID to validate access
  * @param productId - Product ID
  * @param userId - User ID
  * @returns Boolean indicating if user has reviewed
  */
 export async function hasUserReviewedProduct(
+  tenantId: string,
   productId: string,
   userId: string
 ): Promise<boolean> {
+  await ensureTenantAccess(tenantId)
+
+  // Verify product belongs to tenant
+  const product = await db.product.findFirst({
+    where: {
+      id: productId,
+      tenantId
+    }
+  })
+
+  if (!product) {
+    throw new Error('Product not found or does not belong to tenant')
+  }
+
   const review = await db.review.findUnique({
     where: {
       productId_userId: {
