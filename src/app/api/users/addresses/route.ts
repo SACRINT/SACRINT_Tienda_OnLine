@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
     const addresses = await getUserAddresses(userId)
 
     return NextResponse.json({
-      addresses: addresses.map((address) => ({
+      addresses: addresses.map((address: any) => ({
         id: address.id,
         name: address.name,
         email: address.email,
@@ -114,7 +114,7 @@ export async function POST(req: NextRequest) {
     // If this is set as default, unset other default addresses
     if (isDefault) {
       const existingAddresses = await getUserAddresses(userId)
-      const defaultAddress = existingAddresses.find((addr) => addr.isDefault)
+      const defaultAddress = existingAddresses.find((addr: any) => addr.isDefault)
 
       if (defaultAddress) {
         await db.address.update({

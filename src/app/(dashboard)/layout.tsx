@@ -2,11 +2,11 @@
 // Requires STORE_OWNER or SUPER_ADMIN role
 
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import { ReactNode } from 'react'
 import { auth } from '@/lib/auth/auth'
 import { USER_ROLES } from '@/lib/types/user-role'
-import DashboardSidebar from '@/components/dashboard/DashboardSidebar'
-import DashboardHeader from '@/components/dashboard/DashboardHeader'
+import { LogoutButton } from '@/components/auth/LogoutButton'
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
   const session = await auth()
@@ -37,12 +37,12 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   }
 
   return (
-    <div className="min-h-screen bg-neutral-light">
+    <div className="min-h-screen bg-gray-50">
       {/* Sidebar */}
-      <aside className="fixed left-0 top-0 z-40 h-screen w-64 bg-primary text-white">
+      <aside className="fixed left-0 top-0 z-40 h-screen w-64 bg-gray-900 text-white">
         <div className="flex h-full flex-col">
           {/* Logo */}
-          <div className="flex h-16 items-center border-b border-primary-light px-6">
+          <div className="flex h-16 items-center border-b border-gray-700 px-6">
             <Link href="/dashboard" className="text-xl font-bold">
               Tienda Online
             </Link>
@@ -52,7 +52,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
           <nav className="flex-1 space-y-1 px-3 py-4">
             <Link
               href="/dashboard"
-              className="flex items-center rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-primary-light transition-colors"
+              className="flex items-center rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-gray-800 transition-colors"
             >
               <svg
                 className="mr-3 h-5 w-5"
@@ -72,7 +72,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
 
             <Link
               href="/dashboard/products"
-              className="flex items-center rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-primary-light transition-colors"
+              className="flex items-center rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-gray-800 transition-colors"
             >
               <svg
                 className="mr-3 h-5 w-5"
@@ -92,7 +92,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
 
             <Link
               href="/dashboard/orders"
-              className="flex items-center rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-primary-light transition-colors"
+              className="flex items-center rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-gray-800 transition-colors"
             >
               <svg
                 className="mr-3 h-5 w-5"
@@ -112,7 +112,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
 
             <Link
               href="/dashboard/analytics"
-              className="flex items-center rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-primary-light transition-colors"
+              className="flex items-center rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-gray-800 transition-colors"
             >
               <svg
                 className="mr-3 h-5 w-5"
@@ -132,7 +132,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
 
             <Link
               href="/dashboard/settings"
-              className="flex items-center rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-primary-light transition-colors"
+              className="flex items-center rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-gray-800 transition-colors"
             >
               <svg
                 className="mr-3 h-5 w-5"
@@ -158,24 +158,17 @@ export default async function DashboardLayout({ children }: { children: ReactNod
           </nav>
 
           {/* User Profile */}
-          <div className="border-t border-primary-light p-4">
+          <div className="border-t border-gray-700 p-4">
             <div className="flex items-center space-x-3 mb-3">
-              <div className="h-10 w-10 rounded-full bg-accent flex items-center justify-center text-white font-bold">
-                {user.name.charAt(0)}
+              <div className="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold">
+                {user.name.charAt(0).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">{user.name}</p>
-                <p className="text-xs text-gray-300 truncate">{user.email}</p>
+                <p className="text-xs text-gray-400 truncate">{user.email}</p>
               </div>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full border-white text-white hover:bg-primary-light"
-              onClick={handleLogout}
-            >
-              Cerrar Sesión
-            </Button>
+            <LogoutButton />
           </div>
         </div>
       </aside>
@@ -184,9 +177,9 @@ export default async function DashboardLayout({ children }: { children: ReactNod
       <div className="pl-64">
         {/* Top Header */}
         <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8">
-          <h1 className="text-2xl font-bold text-primary">Dashboard</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
           <div className="flex items-center space-x-4">
-            <Button variant="outline" size="sm">
+            <button className="flex items-center px-3 py-2 text-sm text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50">
               <svg
                 className="h-4 w-4 mr-2"
                 fill="none"
@@ -201,7 +194,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
                 />
               </svg>
               Notificaciones
-            </Button>
+            </button>
           </div>
         </header>
 

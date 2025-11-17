@@ -135,11 +135,6 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// Configure max file size (50MB total for multiple files)
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: '50mb',
-    },
-  },
-}
+// Configure route segment
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
