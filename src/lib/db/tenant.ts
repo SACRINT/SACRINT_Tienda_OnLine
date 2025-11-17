@@ -36,9 +36,12 @@ export async function ensureTenantAccess(tenantId: string): Promise<void> {
 }
 
 /**
- * Get tenant by ID
+ * Get tenant by ID with access validation
+ * @param tenantId - Tenant ID to retrieve and validate access
  */
 export async function getTenantById(tenantId: string) {
+  await ensureTenantAccess(tenantId)
+
   return db.tenant.findUnique({
     where: { id: tenantId },
     include: {
@@ -55,15 +58,32 @@ export async function getTenantById(tenantId: string) {
 
 /**
  * Get tenant by slug
+ * NOTE: This function is typically used for public tenant resolution (e.g., from URL subdomain)
+ * @param slug - Tenant slug
+ * @param validateAccess - Optional: If true, validates user has access to this tenant
  */
-export async function getTenantBySlug(slug: string) {
-  return db.tenant.findUnique({
+export async function getTenantBySlug(slug: string, validateAccess: boolean = false) {
+  const tenant = await db.tenant.findUnique({
     where: { slug },
   })
+
+  if (!tenant) {
+    return null
+  }
+
+  // Optional validation for authenticated contexts
+  if (validateAccess) {
+    await ensureTenantAccess(tenant.id)
+  }
+
+  return tenant
 }
 
 /**
  * Create new tenant
+ * NOTE: This function should only be called during tenant provisioning or by SUPER_ADMIN
+ * @param data - Tenant data
+ * @param skipAuth - Optional: Skip authentication check (for initial setup/migrations only)
  */
 export async function createTenant(data: {
   name: string
@@ -71,7 +91,19 @@ export async function createTenant(data: {
   logo?: string
   primaryColor?: string
   accentColor?: string
-}) {
+}, skipAuth: boolean = false) {
+  // For production: Verify user is authenticated (SUPER_ADMIN check can be added here)
+  if (!skipAuth) {
+    const session = await auth()
+    if (!session?.user?.id) {
+      throw new Error('Unauthorized - Must be authenticated to create tenant')
+    }
+    // Optional: Add SUPER_ADMIN role check
+    // if (session.user.role !== 'SUPER_ADMIN') {
+    //   throw new Error('Forbidden - Only SUPER_ADMIN can create tenants')
+    // }
+  }
+
   return db.tenant.create({
     data: {
       name: data.name,
