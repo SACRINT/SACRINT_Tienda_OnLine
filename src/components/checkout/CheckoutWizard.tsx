@@ -121,21 +121,21 @@ export function CheckoutWizard({
   const isLastStep = currentStep === STEPS.length - 1
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 py-4 md:py-8">
+      <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-8 text-center">
-          <div className="mb-4 flex items-center justify-center gap-3">
-            <ShoppingBag className="h-8 w-8 text-blue-600" />
-            <h1 className="text-3xl font-bold text-gray-900">Checkout</h1>
+        <div className="mb-4 md:mb-8 text-center">
+          <div className="mb-2 md:mb-4 flex items-center justify-center gap-2 md:gap-3">
+            <ShoppingBag className="h-6 w-6 md:h-8 md:w-8 text-blue-600" />
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Checkout</h1>
           </div>
-          <p className="text-gray-600">
+          <p className="text-sm md:text-base text-gray-600">
             Complete your purchase in {STEPS.length} easy steps
           </p>
         </div>
 
         {/* Progress Steps */}
-        <div className="mb-8">
+        <div className="mb-4 md:mb-8">
           <div className="flex items-center justify-between">
             {STEPS.map((step, index) => (
               <div key={step.id} className="flex flex-1 items-center">
@@ -143,12 +143,12 @@ export function CheckoutWizard({
                 <button
                   onClick={() => goToStep(index)}
                   disabled={index > currentStep}
-                  className={`group relative flex items-center justify-center ${
+                  className={`group relative flex items-center justify-center touch-manipulation ${
                     index <= currentStep ? 'cursor-pointer' : 'cursor-not-allowed'
                   }`}
                 >
                   <div
-                    className={`flex h-12 w-12 items-center justify-center rounded-full border-2 transition-all ${
+                    className={`flex h-8 w-8 md:h-12 md:w-12 items-center justify-center rounded-full border-2 transition-all active:scale-95 ${
                       index < currentStep
                         ? 'border-green-500 bg-green-500 text-white'
                         : index === currentStep
@@ -157,14 +157,14 @@ export function CheckoutWizard({
                     }`}
                   >
                     {index < currentStep ? (
-                      <Check className="h-6 w-6" />
+                      <Check className="h-4 w-4 md:h-6 md:w-6" />
                     ) : (
-                      <span className="font-semibold">{index + 1}</span>
+                      <span className="text-sm md:text-base font-semibold">{index + 1}</span>
                     )}
                   </div>
 
                   {/* Step Label (visible on desktop) */}
-                  <div className="absolute top-14 hidden w-32 flex-col items-center md:flex">
+                  <div className="absolute top-12 md:top-14 hidden w-32 flex-col items-center md:flex">
                     <p
                       className={`text-sm font-medium ${
                         index <= currentStep ? 'text-gray-900' : 'text-gray-500'
@@ -179,7 +179,7 @@ export function CheckoutWizard({
                 {/* Connector Line */}
                 {index < STEPS.length - 1 && (
                   <div
-                    className={`h-1 flex-1 transition-all ${
+                    className={`h-0.5 md:h-1 flex-1 transition-all ${
                       index < currentStep ? 'bg-green-500' : 'bg-gray-300'
                     }`}
                   />
@@ -200,52 +200,54 @@ export function CheckoutWizard({
         </div>
 
         {/* Step Content */}
-        <div className="mb-8 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="mb-20 md:mb-8 rounded-lg border border-gray-200 bg-white p-4 md:p-6 shadow-sm">
           {children[currentStep]}
         </div>
 
-        {/* Navigation Buttons */}
-        <div className="flex items-center justify-between">
-          <button
-            onClick={goToPreviousStep}
-            disabled={currentStep === 0}
-            className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-6 py-3 font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <ChevronLeft className="h-5 w-5" />
-            <span>Back</span>
-          </button>
+        {/* Navigation Buttons - Sticky on Mobile */}
+        <div className="fixed bottom-16 md:bottom-0 left-0 right-0 md:relative bg-white md:bg-transparent border-t md:border-t-0 border-gray-200 p-4 md:p-0 shadow-lg md:shadow-none z-30">
+          <div className="mx-auto max-w-7xl flex items-center justify-between gap-2">
+            <button
+              onClick={goToPreviousStep}
+              disabled={currentStep === 0}
+              className="inline-flex items-center gap-1 md:gap-2 rounded-lg border border-gray-300 bg-white px-3 md:px-6 py-2.5 md:py-3 font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 active:scale-95 touch-manipulation min-h-[44px]"
+            >
+              <ChevronLeft className="h-5 w-5" />
+              <span className="text-sm md:text-base">Back</span>
+            </button>
 
-          <div className="text-sm text-gray-600">
-            Step {currentStep + 1} of {STEPS.length}
+            <div className="text-xs md:text-sm text-gray-600 font-medium">
+              {currentStep + 1}/{STEPS.length}
+            </div>
+
+            {isLastStep ? (
+              <button
+                onClick={handleComplete}
+                disabled={isProcessing}
+                className="inline-flex items-center gap-1 md:gap-2 rounded-lg bg-green-600 px-4 md:px-8 py-2.5 md:py-3 font-semibold text-white transition-colors hover:bg-green-700 disabled:opacity-50 active:scale-95 touch-manipulation min-h-[44px]"
+              >
+                {isProcessing ? (
+                  <>
+                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    <span className="text-sm md:text-base">Processing...</span>
+                  </>
+                ) : (
+                  <>
+                    <Check className="h-5 w-5" />
+                    <span className="text-sm md:text-base">Place Order</span>
+                  </>
+                )}
+              </button>
+            ) : (
+              <button
+                onClick={goToNextStep}
+                className="inline-flex items-center gap-1 md:gap-2 rounded-lg bg-blue-600 px-4 md:px-6 py-2.5 md:py-3 font-medium text-white transition-colors hover:bg-blue-700 active:scale-95 touch-manipulation min-h-[44px]"
+              >
+                <span className="text-sm md:text-base">Continue</span>
+                <ChevronRight className="h-5 w-5" />
+              </button>
+            )}
           </div>
-
-          {isLastStep ? (
-            <button
-              onClick={handleComplete}
-              disabled={isProcessing}
-              className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-8 py-3 font-semibold text-white transition-colors hover:bg-green-700 disabled:opacity-50"
-            >
-              {isProcessing ? (
-                <>
-                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                  <span>Processing...</span>
-                </>
-              ) : (
-                <>
-                  <Check className="h-5 w-5" />
-                  <span>Place Order</span>
-                </>
-              )}
-            </button>
-          ) : (
-            <button
-              onClick={goToNextStep}
-              className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 font-medium text-white transition-colors hover:bg-blue-700"
-            >
-              <span>Continue</span>
-              <ChevronRight className="h-5 w-5" />
-            </button>
-          )}
         </div>
 
         {/* Security Badge */}

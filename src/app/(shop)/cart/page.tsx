@@ -14,6 +14,8 @@ import {
   ShoppingBag,
   Tag,
 } from 'lucide-react'
+import { SwipeableCartItem } from '@/components/cart/SwipeableCartItem'
+import type { CartItem as SwipeableCartItemType } from '@/components/cart/SwipeableCartItem'
 
 interface CartItem {
   id: string
@@ -131,120 +133,63 @@ export default function CartPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 py-4 md:py-8 pb-20 md:pb-8">
+      <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Shopping Cart</h1>
-          <p className="mt-2 text-gray-600">
+        <div className="mb-4 md:mb-8">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Shopping Cart</h1>
+          <p className="mt-2 text-sm md:text-base text-gray-600">
             {cartItems.length} {cartItems.length === 1 ? 'item' : 'items'} in your
             cart
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 md:gap-8 lg:grid-cols-3">
           {/* Cart Items */}
           <div className="lg:col-span-2">
-            <div className="space-y-4">
-              {cartItems.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex gap-4 rounded-lg border border-gray-200 bg-white p-4"
-                >
-                  {/* Product Image */}
-                  <Link href={`/shop/products/${item.productSlug}`}>
-                    {item.productImage ? (
-                      <img
-                        src={item.productImage}
-                        alt={item.productName}
-                        className="h-24 w-24 rounded-lg object-cover transition-transform hover:scale-105 sm:h-32 sm:w-32"
-                      />
-                    ) : (
-                      <div className="flex h-24 w-24 items-center justify-center rounded-lg bg-gray-100 sm:h-32 sm:w-32">
-                        <ShoppingBag className="h-12 w-12 text-gray-400" />
-                      </div>
-                    )}
-                  </Link>
+            <div className="space-y-2 md:space-y-4">
+              {cartItems.map((item) => {
+                // Convert to swipeable cart item format
+                const swipeableItem: SwipeableCartItemType = {
+                  id: item.id,
+                  name: item.productName,
+                  image: item.productImage || '',
+                  price: item.price,
+                  quantity: item.quantity,
+                  stock: item.stock,
+                  variant: item.variantInfo,
+                }
 
-                  {/* Product Info */}
-                  <div className="flex flex-1 flex-col justify-between">
-                    <div>
-                      <Link
-                        href={`/shop/products/${item.productSlug}`}
-                        className="text-lg font-semibold text-gray-900 hover:text-blue-600"
-                      >
-                        {item.productName}
-                      </Link>
-                      {item.variantInfo && (
-                        <p className="mt-1 text-sm text-gray-600">
-                          {item.variantInfo}
-                        </p>
-                      )}
-                      <p className="mt-2 text-xl font-bold text-gray-900">
-                        ${item.price.toFixed(2)}
-                      </p>
-                    </div>
-
-                    {/* Quantity Controls */}
-                    <div className="mt-4 flex items-center gap-4">
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() =>
-                            updateQuantity(item.id, item.quantity - 1)
-                          }
-                          disabled={item.quantity <= 1}
-                          className="rounded-lg border border-gray-300 p-2 text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-                          aria-label="Decrease quantity"
-                        >
-                          <Minus className="h-4 w-4" />
-                        </button>
-                        <span className="w-12 text-center font-semibold">
-                          {item.quantity}
-                        </span>
-                        <button
-                          onClick={() =>
-                            updateQuantity(item.id, item.quantity + 1)
-                          }
-                          disabled={item.quantity >= item.stock}
-                          className="rounded-lg border border-gray-300 p-2 text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-                          aria-label="Increase quantity"
-                        >
-                          <Plus className="h-4 w-4" />
-                        </button>
-                      </div>
-
-                      <button
-                        onClick={() => removeItem(item.id)}
-                        className="flex items-center gap-2 rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                        <span>Remove</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
+                return (
+                  <SwipeableCartItem
+                    key={item.id}
+                    item={swipeableItem}
+                    onQuantityChange={updateQuantity}
+                    onRemove={removeItem}
+                  />
+                )
+              })}
             </div>
 
             {/* Continue Shopping */}
             <Link
               href="/shop"
-              className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-700"
+              className="mt-4 md:mt-6 inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-700"
             >
               ← Continue Shopping
             </Link>
           </div>
 
-          {/* Order Summary */}
+          {/* Order Summary - Sticky on desktop, bottom sheet on mobile */}
           <div className="lg:col-span-1">
-            <div className="sticky top-8 space-y-6">
+            <div className="lg:sticky lg:top-8">
               {/* Summary Card */}
-              <div className="rounded-lg border border-gray-200 bg-white p-6">
-                <h2 className="text-xl font-semibold text-gray-900">
+              <div className="rounded-lg border border-gray-200 bg-white p-4 md:p-6">
+                <h2 className="text-lg md:text-xl font-semibold text-gray-900">
                   Order Summary
                 </h2>
 
-                <div className="mt-6 space-y-3">
+                <div className="mt-4 md:mt-6 space-y-3">
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Subtotal</span>
                     <span className="font-medium text-gray-900">
