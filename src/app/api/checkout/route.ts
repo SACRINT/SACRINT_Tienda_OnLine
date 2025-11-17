@@ -227,7 +227,9 @@ export async function POST(req: NextRequest) {
 
       // Step 4: Immediately confirm reservation (for non-Stripe payments)
       // This deducts the actual stock
-      await confirmInventoryReservation(reservationId)
+      if (reservationId) {
+        await confirmInventoryReservation(reservationId)
+      }
 
       console.log(
         `[CHECKOUT] Inventory confirmed for order ${orderId} (non-Stripe payment)`
