@@ -93,7 +93,7 @@ export async function POST(req: NextRequest) {
 
     // Reserve inventory (this validates stock availability)
     try {
-      const reservationId = await reserveInventory(orderId, normalizedItems)
+      const reservationId = await reserveInventory(tenantId, orderId, normalizedItems)
 
       console.log(
         `[INVENTORY] Reserved inventory for order ${orderId}: reservation ${reservationId}`
