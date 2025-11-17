@@ -36,10 +36,19 @@ export async function PATCH(
       )
     }
 
+    const { tenantId } = session.user
+
+    if (!tenantId) {
+      return NextResponse.json(
+        { error: 'User has no tenant assigned' },
+        { status: 404 }
+      )
+    }
+
     const reviewId = params.id
 
     // Check if review exists
-    const existingReview = await getReviewById(reviewId)
+    const existingReview = await getReviewById(tenantId, reviewId)
 
     if (!existingReview) {
       return NextResponse.json(
@@ -76,7 +85,7 @@ export async function PATCH(
     const { rating, title, comment } = validation.data
 
     // Update the review
-    const updatedReview = await updateReview(reviewId, session.user.id, {
+    const updatedReview = await updateReview(tenantId, reviewId, session.user.id, {
       rating,
       title,
       comment,
@@ -153,10 +162,19 @@ export async function DELETE(
       )
     }
 
+    const { tenantId } = session.user
+
+    if (!tenantId) {
+      return NextResponse.json(
+        { error: 'User has no tenant assigned' },
+        { status: 404 }
+      )
+    }
+
     const reviewId = params.id
 
     // Check if review exists
-    const existingReview = await getReviewById(reviewId)
+    const existingReview = await getReviewById(tenantId, reviewId)
 
     if (!existingReview) {
       return NextResponse.json(
@@ -177,7 +195,7 @@ export async function DELETE(
     }
 
     // Delete the review
-    await deleteReview(reviewId, session.user.id)
+    await deleteReview(tenantId, reviewId, session.user.id)
 
     console.log(
       `[REVIEWS] Deleted review ${reviewId} by user ${session.user.id}`
