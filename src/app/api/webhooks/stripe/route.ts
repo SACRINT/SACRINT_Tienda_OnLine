@@ -15,6 +15,7 @@ import { headers } from 'next/headers'
 import { handleWebhookEvent } from '@/lib/payment/stripe'
 import { db } from '@/lib/db/client'
 import { confirmInventoryReservation, cancelInventoryReservation } from '@/lib/db/inventory'
+import { sendOrderConfirmationEmail, sendPaymentFailedEmail } from '@/lib/email/send'
 import Stripe from 'stripe'
 
 /**
@@ -116,7 +117,49 @@ export async function POST(req: NextRequest) {
 
           console.log(`[WEBHOOK] Order ${orderId} updated to PROCESSING`)
 
-          // TODO: Send order confirmation email here (Week 2 - Email task)
+          // Send order confirmation email
+          try {
+            // Get full order details for email
+            const fullOrder = await db.order.findUnique({
+              where: { id: orderId },
+              include: {
+                user: true,
+                shippingAddress: true,
+                items: {
+                  include: {
+                    product: true,
+                  },
+                },
+              },
+            })
+
+            if (fullOrder && fullOrder.user.email) {
+              await sendOrderConfirmationEmail({
+                orderNumber: fullOrder.orderNumber,
+                customerName: fullOrder.user.name || 'Customer',
+                customerEmail: fullOrder.user.email,
+                orderTotal: Math.round(fullOrder.total * 100),
+                orderDate: fullOrder.createdAt.toLocaleDateString(),
+                items: fullOrder.items.map((item) => ({
+                  name: item.product.name,
+                  quantity: item.quantity,
+                  price: Math.round(item.priceAtPurchase * 100),
+                })),
+                shippingAddress: {
+                  street: fullOrder.shippingAddress.street,
+                  city: fullOrder.shippingAddress.city,
+                  state: fullOrder.shippingAddress.state,
+                  postalCode: fullOrder.shippingAddress.postalCode,
+                  country: fullOrder.shippingAddress.country,
+                },
+              })
+
+              console.log(`[WEBHOOK] Sent order confirmation email for order ${orderId}`)
+            }
+          } catch (emailError) {
+            // Log email error but don't fail the webhook
+            console.error(`[WEBHOOK] Failed to send confirmation email for order ${orderId}:`, emailError)
+          }
 
           return NextResponse.json({
             received: true,
@@ -193,7 +236,32 @@ export async function POST(req: NextRequest) {
 
           console.log(`[WEBHOOK] Order ${orderId} marked as CANCELLED due to payment failure`)
 
-          // TODO: Send payment failure email here (Week 2 - Email task)
+          // Send payment failure email
+          try {
+            // Get full order details for email
+            const fullOrder = await db.order.findUnique({
+              where: { id: orderId },
+              include: {
+                user: true,
+              },
+            })
+
+            if (fullOrder && fullOrder.user.email) {
+              await sendPaymentFailedEmail({
+                orderNumber: fullOrder.orderNumber,
+                customerName: fullOrder.user.name || 'Customer',
+                customerEmail: fullOrder.user.email,
+                orderTotal: Math.round(fullOrder.total * 100),
+                failureReason: errorMessage,
+                retryUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://yourdomain.com'}/shop`,
+              })
+
+              console.log(`[WEBHOOK] Sent payment failure email for order ${orderId}`)
+            }
+          } catch (emailError) {
+            // Log email error but don't fail the webhook
+            console.error(`[WEBHOOK] Failed to send payment failure email for order ${orderId}:`, emailError)
+          }
 
           return NextResponse.json({
             received: true,
