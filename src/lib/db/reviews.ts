@@ -146,7 +146,7 @@ export async function getReviewStats(productId: string) {
   }
 
   // Calculate average
-  const sum = reviews.reduce((acc, review) => acc + review.rating, 0)
+  const sum = reviews.reduce((acc: any, review: any) => acc + review.rating, 0)
   const averageRating = sum / totalReviews
 
   // Calculate distribution

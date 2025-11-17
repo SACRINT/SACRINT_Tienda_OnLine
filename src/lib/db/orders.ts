@@ -109,7 +109,7 @@ export async function createOrder(data: {
   }
 
   // Calculate totals
-  const subtotal = cart.items.reduce((sum, item) => {
+  const subtotal = cart.items.reduce((sum: any, item: any) => {
     const price = Number(item.priceSnapshot)
     return sum + price * item.quantity
   }, 0)

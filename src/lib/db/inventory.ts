@@ -69,7 +69,7 @@ export async function reserveInventory(
       orderId,
       status: 'RESERVED',
       items: {
-        create: items.map((item) => ({
+        create: items.map((item: any) => ({
           productId: item.productId,
           variantId: item.variantId || null,
           reservedQuantity: item.quantity,
@@ -385,7 +385,7 @@ export async function getInventoryReport(tenantId: string) {
       totalItemsInStock,
       lowStockProducts,
     },
-    products: products.map((p) => ({
+    products: products.map((p: any) => ({
       id: p.id,
       name: p.name,
       sku: p.sku,

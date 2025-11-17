@@ -110,7 +110,7 @@ export async function POST(req: NextRequest) {
           throw new Error('Cart not found')
         }
 
-        const reservationItems = cart.items.map((item) => ({
+        const reservationItems = cart.items.map((item: any) => ({
           productId: item.productId,
           variantId: item.variantId,
           quantity: item.quantity,
@@ -212,7 +212,7 @@ export async function POST(req: NextRequest) {
         throw new Error('Cart not found')
       }
 
-      const reservationItems = cart.items.map((item) => ({
+      const reservationItems = cart.items.map((item: any) => ({
         productId: item.productId,
         variantId: item.variantId,
         quantity: item.quantity,

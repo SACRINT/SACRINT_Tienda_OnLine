@@ -77,7 +77,7 @@ export async function GET(
 
     return NextResponse.json({
       productId,
-      reviews: filteredReviews.map((review) => ({
+      reviews: filteredReviews.map((review: any) => ({
         id: review.id,
         rating: review.rating,
         title: review.title,

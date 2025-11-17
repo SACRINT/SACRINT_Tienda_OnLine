@@ -430,7 +430,7 @@ export async function getCartTotal(
   }
 
   // Calculate subtotal from cart items
-  const subtotal = cart.items.reduce((sum, item) => {
+  const subtotal = cart.items.reduce((sum: any, item: any) => {
     const price = Number(item.priceSnapshot)
     return sum + price * item.quantity
   }, 0)
@@ -449,7 +449,7 @@ export async function getCartTotal(
     shippingCost: Number(finalShippingCost.toFixed(2)),
     tax: Number(tax.toFixed(2)),
     total: Number(total.toFixed(2)),
-    itemCount: cart.items.reduce((sum, item) => sum + item.quantity, 0),
+    itemCount: cart.items.reduce((sum: any, item: any) => sum + item.quantity, 0),
     items: cart.items.length,
   }
 }

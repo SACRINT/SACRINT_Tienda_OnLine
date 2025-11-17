@@ -86,7 +86,7 @@ export async function GET(
           postalCode: order.billingAddress.postalCode,
           country: order.billingAddress.country,
         } : null,
-        items: order.items.map((item) => ({
+        items: order.items.map((item: any) => ({
           id: item.id,
           quantity: item.quantity,
           priceAtPurchase: Number(item.priceAtPurchase),

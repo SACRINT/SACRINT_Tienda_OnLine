@@ -85,13 +85,13 @@ export async function GET(req: NextRequest) {
       )
 
       return NextResponse.json({
-        lowStockProducts: lowStockProducts.map((product) => ({
+        lowStockProducts: lowStockProducts.map((product: any) => ({
           id: product.id,
           name: product.name,
           sku: product.sku,
           stock: product.stock,
           lowStockThreshold: product.lowStockThreshold,
-          variants: product.variants.map((variant) => ({
+          variants: product.variants.map((variant: any) => ({
             id: variant.id,
             sku: variant.sku,
             size: variant.size,

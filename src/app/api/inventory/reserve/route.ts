@@ -97,7 +97,7 @@ export async function POST(req: NextRequest) {
           message: 'Inventory reserved successfully',
           reservationId,
           orderId,
-          items: items.map((item) => ({
+          items: items.map((item: any) => ({
             productId: item.productId,
             variantId: item.variantId || null,
             quantity: item.quantity,
