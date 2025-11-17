@@ -597,6 +597,120 @@ export async function isProductSkuAvailable(
   return false
 }
 
+// ============ PRODUCT IMAGE MANAGEMENT ============
+
+/**
+ * Add image to product
+ * @param tenantId - Tenant ID for validation
+ * @param productId - Product ID
+ * @param imageData - Image data (url, alt, order)
+ */
+export async function addProductImage(
+  tenantId: string,
+  productId: string,
+  imageData: {
+    url: string
+    alt: string
+    order: number
+  }
+) {
+  await ensureTenantAccess(tenantId)
+
+  // Verify product belongs to tenant
+  const product = await db.product.findFirst({
+    where: { id: productId, tenantId },
+  })
+
+  if (!product) {
+    throw new Error('Product not found or does not belong to tenant')
+  }
+
+  // Create image
+  return db.productImage.create({
+    data: {
+      productId,
+      url: imageData.url,
+      alt: imageData.alt,
+      order: imageData.order,
+    },
+  })
+}
+
+/**
+ * Remove image from product
+ * @param tenantId - Tenant ID for validation
+ * @param productId - Product ID
+ * @param imageId - Image ID to remove
+ */
+export async function removeProductImage(
+  tenantId: string,
+  productId: string,
+  imageId: string
+) {
+  await ensureTenantAccess(tenantId)
+
+  // Verify product belongs to tenant
+  const product = await db.product.findFirst({
+    where: { id: productId, tenantId },
+  })
+
+  if (!product) {
+    throw new Error('Product not found or does not belong to tenant')
+  }
+
+  // Verify image belongs to product
+  const image = await db.productImage.findFirst({
+    where: { id: imageId, productId },
+  })
+
+  if (!image) {
+    throw new Error('Image not found or does not belong to product')
+  }
+
+  // Delete image
+  return db.productImage.delete({
+    where: { id: imageId },
+  })
+}
+
+/**
+ * Reorder product images
+ * @param tenantId - Tenant ID for validation
+ * @param productId - Product ID
+ * @param imageOrders - Array of {imageId, order}
+ */
+export async function reorderProductImages(
+  tenantId: string,
+  productId: string,
+  imageOrders: Array<{ imageId: string; order: number }>
+) {
+  await ensureTenantAccess(tenantId)
+
+  // Verify product belongs to tenant
+  const product = await db.product.findFirst({
+    where: { id: productId, tenantId },
+  })
+
+  if (!product) {
+    throw new Error('Product not found or does not belong to tenant')
+  }
+
+  // Update each image's order
+  await db.$transaction(
+    imageOrders.map(({ imageId, order }) =>
+      db.productImage.updateMany({
+        where: {
+          id: imageId,
+          productId,
+        },
+        data: { order },
+      })
+    )
+  )
+
+  console.log(`[PRODUCTS] Reordered ${imageOrders.length} images for product ${productId}`)
+}
+
 // ============ HELPER FUNCTIONS ============
 
 /**
