@@ -3,6 +3,8 @@
 // Shop Page - Listado de productos con filtros y paginación
 // Muestra grid de productos, filtros, y paginación
 
+export const dynamic = 'force-dynamic'
+
 import { useState, useEffect } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { ProductCard, type ProductCardData } from '@/components/features/ProductCard'

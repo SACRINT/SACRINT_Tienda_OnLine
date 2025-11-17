@@ -3,6 +3,8 @@
 // Checkout Page - Flujo de checkout con wizard de 3 pasos
 // Paso 1: Dirección de envío, Paso 2: Método de pago, Paso 3: Revisión
 
+export const dynamic = 'force-dynamic'
+
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
