@@ -73,14 +73,20 @@ export function captureEvent(
 
 // Performance monitoring
 export function startTransaction(name: string, op: string) {
-  return Sentry.startTransaction({
-    name,
-    op,
-  })
+  if (!Sentry) return null
+
+  // Sentry v8+ uses startSpan instead of startTransaction
+  if (typeof Sentry.startSpan === 'function') {
+    return Sentry.startSpan({ name, op }, () => {})
+  }
+
+  return null
 }
 
 // Set user context
 export function setUser(user: { id: string; email?: string; role?: string }) {
+  if (!Sentry) return
+
   Sentry.setUser({
     id: user.id,
     email: user.email,
@@ -93,5 +99,7 @@ export function setUser(user: { id: string; email?: string; role?: string }) {
 
 // Clear user context (on logout)
 export function clearUser() {
+  if (!Sentry) return
+
   Sentry.setUser(null)
 }
