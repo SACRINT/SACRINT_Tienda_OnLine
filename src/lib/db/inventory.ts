@@ -105,7 +105,7 @@ export async function confirmInventoryReservation(reservationId: string) {
   }
 
   // Use transaction to deduct stock and update reservation
-  await db.$transaction(async (tx) => {
+  await db.$transaction(async (tx: any) => {
     // Deduct stock for each item
     for (const item of reservation.items) {
       if (item.variantId) {
