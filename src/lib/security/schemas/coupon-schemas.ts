@@ -107,7 +107,7 @@ export const ValidateCouponSchema = z.object({
  */
 export const CouponFilterSchema = z.object({
   status: z.enum(['ACTIVE', 'INACTIVE', 'EXPIRED']).optional(),
-  type: z.enum(['PERCENTAGE', 'FIXED_AMOUNT']).optional(),
+  type: z.enum(['PERCENTAGE', 'FIXED']).optional(),
   includeExpired: z.string()
     .transform((val) => val === 'true')
     .optional(),

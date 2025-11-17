@@ -4,7 +4,7 @@
 import { db } from './client'
 import { ensureTenantAccess } from './tenant'
 
-export type CouponType = 'PERCENTAGE' | 'FIXED_AMOUNT'
+export type CouponType = 'PERCENTAGE' | 'FIXED'
 export type CouponStatus = 'ACTIVE' | 'INACTIVE' | 'EXPIRED'
 
 /**
@@ -118,7 +118,7 @@ export async function validateCoupon(
   }
 
   // Check minimum purchase amount
-  if (coupon.minPurchase && orderTotal < coupon.minPurchase) {
+  if (coupon.minPurchase && orderTotal < parseFloat(String(coupon.minPurchase))) {
     throw new Error(`Minimum purchase amount is $${coupon.minPurchase}`)
   }
 
@@ -177,7 +177,7 @@ export async function createCoupon(tenantId: string, data: {
   minPurchase?: number | null
   maxUses?: number | null
   startDate?: Date
-  expiresAt?: Date
+  expiresAt?: Date | null
   description?: string | null
 }) {
   await ensureTenantAccess(tenantId)
@@ -221,8 +221,7 @@ export async function updateCoupon(
   tenantId: string,
   couponId: string,
   data: {
-    isActive?: boolean
-    discount?: number
+    value?: number
     maxDiscount?: number | null
     minPurchase?: number | null
     maxUses?: number | null
@@ -241,9 +240,18 @@ export async function updateCoupon(
     throw new Error('Coupon not found or does not belong to tenant')
   }
 
+  // Filter out undefined fields to avoid Prisma type errors
+  const updateData: any = {}
+  if (data.value !== undefined) updateData.value = data.value
+  if (data.maxDiscount !== undefined) updateData.maxDiscount = data.maxDiscount
+  if (data.minPurchase !== undefined) updateData.minPurchase = data.minPurchase
+  if (data.maxUses !== undefined) updateData.maxUses = data.maxUses
+  if (data.expiresAt !== undefined) updateData.expiresAt = data.expiresAt
+  if (data.description !== undefined) updateData.description = data.description
+
   return db.coupon.update({
     where: { id: couponId },
-    data,
+    data: updateData,
   })
 }
 
