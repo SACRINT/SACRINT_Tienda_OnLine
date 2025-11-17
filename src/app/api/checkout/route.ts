@@ -207,9 +207,9 @@ export async function POST(req: NextRequest) {
       console.log(`[CHECKOUT] Order created: ${orderId}, reserving inventory...`)
 
       // Step 2: Get cart items for reservation
-      const cart = await getCartById(cartId)
+      const cart = await getCartById(tenantId, cartId)
       if (!cart) {
-        throw new Error('Cart not found')
+        throw new Error('Cart not found or does not belong to tenant')
       }
 
       const reservationItems = cart.items.map((item: any) => ({
@@ -219,7 +219,7 @@ export async function POST(req: NextRequest) {
       }))
 
       // Step 3: Reserve inventory
-      reservationId = await reserveInventory(orderId, reservationItems)
+      reservationId = await reserveInventory(tenantId, orderId, reservationItems)
 
       console.log(
         `[CHECKOUT] Inventory reserved: ${reservationId} for order ${orderId}`
@@ -228,7 +228,7 @@ export async function POST(req: NextRequest) {
       // Step 4: Immediately confirm reservation (for non-Stripe payments)
       // This deducts the actual stock
       if (reservationId) {
-        await confirmInventoryReservation(reservationId)
+        await confirmInventoryReservation(tenantId, reservationId)
       }
 
       console.log(
