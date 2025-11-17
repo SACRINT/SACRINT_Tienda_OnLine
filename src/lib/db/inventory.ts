@@ -365,7 +365,7 @@ export async function getInventoryReport(tenantId: string) {
   let totalItemsInStock = 0
   let lowStockProducts = 0
 
-  products.forEach((product) => {
+  products.forEach((product: any) => {
     totalItemsInStock += product.stock
     totalVariants += product.variants.length
 
@@ -373,7 +373,7 @@ export async function getInventoryReport(tenantId: string) {
       lowStockProducts++
     }
 
-    product.variants.forEach((variant) => {
+    product.variants.forEach((variant: any) => {
       totalItemsInStock += variant.stock
     })
   })

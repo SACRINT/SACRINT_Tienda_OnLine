@@ -158,7 +158,7 @@ export async function getReviewStats(productId: string) {
     5: 0,
   }
 
-  reviews.forEach((review) => {
+  reviews.forEach((review: any) => {
     ratingDistribution[review.rating as keyof typeof ratingDistribution]++
   })
 
