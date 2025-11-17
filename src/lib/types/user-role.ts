@@ -17,15 +17,10 @@
 
 export type UserRole = 'SUPER_ADMIN' | 'STORE_OWNER' | 'CUSTOMER'
 
-// Inventory Reason Type (from Prisma schema)
+// Inventory Reason Type (from validation schema)
 // Used in InventoryLog to track why stock was adjusted
-export type InventoryReason =
-  | 'PURCHASE'
-  | 'RETURN'
-  | 'RESTOCK'
-  | 'ADJUSTMENT'
-  | 'RESERVATION'
-  | 'CONFIRMATION'
+// IMPORTANT: Must match AdjustInventorySchema enum values in /lib/security/schemas/review-schemas.ts
+export type InventoryReason = 'RECOUNT' | 'RETURN' | 'DAMAGE' | 'PURCHASE' | 'OTHER'
 
 // Helper to check if a string is a valid UserRole
 export function isValidUserRole(role: unknown): role is UserRole {
