@@ -37,7 +37,7 @@ export const PaymentFailedEmail: React.FC<PaymentFailedEmailProps> = ({
             <p style={paragraphStyle}>Hi {customerName},</p>
 
             <p style={paragraphStyle}>
-              We're sorry, but we were unable to process your payment for order <strong>{orderNumber}</strong>.
+              We&apos;re sorry, but we were unable to process your payment for order <strong>{orderNumber}</strong>.
             </p>
 
             {/* Order Details Box */}
@@ -96,7 +96,7 @@ export const PaymentFailedEmail: React.FC<PaymentFailedEmailProps> = ({
             </p>
 
             <p style={paragraphStyle}>
-              If you need assistance, please don't hesitate to contact our support team.
+              If you need assistance, please don&apos;t hesitate to contact our support team.
             </p>
           </div>
 

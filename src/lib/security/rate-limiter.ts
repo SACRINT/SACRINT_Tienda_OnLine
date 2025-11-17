@@ -178,7 +178,9 @@ export function cleanupRateLimitStore() {
   const now = Date.now()
   let cleaned = 0
 
-  for (const [key, data] of rateLimitStore.entries()) {
+  // Convert to array to avoid iterator issues
+  const entries = Array.from(rateLimitStore.entries())
+  for (const [key, data] of entries) {
     if (now > data.resetTime) {
       rateLimitStore.delete(key)
       cleaned++

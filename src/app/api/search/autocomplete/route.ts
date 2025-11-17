@@ -60,7 +60,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       query: q,
-      suggestions: suggestions.map((product) => ({
+      suggestions: suggestions.map((product: any) => ({
         id: product.id,
         name: product.name,
         slug: product.slug,

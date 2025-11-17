@@ -140,7 +140,7 @@ export async function POST(req: NextRequest) {
                 customerEmail: fullOrder.user.email,
                 orderTotal: Math.round(fullOrder.total * 100),
                 orderDate: fullOrder.createdAt.toLocaleDateString(),
-                items: fullOrder.items.map((item) => ({
+                items: fullOrder.items.map((item: any) => ({
                   name: item.product.name,
                   quantity: item.quantity,
                   price: Math.round(item.priceAtPurchase * 100),

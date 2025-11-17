@@ -64,7 +64,7 @@ export async function GET(req: NextRequest) {
     const coupons = await getCouponsByTenant(tenantId, validation.data)
 
     return NextResponse.json({
-      coupons: coupons.map((coupon) => ({
+      coupons: coupons.map((coupon: any) => ({
         id: coupon.id,
         code: coupon.code,
         type: coupon.type,

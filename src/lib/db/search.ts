@@ -130,7 +130,7 @@ export async function searchProducts(
 
   // Calculate average rating for each product
   const productsWithRating = await Promise.all(
-    products.map(async (product) => {
+    products.map(async (product: any) => {
       const ratings = await db.review.aggregate({
         where: {
           productId: product.id,
@@ -259,7 +259,7 @@ export async function getSearchFacets(
   })
 
   // Get category names
-  const categoryIds = categoryFacets.map((f) => f.categoryId)
+  const categoryIds = categoryFacets.map((f: any) => f.categoryId)
   const categories = await db.category.findMany({
     where: {
       id: { in: categoryIds },
@@ -272,7 +272,7 @@ export async function getSearchFacets(
     },
   })
 
-  const categoryMap = new Map(categories.map((c) => [c.id, c]))
+  const categoryMap = new Map(categories.map((c: any) => [c.id, c]))
 
   // Get price range facets
   const priceAggregation = await db.product.aggregate({
@@ -306,25 +306,28 @@ export async function getSearchFacets(
   })
 
   const allTags = new Set<string>()
-  productsWithTags.forEach((p) => {
-    p.tags.forEach((tag) => allTags.add(tag))
+  productsWithTags.forEach((p: any) => {
+    p.tags.forEach((tag: any) => allTags.add(tag))
   })
 
   // Count products per tag
   const tagCounts = new Map<string, number>()
-  productsWithTags.forEach((p) => {
-    p.tags.forEach((tag) => {
+  productsWithTags.forEach((p: any) => {
+    p.tags.forEach((tag: any) => {
       tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1)
     })
   })
 
   return {
-    categories: categoryFacets.map((facet) => ({
-      id: facet.categoryId,
-      name: categoryMap.get(facet.categoryId)?.name || 'Unknown',
-      slug: categoryMap.get(facet.categoryId)?.slug || '',
-      count: facet._count.categoryId,
-    })),
+    categories: categoryFacets.map((facet: any) => {
+      const category = categoryMap.get(facet.categoryId) as any
+      return {
+        id: facet.categoryId,
+        name: category?.name || 'Unknown',
+        slug: category?.slug || '',
+        count: facet._count.categoryId,
+      }
+    }),
     priceRange: {
       min: priceAggregation._min.basePrice || 0,
       max: priceAggregation._max.basePrice || 0,
@@ -333,7 +336,7 @@ export async function getSearchFacets(
       inStock: inStockCount,
       outOfStock: outOfStockCount,
     },
-    tags: Array.from(allTags).map((tag) => ({
+    tags: Array.from(allTags).map((tag: any) => ({
       name: tag,
       count: tagCounts.get(tag) || 0,
     })),

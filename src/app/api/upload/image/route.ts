@@ -94,11 +94,6 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// Configure max file size (10MB)
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: '10mb',
-    },
-  },
-}
+// Note: In Next.js 14+ App Router, body size limits are handled differently
+// The maxDuration export can be used for timeout configuration if needed
+// File size validation is done in the validateImageFile function

@@ -308,12 +308,12 @@ export async function getCouponStats(tenantId: string, couponId: string) {
   })
 
   const totalDiscountGiven = ordersWithCoupon.reduce(
-    (sum, order) => sum + order.discount,
+    (sum: number, order: any) => sum + order.discount,
     0
   )
 
   const totalRevenue = ordersWithCoupon.reduce(
-    (sum, order) => sum + order.total,
+    (sum: number, order: any) => sum + order.total,
     0
   )
 

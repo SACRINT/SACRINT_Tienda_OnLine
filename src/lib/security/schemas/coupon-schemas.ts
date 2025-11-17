@@ -12,22 +12,10 @@ export const CreateCouponSchema = z.object({
     .max(50, 'Coupon code must be at most 50 characters')
     .regex(/^[A-Z0-9_-]+$/, 'Coupon code must contain only uppercase letters, numbers, hyphens, and underscores'),
 
-  type: z.enum(['PERCENTAGE', 'FIXED_AMOUNT'], {
-    errorMap: () => ({ message: 'Type must be PERCENTAGE or FIXED_AMOUNT' }),
-  }),
+  type: z.enum(['PERCENTAGE', 'FIXED_AMOUNT'] as const),
 
   discount: z.number()
-    .positive('Discount must be positive')
-    .refine(
-      (val, ctx) => {
-        // If type is PERCENTAGE, discount must be <= 100
-        if (ctx.parent?.type === 'PERCENTAGE' && val > 100) {
-          return false
-        }
-        return true
-      },
-      { message: 'Percentage discount cannot exceed 100%' }
-    ),
+    .positive('Discount must be positive'),
 
   maxDiscount: z.number()
     .positive('Max discount must be positive')

@@ -78,16 +78,16 @@ export async function uploadImage(
   const buffer = Buffer.from(arrayBuffer)
 
   // Get image metadata
-  const metadata = await sharp(buffer).metadata()
+  const metadata = await sharp(buffer as any).metadata()
   const originalWidth = metadata.width || 0
   const originalHeight = metadata.height || 0
 
   // Optimize image
-  let optimizedBuffer = buffer
+  let optimizedBuffer: any = buffer
 
   // Resize if image is too large
   if (originalWidth > MAX_WIDTH || originalHeight > MAX_HEIGHT) {
-    optimizedBuffer = await sharp(buffer)
+    optimizedBuffer = await sharp(buffer as any)
       .resize(MAX_WIDTH, MAX_HEIGHT, {
         fit: 'inside',
         withoutEnlargement: true,
@@ -96,7 +96,7 @@ export async function uploadImage(
       .toBuffer()
   } else {
     // Just compress
-    optimizedBuffer = await sharp(buffer)
+    optimizedBuffer = await sharp(buffer as any)
       .jpeg({ quality: IMAGE_QUALITY })
       .toBuffer()
   }
@@ -167,7 +167,7 @@ export async function generateThumbnail(
   const arrayBuffer = await file.arrayBuffer()
   const buffer = Buffer.from(arrayBuffer)
 
-  const thumbnail = await sharp(buffer)
+  const thumbnail = await sharp(buffer as any)
     .resize(size, size, {
       fit: 'cover',
       position: 'center',
@@ -194,7 +194,7 @@ export async function validateImageDimensions(
     const arrayBuffer = await file.arrayBuffer()
     const buffer = Buffer.from(arrayBuffer)
 
-    const metadata = await sharp(buffer).metadata()
+    const metadata = await sharp(buffer as any).metadata()
     const width = metadata.width || 0
     const height = metadata.height || 0
 

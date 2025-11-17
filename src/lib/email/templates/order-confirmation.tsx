@@ -51,7 +51,7 @@ export const OrderConfirmationEmail: React.FC<OrderConfirmationEmailProps> = ({
             <p style={paragraphStyle}>Hi {customerName},</p>
 
             <p style={paragraphStyle}>
-              Thank you for your order! We're processing it now and will ship it soon.
+              Thank you for your order! We&apos;re processing it now and will ship it soon.
             </p>
 
             {/* Order Details Box */}
@@ -116,12 +116,12 @@ export const OrderConfirmationEmail: React.FC<OrderConfirmationEmailProps> = ({
             )}
 
             <p style={paragraphStyle}>
-              We'll send you a shipping confirmation email with tracking information once your
+              We&apos;ll send you a shipping confirmation email with tracking information once your
               order ships.
             </p>
 
             <p style={paragraphStyle}>
-              If you have any questions, please don't hesitate to contact our support team.
+              If you have any questions, please don&apos;t hesitate to contact our support team.
             </p>
 
             <p style={paragraphStyle}>
