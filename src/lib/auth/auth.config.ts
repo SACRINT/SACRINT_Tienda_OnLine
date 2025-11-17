@@ -8,7 +8,7 @@ import { PrismaAdapter } from '@auth/prisma-adapter'
 import { db } from '@/lib/db/client'
 import { z } from 'zod'
 import bcrypt from 'bcryptjs'
-import { USER_ROLES } from '@/lib/types/user-role'
+import { USER_ROLES, type UserRole } from '@/lib/types/user-role'
 
 // Validation schemas
 const LoginSchema = z.object({
