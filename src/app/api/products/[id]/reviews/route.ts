@@ -28,17 +28,21 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
+    const session = await auth()
     const productId = params.id
 
-    // Validate product exists
-    const product = await getProductById(productId)
+    // For public access, we need to get tenant from product first
+    // Get a minimal product query to extract tenantId
+    const productBasic = await getProductById(session?.user?.tenantId || '', productId).catch(() => null)
 
-    if (!product) {
+    if (!productBasic) {
       return NextResponse.json(
         { error: 'Product not found' },
         { status: 404 }
       )
     }
+
+    const tenantId = productBasic.tenantId
 
     // Parse and validate query parameters
     const { searchParams } = new URL(req.url)
@@ -65,7 +69,7 @@ export async function GET(
     const { page, limit, minRating } = validation.data
 
     // Get reviews with pagination
-    const result = await getProductReviews(productId, page, limit)
+    const result = await getProductReviews(tenantId, productId, page, limit)
 
     // Filter by minRating if provided (client-side for simplicity)
     let filteredReviews = result.reviews
@@ -129,14 +133,22 @@ export async function POST(
       )
     }
 
+    const { tenantId } = session.user
     const productId = params.id
 
-    // Validate product exists
-    const product = await getProductById(productId)
+    if (!tenantId) {
+      return NextResponse.json(
+        { error: 'User has no tenant assigned' },
+        { status: 404 }
+      )
+    }
+
+    // Validate product exists and belongs to tenant
+    const product = await getProductById(tenantId, productId)
 
     if (!product) {
       return NextResponse.json(
-        { error: 'Product not found' },
+        { error: 'Product not found or does not belong to your tenant' },
         { status: 404 }
       )
     }
@@ -178,7 +190,7 @@ export async function POST(
     const { rating, title, comment } = validation.data
 
     // Check if user has already reviewed this product
-    const hasReviewed = await hasUserReviewedProduct(productId, session.user.id)
+    const hasReviewed = await hasUserReviewedProduct(tenantId, productId, session.user.id)
 
     if (hasReviewed) {
       return NextResponse.json(
@@ -191,7 +203,7 @@ export async function POST(
     }
 
     // Create the review
-    const review = await createReview({
+    const review = await createReview(tenantId, {
       productId,
       userId: session.user.id,
       rating,

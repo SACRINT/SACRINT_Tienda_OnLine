@@ -22,7 +22,7 @@ export type UserRole = 'SUPER_ADMIN' | 'STORE_OWNER' | 'CUSTOMER'
 // IMPORTANT: Must match AdjustInventorySchema enum values in /lib/security/schemas/review-schemas.ts
 export type InventoryReason = 'RECOUNT' | 'RETURN' | 'DAMAGE' | 'PURCHASE' | 'OTHER'
 
-// Order Status Type (from Zod validation schema)
+// Order Status Type (from Prisma schema)
 // enum OrderStatus { PENDING, PROCESSING, SHIPPED, DELIVERED, CANCELLED, REFUNDED }
 export type OrderStatus = 'PENDING' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED' | 'REFUNDED'
 
@@ -30,9 +30,9 @@ export type OrderStatus = 'PENDING' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | '
 // enum PaymentStatus { PENDING, COMPLETED, FAILED, REFUNDED }
 export type PaymentStatus = 'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED'
 
-// Payment Method Type (from Zod validation schema)
-// enum PaymentMethod { STRIPE, CREDIT_CARD, BANK_TRANSFER, PAYMENT_ON_DELIVERY, MERCADO_PAGO, PAYPAL, OXXO }
-export type PaymentMethod = 'STRIPE' | 'CREDIT_CARD' | 'BANK_TRANSFER' | 'PAYMENT_ON_DELIVERY' | 'MERCADO_PAGO' | 'PAYPAL' | 'OXXO'
+// Payment Method Type (from Prisma schema)
+// enum PaymentMethod { CREDIT_CARD, STRIPE, MERCADO_PAGO, PAYPAL, OXXO, BANK_TRANSFER }
+export type PaymentMethod = 'CREDIT_CARD' | 'STRIPE' | 'MERCADO_PAGO' | 'PAYPAL' | 'OXXO' | 'BANK_TRANSFER'
 
 // Helper to check if a string is a valid UserRole
 export function isValidUserRole(role: unknown): role is UserRole {

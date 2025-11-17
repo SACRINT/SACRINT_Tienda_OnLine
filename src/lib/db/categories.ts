@@ -39,11 +39,18 @@ export async function getCategoriesByTenant(
 }
 
 /**
- * Get category by ID
+ * Get category by ID with tenant validation
+ * @param tenantId - Tenant ID to validate access
+ * @param categoryId - Category ID to retrieve
  */
-export async function getCategoryById(categoryId: string) {
-  return db.category.findUnique({
-    where: { id: categoryId },
+export async function getCategoryById(tenantId: string, categoryId: string) {
+  await ensureTenantAccess(tenantId)
+
+  return db.category.findFirst({
+    where: {
+      id: categoryId,
+      tenantId
+    },
     include: {
       parent: true,
       subcategories: {

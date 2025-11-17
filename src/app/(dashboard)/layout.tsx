@@ -1,21 +1,39 @@
-'use client'
+// Dashboard Layout - Protected Area
+// Requires STORE_OWNER or SUPER_ADMIN role
 
+import { redirect } from 'next/navigation'
 import { ReactNode } from 'react'
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
+import { auth } from '@/lib/auth/auth'
+import { USER_ROLES } from '@/lib/types/user-role'
+import DashboardSidebar from '@/components/dashboard/DashboardSidebar'
+import DashboardHeader from '@/components/dashboard/DashboardHeader'
 
-export default function DashboardLayout({ children }: { children: ReactNode }) {
-  // TODO: Obtener usuario de sesión cuando NextAuth esté listo
-  const user = {
-    name: 'Usuario Demo',
-    email: 'demo@tienda.com',
-    role: 'STORE_OWNER',
+export default async function DashboardLayout({ children }: { children: ReactNode }) {
+  const session = await auth()
+
+  // Require authentication
+  if (!session?.user) {
+    redirect('/login')
   }
 
-  const handleLogout = () => {
-    // TODO: Implementar logout con NextAuth cuando esté listo
-    // await signOut({ callbackUrl: '/' })
-    alert('Logout - Integración con NextAuth pendiente')
+  // Require STORE_OWNER or SUPER_ADMIN role
+  if (
+    session.user.role !== USER_ROLES.STORE_OWNER &&
+    session.user.role !== USER_ROLES.SUPER_ADMIN
+  ) {
+    redirect('/')
+  }
+
+  // Require tenant assignment (except for SUPER_ADMIN)
+  if (!session.user.tenantId && session.user.role !== USER_ROLES.SUPER_ADMIN) {
+    redirect('/onboarding')
+  }
+
+  const user = {
+    name: session.user.name || 'User',
+    email: session.user.email || '',
+    role: session.user.role,
+    tenantId: session.user.tenantId,
   }
 
   return (

@@ -46,20 +46,12 @@ export async function GET(
 
     const productId = params.id
 
-    const product = await getProductById(productId)
+    const product = await getProductById(tenantId, productId)
 
     if (!product) {
       return NextResponse.json(
-        { error: 'Product not found' },
+        { error: 'Product not found or does not belong to your tenant' },
         { status: 404 }
-      )
-    }
-
-    // Verify product belongs to user's tenant
-    if (product.tenantId !== tenantId) {
-      return NextResponse.json(
-        { error: 'Forbidden - Product does not belong to your tenant' },
-        { status: 403 }
       )
     }
 
@@ -208,19 +200,12 @@ export async function PATCH(
 
     // If categoryId is being updated, verify it exists and belongs to tenant
     if (categoryId) {
-      const category = await getCategoryById(categoryId)
+      const category = await getCategoryById(tenantId, categoryId)
 
       if (!category) {
         return NextResponse.json(
-          { error: 'Category not found' },
+          { error: 'Category not found or does not belong to your tenant' },
           { status: 404 }
-        )
-      }
-
-      if (category.tenantId !== tenantId) {
-        return NextResponse.json(
-          { error: 'Forbidden - Category does not belong to your tenant' },
-          { status: 403 }
         )
       }
     }
