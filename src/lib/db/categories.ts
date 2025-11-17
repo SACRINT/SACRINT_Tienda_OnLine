@@ -2,7 +2,6 @@
 // Reusable database operations for category management with tenant isolation
 
 import { db } from './client'
-import { Prisma } from '@prisma/client'
 import { getCurrentUserTenantId, ensureTenantAccess } from './tenant'
 
 /**
@@ -137,7 +136,7 @@ export async function createCategory(data: {
  */
 export async function updateCategory(
   categoryId: string,
-  data: Prisma.CategoryUpdateInput
+  data: Record<string, any>
 ) {
   const category = await db.category.findUnique({
     where: { id: categoryId },
