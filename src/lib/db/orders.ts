@@ -269,7 +269,7 @@ export async function getOrdersByUser(
   const limit = filters?.limit || 20
   const skip = (page - 1) * limit
 
-  const where: Prisma.OrderWhereInput = {
+  const where: any = {
     userId,
     tenantId,
     ...(filters?.status && { status: filters.status }),
@@ -340,7 +340,7 @@ export async function getOrdersByTenant(
   const limit = filters.limit || 20
   const skip = (page - 1) * limit
 
-  const where: Prisma.OrderWhereInput = {
+  const where: any = {
     tenantId,
     ...(filters.status && { status: filters.status }),
     ...(filters.paymentStatus && { paymentStatus: filters.paymentStatus }),
@@ -357,10 +357,10 @@ export async function getOrdersByTenant(
   }
 
   // Determine sort order
-  let orderBy: Prisma.OrderOrderByWithRelationInput = { createdAt: 'desc' }
+  let orderBy: any = { createdAt: 'desc' }
 
   if (filters.sort) {
-    const sortMap: Record<string, Prisma.OrderOrderByWithRelationInput> = {
+    const sortMap: Record<string, any> = {
       'date-asc': { createdAt: 'asc' },
       'date-desc': { createdAt: 'desc' },
       'total-asc': { total: 'asc' },

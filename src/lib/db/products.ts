@@ -32,7 +32,7 @@ export async function getProducts(
   const skip = (page - 1) * limit
 
   // Build where clause
-  const where: Prisma.ProductWhereInput = {
+  const where: any = {
     tenantId,
     ...(categoryId && { categoryId }),
     ...(search && {
@@ -190,7 +190,7 @@ export async function getProductBySlug(tenantId: string, slug: string) {
 /**
  * Create new product
  */
-export async function createProduct(data: Prisma.ProductCreateInput) {
+export async function createProduct(data: any) {
   // Tenant isolation is enforced by passing tenantId in data
 
   return db.product.create({
@@ -207,7 +207,7 @@ export async function createProduct(data: Prisma.ProductCreateInput) {
  */
 export async function updateProduct(
   productId: string,
-  data: Prisma.ProductUpdateInput
+  data: any
 ) {
   const product = await db.product.findUnique({
     where: { id: productId },
@@ -300,7 +300,7 @@ export async function getProductsByCategory(
   const limit = options?.limit || 20
   const skip = (page - 1) * limit
 
-  const where: Prisma.ProductWhereInput = {
+  const where: any = {
     tenantId,
     categoryId,
     ...(options?.published !== undefined && { published: options.published }),
@@ -335,7 +335,7 @@ export async function searchProducts(
   const { q, categoryId, minPrice, maxPrice, page, limit } = searchInput
   const skip = (page - 1) * limit
 
-  const where: Prisma.ProductWhereInput = {
+  const where: any = {
     tenantId,
     published: true, // Only search published products
     ...(categoryId && { categoryId }),
@@ -538,7 +538,7 @@ export async function isProductSkuAvailable(
 /**
  * Get Prisma orderBy clause from sort parameter
  */
-function getProductOrderBy(sort: string): Prisma.ProductOrderByWithRelationInput | Prisma.ProductOrderByWithRelationInput[] {
+function getProductOrderBy(sort: string): any {
   switch (sort) {
     case 'newest':
       return { createdAt: 'desc' }

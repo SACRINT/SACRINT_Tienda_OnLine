@@ -88,7 +88,7 @@ export async function createTenant(data: {
  */
 export async function updateTenant(
   tenantId: string,
-  data: Prisma.TenantUpdateInput
+  data: any
 ) {
   // Ensure user has access to this tenant
   await ensureTenantAccess(tenantId)

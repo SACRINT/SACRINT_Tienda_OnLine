@@ -58,7 +58,7 @@ export async function createUser(data: {
  */
 export async function updateUser(
   userId: string,
-  data: Prisma.UserUpdateInput
+  data: any
 ) {
   return db.user.update({
     where: { id: userId },

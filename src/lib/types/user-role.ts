@@ -23,16 +23,16 @@ export type UserRole = 'SUPER_ADMIN' | 'STORE_OWNER' | 'CUSTOMER'
 export type InventoryReason = 'RECOUNT' | 'RETURN' | 'DAMAGE' | 'PURCHASE' | 'OTHER'
 
 // Order Status Type (from Prisma schema)
-// enum OrderStatus { PENDING, PROCESSING, SHIPPED, DELIVERED, CANCELLED }
-export type OrderStatus = 'PENDING' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED'
+// enum OrderStatus { PENDING, PROCESSING, SHIPPED, DELIVERED, CANCELLED, REFUNDED }
+export type OrderStatus = 'PENDING' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED' | 'REFUNDED'
 
 // Payment Status Type (from Prisma schema)
 // enum PaymentStatus { PENDING, COMPLETED, FAILED, REFUNDED }
 export type PaymentStatus = 'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED'
 
 // Payment Method Type (from Prisma schema)
-// enum PaymentMethod { STRIPE, CREDIT_CARD, BANK_TRANSFER, PAYMENT_ON_DELIVERY }
-export type PaymentMethod = 'STRIPE' | 'CREDIT_CARD' | 'BANK_TRANSFER' | 'PAYMENT_ON_DELIVERY'
+// enum PaymentMethod { CREDIT_CARD, STRIPE, MERCADO_PAGO, PAYPAL, OXXO, BANK_TRANSFER }
+export type PaymentMethod = 'CREDIT_CARD' | 'STRIPE' | 'MERCADO_PAGO' | 'PAYPAL' | 'OXXO' | 'BANK_TRANSFER'
 
 // Helper to check if a string is a valid UserRole
 export function isValidUserRole(role: unknown): role is UserRole {
