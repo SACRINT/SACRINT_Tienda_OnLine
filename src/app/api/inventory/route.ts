@@ -177,21 +177,12 @@ export async function PATCH(req: NextRequest) {
     const { productId, adjustment, reason } = validation.data
 
     // Verify product exists and belongs to tenant
-    const product = await getProductById(productId)
+    const product = await getProductById(tenantId, productId)
 
     if (!product) {
       return NextResponse.json(
-        { error: 'Product not found' },
+        { error: 'Product not found or does not belong to your tenant' },
         { status: 404 }
-      )
-    }
-
-    if (product.tenantId !== tenantId) {
-      return NextResponse.json(
-        {
-          error: 'Forbidden - Product does not belong to your tenant',
-        },
-        { status: 403 }
       )
     }
 
