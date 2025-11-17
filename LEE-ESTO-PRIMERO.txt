@@ -1,0 +1,182 @@
+================================================================================
+                      ⚠️  LEE ESTO PRIMERO  ⚠️
+================================================================================
+
+Hola arquitecto! Te dejo acá la guía para COMENZAR AHORA MISMO Semana 1.
+
+No te abrumes con tanta documentación. Solo sigue ESTO EN ORDEN:
+
+================================================================================
+PASO 1: AHORA (5 minutos)
+================================================================================
+
+Abre Terminal y ejecuta:
+
+```
+cd "C:\03_Tienda digital"
+npm run build
+```
+
+✅ Si PASA → Continúa a PASO 2
+❌ Si FALLA → Ver SEMANA-1-TROUBLESHOOTING-RAPIDO.md
+
+================================================================================
+PASO 2: AHORA (5 minutos)
+================================================================================
+
+Lee ESTE archivo COMPLETO:
+
+  SEMANA-1-INICIO-RAPIDO.txt
+  (Es el que tienes frente a ti, sigue leyendo)
+
+No necesitas leer nada más por ahora.
+
+================================================================================
+PASO 3: AHORA (Lee siguiente sección)
+================================================================================
+
+Tu ÚNICA tarea HOY es:
+
+1. Crear: src/components/shop/ShopHero.tsx
+2. Crear: src/components/shop/ProductCard.tsx
+3. Crear: src/components/shop/index.ts
+4. npm run build → Debe pasar
+5. Commit al final del día
+
+ESO ES TODO. No hagas más que eso.
+
+================================================================================
+¿DE DÓNDE COPIO LOS CÓDIGOS?
+================================================================================
+
+Archivo: SEMANA-1-CODIGOS-LISTOS.md
+
+Ese archivo tiene:
+
+✅ ShopHero.tsx (copia línea por línea)
+✅ ProductCard.tsx (copia línea por línea)
+✅ ... y más componentes que necesitarás MAÑANA
+
+Hoy SOLO necesitas los primeros 2.
+
+================================================================================
+¿CÓMO COPIO?
+================================================================================
+
+1. Abre: SEMANA-1-CODIGOS-LISTOS.md
+2. Busca: "### 1. ShopHero.tsx"
+3. Copia todo el código (dentro del ```typescript ... ``` block)
+4. Crea archivo: src/components/shop/ShopHero.tsx
+5. Pega el código
+6. npm run build
+7. Repite para ProductCard.tsx
+
+Eso es todo. No hay sorpresas.
+
+================================================================================
+¿SI FALLA npm run build?
+================================================================================
+
+1. LEE: SEMANA-1-TROUBLESHOOTING-RAPIDO.md
+2. Busca tu error específico (ERROR #1, #2, etc.)
+3. Sigue la solución
+4. Recompila: npm run build
+
+Si no encuentras tu error en ese archivo, copia el error completo y avísame.
+
+================================================================================
+¿MAÑANA QUÉ HAGO?
+================================================================================
+
+Mañana lees: SEMANA-1-VERIFICACION-RAPIDA.md
+
+Ese archivo tiene exactamente qué hacer CADA DÍA de la semana.
+
+No lo necesitas hoy. Mañana sí.
+
+================================================================================
+¿TENGO MÁS DUDAS?
+================================================================================
+
+PREGUNTA 1: "¿Cuál es el roadmap general?"
+RESPUESTA: 24-WEEK-ROADMAP-PHASE-2.md
+
+PREGUNTA 2: "¿Cuál es el estándar de código?"
+RESPUESTA: ARCHITECT-INSTRUCTIONS-PHASE-2.md
+
+PREGUNTA 3: "¿Cómo hago un PR?"
+RESPUESTA: Voy a darte instrucciones el viernes
+
+PREGUNTA 4: "npm run build me dice: Cannot find module..."
+RESPUESTA: Sección "Cannot find module" en SEMANA-1-TROUBLESHOOTING-RAPIDO.md
+
+================================================================================
+RESUMEN (ESTO ES TODO LO QUE IMPORTA HOY):
+================================================================================
+
+HOY (Lunes):
+  [ ] npm run build → DEBE PASAR
+  [ ] Crear ShopHero.tsx (copiar de SEMANA-1-CODIGOS-LISTOS.md)
+  [ ] Crear ProductCard.tsx (copiar de SEMANA-1-CODIGOS-LISTOS.md)
+  [ ] Crear index.ts con exports
+  [ ] npm run build → DEBE PASAR
+  [ ] git commit -m "feat(shop): Add ShopHero and ProductCard"
+
+MAÑANA:
+  [ ] Leer SEMANA-1-VERIFICACION-RAPIDA.md
+  [ ] Seguir instrucciones para Martes
+  [ ] ... (ProductGallery.tsx y FilterSidebar.tsx)
+
+VIERNES:
+  [ ] Crear PR #7
+  [ ] Hacer push a GitHub
+  [ ] Esperar code review
+
+================================================================================
+¿ESTÁS LISTO? AQUÍ VA:
+================================================================================
+
+Abre Terminal ahora:
+
+$ npm run build
+
+Si compila OK, copia este comando y ejecútalo:
+
+$ mkdir -p src/components/shop
+
+Luego crea:
+
+$ code src/components/shop/ShopHero.tsx
+
+Y pega el código de SEMANA-1-CODIGOS-LISTOS.md → Sección "### 1. ShopHero.tsx"
+
+Luego:
+
+$ npm run build
+
+Si compila → ¡EXCELENTE! Hiciste tu primer componente.
+
+Repite para ProductCard.tsx.
+
+NO HAGAS NADA MÁS HOY.
+
+================================================================================
+ADELANTE! 🚀
+================================================================================
+
+Tiempo estimado:
+  - ShopHero: 20 minutos
+  - ProductCard: 20 minutos
+  - Index + testing: 20 minutos
+  - TOTAL: ~1 hora
+
+Ese es tu objetivo para hoy.
+
+Mañana continúas con 2 componentes más.
+
+¡Vamos!
+
+================================================================================
+Última actualización: 17 de Noviembre, 2025
+Estado: LISTO PARA COMENZAR
+================================================================================
