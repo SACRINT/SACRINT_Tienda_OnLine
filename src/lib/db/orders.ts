@@ -4,6 +4,7 @@
 import { db } from './client'
 import { ensureTenantAccess } from './tenant'
 import { getCartById, clearCart } from './cart'
+import { validateCoupon, calculateDiscount, incrementCouponUsage } from './coupons'
 import type { Prisma } from '@prisma/client'
 import type { OrderStatus, PaymentStatus, PaymentMethod } from '@/lib/types/user-role'
 
@@ -75,10 +76,10 @@ export async function createOrder(data: {
   await ensureTenantAccess(data.tenantId)
 
   // Get cart with items
-  const cart = await getCartById(data.cartId)
+  const cart = await getCartById(data.tenantId, data.cartId)
 
   if (!cart) {
-    throw new Error('Cart not found')
+    throw new Error('Cart not found or does not belong to tenant')
   }
 
   if (cart.items.length === 0) {
@@ -121,8 +122,41 @@ export async function createOrder(data: {
   // Tax rate 16%
   const tax = subtotal * 0.16
 
-  // Discount from coupon (TODO: implement coupon validation)
-  const discount = 0
+  // Discount from coupon
+  let discount = 0
+  let validatedCoupon = null
+
+  if (data.couponCode) {
+    try {
+      // Validate coupon before applying discount
+      validatedCoupon = await validateCoupon(
+        data.tenantId,
+        data.couponCode,
+        subtotal + shippingCost + tax
+      )
+
+      // Calculate discount amount
+      discount = calculateDiscount(
+        {
+          type: validatedCoupon.type,
+          discount: validatedCoupon.discount,
+          maxDiscount: validatedCoupon.maxDiscount,
+        },
+        subtotal + shippingCost + tax
+      )
+
+      console.log(
+        `[ORDERS] Coupon ${data.couponCode} applied, discount: $${discount.toFixed(2)}`
+      )
+    } catch (error) {
+      console.warn(
+        `[ORDERS] Coupon validation failed for ${data.couponCode}:`,
+        error instanceof Error ? error.message : 'Unknown error'
+      )
+      // Continue without discount if coupon is invalid
+      // The API layer should validate before calling this, but we handle it gracefully
+    }
+  }
 
   const total = subtotal + shippingCost + tax - discount
 
@@ -183,12 +217,26 @@ export async function createOrder(data: {
     `[ORDERS] Created order ${orderNumber} for user ${data.userId}, total: $${total.toFixed(2)}`
   )
 
+  // Increment coupon usage count if coupon was used
+  if (validatedCoupon) {
+    try {
+      await incrementCouponUsage(validatedCoupon.id)
+      console.log(`[ORDERS] Incremented usage count for coupon ${data.couponCode}`)
+    } catch (error) {
+      console.error(
+        `[ORDERS] Failed to increment coupon usage for ${data.couponCode}:`,
+        error
+      )
+      // Don't fail the order if coupon increment fails
+    }
+  }
+
   // Return order with items
   return await getOrderById(order.id, data.tenantId)
 }
 
 /**
- * Gets order by ID with full details
+ * Gets order by ID with full details and tenant validation
  * @param orderId - Order ID
  * @param tenantId - Tenant ID for validation
  * @returns Order with items and addresses
@@ -196,8 +244,11 @@ export async function createOrder(data: {
 export async function getOrderById(orderId: string, tenantId: string) {
   await ensureTenantAccess(tenantId)
 
-  const order = await db.order.findUnique({
-    where: { id: orderId },
+  const order = await db.order.findFirst({
+    where: {
+      id: orderId,
+      tenantId
+    },
     include: {
       items: {
         include: {
@@ -235,15 +286,6 @@ export async function getOrderById(orderId: string, tenantId: string) {
     },
   })
 
-  if (!order) {
-    return null
-  }
-
-  // Verify tenant access
-  if (order.tenantId !== tenantId) {
-    throw new Error('Forbidden - Order does not belong to your tenant')
-  }
-
   return order
 }
 
@@ -269,7 +311,7 @@ export async function getOrdersByUser(
   const limit = filters?.limit || 20
   const skip = (page - 1) * limit
 
-  const where: Prisma.OrderWhereInput = {
+  const where: any = {
     userId,
     tenantId,
     ...(filters?.status && { status: filters.status }),
@@ -340,7 +382,7 @@ export async function getOrdersByTenant(
   const limit = filters.limit || 20
   const skip = (page - 1) * limit
 
-  const where: Prisma.OrderWhereInput = {
+  const where: any = {
     tenantId,
     ...(filters.status && { status: filters.status }),
     ...(filters.paymentStatus && { paymentStatus: filters.paymentStatus }),
@@ -357,10 +399,10 @@ export async function getOrdersByTenant(
   }
 
   // Determine sort order
-  let orderBy: Prisma.OrderOrderByWithRelationInput = { createdAt: 'desc' }
+  let orderBy: any = { createdAt: 'desc' }
 
   if (filters.sort) {
-    const sortMap: Record<string, Prisma.OrderOrderByWithRelationInput> = {
+    const sortMap: Record<string, any> = {
       'date-asc': { createdAt: 'asc' },
       'date-desc': { createdAt: 'desc' },
       'total-asc': { total: 'asc' },

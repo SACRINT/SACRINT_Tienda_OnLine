@@ -197,19 +197,12 @@ export async function POST(req: NextRequest) {
     } = validation.data
 
     // Verify category exists and belongs to tenant
-    const category = await getCategoryById(categoryId)
+    const category = await getCategoryById(tenantId, categoryId)
 
     if (!category) {
       return NextResponse.json(
-        { error: 'Category not found' },
+        { error: 'Category not found or does not belong to your tenant' },
         { status: 404 }
-      )
-    }
-
-    if (category.tenantId !== tenantId) {
-      return NextResponse.json(
-        { error: 'Forbidden - Category does not belong to your tenant' },
-        { status: 403 }
       )
     }
 
@@ -224,7 +217,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Create product with images
-    const product = await createProduct({
+    const product = await createProduct(tenantId, {
       name,
       slug,
       description,
@@ -244,9 +237,6 @@ export async function POST(req: NextRequest) {
       seo: seo || {},
       published,
       featured,
-      tenant: {
-        connect: { id: tenantId },
-      },
       category: {
         connect: { id: categoryId },
       },

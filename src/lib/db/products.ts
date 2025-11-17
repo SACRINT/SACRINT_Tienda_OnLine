@@ -32,7 +32,7 @@ export async function getProducts(
   const skip = (page - 1) * limit
 
   // Build where clause
-  const where: Prisma.ProductWhereInput = {
+  const where: any = {
     tenantId,
     ...(categoryId && { categoryId }),
     ...(search && {
@@ -108,11 +108,18 @@ export async function getProducts(
 }
 
 /**
- * Get product by ID with full details
+ * Get product by ID with full details and tenant validation
+ * @param tenantId - Tenant ID to validate access
+ * @param productId - Product ID to retrieve
  */
-export async function getProductById(productId: string) {
-  return db.product.findUnique({
-    where: { id: productId },
+export async function getProductById(tenantId: string, productId: string) {
+  await ensureTenantAccess(tenantId)
+
+  return db.product.findFirst({
+    where: {
+      id: productId,
+      tenantId
+    },
     include: {
       category: true,
       images: {
@@ -188,13 +195,18 @@ export async function getProductBySlug(tenantId: string, slug: string) {
 }
 
 /**
- * Create new product
+ * Create new product with tenant validation
+ * @param tenantId - Tenant ID to validate access
+ * @param data - Product data to create
  */
-export async function createProduct(data: Prisma.ProductCreateInput) {
-  // Tenant isolation is enforced by passing tenantId in data
+export async function createProduct(tenantId: string, data: any) {
+  await ensureTenantAccess(tenantId)
 
   return db.product.create({
-    data,
+    data: {
+      ...data,
+      tenantId // Explicitly set tenantId
+    },
     include: {
       category: true,
       images: true,
@@ -207,7 +219,7 @@ export async function createProduct(data: Prisma.ProductCreateInput) {
  */
 export async function updateProduct(
   productId: string,
-  data: Prisma.ProductUpdateInput
+  data: any
 ) {
   const product = await db.product.findUnique({
     where: { id: productId },
@@ -300,7 +312,7 @@ export async function getProductsByCategory(
   const limit = options?.limit || 20
   const skip = (page - 1) * limit
 
-  const where: Prisma.ProductWhereInput = {
+  const where: any = {
     tenantId,
     categoryId,
     ...(options?.published !== undefined && { published: options.published }),
@@ -335,7 +347,7 @@ export async function searchProducts(
   const { q, categoryId, minPrice, maxPrice, page, limit } = searchInput
   const skip = (page - 1) * limit
 
-  const where: Prisma.ProductWhereInput = {
+  const where: any = {
     tenantId,
     published: true, // Only search published products
     ...(categoryId && { categoryId }),
@@ -372,21 +384,28 @@ export async function searchProducts(
 }
 
 /**
- * Check product stock availability
+ * Check product stock availability with tenant validation
+ * @param tenantId - Tenant ID to validate access
+ * @param productId - Product ID to check stock
  */
-export async function checkProductStock(productId: string): Promise<{
+export async function checkProductStock(tenantId: string, productId: string): Promise<{
   available: boolean
   stock: number
   reserved: number
   availableStock: number
 }> {
-  const product = await db.product.findUnique({
-    where: { id: productId },
+  await ensureTenantAccess(tenantId)
+
+  const product = await db.product.findFirst({
+    where: {
+      id: productId,
+      tenantId
+    },
     select: { stock: true, reserved: true },
   })
 
   if (!product) {
-    throw new Error('Product not found')
+    throw new Error('Product not found or does not belong to tenant')
   }
 
   const availableStock = product.stock - product.reserved
@@ -400,16 +419,31 @@ export async function checkProductStock(productId: string): Promise<{
 }
 
 /**
- * Reserve stock for order (prevent overselling)
+ * Reserve stock for order with tenant validation (prevent overselling)
+ * @param tenantId - Tenant ID to validate access
+ * @param productId - Product ID to reserve stock
+ * @param quantity - Quantity to reserve
  */
 export async function reserveStock(
+  tenantId: string,
   productId: string,
   quantity: number
 ): Promise<void> {
-  const stockCheck = await checkProductStock(productId)
+  await ensureTenantAccess(tenantId)
+
+  const stockCheck = await checkProductStock(tenantId, productId)
 
   if (stockCheck.availableStock < quantity) {
     throw new Error(`Insufficient stock. Available: ${stockCheck.availableStock}, Requested: ${quantity}`)
+  }
+
+  // Verify product belongs to tenant before updating
+  const product = await db.product.findFirst({
+    where: { id: productId, tenantId }
+  })
+
+  if (!product) {
+    throw new Error('Product not found or does not belong to tenant')
   }
 
   await db.product.update({
@@ -421,12 +455,27 @@ export async function reserveStock(
 }
 
 /**
- * Release reserved stock (e.g., when order is cancelled)
+ * Release reserved stock with tenant validation (e.g., when order is cancelled)
+ * @param tenantId - Tenant ID to validate access
+ * @param productId - Product ID to release stock
+ * @param quantity - Quantity to release
  */
 export async function releaseStock(
+  tenantId: string,
   productId: string,
   quantity: number
 ): Promise<void> {
+  await ensureTenantAccess(tenantId)
+
+  // Verify product belongs to tenant before updating
+  const product = await db.product.findFirst({
+    where: { id: productId, tenantId }
+  })
+
+  if (!product) {
+    throw new Error('Product not found or does not belong to tenant')
+  }
+
   await db.product.update({
     where: { id: productId },
     data: {
@@ -436,12 +485,27 @@ export async function releaseStock(
 }
 
 /**
- * Confirm stock deduction (when order is paid)
+ * Confirm stock deduction with tenant validation (when order is paid)
+ * @param tenantId - Tenant ID to validate access
+ * @param productId - Product ID to deduct stock
+ * @param quantity - Quantity to deduct
  */
 export async function confirmStockDeduction(
+  tenantId: string,
   productId: string,
   quantity: number
 ): Promise<void> {
+  await ensureTenantAccess(tenantId)
+
+  // Verify product belongs to tenant before updating
+  const product = await db.product.findFirst({
+    where: { id: productId, tenantId }
+  })
+
+  if (!product) {
+    throw new Error('Product not found or does not belong to tenant')
+  }
+
   await db.product.update({
     where: { id: productId },
     data: {
@@ -533,12 +597,126 @@ export async function isProductSkuAvailable(
   return false
 }
 
+// ============ PRODUCT IMAGE MANAGEMENT ============
+
+/**
+ * Add image to product
+ * @param tenantId - Tenant ID for validation
+ * @param productId - Product ID
+ * @param imageData - Image data (url, alt, order)
+ */
+export async function addProductImage(
+  tenantId: string,
+  productId: string,
+  imageData: {
+    url: string
+    alt: string
+    order: number
+  }
+) {
+  await ensureTenantAccess(tenantId)
+
+  // Verify product belongs to tenant
+  const product = await db.product.findFirst({
+    where: { id: productId, tenantId },
+  })
+
+  if (!product) {
+    throw new Error('Product not found or does not belong to tenant')
+  }
+
+  // Create image
+  return db.productImage.create({
+    data: {
+      productId,
+      url: imageData.url,
+      alt: imageData.alt,
+      order: imageData.order,
+    },
+  })
+}
+
+/**
+ * Remove image from product
+ * @param tenantId - Tenant ID for validation
+ * @param productId - Product ID
+ * @param imageId - Image ID to remove
+ */
+export async function removeProductImage(
+  tenantId: string,
+  productId: string,
+  imageId: string
+) {
+  await ensureTenantAccess(tenantId)
+
+  // Verify product belongs to tenant
+  const product = await db.product.findFirst({
+    where: { id: productId, tenantId },
+  })
+
+  if (!product) {
+    throw new Error('Product not found or does not belong to tenant')
+  }
+
+  // Verify image belongs to product
+  const image = await db.productImage.findFirst({
+    where: { id: imageId, productId },
+  })
+
+  if (!image) {
+    throw new Error('Image not found or does not belong to product')
+  }
+
+  // Delete image
+  return db.productImage.delete({
+    where: { id: imageId },
+  })
+}
+
+/**
+ * Reorder product images
+ * @param tenantId - Tenant ID for validation
+ * @param productId - Product ID
+ * @param imageOrders - Array of {imageId, order}
+ */
+export async function reorderProductImages(
+  tenantId: string,
+  productId: string,
+  imageOrders: Array<{ imageId: string; order: number }>
+) {
+  await ensureTenantAccess(tenantId)
+
+  // Verify product belongs to tenant
+  const product = await db.product.findFirst({
+    where: { id: productId, tenantId },
+  })
+
+  if (!product) {
+    throw new Error('Product not found or does not belong to tenant')
+  }
+
+  // Update each image's order
+  await db.$transaction(
+    imageOrders.map(({ imageId, order }) =>
+      db.productImage.updateMany({
+        where: {
+          id: imageId,
+          productId,
+        },
+        data: { order },
+      })
+    )
+  )
+
+  console.log(`[PRODUCTS] Reordered ${imageOrders.length} images for product ${productId}`)
+}
+
 // ============ HELPER FUNCTIONS ============
 
 /**
  * Get Prisma orderBy clause from sort parameter
  */
-function getProductOrderBy(sort: string): Prisma.ProductOrderByWithRelationInput | Prisma.ProductOrderByWithRelationInput[] {
+function getProductOrderBy(sort: string): any {
   switch (sort) {
     case 'newest':
       return { createdAt: 'desc' }

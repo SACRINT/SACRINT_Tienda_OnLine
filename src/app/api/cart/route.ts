@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
     const cart = await getOrCreateCart(session.user.id, tenantId)
 
     // Calculate totals
-    const totals = await getCartTotal(cart.id, 99, 0.16)
+    const totals = await getCartTotal(tenantId, cart.id, 99, 0.16)
 
     return NextResponse.json({
       cart: {
@@ -130,6 +130,7 @@ export async function POST(req: NextRequest) {
     // Add item to cart
     try {
       const cartItem = await addItemToCart(
+        tenantId,
         cart.id,
         productId,
         variantId,

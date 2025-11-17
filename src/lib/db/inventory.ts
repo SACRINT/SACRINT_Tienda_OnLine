@@ -6,55 +6,82 @@ import { ensureTenantAccess } from './tenant'
 import type { InventoryReason } from '@/lib/types/user-role'
 
 /**
- * Gets current stock for a product or variant
+ * Gets current stock for a product or variant with tenant validation
+ * @param tenantId - Tenant ID to validate access
  * @param productId - Product ID
  * @param variantId - Optional variant ID
  * @returns Stock quantity
  */
-export async function getProductStock(productId: string, variantId?: string) {
+export async function getProductStock(tenantId: string, productId: string, variantId?: string) {
+  await ensureTenantAccess(tenantId)
+
   if (variantId) {
-    const variant = await db.productVariant.findUnique({
-      where: { id: variantId },
+    const variant = await db.productVariant.findFirst({
+      where: {
+        id: variantId,
+        product: {
+          tenantId
+        }
+      },
       select: { stock: true },
     })
 
     if (!variant) {
-      throw new Error('Variant not found')
+      throw new Error('Variant not found or does not belong to tenant')
     }
 
     return { stock: variant.stock }
   }
 
-  const product = await db.product.findUnique({
-    where: { id: productId },
+  const product = await db.product.findFirst({
+    where: {
+      id: productId,
+      tenantId
+    },
     select: { stock: true },
   })
 
   if (!product) {
-    throw new Error('Product not found')
+    throw new Error('Product not found or does not belong to tenant')
   }
 
   return { stock: product.stock }
 }
 
 /**
- * Creates an inventory reservation for an order
+ * Creates an inventory reservation for an order with tenant validation
  * IMPORTANT: Does NOT deduct stock yet, only creates reservation record
+ * @param tenantId - Tenant ID to validate access
  * @param orderId - Order ID
  * @param items - Array of items to reserve
  * @returns Reservation ID
  */
 export async function reserveInventory(
+  tenantId: string,
   orderId: string,
   items: Array<{ productId: string; variantId?: string; quantity: number }>
 ) {
+  await ensureTenantAccess(tenantId)
+
+  // Verify order belongs to tenant
+  const order = await db.order.findFirst({
+    where: {
+      id: orderId,
+      tenantId
+    }
+  })
+
+  if (!order) {
+    throw new Error('Order not found or does not belong to tenant')
+  }
+
   // Validate all items have sufficient stock
   for (const item of items) {
     if (item.quantity <= 0) {
       throw new Error('Quantity must be positive')
     }
 
-    const stockInfo = await getProductStock(item.productId, item.variantId)
+    const stockInfo = await getProductStock(tenantId, item.productId, item.variantId)
 
     if (stockInfo.stock < item.quantity) {
       throw new Error(
@@ -85,19 +112,34 @@ export async function reserveInventory(
 }
 
 /**
- * Confirms a reservation and deducts stock
+ * Confirms a reservation and deducts stock with tenant validation
  * Uses transaction to ensure atomicity
+ * @param tenantId - Tenant ID to validate access
  * @param reservationId - Reservation ID
  */
-export async function confirmInventoryReservation(reservationId: string) {
-  // Get reservation with items
+export async function confirmInventoryReservation(tenantId: string, reservationId: string) {
+  await ensureTenantAccess(tenantId)
+
+  // Get reservation with items and order
   const reservation = await db.inventoryReservation.findUnique({
     where: { id: reservationId },
-    include: { items: true },
+    include: {
+      items: true,
+      order: {
+        select: {
+          tenantId: true
+        }
+      }
+    },
   })
 
   if (!reservation) {
     throw new Error('Reservation not found')
+  }
+
+  // Verify reservation's order belongs to tenant
+  if (reservation.order.tenantId !== tenantId) {
+    throw new Error('Reservation does not belong to tenant')
   }
 
   if (reservation.status !== 'RESERVED') {
@@ -147,17 +189,32 @@ export async function confirmInventoryReservation(reservationId: string) {
 }
 
 /**
- * Cancels a reservation
+ * Cancels a reservation with tenant validation
  * IMPORTANT: Does NOT restore stock (stock was never deducted)
+ * @param tenantId - Tenant ID to validate access
  * @param reservationId - Reservation ID
  */
-export async function cancelInventoryReservation(reservationId: string) {
+export async function cancelInventoryReservation(tenantId: string, reservationId: string) {
+  await ensureTenantAccess(tenantId)
+
   const reservation = await db.inventoryReservation.findUnique({
     where: { id: reservationId },
+    include: {
+      order: {
+        select: {
+          tenantId: true
+        }
+      }
+    }
   })
 
   if (!reservation) {
     throw new Error('Reservation not found')
+  }
+
+  // Verify reservation's order belongs to tenant
+  if (reservation.order.tenantId !== tenantId) {
+    throw new Error('Reservation does not belong to tenant')
   }
 
   if (reservation.status !== 'RESERVED') {
@@ -304,15 +361,31 @@ export async function getLowStockProducts(
 }
 
 /**
- * Gets inventory change history for a product
+ * Gets inventory change history for a product with tenant validation
+ * @param tenantId - Tenant ID to validate access
  * @param productId - Product ID
  * @param limit - Max number of records (default 50)
  * @returns Inventory logs ordered by date descending
  */
 export async function getInventoryHistory(
+  tenantId: string,
   productId: string,
   limit: number = 50
 ) {
+  await ensureTenantAccess(tenantId)
+
+  // Verify product belongs to tenant
+  const product = await db.product.findFirst({
+    where: {
+      id: productId,
+      tenantId
+    }
+  })
+
+  if (!product) {
+    throw new Error('Product not found or does not belong to tenant')
+  }
+
   const logs = await db.inventoryLog.findMany({
     where: {
       productId,

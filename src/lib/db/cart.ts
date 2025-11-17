@@ -98,12 +98,18 @@ export async function getOrCreateCart(userId: string, tenantId: string) {
 
 /**
  * Gets cart by ID with tenant access validation
+ * @param tenantId - Tenant ID to validate access
  * @param cartId - Cart ID
  * @returns Cart with items or null
  */
-export async function getCartById(cartId: string) {
-  const cart = await db.cart.findUnique({
-    where: { id: cartId },
+export async function getCartById(tenantId: string, cartId: string) {
+  await ensureTenantAccess(tenantId)
+
+  const cart = await db.cart.findFirst({
+    where: {
+      id: cartId,
+      tenantId
+    },
     include: {
       items: {
         include: {
@@ -138,18 +144,12 @@ export async function getCartById(cartId: string) {
     },
   })
 
-  if (!cart) {
-    return null
-  }
-
-  // Ensure tenant access
-  await ensureTenantAccess(cart.tenantId)
-
   return cart
 }
 
 /**
- * Adds or updates an item in the cart
+ * Adds or updates an item in the cart with tenant validation
+ * @param tenantId - Tenant ID to validate access
  * @param cartId - Cart ID
  * @param productId - Product ID
  * @param variantId - Optional variant ID
@@ -157,16 +157,19 @@ export async function getCartById(cartId: string) {
  * @returns Updated cart item
  */
 export async function addItemToCart(
+  tenantId: string,
   cartId: string,
   productId: string,
   variantId: string | null | undefined,
   quantity: number
 ) {
+  await ensureTenantAccess(tenantId)
+
   // Get cart and validate tenant access
-  const cart = await getCartById(cartId)
+  const cart = await getCartById(tenantId, cartId)
 
   if (!cart) {
-    throw new Error('Cart not found')
+    throw new Error('Cart not found or does not belong to tenant')
   }
 
   // Validate quantity
@@ -201,7 +204,7 @@ export async function addItemToCart(
     const variant = product.variants[0]
     availableStock = variant.stock
   } else {
-    const stockInfo = await checkProductStock(productId)
+    const stockInfo = await checkProductStock(tenantId, productId)
     availableStock = stockInfo.availableStock
   }
 
@@ -297,21 +300,30 @@ export async function addItemToCart(
 }
 
 /**
- * Updates quantity of a cart item
+ * Updates quantity of a cart item with tenant validation
+ * @param tenantId - Tenant ID to validate access
  * @param cartItemId - Cart item ID
  * @param quantity - New quantity
  * @returns Updated cart item
  */
 export async function updateCartItemQuantity(
+  tenantId: string,
   cartItemId: string,
   quantity: number
 ) {
+  await ensureTenantAccess(tenantId)
+
   if (quantity <= 0) {
     throw new Error('Quantity must be positive. Use removeCartItem to delete.')
   }
 
-  const cartItem = await db.cartItem.findUnique({
-    where: { id: cartItemId },
+  const cartItem = await db.cartItem.findFirst({
+    where: {
+      id: cartItemId,
+      cart: {
+        tenantId
+      }
+    },
     include: {
       cart: true,
       product: true,
@@ -320,11 +332,8 @@ export async function updateCartItemQuantity(
   })
 
   if (!cartItem) {
-    throw new Error('Cart item not found')
+    throw new Error('Cart item not found or does not belong to tenant')
   }
-
-  // Validate tenant access
-  await ensureTenantAccess(cartItem.cart.tenantId)
 
   // Check stock availability
   let availableStock: number
@@ -332,7 +341,7 @@ export async function updateCartItemQuantity(
   if (cartItem.variant) {
     availableStock = cartItem.variant.stock
   } else {
-    const stockInfo = await checkProductStock(cartItem.productId)
+    const stockInfo = await checkProductStock(tenantId, cartItem.productId)
     availableStock = stockInfo.availableStock
   }
 
@@ -394,14 +403,17 @@ export async function removeCartItem(cartItemId: string) {
 }
 
 /**
- * Clears all items from a cart
+ * Clears all items from a cart with tenant validation
+ * @param tenantId - Tenant ID to validate access
  * @param cartId - Cart ID
  */
-export async function clearCart(cartId: string) {
-  const cart = await getCartById(cartId)
+export async function clearCart(tenantId: string, cartId: string) {
+  await ensureTenantAccess(tenantId)
+
+  const cart = await getCartById(tenantId, cartId)
 
   if (!cart) {
-    throw new Error('Cart not found')
+    throw new Error('Cart not found or does not belong to tenant')
   }
 
   await db.cartItem.deleteMany({
@@ -412,21 +424,25 @@ export async function clearCart(cartId: string) {
 }
 
 /**
- * Calculates cart total with tax and shipping
+ * Calculates cart total with tax and shipping and tenant validation
+ * @param tenantId - Tenant ID to validate access
  * @param cartId - Cart ID
  * @param shippingCost - Shipping cost (default 0)
  * @param taxRate - Tax rate as decimal (default 0.16 = 16%)
  * @returns Cart totals breakdown
  */
 export async function getCartTotal(
+  tenantId: string,
   cartId: string,
   shippingCost: number = 0,
   taxRate: number = 0.16
 ) {
-  const cart = await getCartById(cartId)
+  await ensureTenantAccess(tenantId)
+
+  const cart = await getCartById(tenantId, cartId)
 
   if (!cart) {
-    throw new Error('Cart not found')
+    throw new Error('Cart not found or does not belong to tenant')
   }
 
   // Calculate subtotal from cart items
@@ -455,19 +471,22 @@ export async function getCartTotal(
 }
 
 /**
- * Validates cart before checkout
+ * Validates cart before checkout with tenant validation
  * Checks:
  * - All products still exist and are published
  * - All products have sufficient stock
  * - Prices haven't changed significantly (>10%)
+ * @param tenantId - Tenant ID to validate access
  * @param cartId - Cart ID
  * @returns Validation result with warnings
  */
-export async function validateCartBeforeCheckout(cartId: string) {
-  const cart = await getCartById(cartId)
+export async function validateCartBeforeCheckout(tenantId: string, cartId: string) {
+  await ensureTenantAccess(tenantId)
+
+  const cart = await getCartById(tenantId, cartId)
 
   if (!cart) {
-    throw new Error('Cart not found')
+    throw new Error('Cart not found or does not belong to tenant')
   }
 
   if (cart.items.length === 0) {
@@ -509,7 +528,7 @@ export async function validateCartBeforeCheckout(cartId: string) {
         currentPrice = Number(variant.price)
       }
     } else {
-      const stockInfo = await checkProductStock(product.id)
+      const stockInfo = await checkProductStock(tenantId, product.id)
       availableStock = stockInfo.availableStock
     }
 

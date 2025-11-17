@@ -4,6 +4,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { confirmInventoryReservation } from '@/lib/db/inventory'
 import { ConfirmReservationSchema } from '@/lib/security/schemas/review-schemas'
+import { db } from '@/lib/db/client'
 
 /**
  * POST /api/inventory/confirm
@@ -39,9 +40,28 @@ export async function POST(req: NextRequest) {
 
     const { reservationId } = validation.data
 
+    // Get reservation to extract tenantId (needed for tenant isolation)
+    const reservation = await db.inventoryReservation.findUnique({
+      where: { id: reservationId },
+      include: {
+        order: {
+          select: { tenantId: true }
+        }
+      }
+    })
+
+    if (!reservation) {
+      return NextResponse.json(
+        { error: 'Reservation not found' },
+        { status: 404 }
+      )
+    }
+
+    const tenantId = reservation.order.tenantId
+
     // Confirm the reservation (deducts stock in transaction)
     try {
-      await confirmInventoryReservation(reservationId)
+      await confirmInventoryReservation(tenantId, reservationId)
 
       console.log(
         `[INVENTORY] Confirmed reservation ${reservationId} - stock deducted`

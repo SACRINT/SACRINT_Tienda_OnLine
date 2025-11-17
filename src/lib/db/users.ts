@@ -4,13 +4,21 @@
 import { db } from './client'
 import { Prisma } from '@prisma/client'
 import { USER_ROLES, type UserRole } from '@/lib/types/user-role'
+import { ensureTenantAccess } from './tenant'
 
 /**
- * Get user by ID
+ * Get user by ID with tenant validation
+ * @param tenantId - Tenant ID to validate access
+ * @param userId - User ID to retrieve
  */
-export async function getUserById(userId: string) {
-  return db.user.findUnique({
-    where: { id: userId },
+export async function getUserById(tenantId: string, userId: string) {
+  await ensureTenantAccess(tenantId)
+
+  return db.user.findFirst({
+    where: {
+      id: userId,
+      tenantId
+    },
     include: {
       tenant: true,
       accounts: true,
@@ -19,11 +27,18 @@ export async function getUserById(userId: string) {
 }
 
 /**
- * Get user by email (uses findFirst due to composite unique constraint email_tenantId)
+ * Get user by email within tenant (uses findFirst due to composite unique constraint email_tenantId)
+ * @param tenantId - Tenant ID to validate access
+ * @param email - User email to search
  */
-export async function getUserByEmail(email: string) {
+export async function getUserByEmail(tenantId: string, email: string) {
+  await ensureTenantAccess(tenantId)
+
   return db.user.findFirst({
-    where: { email },
+    where: {
+      email,
+      tenantId
+    },
     include: {
       tenant: true,
     },
@@ -54,12 +69,30 @@ export async function createUser(data: {
 }
 
 /**
- * Update user
+ * Update user with tenant validation
+ * @param tenantId - Tenant ID to validate access
+ * @param userId - User ID to update
+ * @param data - Update data
  */
 export async function updateUser(
+  tenantId: string,
   userId: string,
-  data: Prisma.UserUpdateInput
+  data: any
 ) {
+  await ensureTenantAccess(tenantId)
+
+  // Verify user belongs to tenant before updating
+  const user = await db.user.findFirst({
+    where: {
+      id: userId,
+      tenantId
+    }
+  })
+
+  if (!user) {
+    throw new Error('User not found or does not belong to tenant')
+  }
+
   return db.user.update({
     where: { id: userId },
     data,
@@ -67,9 +100,25 @@ export async function updateUser(
 }
 
 /**
- * Delete user
+ * Delete user with tenant validation
+ * @param tenantId - Tenant ID to validate access
+ * @param userId - User ID to delete
  */
-export async function deleteUser(userId: string) {
+export async function deleteUser(tenantId: string, userId: string) {
+  await ensureTenantAccess(tenantId)
+
+  // Verify user belongs to tenant before deleting
+  const user = await db.user.findFirst({
+    where: {
+      id: userId,
+      tenantId
+    }
+  })
+
+  if (!user) {
+    throw new Error('User not found or does not belong to tenant')
+  }
+
   return db.user.delete({
     where: { id: userId },
   })
@@ -77,8 +126,11 @@ export async function deleteUser(userId: string) {
 
 /**
  * Get all users for a tenant
+ * @param tenantId - Tenant ID to validate access
  */
 export async function getUsersByTenant(tenantId: string) {
+  await ensureTenantAccess(tenantId)
+
   return db.user.findMany({
     where: { tenantId },
     select: {
@@ -95,17 +147,37 @@ export async function getUsersByTenant(tenantId: string) {
 
 /**
  * Count users by tenant
+ * @param tenantId - Tenant ID to validate access
  */
 export async function countUsersByTenant(tenantId: string) {
+  await ensureTenantAccess(tenantId)
+
   return db.user.count({
     where: { tenantId },
   })
 }
 
 /**
- * Update user role (RBAC)
+ * Update user role (RBAC) with tenant validation
+ * @param tenantId - Tenant ID to validate access
+ * @param userId - User ID to update role
+ * @param role - New role to assign
  */
-export async function updateUserRole(userId: string, role: UserRole) {
+export async function updateUserRole(tenantId: string, userId: string, role: UserRole) {
+  await ensureTenantAccess(tenantId)
+
+  // Verify user belongs to tenant before updating role
+  const user = await db.user.findFirst({
+    where: {
+      id: userId,
+      tenantId
+    }
+  })
+
+  if (!user) {
+    throw new Error('User not found or does not belong to tenant')
+  }
+
   return db.user.update({
     where: { id: userId },
     data: { role },
