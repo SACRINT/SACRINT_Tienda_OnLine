@@ -52,7 +52,7 @@ export async function PATCH(
     const { quantity } = validation.data
 
     try {
-      const cartItem = await updateCartItemQuantity(itemId, quantity)
+      const cartItem = await updateCartItemQuantity(tenantId, itemId, quantity)
 
       console.log(
         `[CART] Updated item ${itemId} quantity to ${quantity}`
