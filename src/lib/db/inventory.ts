@@ -3,7 +3,7 @@
 
 import { db } from './client'
 import { ensureTenantAccess } from './tenant'
-import type { InventoryReason } from '@prisma/client'
+import type { InventoryReason } from '@/lib/types/user-role'
 
 /**
  * Gets current stock for a product or variant
