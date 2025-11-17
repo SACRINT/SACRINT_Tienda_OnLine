@@ -332,3 +332,146 @@ export async function getOrdersInPeriod(tenantId: string, startDate: Date, endDa
     },
   })
 }
+
+// ============================================
+// COUPON REPORTS
+// ============================================
+
+export async function getCouponReports(
+  tenantId: string,
+  startDate: Date,
+  endDate: Date
+) {
+  const orders = await db.order.findMany({
+    where: {
+      tenantId,
+      createdAt: {
+        gte: startDate,
+        lte: endDate,
+      },
+      couponId: {
+        not: null,
+      },
+    },
+    include: {
+      coupon: true,
+    },
+  })
+
+  // Aggregate by coupon
+  const couponMap = new Map<string, {
+    code: string
+    type: 'PERCENTAGE' | 'FIXED_AMOUNT'
+    value: number
+    timesUsed: number
+    totalDiscount: number
+    revenueGenerated: number
+  }>()
+
+  orders.forEach((order) => {
+    if (order.coupon) {
+      const existing = couponMap.get(order.couponId!) || {
+        code: order.coupon.code,
+        type: order.coupon.type as 'PERCENTAGE' | 'FIXED_AMOUNT',
+        value: order.coupon.value,
+        timesUsed: 0,
+        totalDiscount: 0,
+        revenueGenerated: 0,
+      }
+      existing.timesUsed += 1
+      existing.totalDiscount += order.discount || 0
+      existing.revenueGenerated += order.total
+      couponMap.set(order.couponId!, existing)
+    }
+  })
+
+  return Array.from(couponMap.entries()).map(([couponId, data]) => ({
+    couponId,
+    code: data.code,
+    type: data.type,
+    value: data.value,
+    timesUsed: data.timesUsed,
+    totalDiscount: data.totalDiscount,
+    revenueImpact: data.revenueGenerated,
+    roi: data.totalDiscount > 0 ? (data.revenueGenerated / data.totalDiscount) : 0,
+  }))
+}
+
+// ============================================
+// TAX REPORTS
+// ============================================
+
+export async function getTaxReports(
+  tenantId: string,
+  startDate: Date,
+  endDate: Date
+) {
+  const orders = await db.order.findMany({
+    where: {
+      tenantId,
+      createdAt: {
+        gte: startDate,
+        lte: endDate,
+      },
+    },
+    include: {
+      shippingAddress: true,
+    },
+  })
+
+  // Aggregate by state
+  const taxByState = new Map<string, { totalTax: number; orders: number }>()
+
+  orders.forEach((order) => {
+    const state = order.shippingAddress?.state || 'Unknown'
+    const existing = taxByState.get(state) || { totalTax: 0, orders: 0 }
+    existing.totalTax += order.tax || 0
+    existing.orders += 1
+    taxByState.set(state, existing)
+  })
+
+  return Array.from(taxByState.entries()).map(([state, data]) => ({
+    state,
+    totalTax: data.totalTax,
+    orders: data.orders,
+    taxRate: data.orders > 0 ? (data.totalTax / data.orders) : 0,
+  }))
+}
+
+// ============================================
+// SHIPPING REPORTS
+// ============================================
+
+export async function getShippingReports(
+  tenantId: string,
+  startDate: Date,
+  endDate: Date
+) {
+  const orders = await db.order.findMany({
+    where: {
+      tenantId,
+      createdAt: {
+        gte: startDate,
+        lte: endDate,
+      },
+    },
+  })
+
+  // Aggregate by shipping method
+  const shippingByMethod = new Map<string, { timesUsed: number; totalCost: number }>()
+
+  orders.forEach((order) => {
+    const method = order.shippingMethod || 'Standard'
+    const existing = shippingByMethod.get(method) || { timesUsed: 0, totalCost: 0 }
+    existing.timesUsed += 1
+    existing.totalCost += order.shippingCost || 0
+    shippingByMethod.set(method, existing)
+  })
+
+  return Array.from(shippingByMethod.entries()).map(([method, data]) => ({
+    method,
+    timesUsed: data.timesUsed,
+    totalCost: data.totalCost,
+    avgCost: data.timesUsed > 0 ? data.totalCost / data.timesUsed : 0,
+  }))
+}
