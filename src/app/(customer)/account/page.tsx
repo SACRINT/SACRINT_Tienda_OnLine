@@ -103,7 +103,7 @@ export default function AccountDashboardPage() {
             Welcome back, {user.name.split(' ')[0]}!
           </h1>
           <p className="mt-2 text-gray-600">
-            Here's an overview of your account activity
+            Here&apos;s an overview of your account activity
           </p>
         </div>
 

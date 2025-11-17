@@ -28,7 +28,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
   const imageRef = useRef<HTMLDivElement>(null)
 
   // Calcular distancia entre dos puntos táctiles para pinch-to-zoom
-  const getDistance = (touch1: Touch, touch2: Touch) => {
+  const getDistance = (touch1: React.Touch, touch2: React.Touch) => {
     const dx = touch1.clientX - touch2.clientX
     const dy = touch1.clientY - touch2.clientY
     return Math.sqrt(dx * dx + dy * dy)

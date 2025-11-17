@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import Image from 'next/image'
 import { ChevronLeft, ChevronRight, X, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -31,22 +31,22 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
   const imageRef = useRef<HTMLDivElement>(null)
 
   // Calcular distancia entre dos puntos táctiles para pinch-to-zoom
-  const getDistance = (touch1: Touch, touch2: Touch) => {
+  const getDistance = (touch1: React.Touch, touch2: React.Touch) => {
     const dx = touch1.clientX - touch2.clientX
     const dy = touch1.clientY - touch2.clientY
     return Math.sqrt(dx * dx + dy * dy)
   }
 
   // Navegación entre imágenes
-  const goToNext = () => {
+  const goToNext = useCallback(() => {
     setCurrentIndex((prev) => (prev + 1) % images.length)
     resetZoom()
-  }
+  }, [images.length])
 
-  const goToPrevious = () => {
+  const goToPrevious = useCallback(() => {
     setCurrentIndex((prev) => (prev - 1 + images.length) % images.length)
     resetZoom()
-  }
+  }, [images.length])
 
   const goToImage = (index: number) => {
     setCurrentIndex(index)
@@ -143,7 +143,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [isFullscreen])
+  }, [isFullscreen, goToPrevious, goToNext])
 
   // Prevenir scroll del body cuando está en fullscreen
   useEffect(() => {

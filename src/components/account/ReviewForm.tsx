@@ -2,6 +2,7 @@
 // Submit product review with rating, title, and comment
 
 'use client'
+import Image from 'next/image'
 
 import { useState } from 'react'
 import { Star, X, Send, AlertCircle } from 'lucide-react'
@@ -113,9 +114,11 @@ export function ReviewForm({
       {(productName || productImage) && (
         <div className="flex items-center gap-4 rounded-lg bg-gray-50 p-4">
           {productImage && (
-            <img
+            <Image
               src={productImage}
-              alt={productName}
+              alt={productName || 'Product image'}
+              width={64}
+              height={64}
               className="h-16 w-16 rounded-lg object-cover"
             />
           )}

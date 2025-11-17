@@ -1,6 +1,7 @@
 'use client'
 
 import { Suspense, ComponentType, lazy } from 'react'
+import Image from 'next/image'
 import { Loader2 } from 'lucide-react'
 
 interface LazyLoadProps {
@@ -91,8 +92,8 @@ export function LazyImage({
   src,
   alt,
   className,
-  width,
-  height,
+  width = 500,
+  height = 500,
   onLoad,
 }: {
   src: string
@@ -103,14 +104,13 @@ export function LazyImage({
   onLoad?: () => void
 }) {
   return (
-    <img
+    <Image
       src={src}
       alt={alt}
       className={className}
       width={width}
       height={height}
       loading="lazy"
-      decoding="async"
       onLoad={onLoad}
     />
   )

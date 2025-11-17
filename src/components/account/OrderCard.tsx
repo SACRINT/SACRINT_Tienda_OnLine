@@ -2,6 +2,7 @@
 // Display order summary with status, items, and actions
 
 'use client'
+import Image from 'next/image'
 
 import { useState } from 'react'
 import Link from 'next/link'
@@ -202,7 +203,7 @@ export function OrderCard({
                 className="flex items-center gap-4 rounded-lg border border-gray-200 p-3"
               >
                 {item.productImage ? (
-                  <img
+                  <Image
                     src={item.productImage}
                     alt={item.productName}
                     className="h-16 w-16 rounded-lg object-cover"

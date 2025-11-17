@@ -2,6 +2,7 @@
 // Real-time search with autocomplete suggestions
 
 'use client'
+import Image from 'next/image'
 
 import { useState, useEffect, useRef } from 'react'
 import { Search, X, TrendingUp, Clock } from 'lucide-react'
@@ -178,7 +179,7 @@ export function SearchAutocomplete({
                   onClick={() => setIsOpen(false)}
                 >
                   {suggestion.image && (
-                    <img
+                    <Image
                       src={suggestion.image}
                       alt={suggestion.name}
                       className="h-12 w-12 rounded-lg object-cover"

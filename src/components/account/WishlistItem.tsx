@@ -2,6 +2,7 @@
 // Display wishlist product with actions (add to cart, remove)
 
 'use client'
+import Image from 'next/image'
 
 import { useState } from 'react'
 import Link from 'next/link'
@@ -95,7 +96,7 @@ export function WishlistItem({
           className="flex-shrink-0"
         >
           {item.productImage ? (
-            <img
+            <Image
               src={item.productImage}
               alt={item.productName}
               className="h-24 w-24 rounded-lg object-cover transition-transform hover:scale-105 sm:h-32 sm:w-32"

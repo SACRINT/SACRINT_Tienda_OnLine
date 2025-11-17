@@ -26,7 +26,7 @@ export const LazyOrderSummary = lazy(
 
 // Re-exportar tipos
 export type { CheckoutWizardProps, CheckoutData, StepConfig } from './CheckoutWizard'
-export type { AddressSelectorProps, Address } from './AddressSelector'
+export type { AddressSelectorProps } from './AddressSelector'
 export type { ShippingMethodProps, ShippingOption } from './ShippingMethod'
-export type { PaymentFormProps, PaymentMethod } from './PaymentForm'
+export type { PaymentFormProps } from './PaymentForm'
 export type { OrderSummaryProps } from './OrderSummary'

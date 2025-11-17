@@ -2,6 +2,7 @@
 // Stripe Elements integration for payment processing
 
 'use client'
+import Image from 'next/image'
 
 import { useState } from 'react'
 import {
@@ -297,7 +298,7 @@ export function PaymentForm({
               <span className="text-sm text-gray-700">PCI Compliant</span>
             </div>
             <div className="flex items-center gap-2">
-              <img
+              <Image
                 src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg"
                 alt="Stripe"
                 className="h-5"
@@ -323,7 +324,7 @@ export function PaymentForm({
               Pay with PayPal
             </h3>
             <p className="mt-2 text-sm text-gray-600">
-              You'll be redirected to PayPal to complete your purchase
+              You&apos;ll be redirected to PayPal to complete your purchase
             </p>
             <button className="mt-6 inline-flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-blue-700">
               Continue to PayPal

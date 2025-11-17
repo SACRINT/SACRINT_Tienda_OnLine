@@ -238,7 +238,7 @@ export default function WishlistPage() {
               <li>• Items in your wishlist are not reserved - add to cart to secure them</li>
               <li>• Share your wishlist with friends and family for gift ideas</li>
               <li>• Get notified when wishlist items go on sale (coming soon)</li>
-              <li>• Wishlist items stay saved across devices when you're signed in</li>
+              <li>• Wishlist items stay saved across devices when you&apos;re signed in</li>
             </ul>
           </div>
         )}

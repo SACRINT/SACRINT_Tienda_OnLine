@@ -2,6 +2,7 @@
 // Displays product reviews with ratings, pagination, and sorting
 
 'use client'
+import Image from 'next/image'
 
 import { useState } from 'react'
 import { Star, ThumbsUp, VerifiedIcon, ChevronDown } from 'lucide-react'
@@ -148,7 +149,7 @@ export function ProductReviews({
                 {/* User Avatar */}
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-200 text-lg font-bold text-gray-600">
                   {review.userImage ? (
-                    <img
+                    <Image
                       src={review.userImage}
                       alt={review.userName}
                       className="h-full w-full rounded-full object-cover"

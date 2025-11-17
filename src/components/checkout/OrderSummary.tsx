@@ -2,6 +2,7 @@
 // Final review of order before placing
 
 'use client'
+import Image from 'next/image'
 
 import { Package, MapPin, Truck, CreditCard, Tag, Edit2 } from 'lucide-react'
 import type { Address } from '@/components/account'
@@ -65,7 +66,7 @@ export function OrderSummary({
           {items.map((item) => (
             <div key={item.id} className="flex gap-4 px-6 py-4">
               {item.productImage ? (
-                <img
+                <Image
                   src={item.productImage}
                   alt={item.productName}
                   className="h-20 w-20 rounded-lg object-cover"

@@ -70,7 +70,7 @@ export function AddressSelector({
           Select Shipping Address
         </h2>
         <p className="mt-1 text-sm text-gray-600">
-          Choose where you'd like your order delivered
+          Choose where you&apos;d like your order delivered
         </p>
       </div>
 

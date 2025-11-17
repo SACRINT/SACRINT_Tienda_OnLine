@@ -38,7 +38,7 @@ export function ShippingMethod({
           Choose Shipping Method
         </h2>
         <p className="mt-1 text-sm text-gray-600">
-          Select how fast you'd like to receive your order
+          Select how fast you&apos;d like to receive your order
         </p>
       </div>
 

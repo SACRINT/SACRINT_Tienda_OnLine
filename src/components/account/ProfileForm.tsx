@@ -2,6 +2,7 @@
 // Edit user profile information (name, email, phone, etc.)
 
 'use client'
+import Image from 'next/image'
 
 import { useState } from 'react'
 import { User, Mail, Phone, Calendar, Upload, Save, X } from 'lucide-react'
@@ -139,7 +140,7 @@ export function ProfileForm({
         <div className="mt-2 flex items-center gap-6">
           <div className="relative">
             {imagePreview ? (
-              <img
+              <Image
                 src={imagePreview}
                 alt="Profile preview"
                 className="h-24 w-24 rounded-full object-cover"

@@ -2,6 +2,7 @@
 // Submit return/refund request for orders
 
 'use client'
+import Image from 'next/image'
 
 import { useState } from 'react'
 import { Package, Upload, X, Send, AlertCircle } from 'lucide-react'
@@ -176,7 +177,7 @@ export function RefundRequest({
                 className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
               />
               {item.productImage ? (
-                <img
+                <Image
                   src={item.productImage}
                   alt={item.productName}
                   className="h-16 w-16 rounded-lg object-cover"
@@ -312,7 +313,7 @@ export function RefundRequest({
           <div className="mt-4 grid grid-cols-3 gap-4 sm:grid-cols-4">
             {images.map((img, index) => (
               <div key={index} className="relative">
-                <img
+                <Image
                   src={img}
                   alt={`Upload ${index + 1}`}
                   className="h-24 w-24 rounded-lg object-cover"

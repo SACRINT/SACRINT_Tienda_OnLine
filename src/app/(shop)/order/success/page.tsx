@@ -61,7 +61,7 @@ export default function OrderSuccessPage({
 
         {/* What's Next */}
         <div className="mt-8 rounded-lg bg-blue-50 p-6">
-          <h3 className="font-semibold text-blue-900">What's Next?</h3>
+          <h3 className="font-semibold text-blue-900">What&apos;s Next?</h3>
           <ul className="mt-4 space-y-3 text-sm text-blue-800">
             <li className="flex items-start gap-3">
               <Mail className="mt-0.5 h-5 w-5 flex-shrink-0" />
@@ -79,7 +79,7 @@ export default function OrderSuccessPage({
             <li className="flex items-start gap-3">
               <CheckCircle className="mt-0.5 h-5 w-5 flex-shrink-0" />
               <span>
-                You'll receive a tracking number once your order ships
+                You&apos;ll receive a tracking number once your order ships
               </span>
             </li>
           </ul>

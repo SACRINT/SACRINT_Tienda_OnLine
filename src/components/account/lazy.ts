@@ -23,7 +23,7 @@ export const LazyRefundRequest = lazy(
 // Re-exportar tipos para mantener compatibilidad
 export type {
   OrderCardProps,
-  OrderStatus,
+  
   Order,
 } from './OrderCard'
 

@@ -2,6 +2,7 @@
 // Sidebar navigation layout for customer account pages
 
 'use client'
+import Image from 'next/image'
 
 import { ReactNode } from 'react'
 import Link from 'next/link'
@@ -105,7 +106,7 @@ export function AccountLayout({ children, user }: AccountLayoutProps) {
                 <div className="border-b border-gray-200 p-6">
                   <div className="flex items-center gap-4">
                     {user.image ? (
-                      <img
+                      <Image
                         src={user.image}
                         alt={user.name}
                         className="h-16 w-16 rounded-full object-cover"

@@ -266,7 +266,7 @@ export default function CartPage() {
                     <div className="flex items-center gap-2">
                       <Tag className="h-4 w-4 text-green-600" />
                       <span className="text-sm font-medium text-green-900">
-                        Coupon "{appliedCoupon.code}" applied
+                        Coupon &quot;{appliedCoupon.code}&quot; applied
                       </span>
                     </div>
                     <button
