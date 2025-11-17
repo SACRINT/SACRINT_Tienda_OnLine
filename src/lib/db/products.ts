@@ -714,6 +714,102 @@ export async function reorderProductImages(
 // ============ HELPER FUNCTIONS ============
 
 /**
+ * Get related products based on category, tags, and price
+ * @param tenantId - Tenant ID for validation
+ * @param productId - Product ID to find related products for
+ * @param limit - Maximum number of related products to return (default 6)
+ */
+export async function getRelatedProducts(
+  tenantId: string,
+  productId: string,
+  limit: number = 6
+) {
+  await ensureTenantAccess(tenantId)
+
+  // Get the source product
+  const product = await db.product.findFirst({
+    where: {
+      id: productId,
+      tenantId,
+    },
+    select: {
+      categoryId: true,
+      basePrice: true,
+      tags: true,
+    },
+  })
+
+  if (!product) {
+    throw new Error('Product not found or does not belong to tenant')
+  }
+
+  // Build scoring query - products are ranked by:
+  // 1. Same category (highest priority)
+  // 2. Similar price range (±30%)
+  // 3. Overlapping tags
+  const priceMin = product.basePrice * 0.7
+  const priceMax = product.basePrice * 1.3
+
+  const relatedProducts = await db.product.findMany({
+    where: {
+      tenantId,
+      published: true,
+      id: { not: productId }, // Exclude the current product
+      OR: [
+        // Same category
+        {
+          categoryId: product.categoryId,
+        },
+        // Similar price range
+        {
+          basePrice: {
+            gte: priceMin,
+            lte: priceMax,
+          },
+        },
+        // Overlapping tags
+        ...(product.tags && product.tags.length > 0
+          ? [
+              {
+                tags: {
+                  hasSome: product.tags,
+                },
+              },
+            ]
+          : []),
+      ],
+    },
+    include: {
+      category: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+        },
+      },
+      images: {
+        orderBy: { order: 'asc' },
+        take: 1,
+      },
+      _count: {
+        select: { reviews: true },
+      },
+    },
+    orderBy: [
+      // Prioritize same category
+      { categoryId: product.categoryId ? 'asc' : 'desc' },
+      // Then featured products
+      { featured: 'desc' },
+      // Then by creation date
+      { createdAt: 'desc' },
+    ],
+    take: limit,
+  })
+
+  return relatedProducts
+}
+
+/**
  * Get Prisma orderBy clause from sort parameter
  */
 function getProductOrderBy(sort: string): any {
