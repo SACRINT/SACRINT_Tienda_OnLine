@@ -43,20 +43,12 @@ export async function GET(
 
     const categoryId = params.id
 
-    const category = await getCategoryById(categoryId)
+    const category = await getCategoryById(tenantId, categoryId)
 
     if (!category) {
       return NextResponse.json(
-        { error: 'Category not found' },
+        { error: 'Category not found or does not belong to your tenant' },
         { status: 404 }
-      )
-    }
-
-    // Verify category belongs to user's tenant
-    if (category.tenantId !== tenantId) {
-      return NextResponse.json(
-        { error: 'Forbidden - Category does not belong to your tenant' },
-        { status: 403 }
       )
     }
 
