@@ -12,7 +12,7 @@ import {
   isCategorySlugAvailable
 } from '@/lib/db/categories'
 import { UpdateCategorySchema } from '@/lib/security/schemas/product-schemas'
-import { UserRole } from '@prisma/client'
+import { USER_ROLES } from '@/lib/types/user-role'
 
 /**
  * GET /api/categories/[id]
@@ -126,7 +126,7 @@ export async function PATCH(
     }
 
     // Check if user has permission to update categories
-    if (role !== UserRole.STORE_OWNER && role !== UserRole.SUPER_ADMIN) {
+    if (role !== USER_ROLES.STORE_OWNER && role !== USER_ROLES.SUPER_ADMIN) {
       return NextResponse.json(
         { error: 'Forbidden - Only STORE_OWNER or SUPER_ADMIN can update categories' },
         { status: 403 }
@@ -249,7 +249,7 @@ export async function DELETE(
     }
 
     // Check if user has permission to delete categories
-    if (role !== UserRole.STORE_OWNER && role !== UserRole.SUPER_ADMIN) {
+    if (role !== USER_ROLES.STORE_OWNER && role !== USER_ROLES.SUPER_ADMIN) {
       return NextResponse.json(
         { error: 'Forbidden - Only STORE_OWNER or SUPER_ADMIN can delete categories' },
         { status: 403 }

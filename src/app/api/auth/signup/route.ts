@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db/client'
 import { z } from 'zod'
 import bcrypt from 'bcryptjs'
-import { UserRole } from '@prisma/client'
+import { USER_ROLES } from '@/lib/types/user-role'
 
 // Validation schema
 const SignupSchema = z.object({
@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
           password: hashedPassword,
           name,
           tenantId: tenant.id,
-          role: UserRole.STORE_OWNER, // First user becomes STORE_OWNER
+          role: USER_ROLES.STORE_OWNER, // First user becomes STORE_OWNER
         },
         select: {
           id: true,

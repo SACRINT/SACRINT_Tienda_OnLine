@@ -2,7 +2,8 @@
 // Reusable database operations for user management
 
 import { db } from './client'
-import { UserRole, Prisma } from '@prisma/client'
+import { Prisma } from '@prisma/client'
+import { USER_ROLES, type UserRole } from '@/lib/types/user-role'
 
 /**
  * Get user by ID
@@ -46,7 +47,7 @@ export async function createUser(data: {
       name: data.name,
       password: data.password,
       tenantId: data.tenantId,
-      role: data.role || UserRole.CUSTOMER,
+      role: data.role || USER_ROLES.CUSTOMER,
       image: data.image,
     },
   })
@@ -116,9 +117,9 @@ export async function updateUserRole(userId: string, role: UserRole) {
  */
 export function hasPermission(userRole: UserRole, requiredRole: UserRole): boolean {
   const roleHierarchy = {
-    [UserRole.SUPER_ADMIN]: 3,
-    [UserRole.STORE_OWNER]: 2,
-    [UserRole.CUSTOMER]: 1,
+    [USER_ROLES.SUPER_ADMIN]: 3,
+    [USER_ROLES.STORE_OWNER]: 2,
+    [USER_ROLES.CUSTOMER]: 1,
   }
 
   return roleHierarchy[userRole] >= roleHierarchy[requiredRole]

@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth/auth'
 import { getOrderById, updateOrderStatus } from '@/lib/db/orders'
 import { OrderStatusUpdateSchema } from '@/lib/security/schemas/order-schemas'
-import { UserRole } from '@prisma/client'
+import { USER_ROLES } from '@/lib/types/user-role'
 
 /**
  * GET /api/orders/[id]
@@ -41,7 +41,7 @@ export async function GET(
     }
 
     // Verify user has access to this order
-    if (order.userId !== session.user.id && session.user.role !== UserRole.STORE_OWNER && session.user.role !== UserRole.SUPER_ADMIN) {
+    if (order.userId !== session.user.id && session.user.role !== USER_ROLES.STORE_OWNER && session.user.role !== USER_ROLES.SUPER_ADMIN) {
       return NextResponse.json(
         { error: 'Forbidden - You do not have access to this order' },
         { status: 403 }
@@ -153,7 +153,7 @@ export async function PATCH(
     }
 
     // Check if user has permission to update orders
-    if (role !== UserRole.STORE_OWNER && role !== UserRole.SUPER_ADMIN) {
+    if (role !== USER_ROLES.STORE_OWNER && role !== USER_ROLES.SUPER_ADMIN) {
       return NextResponse.json(
         { error: 'Forbidden - Only STORE_OWNER or SUPER_ADMIN can update orders' },
         { status: 403 }

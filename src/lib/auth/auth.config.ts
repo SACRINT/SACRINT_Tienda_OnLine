@@ -8,7 +8,7 @@ import { PrismaAdapter } from '@auth/prisma-adapter'
 import { db } from '@/lib/db/client'
 import { z } from 'zod'
 import bcrypt from 'bcryptjs'
-import { UserRole } from '@prisma/client'
+import { USER_ROLES } from '@/lib/types/user-role'
 
 // Validation schemas
 const LoginSchema = z.object({
@@ -65,7 +65,7 @@ export const authConfig = {
           image: profile.picture,
           emailVerified: new Date(),
           tenantId,
-          role: UserRole.CUSTOMER,
+          role: USER_ROLES.CUSTOMER,
         }
       },
     }),

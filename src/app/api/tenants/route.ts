@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth/auth'
 import { db } from '@/lib/db/client'
 import { z } from 'zod'
-import { UserRole } from '@prisma/client'
+import { USER_ROLES } from '@/lib/types/user-role'
 
 // Validation schema for creating a tenant
 const CreateTenantSchema = z.object({
@@ -112,7 +112,7 @@ export async function POST(req: NextRequest) {
     // Check if user has permission to create tenants
     const { role } = session.user
 
-    if (role !== UserRole.STORE_OWNER && role !== UserRole.SUPER_ADMIN) {
+    if (role !== USER_ROLES.STORE_OWNER && role !== USER_ROLES.SUPER_ADMIN) {
       return NextResponse.json(
         { error: 'Forbidden - Only STORE_OWNER or SUPER_ADMIN can create tenants' },
         { status: 403 }

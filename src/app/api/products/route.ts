@@ -11,7 +11,7 @@ import {
 } from '@/lib/db/products'
 import { getCategoryById } from '@/lib/db/categories'
 import { ProductFilterSchema, CreateProductSchema } from '@/lib/security/schemas/product-schemas'
-import { UserRole } from '@prisma/client'
+import { USER_ROLES } from '@/lib/types/user-role'
 
 /**
  * GET /api/products
@@ -154,7 +154,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Check if user has permission to create products
-    if (role !== UserRole.STORE_OWNER && role !== UserRole.SUPER_ADMIN) {
+    if (role !== USER_ROLES.STORE_OWNER && role !== USER_ROLES.SUPER_ADMIN) {
       return NextResponse.json(
         { error: 'Forbidden - Only STORE_OWNER or SUPER_ADMIN can create products' },
         { status: 403 }

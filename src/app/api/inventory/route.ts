@@ -14,7 +14,7 @@ import {
   AdjustInventorySchema,
   InventoryFilterSchema,
 } from '@/lib/security/schemas/review-schemas'
-import { UserRole } from '@prisma/client'
+import { USER_ROLES } from '@/lib/types/user-role'
 
 /**
  * GET /api/inventory
@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Check if user is STORE_OWNER
-    if (role !== UserRole.STORE_OWNER && role !== UserRole.SUPER_ADMIN) {
+    if (role !== USER_ROLES.STORE_OWNER && role !== USER_ROLES.SUPER_ADMIN) {
       return NextResponse.json(
         {
           error: 'Forbidden - Only STORE_OWNER or SUPER_ADMIN can access inventory',
@@ -151,7 +151,7 @@ export async function PATCH(req: NextRequest) {
     }
 
     // Check if user is STORE_OWNER
-    if (role !== UserRole.STORE_OWNER && role !== UserRole.SUPER_ADMIN) {
+    if (role !== USER_ROLES.STORE_OWNER && role !== USER_ROLES.SUPER_ADMIN) {
       return NextResponse.json(
         {
           error: 'Forbidden - Only STORE_OWNER or SUPER_ADMIN can adjust inventory',
