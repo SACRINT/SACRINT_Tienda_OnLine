@@ -108,11 +108,18 @@ export async function getProducts(
 }
 
 /**
- * Get product by ID with full details
+ * Get product by ID with full details and tenant validation
+ * @param tenantId - Tenant ID to validate access
+ * @param productId - Product ID to retrieve
  */
-export async function getProductById(productId: string) {
-  return db.product.findUnique({
-    where: { id: productId },
+export async function getProductById(tenantId: string, productId: string) {
+  await ensureTenantAccess(tenantId)
+
+  return db.product.findFirst({
+    where: {
+      id: productId,
+      tenantId
+    },
     include: {
       category: true,
       images: {
@@ -188,13 +195,18 @@ export async function getProductBySlug(tenantId: string, slug: string) {
 }
 
 /**
- * Create new product
+ * Create new product with tenant validation
+ * @param tenantId - Tenant ID to validate access
+ * @param data - Product data to create
  */
-export async function createProduct(data: any) {
-  // Tenant isolation is enforced by passing tenantId in data
+export async function createProduct(tenantId: string, data: any) {
+  await ensureTenantAccess(tenantId)
 
   return db.product.create({
-    data,
+    data: {
+      ...data,
+      tenantId // Explicitly set tenantId
+    },
     include: {
       category: true,
       images: true,
@@ -372,21 +384,28 @@ export async function searchProducts(
 }
 
 /**
- * Check product stock availability
+ * Check product stock availability with tenant validation
+ * @param tenantId - Tenant ID to validate access
+ * @param productId - Product ID to check stock
  */
-export async function checkProductStock(productId: string): Promise<{
+export async function checkProductStock(tenantId: string, productId: string): Promise<{
   available: boolean
   stock: number
   reserved: number
   availableStock: number
 }> {
-  const product = await db.product.findUnique({
-    where: { id: productId },
+  await ensureTenantAccess(tenantId)
+
+  const product = await db.product.findFirst({
+    where: {
+      id: productId,
+      tenantId
+    },
     select: { stock: true, reserved: true },
   })
 
   if (!product) {
-    throw new Error('Product not found')
+    throw new Error('Product not found or does not belong to tenant')
   }
 
   const availableStock = product.stock - product.reserved
@@ -400,16 +419,31 @@ export async function checkProductStock(productId: string): Promise<{
 }
 
 /**
- * Reserve stock for order (prevent overselling)
+ * Reserve stock for order with tenant validation (prevent overselling)
+ * @param tenantId - Tenant ID to validate access
+ * @param productId - Product ID to reserve stock
+ * @param quantity - Quantity to reserve
  */
 export async function reserveStock(
+  tenantId: string,
   productId: string,
   quantity: number
 ): Promise<void> {
-  const stockCheck = await checkProductStock(productId)
+  await ensureTenantAccess(tenantId)
+
+  const stockCheck = await checkProductStock(tenantId, productId)
 
   if (stockCheck.availableStock < quantity) {
     throw new Error(`Insufficient stock. Available: ${stockCheck.availableStock}, Requested: ${quantity}`)
+  }
+
+  // Verify product belongs to tenant before updating
+  const product = await db.product.findFirst({
+    where: { id: productId, tenantId }
+  })
+
+  if (!product) {
+    throw new Error('Product not found or does not belong to tenant')
   }
 
   await db.product.update({
@@ -421,12 +455,27 @@ export async function reserveStock(
 }
 
 /**
- * Release reserved stock (e.g., when order is cancelled)
+ * Release reserved stock with tenant validation (e.g., when order is cancelled)
+ * @param tenantId - Tenant ID to validate access
+ * @param productId - Product ID to release stock
+ * @param quantity - Quantity to release
  */
 export async function releaseStock(
+  tenantId: string,
   productId: string,
   quantity: number
 ): Promise<void> {
+  await ensureTenantAccess(tenantId)
+
+  // Verify product belongs to tenant before updating
+  const product = await db.product.findFirst({
+    where: { id: productId, tenantId }
+  })
+
+  if (!product) {
+    throw new Error('Product not found or does not belong to tenant')
+  }
+
   await db.product.update({
     where: { id: productId },
     data: {
@@ -436,12 +485,27 @@ export async function releaseStock(
 }
 
 /**
- * Confirm stock deduction (when order is paid)
+ * Confirm stock deduction with tenant validation (when order is paid)
+ * @param tenantId - Tenant ID to validate access
+ * @param productId - Product ID to deduct stock
+ * @param quantity - Quantity to deduct
  */
 export async function confirmStockDeduction(
+  tenantId: string,
   productId: string,
   quantity: number
 ): Promise<void> {
+  await ensureTenantAccess(tenantId)
+
+  // Verify product belongs to tenant before updating
+  const product = await db.product.findFirst({
+    where: { id: productId, tenantId }
+  })
+
+  if (!product) {
+    throw new Error('Product not found or does not belong to tenant')
+  }
+
   await db.product.update({
     where: { id: productId },
     data: {
