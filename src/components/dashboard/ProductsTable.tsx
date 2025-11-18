@@ -3,8 +3,14 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
+import { useSession } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Checkbox } from '@/components/ui/checkbox'
+import { BulkActions, PRODUCT_BULK_ACTIONS } from '@/components/admin/BulkActions'
+import { AdvancedFilters, PRODUCT_FILTERS } from '@/components/admin/AdvancedFilters'
+import { QuickEdit } from '@/components/admin/QuickEdit'
+import { formatCurrency } from '@/lib/analytics/types'
 
 interface Product {
   id: string
@@ -25,8 +31,11 @@ interface ProductsTableProps {
 }
 
 export function ProductsTable({ products, currentPage }: ProductsTableProps) {
+  const { data: session } = useSession()
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [selectedProducts, setSelectedProducts] = useState<string[]>([])
+  const [filterValues, setFilterValues] = useState<Record<string, any>>({})
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -69,51 +78,107 @@ export function ProductsTable({ products, currentPage }: ProductsTableProps) {
     }
   }
 
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedProducts(products.map((p) => p.id))
+    } else {
+      setSelectedProducts([])
+    }
+  }
+
+  const handleSelectProduct = (productId: string, checked: boolean) => {
+    if (checked) {
+      setSelectedProducts([...selectedProducts, productId])
+    } else {
+      setSelectedProducts(selectedProducts.filter((id) => id !== productId))
+    }
+  }
+
+  const handleBulkAction = async (actionId: string, value?: any) => {
+    if (!session?.user?.tenantId) return
+
+    try {
+      const res = await fetch('/api/products/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tenantId: session.user.tenantId,
+          productIds: selectedProducts,
+          operation: actionId,
+          value,
+        }),
+      })
+
+      if (res.ok) {
+        setSelectedProducts([])
+        window.location.reload()
+      } else {
+        alert('Error en la operación masiva')
+      }
+    } catch (error) {
+      alert('Error en la operación masiva')
+    }
+  }
+
+  const handleClearSelection = () => {
+    setSelectedProducts([])
+  }
+
+  const handleFilterChange = (newFilters: Record<string, any>) => {
+    setFilterValues(newFilters)
+    // Apply filters to URL
+    const params = new URLSearchParams(window.location.search)
+    Object.entries(newFilters).forEach(([key, value]) => {
+      if (value !== null && value !== undefined && value !== '') {
+        params.set(key, value)
+      } else {
+        params.delete(key)
+      }
+    })
+    params.set('page', '1')
+    window.location.href = `?${params.toString()}`
+  }
+
+  const handleClearFilters = () => {
+    setFilterValues({})
+    window.location.href = window.location.pathname
+  }
+
+  const handleQuickEditSuccess = () => {
+    window.location.reload()
+  }
+
   return (
     <div className="space-y-4">
-      {/* Filters */}
-      <div className="flex gap-4 items-end">
-        <form onSubmit={handleSearch} className="flex-1 flex gap-2">
-          <Input
-            type="text"
-            placeholder="Buscar por nombre o SKU..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="max-w-sm"
-          />
-          <Button type="submit">Buscar</Button>
-        </form>
+      {/* Advanced Filters */}
+      <AdvancedFilters
+        filters={PRODUCT_FILTERS}
+        values={filterValues}
+        onChange={handleFilterChange}
+        onClear={handleClearFilters}
+      />
 
-        <div className="flex gap-2">
-          <Button
-            variant={statusFilter === 'all' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => handleStatusFilter('all')}
-          >
-            Todos
-          </Button>
-          <Button
-            variant={statusFilter === 'active' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => handleStatusFilter('active')}
-          >
-            Activos
-          </Button>
-          <Button
-            variant={statusFilter === 'inactive' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => handleStatusFilter('inactive')}
-          >
-            Inactivos
-          </Button>
-        </div>
-      </div>
+      {/* Bulk Actions (sticky bar when items selected) */}
+      {selectedProducts.length > 0 && (
+        <BulkActions
+          selectedCount={selectedProducts.length}
+          actions={PRODUCT_BULK_ACTIONS}
+          onAction={handleBulkAction}
+          onClear={handleClearSelection}
+        />
+      )}
 
       {/* Table */}
       <div className="border rounded-lg overflow-hidden">
         <table className="w-full">
           <thead className="bg-gray-50 border-b">
             <tr>
+              <th className="px-4 py-3 text-left">
+                <Checkbox
+                  checked={selectedProducts.length === products.length && products.length > 0}
+                  onCheckedChange={handleSelectAll}
+                />
+              </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Producto
               </th>
@@ -140,68 +205,102 @@ export function ProductsTable({ products, currentPage }: ProductsTableProps) {
           <tbody className="bg-white divide-y divide-gray-200">
             {products.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
+                <td colSpan={8} className="px-6 py-8 text-center text-gray-500">
                   No se encontraron productos
                 </td>
               </tr>
             ) : (
-              products.map((product) => (
-                <tr key={product.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      {product.images[0] && (
-                        <Image
-                          src={product.images[0].url}
-                          alt={product.name}
-                          width={40}
-                          height={40}
-                          className="h-10 w-10 rounded object-cover mr-3"
-                        />
-                      )}
-                      <div className="text-sm font-medium text-gray-900">
-                        {product.name}
+              products.map((product) => {
+                const isSelected = selectedProducts.includes(product.id)
+                return (
+                  <tr
+                    key={product.id}
+                    className={`hover:bg-gray-50 ${isSelected ? 'bg-blue-50' : ''}`}
+                  >
+                    <td className="px-4 py-4">
+                      <Checkbox
+                        checked={isSelected}
+                        onCheckedChange={(checked) =>
+                          handleSelectProduct(product.id, checked as boolean)
+                        }
+                      />
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        {product.images[0] && (
+                          <Image
+                            src={product.images[0].url}
+                            alt={product.name}
+                            width={40}
+                            height={40}
+                            className="h-10 w-10 rounded object-cover mr-3"
+                          />
+                        )}
+                        <div className="text-sm font-medium text-gray-900">
+                          {product.name}
+                        </div>
                       </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {product.sku || '-'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {product.category?.name || '-'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    ${parseFloat(String(product.basePrice)).toFixed(2)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {product.stock}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span
-                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        product.published
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-red-100 text-red-800'
-                      }`}
-                    >
-                      {product.published ? 'Publicado' : 'Borrador'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                    <Link
-                      href={`/dashboard/products/${product.id}`}
-                      className="text-blue-600 hover:text-blue-900"
-                    >
-                      Editar
-                    </Link>
-                    <button
-                      onClick={() => handleDelete(product.id)}
-                      className="text-red-600 hover:text-red-900"
-                    >
-                      Eliminar
-                    </button>
-                  </td>
-                </tr>
-              ))
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {product.sku || '-'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {product.category?.name || '-'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {session?.user?.tenantId ? (
+                        <QuickEdit
+                          entityId={product.id}
+                          tenantId={session.user.tenantId}
+                          field="price"
+                          currentValue={parseFloat(String(product.basePrice))}
+                          onSuccess={handleQuickEditSuccess}
+                        />
+                      ) : (
+                        formatCurrency(parseFloat(String(product.basePrice)))
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {session?.user?.tenantId ? (
+                        <QuickEdit
+                          entityId={product.id}
+                          tenantId={session.user.tenantId}
+                          field="stock"
+                          currentValue={product.stock}
+                          onSuccess={handleQuickEditSuccess}
+                        />
+                      ) : (
+                        product.stock
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span
+                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          product.published
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-red-100 text-red-800'
+                        }`}
+                      >
+                        {product.published ? 'Publicado' : 'Borrador'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                      <Link
+                        href={`/dashboard/products/${product.id}`}
+                        className="text-blue-600 hover:text-blue-900"
+                      >
+                        Editar
+                      </Link>
+                      <button
+                        onClick={() => handleDelete(product.id)}
+                        className="text-red-600 hover:text-red-900"
+                      >
+                        Eliminar
+                      </button>
+                    </td>
+                  </tr>
+                )
+              })
             )}
           </tbody>
         </table>

@@ -73,6 +73,8 @@ export function captureEvent(
 
 // Set user context
 export function setUser(user: { id: string; email?: string; role?: string }) {
+  if (!Sentry) return
+
   Sentry.setUser({
     id: user.id,
     email: user.email,
@@ -85,5 +87,7 @@ export function setUser(user: { id: string; email?: string; role?: string }) {
 
 // Clear user context (on logout)
 export function clearUser() {
+  if (!Sentry) return
+
   Sentry.setUser(null)
 }
