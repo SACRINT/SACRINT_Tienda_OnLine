@@ -71,14 +71,6 @@ export function captureEvent(
   }
 }
 
-// Performance monitoring
-export function startTransaction(name: string, op: string) {
-  return Sentry.startTransaction({
-    name,
-    op,
-  })
-}
-
 // Set user context
 export function setUser(user: { id: string; email?: string; role?: string }) {
   Sentry.setUser({
