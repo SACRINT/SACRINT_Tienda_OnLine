@@ -137,18 +137,11 @@ export async function PUT(req: NextRequest) {
       },
     })
 
-    // Log activity
-    await db.activityLog.create({
-      data: {
-        tenantId,
-        userId: session.user.id,
-        action: 'SETTINGS_UPDATE',
-        entityType: 'TENANT',
-        entityId: tenantId,
-        metadata: {
-          updatedFields: Object.keys(settings),
-        },
-      },
+    // TODO: Activity logging - implement with dedicated activity log model if needed
+    console.log('[Settings API] Tenant settings updated', {
+      tenantId,
+      userId: session.user.id,
+      updatedFields: Object.keys(settings),
     })
 
     return NextResponse.json({
