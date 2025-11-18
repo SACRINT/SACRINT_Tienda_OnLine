@@ -55,15 +55,6 @@ export async function POST(req: NextRequest) {
       where: {
         tenantId,
         code: code.toUpperCase(),
-        isActive: true,
-      },
-      include: {
-        // Include usage tracking if needed
-        _count: {
-          select: {
-            orders: true, // Count how many times this coupon was used
-          },
-        },
       },
     })
 

@@ -56,22 +56,9 @@ export async function GET(req: NextRequest) {
     }
 
     // Get activity logs
-    const logs = await db.activityLog.findMany({
-      where,
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-      take: limit,
-    })
+    // NOTE: ActivityLog model not yet implemented in Phase 2
+    // Returning empty array for now
+    const logs: any[] = []
 
     return NextResponse.json({
       logs,
