@@ -74,7 +74,7 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json(preferences)
   } catch (error: any) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: 'Invalid request', details: error.errors }, { status: 400 })
+      return NextResponse.json({ error: 'Invalid request', details: error.issues }, { status: 400 })
     }
     console.error('[Notification Preferences API] PUT error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

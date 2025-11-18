@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true })
   } catch (error: any) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: 'Invalid request', details: error.errors }, { status: 400 })
+      return NextResponse.json({ error: 'Invalid request', details: error.issues }, { status: 400 })
     }
     console.error('[Inventory API] POST error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
