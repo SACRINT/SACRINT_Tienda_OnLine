@@ -1,19 +1,25 @@
-import { auth } from '@/lib/auth/auth'
-import { getTenantById } from '@/lib/db/tenant'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { SettingsForm } from '@/components/dashboard/SettingsForm'
+import { auth } from "@/lib/auth/auth";
+import { getTenantById } from "@/lib/db/tenant";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { SettingsForm } from "@/components/dashboard/SettingsForm";
 
 export default async function SettingsPage() {
-  const session = await auth()
+  const session = await auth();
 
   if (!session?.user?.tenantId) {
-    return <div>No tenant found</div>
+    return <div>No tenant found</div>;
   }
 
-  const tenant = await getTenantById(session.user.tenantId)
+  const tenant = await getTenantById(session.user.tenantId);
 
   if (!tenant) {
-    return <div>Tenant not found</div>
+    return <div>Tenant not found</div>;
   }
 
   return (
@@ -47,10 +53,10 @@ export default async function SettingsPage() {
         <CardContent>
           <div className="space-y-4">
             <div>
-              <p className="text-sm font-medium text-gray-700">Estado de Stripe</p>
-              <p className="text-sm text-gray-600">
-                Configurado y activo
+              <p className="text-sm font-medium text-gray-700">
+                Estado de Stripe
               </p>
+              <p className="text-sm text-gray-600">Configurado y activo</p>
             </div>
             <div>
               <p className="text-sm font-medium text-gray-700">Webhook URL</p>
@@ -62,5 +68,5 @@ export default async function SettingsPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

@@ -6,9 +6,9 @@
  * PUT - Update preferences
  */
 
-import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/lib/auth/auth'
-import { z } from 'zod'
+import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth/auth";
+import { z } from "zod";
 
 const preferencesSchema = z.object({
   emailOrderConfirmation: z.boolean().optional(),
@@ -26,13 +26,13 @@ const preferencesSchema = z.object({
   inAppProductRestocked: z.boolean().optional(),
   pushOrderUpdates: z.boolean().optional(),
   pushPromotions: z.boolean().optional(),
-})
+});
 
 export async function GET(req: NextRequest) {
   try {
-    const session = await auth()
+    const session = await auth();
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // TODO: Implement with NotificationPreference model
@@ -53,37 +53,46 @@ export async function GET(req: NextRequest) {
       inAppProductRestocked: true,
       pushOrderUpdates: true,
       pushPromotions: false,
-    }
+    };
 
-    return NextResponse.json(preferences)
+    return NextResponse.json(preferences);
   } catch (error: any) {
-    console.error('[Notification Preferences API] GET error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    console.error("[Notification Preferences API] GET error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }
 
 export async function PUT(req: NextRequest) {
   try {
-    const session = await auth()
+    const session = await auth();
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const body = await req.json()
-    const data = preferencesSchema.parse(body)
+    const body = await req.json();
+    const data = preferencesSchema.parse(body);
 
     // TODO: Implement with NotificationPreference model
     const preferences = {
       userId: session.user.id,
       ...data,
-    }
+    };
 
-    return NextResponse.json(preferences)
+    return NextResponse.json(preferences);
   } catch (error: any) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: 'Invalid request', details: error.issues }, { status: 400 })
+      return NextResponse.json(
+        { error: "Invalid request", details: error.issues },
+        { status: 400 },
+      );
     }
-    console.error('[Notification Preferences API] PUT error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    console.error("[Notification Preferences API] PUT error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }

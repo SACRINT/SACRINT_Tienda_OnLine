@@ -1,115 +1,115 @@
 // Shop Page
 // Main shop page with products, filters, and search
 
-import { Suspense } from 'react'
+import { Suspense } from "react";
 import {
   ShopHero,
   ProductCard,
   FilterSidebar,
   SearchAutocomplete,
-} from '@/components/shop'
-import type { ProductCardProps } from '@/components/shop'
+} from "@/components/shop";
+import type { ProductCardProps } from "@/components/shop";
 
 // Mock data - In production, this would come from API/Database
 const getMockProducts = (): ProductCardProps[] => {
   return [
     {
-      id: '1',
-      name: 'Premium Wireless Headphones',
-      slug: 'premium-wireless-headphones',
-      image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e',
+      id: "1",
+      name: "Premium Wireless Headphones",
+      slug: "premium-wireless-headphones",
+      image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e",
       price: 299.99,
       salePrice: 249.99,
       rating: 4.5,
       reviewCount: 128,
       inStock: true,
-      category: 'Electronics',
+      category: "Electronics",
     },
     {
-      id: '2',
-      name: 'Smart Watch Pro',
-      slug: 'smart-watch-pro',
-      image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30',
+      id: "2",
+      name: "Smart Watch Pro",
+      slug: "smart-watch-pro",
+      image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30",
       price: 399.99,
       rating: 4.8,
       reviewCount: 256,
       inStock: true,
-      category: 'Electronics',
+      category: "Electronics",
     },
     {
-      id: '3',
-      name: 'Designer Sunglasses',
-      slug: 'designer-sunglasses',
-      image: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f',
+      id: "3",
+      name: "Designer Sunglasses",
+      slug: "designer-sunglasses",
+      image: "https://images.unsplash.com/photo-1572635196237-14b3f281503f",
       price: 149.99,
       salePrice: 99.99,
       rating: 4.2,
       reviewCount: 89,
       inStock: true,
-      category: 'Accessories',
+      category: "Accessories",
     },
     {
-      id: '4',
-      name: 'Leather Backpack',
-      slug: 'leather-backpack',
-      image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62',
+      id: "4",
+      name: "Leather Backpack",
+      slug: "leather-backpack",
+      image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62",
       price: 129.99,
       rating: 4.6,
       reviewCount: 45,
       inStock: false,
-      category: 'Bags',
+      category: "Bags",
     },
     {
-      id: '5',
-      name: 'Portable Bluetooth Speaker',
-      slug: 'portable-bluetooth-speaker',
-      image: 'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1',
+      id: "5",
+      name: "Portable Bluetooth Speaker",
+      slug: "portable-bluetooth-speaker",
+      image: "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1",
       price: 79.99,
       salePrice: 59.99,
       rating: 4.3,
       reviewCount: 312,
       inStock: true,
-      category: 'Electronics',
+      category: "Electronics",
     },
     {
-      id: '6',
-      name: 'Running Shoes',
-      slug: 'running-shoes',
-      image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff',
+      id: "6",
+      name: "Running Shoes",
+      slug: "running-shoes",
+      image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff",
       price: 119.99,
       rating: 4.7,
       reviewCount: 523,
       inStock: true,
-      category: 'Footwear',
+      category: "Footwear",
     },
-  ]
-}
+  ];
+};
 
 const getMockCategories = () => {
   return [
-    { id: '1', name: 'Electronics', count: 124 },
-    { id: '2', name: 'Accessories', count: 89 },
-    { id: '3', name: 'Bags', count: 56 },
-    { id: '4', name: 'Footwear', count: 203 },
-    { id: '5', name: 'Clothing', count: 445 },
-  ]
-}
+    { id: "1", name: "Electronics", count: 124 },
+    { id: "2", name: "Accessories", count: 89 },
+    { id: "3", name: "Bags", count: 56 },
+    { id: "4", name: "Footwear", count: 203 },
+    { id: "5", name: "Clothing", count: 445 },
+  ];
+};
 
 export default function ShopPage() {
-  const products = getMockProducts()
-  const categories = getMockCategories()
+  const products = getMockProducts();
+  const categories = getMockCategories();
 
   const filterOptions = {
     categories,
     priceRange: { min: 0, max: 500 },
     ratings: [5, 4, 3, 2, 1],
-  }
+  };
 
   const activeFilters = {
     categories: [],
     inStock: false,
     onSale: false,
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -132,11 +132,11 @@ export default function ShopPage() {
                 options={filterOptions}
                 activeFilters={activeFilters}
                 onFilterChange={(filters) => {
-                  console.log('Filters changed:', filters)
+                  console.log("Filters changed:", filters);
                   // In production, this would update URL params and refetch products
                 }}
                 onClearAll={() => {
-                  console.log('Clear all filters')
+                  console.log("Clear all filters");
                   // In production, this would reset all filters
                 }}
               />
@@ -188,11 +188,11 @@ export default function ShopPage() {
                     key={product.id}
                     {...product}
                     onAddToCart={(productId) => {
-                      console.log('Add to cart:', productId)
+                      console.log("Add to cart:", productId);
                       // In production, this would add to cart via API
                     }}
                     onToggleWishlist={(productId) => {
-                      console.log('Toggle wishlist:', productId)
+                      console.log("Toggle wishlist:", productId);
                       // In production, this would toggle wishlist via API
                     }}
                   />
@@ -248,5 +248,5 @@ export default function ShopPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

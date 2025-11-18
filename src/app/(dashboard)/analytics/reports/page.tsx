@@ -1,8 +1,8 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
-import { useSession } from 'next-auth/react'
-import { subDays } from 'date-fns'
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import { subDays } from "date-fns";
 import {
   Tag,
   Receipt,
@@ -10,45 +10,47 @@ import {
   TrendingUp,
   Percent,
   DollarSign,
-} from 'lucide-react'
+} from "lucide-react";
 
-import { BarChart } from '@/components/analytics/charts/BarChart'
-import { PieChart } from '@/components/analytics/charts/PieChart'
-import { DateRangePicker } from '@/components/analytics/filters/DateRangePicker'
+import { BarChart } from "@/components/analytics/charts/BarChart";
+import { PieChart } from "@/components/analytics/charts/PieChart";
+import { DateRangePicker } from "@/components/analytics/filters/DateRangePicker";
 import {
   CouponUsage,
   TaxReport,
   ShippingReport,
   formatCurrency,
   formatNumber,
-} from '@/lib/analytics/types'
+} from "@/lib/analytics/types";
 
 interface ReportsData {
-  coupons: CouponUsage[]
-  tax: TaxReport[]
-  shipping: ShippingReport[]
+  coupons: CouponUsage[];
+  tax: TaxReport[];
+  shipping: ShippingReport[];
 }
 
 export default function SpecializedReportsPage() {
-  const { data: session } = useSession()
-  const [loading, setLoading] = useState(true)
-  const [reportsData, setReportsData] = useState<ReportsData | null>(null)
+  const { data: session } = useSession();
+  const [loading, setLoading] = useState(true);
+  const [reportsData, setReportsData] = useState<ReportsData | null>(null);
   const [dateRange, setDateRange] = useState({
     startDate: subDays(new Date(), 29),
     endDate: new Date(),
-  })
-  const [activeTab, setActiveTab] = useState<'coupons' | 'tax' | 'shipping'>('coupons')
+  });
+  const [activeTab, setActiveTab] = useState<"coupons" | "tax" | "shipping">(
+    "coupons",
+  );
 
   useEffect(() => {
     if (session?.user?.tenantId) {
-      fetchReportsData()
+      fetchReportsData();
     }
-  }, [session, dateRange])
+  }, [session, dateRange]);
 
   const fetchReportsData = async () => {
-    if (!session?.user?.tenantId) return
+    if (!session?.user?.tenantId) return;
 
-    setLoading(true)
+    setLoading(true);
     try {
       // Fetch all reports data
       const [couponsRes, taxRes, shippingRes] = await Promise.all([
@@ -58,7 +60,7 @@ export default function SpecializedReportsPage() {
               tenantId: session.user.tenantId,
               startDate: dateRange.startDate.toISOString(),
               endDate: dateRange.endDate.toISOString(),
-            })
+            }),
         ),
         fetch(
           `/api/reports/tax?` +
@@ -66,7 +68,7 @@ export default function SpecializedReportsPage() {
               tenantId: session.user.tenantId,
               startDate: dateRange.startDate.toISOString(),
               endDate: dateRange.endDate.toISOString(),
-            })
+            }),
         ),
         fetch(
           `/api/reports/shipping?` +
@@ -74,38 +76,38 @@ export default function SpecializedReportsPage() {
               tenantId: session.user.tenantId,
               startDate: dateRange.startDate.toISOString(),
               endDate: dateRange.endDate.toISOString(),
-            })
+            }),
         ),
-      ])
+      ]);
 
-      const coupons = couponsRes.ok ? await couponsRes.json() : { data: [] }
-      const tax = taxRes.ok ? await taxRes.json() : { data: [] }
-      const shipping = shippingRes.ok ? await shippingRes.json() : { data: [] }
+      const coupons = couponsRes.ok ? await couponsRes.json() : { data: [] };
+      const tax = taxRes.ok ? await taxRes.json() : { data: [] };
+      const shipping = shippingRes.ok ? await shippingRes.json() : { data: [] };
 
       setReportsData({
         coupons: coupons.data || [],
         tax: tax.data || [],
         shipping: shipping.data || [],
-      })
+      });
     } catch (error) {
-      console.error('Failed to fetch reports data:', error)
+      console.error("Failed to fetch reports data:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const tabs = [
-    { id: 'coupons' as const, label: 'Coupons', icon: Tag },
-    { id: 'tax' as const, label: 'Tax Reports', icon: Receipt },
-    { id: 'shipping' as const, label: 'Shipping', icon: Truck },
-  ]
+    { id: "coupons" as const, label: "Coupons", icon: Tag },
+    { id: "tax" as const, label: "Tax Reports", icon: Receipt },
+    { id: "shipping" as const, label: "Shipping", icon: Truck },
+  ];
 
   if (!session?.user) {
     return (
       <div className="flex h-64 items-center justify-center">
         <p className="text-gray-600">Please sign in to view reports</p>
       </div>
-    )
+    );
   }
 
   return (
@@ -113,7 +115,9 @@ export default function SpecializedReportsPage() {
       {/* Header */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Specialized Reports</h1>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Specialized Reports
+          </h1>
           <p className="mt-1 text-gray-600">
             Coupons, tax, and shipping analytics
           </p>
@@ -126,34 +130,36 @@ export default function SpecializedReportsPage() {
       <div className="border-b border-gray-200">
         <nav className="-mb-px flex space-x-8">
           {tabs.map((tab) => {
-            const Icon = tab.icon
+            const Icon = tab.icon;
             return (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center gap-2 border-b-2 px-1 py-4 text-sm font-medium transition-colors ${
                   activeTab === tab.id
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                    ? "border-blue-600 text-blue-600"
+                    : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
                 }`}
               >
                 <Icon className="h-5 w-5" />
                 {tab.label}
               </button>
-            )
+            );
           })}
         </nav>
       </div>
 
       {/* Coupons Tab */}
-      {activeTab === 'coupons' && (
+      {activeTab === "coupons" && (
         <div className="space-y-6">
           {/* Summary Cards */}
           {reportsData && reportsData.coupons.length > 0 && (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-sm font-medium text-gray-600">Active Coupons</p>
+                  <p className="text-sm font-medium text-gray-600">
+                    Active Coupons
+                  </p>
                   <Tag className="h-5 w-5 text-blue-600" />
                 </div>
                 <p className="text-3xl font-bold text-gray-900">
@@ -163,24 +169,34 @@ export default function SpecializedReportsPage() {
 
               <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-sm font-medium text-gray-600">Total Discount Given</p>
+                  <p className="text-sm font-medium text-gray-600">
+                    Total Discount Given
+                  </p>
                   <DollarSign className="h-5 w-5 text-red-600" />
                 </div>
                 <p className="text-3xl font-bold text-gray-900">
                   {formatCurrency(
-                    reportsData.coupons.reduce((sum, c) => sum + c.totalDiscount, 0)
+                    reportsData.coupons.reduce(
+                      (sum, c) => sum + c.totalDiscount,
+                      0,
+                    ),
                   )}
                 </p>
               </div>
 
               <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-sm font-medium text-gray-600">Revenue Generated</p>
+                  <p className="text-sm font-medium text-gray-600">
+                    Revenue Generated
+                  </p>
                   <TrendingUp className="h-5 w-5 text-green-600" />
                 </div>
                 <p className="text-3xl font-bold text-gray-900">
                   {formatCurrency(
-                    reportsData.coupons.reduce((sum, c) => sum + c.revenueImpact, 0)
+                    reportsData.coupons.reduce(
+                      (sum, c) => sum + c.revenueImpact,
+                      0,
+                    ),
                   )}
                 </p>
               </div>
@@ -230,17 +246,17 @@ export default function SpecializedReportsPage() {
                           </code>
                         </td>
                         <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-600">
-                          {coupon.type === 'PERCENTAGE' ? (
+                          {coupon.type === "PERCENTAGE" ? (
                             <span className="inline-flex items-center gap-1">
                               <Percent className="h-3 w-3" />
                               Percentage
                             </span>
                           ) : (
-                            'Fixed Amount'
+                            "Fixed Amount"
                           )}
                         </td>
                         <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
-                          {coupon.type === 'PERCENTAGE'
+                          {coupon.type === "PERCENTAGE"
                             ? `${coupon.value}%`
                             : formatCurrency(coupon.value)}
                         </td>
@@ -264,14 +280,16 @@ export default function SpecializedReportsPage() {
             </div>
           ) : (
             <div className="flex h-64 items-center justify-center rounded-lg border border-gray-200 bg-white">
-              <p className="text-gray-500">No coupon data available for this period</p>
+              <p className="text-gray-500">
+                No coupon data available for this period
+              </p>
             </div>
           )}
         </div>
       )}
 
       {/* Tax Tab */}
-      {activeTab === 'tax' && (
+      {activeTab === "tax" && (
         <div className="space-y-6">
           {/* Tax Summary */}
           {reportsData && reportsData.tax.length > 0 && (
@@ -298,7 +316,13 @@ export default function SpecializedReportsPage() {
                   data={reportsData.tax.slice(0, 8).map((t, idx) => ({
                     name: t.state,
                     value: t.totalTax,
-                    percentage: (t.totalTax / reportsData.tax.reduce((sum, x) => sum + x.totalTax, 0)) * 100,
+                    percentage:
+                      (t.totalTax /
+                        reportsData.tax.reduce(
+                          (sum, x) => sum + x.totalTax,
+                          0,
+                        )) *
+                      100,
                   }))}
                   formatValue="currency"
                   height={300}
@@ -356,14 +380,16 @@ export default function SpecializedReportsPage() {
             </div>
           ) : (
             <div className="flex h-64 items-center justify-center rounded-lg border border-gray-200 bg-white">
-              <p className="text-gray-500">No tax data available for this period</p>
+              <p className="text-gray-500">
+                No tax data available for this period
+              </p>
             </div>
           )}
         </div>
       )}
 
       {/* Shipping Tab */}
-      {activeTab === 'shipping' && (
+      {activeTab === "shipping" && (
         <div className="space-y-6">
           {/* Shipping Charts */}
           {reportsData && reportsData.shipping.length > 0 && (
@@ -390,7 +416,13 @@ export default function SpecializedReportsPage() {
                   data={reportsData.shipping.map((s) => ({
                     name: s.method,
                     value: s.totalCost,
-                    percentage: (s.totalCost / reportsData.shipping.reduce((sum, x) => sum + x.totalCost, 0)) * 100,
+                    percentage:
+                      (s.totalCost /
+                        reportsData.shipping.reduce(
+                          (sum, x) => sum + x.totalCost,
+                          0,
+                        )) *
+                      100,
                   }))}
                   formatValue="currency"
                   height={300}
@@ -427,7 +459,10 @@ export default function SpecializedReportsPage() {
                   </thead>
                   <tbody className="divide-y divide-gray-200 bg-white">
                     {reportsData.shipping.map((shippingData) => (
-                      <tr key={shippingData.method} className="hover:bg-gray-50">
+                      <tr
+                        key={shippingData.method}
+                        className="hover:bg-gray-50"
+                      >
                         <td className="px-6 py-4 font-medium text-gray-900">
                           {shippingData.method}
                         </td>
@@ -448,11 +483,13 @@ export default function SpecializedReportsPage() {
             </div>
           ) : (
             <div className="flex h-64 items-center justify-center rounded-lg border border-gray-200 bg-white">
-              <p className="text-gray-500">No shipping data available for this period</p>
+              <p className="text-gray-500">
+                No shipping data available for this period
+              </p>
             </div>
           )}
         </div>
       )}
     </div>
-  )
+  );
 }

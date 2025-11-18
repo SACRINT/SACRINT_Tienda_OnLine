@@ -1,30 +1,30 @@
 // Shipping Method Component
 // Select shipping speed and cost
 
-'use client'
+"use client";
 
-import { Check, Truck, Clock, Zap } from 'lucide-react'
+import { Check, Truck, Clock, Zap } from "lucide-react";
 
 export interface ShippingOption {
-  id: string
-  name: string
-  description: string
-  price: number
-  estimatedDays: string
-  icon: 'truck' | 'clock' | 'zap'
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  estimatedDays: string;
+  icon: "truck" | "clock" | "zap";
 }
 
 export interface ShippingMethodProps {
-  options: ShippingOption[]
-  selectedMethodId?: string
-  onMethodSelect: (method: ShippingOption) => void
+  options: ShippingOption[];
+  selectedMethodId?: string;
+  onMethodSelect: (method: ShippingOption) => void;
 }
 
 const ICON_MAP = {
   truck: Truck,
   clock: Clock,
   zap: Zap,
-}
+};
 
 export function ShippingMethod({
   options,
@@ -45,9 +45,9 @@ export function ShippingMethod({
       {/* Shipping Options */}
       <div className="space-y-4">
         {options.map((option) => {
-          const Icon = ICON_MAP[option.icon]
-          const isSelected = selectedMethodId === option.id
-          const isFree = option.price === 0
+          const Icon = ICON_MAP[option.icon];
+          const isSelected = selectedMethodId === option.id;
+          const isFree = option.price === 0;
 
           return (
             <button
@@ -55,8 +55,8 @@ export function ShippingMethod({
               onClick={() => onMethodSelect(option)}
               className={`relative w-full rounded-lg border-2 p-4 text-left transition-all ${
                 isSelected
-                  ? 'border-blue-600 bg-blue-50'
-                  : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-md'
+                  ? "border-blue-600 bg-blue-50"
+                  : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-md"
               }`}
             >
               {/* Selected Checkmark */}
@@ -72,12 +72,12 @@ export function ShippingMethod({
                 {/* Icon */}
                 <div
                   className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg ${
-                    isSelected ? 'bg-blue-100' : 'bg-gray-100'
+                    isSelected ? "bg-blue-100" : "bg-gray-100"
                   }`}
                 >
                   <Icon
                     className={`h-6 w-6 ${
-                      isSelected ? 'text-blue-600' : 'text-gray-600'
+                      isSelected ? "text-blue-600" : "text-gray-600"
                     }`}
                   />
                 </div>
@@ -113,7 +113,7 @@ export function ShippingMethod({
                 </div>
               </div>
             </button>
-          )
+          );
         })}
       </div>
 
@@ -149,41 +149,41 @@ export function ShippingMethod({
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 // Default shipping options (can be customized per order)
 export const DEFAULT_SHIPPING_OPTIONS: ShippingOption[] = [
   {
-    id: 'standard',
-    name: 'Standard Shipping',
-    description: 'Regular delivery at the best value',
+    id: "standard",
+    name: "Standard Shipping",
+    description: "Regular delivery at the best value",
     price: 5.99,
-    estimatedDays: '5-7 business days',
-    icon: 'truck',
+    estimatedDays: "5-7 business days",
+    icon: "truck",
   },
   {
-    id: 'express',
-    name: 'Express Shipping',
-    description: 'Faster delivery for when you need it sooner',
+    id: "express",
+    name: "Express Shipping",
+    description: "Faster delivery for when you need it sooner",
     price: 12.99,
-    estimatedDays: '2-3 business days',
-    icon: 'clock',
+    estimatedDays: "2-3 business days",
+    icon: "clock",
   },
   {
-    id: 'overnight',
-    name: 'Overnight Shipping',
-    description: 'Next business day delivery',
+    id: "overnight",
+    name: "Overnight Shipping",
+    description: "Next business day delivery",
     price: 24.99,
-    estimatedDays: '1 business day',
-    icon: 'zap',
+    estimatedDays: "1 business day",
+    icon: "zap",
   },
   {
-    id: 'free',
-    name: 'Free Standard Shipping',
-    description: 'For orders over $50',
+    id: "free",
+    name: "Free Standard Shipping",
+    description: "For orders over $50",
     price: 0,
-    estimatedDays: '5-7 business days',
-    icon: 'truck',
+    estimatedDays: "5-7 business days",
+    icon: "truck",
   },
-]
+];

@@ -1,20 +1,28 @@
 // Orders Data Access Layer
 // CRUD and transaction functions for order management
 
-import { db } from './client'
-import { ensureTenantAccess } from './tenant'
-import { getCartById, clearCart } from './cart'
-import { validateCoupon, calculateDiscount, incrementCouponUsage } from './coupons'
-import type { Prisma } from '@prisma/client'
-import type { OrderStatus, PaymentStatus, PaymentMethod } from '@/lib/types/user-role'
+import { db } from "./client";
+import { ensureTenantAccess } from "./tenant";
+import { getCartById, clearCart } from "./cart";
+import {
+  validateCoupon,
+  calculateDiscount,
+  incrementCouponUsage,
+} from "./coupons";
+import type { Prisma } from "@prisma/client";
+import type {
+  OrderStatus,
+  PaymentStatus,
+  PaymentMethod,
+} from "@/lib/types/user-role";
 
 /**
  * Generates a unique order number
  * Format: ORD-YYYY-NNNNNN
  */
 async function generateOrderNumber(): Promise<string> {
-  const year = new Date().getFullYear()
-  const prefix = `ORD-${year}-`
+  const year = new Date().getFullYear();
+  const prefix = `ORD-${year}-`;
 
   // Get the last order number for this year
   const lastOrder = await db.order.findFirst({
@@ -24,23 +32,26 @@ async function generateOrderNumber(): Promise<string> {
       },
     },
     orderBy: {
-      orderNumber: 'desc',
+      orderNumber: "desc",
     },
     select: {
       orderNumber: true,
     },
-  })
+  });
 
-  let sequence = 1
+  let sequence = 1;
 
   if (lastOrder) {
-    const lastSequence = parseInt(lastOrder.orderNumber.split('-')[2] || '0', 10)
-    sequence = lastSequence + 1
+    const lastSequence = parseInt(
+      lastOrder.orderNumber.split("-")[2] || "0",
+      10,
+    );
+    sequence = lastSequence + 1;
   }
 
-  const orderNumber = `${prefix}${sequence.toString().padStart(6, '0')}`
+  const orderNumber = `${prefix}${sequence.toString().padStart(6, "0")}`;
 
-  return orderNumber
+  return orderNumber;
 }
 
 /**
@@ -63,31 +74,31 @@ async function generateOrderNumber(): Promise<string> {
  * @returns Created order
  */
 export async function createOrder(data: {
-  userId: string
-  tenantId: string
-  cartId: string
-  shippingAddressId: string
-  billingAddressId?: string | null
-  paymentMethod: PaymentMethod
-  paymentIntentId?: string | null
-  couponCode?: string | null
-  notes?: string | null
+  userId: string;
+  tenantId: string;
+  cartId: string;
+  shippingAddressId: string;
+  billingAddressId?: string | null;
+  paymentMethod: PaymentMethod;
+  paymentIntentId?: string | null;
+  couponCode?: string | null;
+  notes?: string | null;
 }) {
-  await ensureTenantAccess(data.tenantId)
+  await ensureTenantAccess(data.tenantId);
 
   // Get cart with items
-  const cart = await getCartById(data.tenantId, data.cartId)
+  const cart = await getCartById(data.tenantId, data.cartId);
 
   if (!cart) {
-    throw new Error('Cart not found or does not belong to tenant')
+    throw new Error("Cart not found or does not belong to tenant");
   }
 
   if (cart.items.length === 0) {
-    throw new Error('Cart is empty')
+    throw new Error("Cart is empty");
   }
 
   if (cart.userId !== data.userId) {
-    throw new Error('Cart does not belong to this user')
+    throw new Error("Cart does not belong to this user");
   }
 
   // Verify addresses belong to user
@@ -100,31 +111,31 @@ export async function createOrder(data: {
           where: { id: data.billingAddressId, userId: data.userId },
         })
       : null,
-  ])
+  ]);
 
   if (!shippingAddress) {
-    throw new Error('Shipping address not found')
+    throw new Error("Shipping address not found");
   }
 
   if (data.billingAddressId && !billingAddress) {
-    throw new Error('Billing address not found')
+    throw new Error("Billing address not found");
   }
 
   // Calculate totals
   const subtotal = cart.items.reduce((sum: any, item: any) => {
-    const price = Number(item.priceSnapshot)
-    return sum + price * item.quantity
-  }, 0)
+    const price = Number(item.priceSnapshot);
+    return sum + price * item.quantity;
+  }, 0);
 
   // Free shipping if subtotal > $100
-  const shippingCost = subtotal > 1000 ? 0 : 99 // $9.99 shipping
+  const shippingCost = subtotal > 1000 ? 0 : 99; // $9.99 shipping
 
   // Tax rate 16%
-  const tax = subtotal * 0.16
+  const tax = subtotal * 0.16;
 
   // Discount from coupon
-  let discount = 0
-  let validatedCoupon = null
+  let discount = 0;
+  let validatedCoupon = null;
 
   if (data.couponCode) {
     try {
@@ -132,8 +143,8 @@ export async function createOrder(data: {
       validatedCoupon = await validateCoupon(
         data.tenantId,
         data.couponCode,
-        subtotal + shippingCost + tax
-      )
+        subtotal + shippingCost + tax,
+      );
 
       // Calculate discount amount
       discount = calculateDiscount(
@@ -142,26 +153,26 @@ export async function createOrder(data: {
           value: validatedCoupon.value,
           maxDiscount: validatedCoupon.maxDiscount,
         },
-        subtotal + shippingCost + tax
-      )
+        subtotal + shippingCost + tax,
+      );
 
       console.log(
-        `[ORDERS] Coupon ${data.couponCode} applied, discount: $${discount.toFixed(2)}`
-      )
+        `[ORDERS] Coupon ${data.couponCode} applied, discount: $${discount.toFixed(2)}`,
+      );
     } catch (error) {
       console.warn(
         `[ORDERS] Coupon validation failed for ${data.couponCode}:`,
-        error instanceof Error ? error.message : 'Unknown error'
-      )
+        error instanceof Error ? error.message : "Unknown error",
+      );
       // Continue without discount if coupon is invalid
       // The API layer should validate before calling this, but we handle it gracefully
     }
   }
 
-  const total = subtotal + shippingCost + tax - discount
+  const total = subtotal + shippingCost + tax - discount;
 
   // Generate order number
-  const orderNumber = await generateOrderNumber()
+  const orderNumber = await generateOrderNumber();
 
   // Create order with transaction
   const order = await db.$transaction(async (tx: any) => {
@@ -180,12 +191,12 @@ export async function createOrder(data: {
         billingAddressId: data.billingAddressId || data.shippingAddressId,
         paymentMethod: data.paymentMethod,
         paymentId: data.paymentIntentId,
-        paymentStatus: data.paymentIntentId ? 'COMPLETED' : 'PENDING',
-        status: data.paymentIntentId ? 'PROCESSING' : 'PENDING',
+        paymentStatus: data.paymentIntentId ? "COMPLETED" : "PENDING",
+        status: data.paymentIntentId ? "PROCESSING" : "PENDING",
         couponCode: data.couponCode,
         notes: data.notes,
       },
-    })
+    });
 
     // Create order items
     // NOTE: Stock is NO LONGER deducted here
@@ -202,37 +213,39 @@ export async function createOrder(data: {
           quantity: cartItem.quantity,
           priceAtPurchase: cartItem.priceSnapshot,
         },
-      })
+      });
     }
 
     // Clear cart
     await tx.cartItem.deleteMany({
       where: { cartId: data.cartId },
-    })
+    });
 
-    return newOrder
-  })
+    return newOrder;
+  });
 
   console.log(
-    `[ORDERS] Created order ${orderNumber} for user ${data.userId}, total: $${total.toFixed(2)}`
-  )
+    `[ORDERS] Created order ${orderNumber} for user ${data.userId}, total: $${total.toFixed(2)}`,
+  );
 
   // Increment coupon usage count if coupon was used
   if (validatedCoupon) {
     try {
-      await incrementCouponUsage(validatedCoupon.id)
-      console.log(`[ORDERS] Incremented usage count for coupon ${data.couponCode}`)
+      await incrementCouponUsage(validatedCoupon.id);
+      console.log(
+        `[ORDERS] Incremented usage count for coupon ${data.couponCode}`,
+      );
     } catch (error) {
       console.error(
         `[ORDERS] Failed to increment coupon usage for ${data.couponCode}:`,
-        error
-      )
+        error,
+      );
       // Don't fail the order if coupon increment fails
     }
   }
 
   // Return order with items
-  return await getOrderById(order.id, data.tenantId)
+  return await getOrderById(order.id, data.tenantId);
 }
 
 /**
@@ -242,12 +255,12 @@ export async function createOrder(data: {
  * @returns Order with items and addresses
  */
 export async function getOrderById(orderId: string, tenantId: string) {
-  await ensureTenantAccess(tenantId)
+  await ensureTenantAccess(tenantId);
 
   const order = await db.order.findFirst({
     where: {
       id: orderId,
-      tenantId
+      tenantId,
     },
     include: {
       items: {
@@ -259,7 +272,7 @@ export async function getOrderById(orderId: string, tenantId: string) {
               slug: true,
               images: {
                 take: 1,
-                orderBy: { order: 'asc' },
+                orderBy: { order: "asc" },
               },
             },
           },
@@ -284,9 +297,9 @@ export async function getOrderById(orderId: string, tenantId: string) {
         },
       },
     },
-  })
+  });
 
-  return order
+  return order;
 }
 
 /**
@@ -300,22 +313,22 @@ export async function getOrdersByUser(
   userId: string,
   tenantId: string,
   filters?: {
-    status?: OrderStatus
-    page?: number
-    limit?: number
-  }
+    status?: OrderStatus;
+    page?: number;
+    limit?: number;
+  },
 ) {
-  await ensureTenantAccess(tenantId)
+  await ensureTenantAccess(tenantId);
 
-  const page = filters?.page || 1
-  const limit = filters?.limit || 20
-  const skip = (page - 1) * limit
+  const page = filters?.page || 1;
+  const limit = filters?.limit || 20;
+  const skip = (page - 1) * limit;
 
   const where: any = {
     userId,
     tenantId,
     ...(filters?.status && { status: filters.status }),
-  }
+  };
 
   const [orders, total] = await Promise.all([
     db.order.findMany({
@@ -330,19 +343,19 @@ export async function getOrdersByUser(
                 slug: true,
                 images: {
                   take: 1,
-                  orderBy: { order: 'asc' },
+                  orderBy: { order: "asc" },
                 },
               },
             },
           },
         },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
       skip,
       take: limit,
     }),
     db.order.count({ where }),
-  ])
+  ]);
 
   return {
     orders,
@@ -352,7 +365,7 @@ export async function getOrdersByUser(
       total,
       pages: Math.ceil(total / limit),
     },
-  }
+  };
 }
 
 /**
@@ -364,23 +377,23 @@ export async function getOrdersByUser(
 export async function getOrdersByTenant(
   tenantId: string,
   filters: {
-    page?: number
-    limit?: number
-    status?: OrderStatus
-    paymentStatus?: PaymentStatus
-    startDate?: Date
-    endDate?: Date
-    minAmount?: number
-    maxAmount?: number
-    customerId?: string
-    sort?: string
-  }
+    page?: number;
+    limit?: number;
+    status?: OrderStatus;
+    paymentStatus?: PaymentStatus;
+    startDate?: Date;
+    endDate?: Date;
+    minAmount?: number;
+    maxAmount?: number;
+    customerId?: string;
+    sort?: string;
+  },
 ) {
-  await ensureTenantAccess(tenantId)
+  await ensureTenantAccess(tenantId);
 
-  const page = filters.page || 1
-  const limit = filters.limit || 20
-  const skip = (page - 1) * limit
+  const page = filters.page || 1;
+  const limit = filters.limit || 20;
+  const skip = (page - 1) * limit;
 
   const where: any = {
     tenantId,
@@ -396,22 +409,22 @@ export async function getOrdersByTenant(
           lte: filters.endDate,
         },
       }),
-  }
+  };
 
   // Determine sort order
-  let orderBy: any = { createdAt: 'desc' }
+  let orderBy: any = { createdAt: "desc" };
 
   if (filters.sort) {
     const sortMap: Record<string, any> = {
-      'date-asc': { createdAt: 'asc' },
-      'date-desc': { createdAt: 'desc' },
-      'total-asc': { total: 'asc' },
-      'total-desc': { total: 'desc' },
-      'status-asc': { status: 'asc' },
-      'status-desc': { status: 'desc' },
-    }
+      "date-asc": { createdAt: "asc" },
+      "date-desc": { createdAt: "desc" },
+      "total-asc": { total: "asc" },
+      "total-desc": { total: "desc" },
+      "status-asc": { status: "asc" },
+      "status-desc": { status: "desc" },
+    };
 
-    orderBy = sortMap[filters.sort] || orderBy
+    orderBy = sortMap[filters.sort] || orderBy;
   }
 
   const [orders, total] = await Promise.all([
@@ -427,7 +440,7 @@ export async function getOrdersByTenant(
                 slug: true,
                 images: {
                   take: 1,
-                  orderBy: { order: 'asc' },
+                  orderBy: { order: "asc" },
                 },
               },
             },
@@ -446,7 +459,7 @@ export async function getOrdersByTenant(
       take: limit,
     }),
     db.order.count({ where }),
-  ])
+  ]);
 
   return {
     orders,
@@ -456,7 +469,7 @@ export async function getOrdersByTenant(
       total,
       pages: Math.ceil(total / limit),
     },
-  }
+  };
 }
 
 /**
@@ -471,18 +484,18 @@ export async function updateOrderStatus(
   orderId: string,
   status: OrderStatus,
   trackingNumber?: string,
-  adminNotes?: string
+  adminNotes?: string,
 ) {
   const order = await db.order.findUnique({
     where: { id: orderId },
     select: { tenantId: true },
-  })
+  });
 
   if (!order) {
-    throw new Error('Order not found')
+    throw new Error("Order not found");
   }
 
-  await ensureTenantAccess(order.tenantId)
+  await ensureTenantAccess(order.tenantId);
 
   const updated = await db.order.update({
     where: { id: orderId },
@@ -511,11 +524,11 @@ export async function updateOrderStatus(
         },
       },
     },
-  })
+  });
 
-  console.log(`[ORDERS] Updated order ${orderId} status to ${status}`)
+  console.log(`[ORDERS] Updated order ${orderId} status to ${status}`);
 
-  return updated
+  return updated;
 }
 
 /**
@@ -529,17 +542,17 @@ export async function cancelOrder(orderId: string) {
     include: {
       items: true,
     },
-  })
+  });
 
   if (!order) {
-    throw new Error('Order not found')
+    throw new Error("Order not found");
   }
 
-  await ensureTenantAccess(order.tenantId)
+  await ensureTenantAccess(order.tenantId);
 
   // Only allow cancellation of PENDING or PROCESSING orders
-  if (!['PENDING', 'PROCESSING'].includes(order.status)) {
-    throw new Error('Cannot cancel order in current status')
+  if (!["PENDING", "PROCESSING"].includes(order.status)) {
+    throw new Error("Cannot cancel order in current status");
   }
 
   // Restore stock for all items
@@ -555,21 +568,21 @@ export async function cancelOrder(orderId: string) {
             decrement: item.quantity,
           },
         },
-      })
+      });
     }
 
     // Update order status
     await tx.order.update({
       where: { id: orderId },
       data: {
-        status: 'CANCELLED',
+        status: "CANCELLED",
       },
-    })
-  })
+    });
+  });
 
-  console.log(`[ORDERS] Cancelled order ${orderId} and restored stock`)
+  console.log(`[ORDERS] Cancelled order ${orderId} and restored stock`);
 
-  return await getOrderById(orderId, order.tenantId)
+  return await getOrderById(orderId, order.tenantId);
 }
 
 /**
@@ -578,19 +591,24 @@ export async function cancelOrder(orderId: string) {
  * @returns Order stats
  */
 export async function getOrderStats(tenantId: string) {
-  await ensureTenantAccess(tenantId)
+  await ensureTenantAccess(tenantId);
 
-  const [totalOrders, totalRevenue, pendingOrders, processingOrders, shippedOrders] =
-    await Promise.all([
-      db.order.count({ where: { tenantId } }),
-      db.order.aggregate({
-        where: { tenantId, paymentStatus: 'COMPLETED' },
-        _sum: { total: true },
-      }),
-      db.order.count({ where: { tenantId, status: 'PENDING' } }),
-      db.order.count({ where: { tenantId, status: 'PROCESSING' } }),
-      db.order.count({ where: { tenantId, status: 'SHIPPED' } }),
-    ])
+  const [
+    totalOrders,
+    totalRevenue,
+    pendingOrders,
+    processingOrders,
+    shippedOrders,
+  ] = await Promise.all([
+    db.order.count({ where: { tenantId } }),
+    db.order.aggregate({
+      where: { tenantId, paymentStatus: "COMPLETED" },
+      _sum: { total: true },
+    }),
+    db.order.count({ where: { tenantId, status: "PENDING" } }),
+    db.order.count({ where: { tenantId, status: "PROCESSING" } }),
+    db.order.count({ where: { tenantId, status: "SHIPPED" } }),
+  ]);
 
   return {
     totalOrders,
@@ -598,5 +616,5 @@ export async function getOrderStats(tenantId: string) {
     pendingOrders,
     processingOrders,
     shippedOrders,
-  }
+  };
 }

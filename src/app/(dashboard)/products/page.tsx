@@ -1,35 +1,51 @@
-import Link from 'next/link'
-import { auth } from '@/lib/auth/auth'
-import { getProducts } from '@/lib/db/products'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { ProductsTable } from '@/components/dashboard/ProductsTable'
+import Link from "next/link";
+import { auth } from "@/lib/auth/auth";
+import { getProducts } from "@/lib/db/products";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { ProductsTable } from "@/components/dashboard/ProductsTable";
 
 export default async function ProductsPage({
   searchParams,
 }: {
-  searchParams: { page?: string; search?: string; category?: string; status?: string }
+  searchParams: {
+    page?: string;
+    search?: string;
+    category?: string;
+    status?: string;
+  };
 }) {
-  const session = await auth()
+  const session = await auth();
 
   if (!session?.user?.tenantId) {
-    return <div>No tenant found</div>
+    return <div>No tenant found</div>;
   }
 
-  const page = parseInt(searchParams.page || '1')
-  const pageSize = 10
+  const page = parseInt(searchParams.page || "1");
+  const pageSize = 10;
 
   // Get products with filters
   const results = await getProducts(session.user.tenantId, {
     page,
     limit: pageSize,
-    sort: 'newest',
+    sort: "newest",
     search: searchParams.search,
     categoryId: searchParams.category,
-    published: searchParams.status === 'active' ? true : searchParams.status === 'inactive' ? false : undefined,
-  })
+    published:
+      searchParams.status === "active"
+        ? true
+        : searchParams.status === "inactive"
+          ? false
+          : undefined,
+  });
 
-  const products = results.products
+  const products = results.products;
 
   return (
     <div className="space-y-6">
@@ -72,5 +88,5 @@ export default async function ProductsPage({
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

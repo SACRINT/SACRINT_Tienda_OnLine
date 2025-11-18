@@ -1,10 +1,16 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
-import { useSession } from 'next-auth/react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -12,7 +18,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from "@/components/ui/table";
 import {
   User,
   Mail,
@@ -23,83 +29,87 @@ import {
   Phone,
   ArrowLeft,
   RefreshCw,
-} from 'lucide-react'
-import { formatCurrency } from '@/lib/analytics/types'
-import { format } from 'date-fns'
-import Link from 'next/link'
+} from "lucide-react";
+import { formatCurrency } from "@/lib/analytics/types";
+import { format } from "date-fns";
+import Link from "next/link";
 
 interface CustomerDetail {
-  id: string
-  name: string | null
-  email: string
-  phone: string | null
-  createdAt: string
+  id: string;
+  name: string | null;
+  email: string;
+  phone: string | null;
+  createdAt: string;
   orders: Array<{
-    id: string
-    orderNumber: string
-    status: string
-    total: number
-    createdAt: string
+    id: string;
+    orderNumber: string;
+    status: string;
+    total: number;
+    createdAt: string;
     items: Array<{
-      id: string
-      quantity: number
-      price: number
+      id: string;
+      quantity: number;
+      price: number;
       product: {
-        name: string
-      }
-    }>
-  }>
+        name: string;
+      };
+    }>;
+  }>;
   addresses: Array<{
-    id: string
-    street: string
-    city: string
-    state: string
-    zipCode: string
-    country: string
-    isDefault: boolean
-  }>
+    id: string;
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+    isDefault: boolean;
+  }>;
   stats: {
-    totalOrders: number
-    totalSpent: number
-    averageOrderValue: number
-    lastOrderDate: string | null
-  }
+    totalOrders: number;
+    totalSpent: number;
+    averageOrderValue: number;
+    lastOrderDate: string | null;
+  };
 }
 
-export default function CustomerDetailPage({ params }: { params: { id: string } }) {
-  const { data: session } = useSession()
-  const [customer, setCustomer] = useState<CustomerDetail | null>(null)
-  const [loading, setLoading] = useState(true)
+export default function CustomerDetailPage({
+  params,
+}: {
+  params: { id: string };
+}) {
+  const { data: session } = useSession();
+  const [customer, setCustomer] = useState<CustomerDetail | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (session?.user?.tenantId) {
-      fetchCustomer()
+      fetchCustomer();
     }
-  }, [session])
+  }, [session]);
 
   const fetchCustomer = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
       const res = await fetch(
-        `/api/customers/${params.id}?tenantId=${session?.user?.tenantId}`
-      )
+        `/api/customers/${params.id}?tenantId=${session?.user?.tenantId}`,
+      );
       if (res.ok) {
-        const data = await res.json()
-        setCustomer(data)
+        const data = await res.json();
+        setCustomer(data);
       }
     } catch (error) {
-      console.error('Error fetching customer:', error)
+      console.error("Error fetching customer:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   if (loading) {
     return (
       <div className="flex h-96 items-center justify-center">
         <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
-    )
+    );
   }
 
   if (!customer) {
@@ -107,19 +117,19 @@ export default function CustomerDetailPage({ params }: { params: { id: string } 
       <div className="flex h-96 items-center justify-center">
         <p className="text-muted-foreground">Customer not found</p>
       </div>
-    )
+    );
   }
 
   const getStatusBadge = (status: string) => {
     const variants: Record<string, string> = {
-      PENDING: 'bg-yellow-100 text-yellow-800',
-      PROCESSING: 'bg-blue-100 text-blue-800',
-      SHIPPED: 'bg-purple-100 text-purple-800',
-      DELIVERED: 'bg-green-100 text-green-800',
-      CANCELLED: 'bg-red-100 text-red-800',
-    }
-    return <Badge className={variants[status] || ''}>{status}</Badge>
-  }
+      PENDING: "bg-yellow-100 text-yellow-800",
+      PROCESSING: "bg-blue-100 text-blue-800",
+      SHIPPED: "bg-purple-100 text-purple-800",
+      DELIVERED: "bg-green-100 text-green-800",
+      CANCELLED: "bg-red-100 text-red-800",
+    };
+    return <Badge className={variants[status] || ""}>{status}</Badge>;
+  };
 
   return (
     <div className="space-y-6">
@@ -132,7 +142,9 @@ export default function CustomerDetailPage({ params }: { params: { id: string } 
               Back to Customers
             </Button>
           </Link>
-          <h1 className="text-3xl font-bold mt-2">{customer.name || 'Customer'}</h1>
+          <h1 className="text-3xl font-bold mt-2">
+            {customer.name || "Customer"}
+          </h1>
           <p className="text-gray-600">{customer.email}</p>
         </div>
         <Button onClick={fetchCustomer} variant="outline">
@@ -151,7 +163,9 @@ export default function CustomerDetailPage({ params }: { params: { id: string } 
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{customer.stats.totalOrders}</div>
+            <div className="text-2xl font-bold">
+              {customer.stats.totalOrders}
+            </div>
           </CardContent>
         </Card>
 
@@ -193,8 +207,8 @@ export default function CustomerDetailPage({ params }: { params: { id: string } 
           <CardContent>
             <div className="text-sm font-medium">
               {customer.stats.lastOrderDate
-                ? format(new Date(customer.stats.lastOrderDate), 'MMM d, yyyy')
-                : 'Never'}
+                ? format(new Date(customer.stats.lastOrderDate), "MMM d, yyyy")
+                : "Never"}
             </div>
           </CardContent>
         </Card>
@@ -220,7 +234,8 @@ export default function CustomerDetailPage({ params }: { params: { id: string } 
             <div className="flex items-center gap-3">
               <Calendar className="h-4 w-4 text-gray-500" />
               <span className="text-sm">
-                Customer since {format(new Date(customer.createdAt), 'MMM d, yyyy')}
+                Customer since{" "}
+                {format(new Date(customer.createdAt), "MMM d, yyyy")}
               </span>
             </div>
           </CardContent>
@@ -270,7 +285,9 @@ export default function CustomerDetailPage({ params }: { params: { id: string } 
         </CardHeader>
         <CardContent>
           {customer.orders.length === 0 ? (
-            <p className="text-sm text-gray-500 text-center py-8">No orders yet</p>
+            <p className="text-sm text-gray-500 text-center py-8">
+              No orders yet
+            </p>
           ) : (
             <Table>
               <TableHeader>
@@ -286,9 +303,11 @@ export default function CustomerDetailPage({ params }: { params: { id: string } 
               <TableBody>
                 {customer.orders.map((order) => (
                   <TableRow key={order.id}>
-                    <TableCell className="font-medium">{order.orderNumber}</TableCell>
+                    <TableCell className="font-medium">
+                      {order.orderNumber}
+                    </TableCell>
                     <TableCell>
-                      {format(new Date(order.createdAt), 'MMM d, yyyy')}
+                      {format(new Date(order.createdAt), "MMM d, yyyy")}
                     </TableCell>
                     <TableCell>{order.items.length} items</TableCell>
                     <TableCell>{formatCurrency(order.total)}</TableCell>
@@ -308,5 +327,5 @@ export default function CustomerDetailPage({ params }: { params: { id: string } 
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

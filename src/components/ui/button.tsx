@@ -1,20 +1,17 @@
-import * as React from "react"
-import { cva, type VariantProps } from "class-variance-authority"
-import { cn } from "@/lib/utils/cn"
+import * as React from "react";
+import { cva, type VariantProps } from "class-variance-authority";
+import { cn } from "@/lib/utils/cn";
 
 const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
-        default:
-          "bg-primary text-white shadow hover:bg-primary/90",
-        destructive:
-          "bg-red-500 text-white shadow-sm hover:bg-red-500/90",
+        default: "bg-primary text-white shadow hover:bg-primary/90",
+        destructive: "bg-red-500 text-white shadow-sm hover:bg-red-500/90",
         outline:
           "border border-accent bg-white shadow-sm hover:bg-neutral-light hover:text-primary",
-        secondary:
-          "bg-accent text-white shadow-sm hover:bg-accent/80",
+        secondary: "bg-accent text-white shadow-sm hover:bg-accent/80",
         ghost: "hover:bg-neutral-light hover:text-primary",
         link: "text-primary underline-offset-4 hover:underline",
       },
@@ -29,13 +26,13 @@ const buttonVariants = cva(
       variant: "default",
       size: "default",
     },
-  }
-)
+  },
+);
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
-  asChild?: boolean
+  asChild?: boolean;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -46,9 +43,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         {...props}
       />
-    )
-  }
-)
-Button.displayName = "Button"
+    );
+  },
+);
+Button.displayName = "Button";
 
-export { Button, buttonVariants }
+export { Button, buttonVariants };

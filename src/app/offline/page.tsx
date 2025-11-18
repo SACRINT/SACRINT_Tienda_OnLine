@@ -1,11 +1,11 @@
-import { WifiOff, RefreshCw, Home } from 'lucide-react'
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
+import { WifiOff, RefreshCw, Home } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export const metadata = {
-  title: 'Offline - Tienda Online',
-  description: 'You are currently offline',
-}
+  title: "Offline - Tienda Online",
+  description: "You are currently offline",
+};
 
 export default function OfflinePage() {
   return (
@@ -25,8 +25,8 @@ export default function OfflinePage() {
 
         {/* Description */}
         <p className="text-gray-600 mb-8">
-          It looks like you&apos;ve lost your internet connection. Please check your
-          connection and try again.
+          It looks like you&apos;ve lost your internet connection. Please check
+          your connection and try again.
         </p>
 
         {/* Actions */}
@@ -82,5 +82,5 @@ export default function OfflinePage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

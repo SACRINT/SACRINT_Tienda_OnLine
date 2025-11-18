@@ -1,36 +1,36 @@
-import { notFound } from 'next/navigation'
-import Image from 'next/image'
-import { auth } from '@/lib/auth/auth'
-import { getOrderById } from '@/lib/db/orders'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { OrderStatusUpdater } from '@/components/dashboard/OrderStatusUpdater'
+import { notFound } from "next/navigation";
+import Image from "next/image";
+import { auth } from "@/lib/auth/auth";
+import { getOrderById } from "@/lib/db/orders";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { OrderStatusUpdater } from "@/components/dashboard/OrderStatusUpdater";
 
 export default async function OrderDetailPage({
   params,
 }: {
-  params: { id: string }
+  params: { id: string };
 }) {
-  const session = await auth()
+  const session = await auth();
 
   if (!session?.user?.tenantId) {
-    return <div>No tenant found</div>
+    return <div>No tenant found</div>;
   }
 
-  const order = await getOrderById(params.id, session.user.tenantId)
+  const order = await getOrderById(params.id, session.user.tenantId);
 
   if (!order) {
-    notFound()
+    notFound();
   }
 
   const statusLabels = {
-    PENDING: 'Pendiente',
-    PROCESSING: 'Procesando',
-    PAID: 'Pagado',
-    SHIPPED: 'Enviado',
-    DELIVERED: 'Entregado',
-    CANCELLED: 'Cancelado',
-    FAILED: 'Fallido',
-  }
+    PENDING: "Pendiente",
+    PROCESSING: "Procesando",
+    PAID: "Pagado",
+    SHIPPED: "Enviado",
+    DELIVERED: "Entregado",
+    CANCELLED: "Cancelado",
+    FAILED: "Fallido",
+  };
 
   return (
     <div className="space-y-6">
@@ -39,7 +39,7 @@ export default async function OrderDetailPage({
           Orden #{order.orderNumber}
         </h2>
         <p className="text-gray-600 mt-1">
-          Creada el {new Date(order.createdAt).toLocaleDateString('es-ES')}
+          Creada el {new Date(order.createdAt).toLocaleDateString("es-ES")}
         </p>
       </div>
 
@@ -96,7 +96,7 @@ export default async function OrderDetailPage({
                   <p className="font-medium">{order.shippingAddress.name}</p>
                   <p>{order.shippingAddress.street}</p>
                   <p>
-                    {order.shippingAddress.city}, {order.shippingAddress.state}{' '}
+                    {order.shippingAddress.city}, {order.shippingAddress.state}{" "}
                     {order.shippingAddress.postalCode}
                   </p>
                   <p>{order.shippingAddress.country}</p>
@@ -120,19 +120,27 @@ export default async function OrderDetailPage({
             <CardContent className="space-y-2">
               <div className="flex justify-between">
                 <span className="text-gray-600">Subtotal:</span>
-                <span className="font-medium">${parseFloat(String(order.subtotal)).toFixed(2)}</span>
+                <span className="font-medium">
+                  ${parseFloat(String(order.subtotal)).toFixed(2)}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Envío:</span>
-                <span className="font-medium">${parseFloat(String(order.shippingCost)).toFixed(2)}</span>
+                <span className="font-medium">
+                  ${parseFloat(String(order.shippingCost)).toFixed(2)}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Impuestos:</span>
-                <span className="font-medium">${parseFloat(String(order.tax)).toFixed(2)}</span>
+                <span className="font-medium">
+                  ${parseFloat(String(order.tax)).toFixed(2)}
+                </span>
               </div>
               <div className="flex justify-between pt-2 border-t">
                 <span className="font-bold">Total:</span>
-                <span className="font-bold text-lg">${parseFloat(String(order.total)).toFixed(2)}</span>
+                <span className="font-bold text-lg">
+                  ${parseFloat(String(order.total)).toFixed(2)}
+                </span>
               </div>
             </CardContent>
           </Card>
@@ -142,7 +150,7 @@ export default async function OrderDetailPage({
               <CardTitle>Cliente</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              <p className="font-medium">{order.user.name || 'Sin nombre'}</p>
+              <p className="font-medium">{order.user.name || "Sin nombre"}</p>
               <p className="text-sm text-gray-600">{order.user.email}</p>
             </CardContent>
           </Card>
@@ -152,11 +160,14 @@ export default async function OrderDetailPage({
               <CardTitle>Estado de la Orden</CardTitle>
             </CardHeader>
             <CardContent>
-              <OrderStatusUpdater orderId={order.id} currentStatus={order.status} />
+              <OrderStatusUpdater
+                orderId={order.id}
+                currentStatus={order.status}
+              />
             </CardContent>
           </Card>
         </div>
       </div>
     </div>
-  )
+  );
 }

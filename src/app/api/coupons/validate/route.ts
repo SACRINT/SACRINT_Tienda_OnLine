@@ -1,10 +1,10 @@
 // Coupon Validation API
 // POST /api/coupons/validate - Validate and calculate coupon discount
 
-import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/lib/auth/auth'
-import { z } from 'zod'
-import { db } from '@/lib/db/client'
+import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth/auth";
+import { z } from "zod";
+import { db } from "@/lib/db/client";
 
 // Coupon validation schema
 const CouponValidationSchema = z.object({
@@ -12,25 +12,25 @@ const CouponValidationSchema = z.object({
   code: z.string().min(1).max(50),
   cartTotal: z.number().positive(),
   userId: z.string().uuid().optional(),
-})
+});
 
 export async function POST(req: NextRequest) {
   try {
     // Parse and validate request body
-    const body = await req.json()
-    const validation = CouponValidationSchema.safeParse(body)
+    const body = await req.json();
+    const validation = CouponValidationSchema.safeParse(body);
 
     if (!validation.success) {
       return NextResponse.json(
         {
-          error: 'Invalid request data',
+          error: "Invalid request data",
           details: validation.error.issues,
         },
-        { status: 400 }
-      )
+        { status: 400 },
+      );
     }
 
-    const { tenantId, code, cartTotal } = validation.data
+    const { tenantId, code, cartTotal } = validation.data;
 
     // Find coupon by code and tenant
     const coupon = await db.coupon.findFirst({
@@ -38,18 +38,18 @@ export async function POST(req: NextRequest) {
         tenantId,
         code: code.toUpperCase(),
       },
-    })
+    });
 
     // Coupon not found
     if (!coupon) {
       return NextResponse.json(
         {
           isValid: false,
-          error: 'INVALID_CODE',
-          message: 'Invalid coupon code',
+          error: "INVALID_CODE",
+          message: "Invalid coupon code",
         },
-        { status: 400 }
-      )
+        { status: 400 },
+      );
     }
 
     // Check if coupon has expired
@@ -57,12 +57,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           isValid: false,
-          error: 'EXPIRED',
-          message: 'This coupon has expired',
+          error: "EXPIRED",
+          message: "This coupon has expired",
           expiresAt: coupon.expiresAt,
         },
-        { status: 400 }
-      )
+        { status: 400 },
+      );
     }
 
     // Check minimum purchase requirement
@@ -70,38 +70,38 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           isValid: false,
-          error: 'MIN_PURCHASE_NOT_MET',
+          error: "MIN_PURCHASE_NOT_MET",
           message: `Minimum purchase of $${Number(coupon.minPurchase).toFixed(2)} required`,
           required: Number(coupon.minPurchase),
           current: cartTotal,
         },
-        { status: 400 }
-      )
+        { status: 400 },
+      );
     }
 
     // Calculate discount amount
-    let discountAmount = 0
+    let discountAmount = 0;
 
-    if (coupon.type === 'PERCENTAGE') {
+    if (coupon.type === "PERCENTAGE") {
       // Percentage discount
-      discountAmount = cartTotal * (Number(coupon.value) / 100)
+      discountAmount = cartTotal * (Number(coupon.value) / 100);
 
       // Apply max discount cap if exists
       if (coupon.maxDiscount && discountAmount > Number(coupon.maxDiscount)) {
-        discountAmount = Number(coupon.maxDiscount)
+        discountAmount = Number(coupon.maxDiscount);
       }
-    } else if (coupon.type === 'FIXED') {
+    } else if (coupon.type === "FIXED") {
       // Fixed amount discount
-      discountAmount = Number(coupon.value)
+      discountAmount = Number(coupon.value);
 
       // Discount cannot exceed cart total
       if (discountAmount > cartTotal) {
-        discountAmount = cartTotal
+        discountAmount = cartTotal;
       }
     }
 
     // Calculate final total
-    const finalTotal = cartTotal - discountAmount
+    const finalTotal = cartTotal - discountAmount;
 
     // Return successful validation
     return NextResponse.json(
@@ -117,7 +117,7 @@ export async function POST(req: NextRequest) {
         discount: {
           amount: parseFloat(discountAmount.toFixed(2)),
           percentage:
-            coupon.type === 'PERCENTAGE'
+            coupon.type === "PERCENTAGE"
               ? Number(coupon.value)
               : parseFloat(((discountAmount / cartTotal) * 100).toFixed(2)),
         },
@@ -127,14 +127,14 @@ export async function POST(req: NextRequest) {
           total: parseFloat(finalTotal.toFixed(2)),
         },
       },
-      { status: 200 }
-    )
+      { status: 200 },
+    );
   } catch (error) {
-    console.error('Coupon validation error:', error)
+    console.error("Coupon validation error:", error);
 
     return NextResponse.json(
-      { error: 'Failed to validate coupon' },
-      { status: 500 }
-    )
+      { error: "Failed to validate coupon" },
+      { status: 500 },
+    );
   }
 }

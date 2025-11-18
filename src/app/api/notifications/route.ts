@@ -4,11 +4,14 @@
  * POST - Create notification (admin only)
  */
 
-import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/lib/auth/auth'
-import { getUserNotifications, createNotification } from '@/lib/notifications/notification-service'
-import { z } from 'zod'
-import { NotificationType } from '@/lib/db/enums'
+import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth/auth";
+import {
+  getUserNotifications,
+  createNotification,
+} from "@/lib/notifications/notification-service";
+import { z } from "zod";
+import { NotificationType } from "@/lib/db/enums";
 
 const createNotificationSchema = z.object({
   userId: z.string().cuid(),
@@ -18,55 +21,67 @@ const createNotificationSchema = z.object({
   message: z.string().min(1),
   actionUrl: z.string().url().optional(),
   metadata: z.record(z.string(), z.any()).optional(),
-})
+});
 
 export async function GET(req: NextRequest) {
   try {
-    const session = await auth()
+    const session = await auth();
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { searchParams } = new URL(req.url)
-    const limit = parseInt(searchParams.get('limit') || '20')
-    const offset = parseInt(searchParams.get('offset') || '0')
-    const unreadOnly = searchParams.get('unreadOnly') === 'true'
+    const { searchParams } = new URL(req.url);
+    const limit = parseInt(searchParams.get("limit") || "20");
+    const offset = parseInt(searchParams.get("offset") || "0");
+    const unreadOnly = searchParams.get("unreadOnly") === "true";
 
     const result = await getUserNotifications(session.user.id, {
       limit,
       offset,
       unreadOnly,
-    })
+    });
 
-    return NextResponse.json(result)
+    return NextResponse.json(result);
   } catch (error: any) {
-    console.error('[Notifications API] GET error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    console.error("[Notifications API] GET error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await auth()
-    if (!session?.user || session.user.role === 'CUSTOMER') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    const session = await auth();
+    if (!session?.user || session.user.role === "CUSTOMER") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const body = await req.json()
-    const data = createNotificationSchema.parse(body)
+    const body = await req.json();
+    const data = createNotificationSchema.parse(body);
 
-    const result = await createNotification(data)
+    const result = await createNotification(data);
 
     if (!result.success) {
-      return NextResponse.json({ error: result.error }, { status: 400 })
+      return NextResponse.json({ error: result.error }, { status: 400 });
     }
 
-    return NextResponse.json({ success: true, notificationId: result.notificationId })
+    return NextResponse.json({
+      success: true,
+      notificationId: result.notificationId,
+    });
   } catch (error: any) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: 'Invalid request', details: error.issues }, { status: 400 })
+      return NextResponse.json(
+        { error: "Invalid request", details: error.issues },
+        { status: 400 },
+      );
     }
-    console.error('[Notifications API] POST error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    console.error("[Notifications API] POST error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }

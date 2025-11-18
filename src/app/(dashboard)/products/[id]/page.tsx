@@ -1,27 +1,27 @@
-import { notFound } from 'next/navigation'
-import { auth } from '@/lib/auth/auth'
-import { getProductById } from '@/lib/db/products'
-import { getCategoriesByTenant } from '@/lib/db/categories'
-import { ProductForm } from '@/components/dashboard/ProductForm'
+import { notFound } from "next/navigation";
+import { auth } from "@/lib/auth/auth";
+import { getProductById } from "@/lib/db/products";
+import { getCategoriesByTenant } from "@/lib/db/categories";
+import { ProductForm } from "@/components/dashboard/ProductForm";
 
 export default async function EditProductPage({
   params,
 }: {
-  params: { id: string }
+  params: { id: string };
 }) {
-  const session = await auth()
+  const session = await auth();
 
   if (!session?.user?.tenantId) {
-    return <div>No tenant found</div>
+    return <div>No tenant found</div>;
   }
 
-  const product = await getProductById(params.id, session.user.tenantId)
+  const product = await getProductById(params.id, session.user.tenantId);
 
   if (!product) {
-    notFound()
+    notFound();
   }
 
-  const categories = await getCategoriesByTenant(session.user.tenantId)
+  const categories = await getCategoriesByTenant(session.user.tenantId);
 
   return (
     <div className="space-y-6">
@@ -48,5 +48,5 @@ export default async function EditProductPage({
         categories={categories}
       />
     </div>
-  )
+  );
 }

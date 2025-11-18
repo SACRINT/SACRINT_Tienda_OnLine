@@ -1,34 +1,34 @@
 // Order Summary Component
 // Final review of order before placing
 
-'use client'
-import Image from 'next/image'
+"use client";
+import Image from "next/image";
 
-import { Package, MapPin, Truck, CreditCard, Tag, Edit2 } from 'lucide-react'
-import type { Address } from '@/components/account'
-import type { ShippingOption } from './ShippingMethod'
+import { Package, MapPin, Truck, CreditCard, Tag, Edit2 } from "lucide-react";
+import type { Address } from "@/components/account";
+import type { ShippingOption } from "./ShippingMethod";
 
 export interface CartItem {
-  id: string
-  productId: string
-  productName: string
-  productImage?: string
-  quantity: number
-  price: number
-  variantInfo?: string
+  id: string;
+  productId: string;
+  productName: string;
+  productImage?: string;
+  quantity: number;
+  price: number;
+  variantInfo?: string;
 }
 
 export interface OrderSummaryProps {
-  items: CartItem[]
-  shippingAddress: Address
-  shippingMethod: ShippingOption
-  subtotal: number
-  shippingCost: number
-  tax: number
-  discount?: number
-  couponCode?: string
-  total: number
-  onEdit?: (step: 'shipping' | 'method' | 'payment') => void
+  items: CartItem[];
+  shippingAddress: Address;
+  shippingMethod: ShippingOption;
+  subtotal: number;
+  shippingCost: number;
+  tax: number;
+  discount?: number;
+  couponCode?: string;
+  total: number;
+  onEdit?: (step: "shipping" | "method" | "payment") => void;
 }
 
 export function OrderSummary({
@@ -46,7 +46,9 @@ export function OrderSummary({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-semibold text-gray-900">Review Your Order</h2>
+        <h2 className="text-xl font-semibold text-gray-900">
+          Review Your Order
+        </h2>
         <p className="mt-1 text-sm text-gray-600">
           Please review all details before placing your order
         </p>
@@ -77,11 +79,15 @@ export function OrderSummary({
                 </div>
               )}
               <div className="flex-1">
-                <h4 className="font-medium text-gray-900">{item.productName}</h4>
+                <h4 className="font-medium text-gray-900">
+                  {item.productName}
+                </h4>
                 {item.variantInfo && (
                   <p className="text-sm text-gray-600">{item.variantInfo}</p>
                 )}
-                <p className="mt-1 text-sm text-gray-600">Qty: {item.quantity}</p>
+                <p className="mt-1 text-sm text-gray-600">
+                  Qty: {item.quantity}
+                </p>
               </div>
               <div className="text-right">
                 <p className="font-semibold text-gray-900">
@@ -107,7 +113,7 @@ export function OrderSummary({
               Shipping Address
             </h3>
             <button
-              onClick={() => onEdit?.('shipping')}
+              onClick={() => onEdit?.("shipping")}
               className="flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700"
             >
               <Edit2 className="h-4 w-4" />
@@ -116,12 +122,16 @@ export function OrderSummary({
           </div>
         </div>
         <div className="px-6 py-4">
-          <p className="font-medium text-gray-900">{shippingAddress.fullName}</p>
+          <p className="font-medium text-gray-900">
+            {shippingAddress.fullName}
+          </p>
           <div className="mt-2 space-y-1 text-sm text-gray-600">
             <p>{shippingAddress.addressLine1}</p>
-            {shippingAddress.addressLine2 && <p>{shippingAddress.addressLine2}</p>}
+            {shippingAddress.addressLine2 && (
+              <p>{shippingAddress.addressLine2}</p>
+            )}
             <p>
-              {shippingAddress.city}, {shippingAddress.state}{' '}
+              {shippingAddress.city}, {shippingAddress.state}{" "}
               {shippingAddress.postalCode}
             </p>
             <p>{shippingAddress.country}</p>
@@ -139,7 +149,7 @@ export function OrderSummary({
               Shipping Method
             </h3>
             <button
-              onClick={() => onEdit?.('method')}
+              onClick={() => onEdit?.("method")}
               className="flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700"
             >
               <Edit2 className="h-4 w-4" />
@@ -151,7 +161,9 @@ export function OrderSummary({
           <div className="flex items-center justify-between">
             <div>
               <p className="font-medium text-gray-900">{shippingMethod.name}</p>
-              <p className="text-sm text-gray-600">{shippingMethod.description}</p>
+              <p className="text-sm text-gray-600">
+                {shippingMethod.description}
+              </p>
               <p className="mt-1 text-sm text-gray-600">
                 Estimated delivery: {shippingMethod.estimatedDays}
               </p>
@@ -180,7 +192,7 @@ export function OrderSummary({
               Payment Method
             </h3>
             <button
-              onClick={() => onEdit?.('payment')}
+              onClick={() => onEdit?.("payment")}
               className="flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700"
             >
               <Edit2 className="h-4 w-4" />
@@ -259,17 +271,23 @@ export function OrderSummary({
       {/* Terms and Conditions */}
       <div className="rounded-lg bg-gray-50 p-4">
         <p className="text-sm text-gray-600">
-          By placing this order, you agree to our{' '}
-          <a href="/terms" className="font-medium text-blue-600 hover:text-blue-700">
+          By placing this order, you agree to our{" "}
+          <a
+            href="/terms"
+            className="font-medium text-blue-600 hover:text-blue-700"
+          >
             Terms of Service
-          </a>{' '}
-          and{' '}
-          <a href="/privacy" className="font-medium text-blue-600 hover:text-blue-700">
+          </a>{" "}
+          and{" "}
+          <a
+            href="/privacy"
+            className="font-medium text-blue-600 hover:text-blue-700"
+          >
             Privacy Policy
           </a>
           . Your payment information is processed securely.
         </p>
       </div>
     </div>
-  )
+  );
 }

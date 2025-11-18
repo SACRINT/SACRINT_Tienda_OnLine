@@ -2,14 +2,14 @@
 // GET /api/users/wishlist - Get user's wishlist
 // POST /api/users/wishlist - Add item to wishlist
 
-import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/lib/auth/auth'
-import { z } from 'zod'
+import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth/auth";
+import { z } from "zod";
 
 // Validation schema for adding to wishlist
 const AddToWishlistSchema = z.object({
-  productId: z.string().uuid('Invalid product ID'),
-})
+  productId: z.string().uuid("Invalid product ID"),
+});
 
 /**
  * GET /api/users/wishlist
@@ -18,22 +18,22 @@ const AddToWishlistSchema = z.object({
  */
 export async function GET(req: NextRequest) {
   try {
-    const session = await auth()
+    const session = await auth();
 
     if (!session?.user?.id) {
       return NextResponse.json(
-        { error: 'Unauthorized - You must be logged in' },
-        { status: 401 }
-      )
+        { error: "Unauthorized - You must be logged in" },
+        { status: 401 },
+      );
     }
 
-    const { tenantId } = session.user
+    const { tenantId } = session.user;
 
     if (!tenantId) {
       return NextResponse.json(
-        { error: 'User has no tenant assigned' },
-        { status: 404 }
-      )
+        { error: "User has no tenant assigned" },
+        { status: 404 },
+      );
     }
 
     // TODO: Replace with actual database query when Wishlist model is added
@@ -58,27 +58,27 @@ export async function GET(req: NextRequest) {
     // Mock data for development
     const wishlistItems = [
       {
-        id: '1',
+        id: "1",
         userId: session.user.id,
-        productId: '1',
+        productId: "1",
         product: {
-          id: '1',
-          name: 'Premium Wireless Headphones',
-          slug: 'premium-wireless-headphones',
+          id: "1",
+          name: "Premium Wireless Headphones",
+          slug: "premium-wireless-headphones",
           basePrice: 299.99,
           salePrice: 249.99,
           stock: 45,
           images: [
             {
-              url: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e',
-              alt: 'Headphones',
+              url: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e",
+              alt: "Headphones",
             },
           ],
           _count: { reviews: 128 },
         },
         createdAt: new Date(2024, 10, 10).toISOString(),
       },
-    ]
+    ];
 
     return NextResponse.json({
       wishlistItems: wishlistItems.map((item: any) => ({
@@ -94,13 +94,13 @@ export async function GET(req: NextRequest) {
         addedAt: item.createdAt,
       })),
       total: wishlistItems.length,
-    })
+    });
   } catch (error) {
-    console.error('[WISHLIST] GET error:', error)
+    console.error("[WISHLIST] GET error:", error);
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }
 
@@ -114,39 +114,39 @@ export async function GET(req: NextRequest) {
  */
 export async function POST(req: NextRequest) {
   try {
-    const session = await auth()
+    const session = await auth();
 
     if (!session?.user?.id) {
       return NextResponse.json(
-        { error: 'Unauthorized - You must be logged in' },
-        { status: 401 }
-      )
+        { error: "Unauthorized - You must be logged in" },
+        { status: 401 },
+      );
     }
 
-    const { tenantId } = session.user
+    const { tenantId } = session.user;
 
     if (!tenantId) {
       return NextResponse.json(
-        { error: 'User has no tenant assigned' },
-        { status: 404 }
-      )
+        { error: "User has no tenant assigned" },
+        { status: 404 },
+      );
     }
 
     // Parse and validate request body
-    const body = await req.json()
-    const validation = AddToWishlistSchema.safeParse(body)
+    const body = await req.json();
+    const validation = AddToWishlistSchema.safeParse(body);
 
     if (!validation.success) {
       return NextResponse.json(
         {
-          error: 'Invalid request body',
+          error: "Invalid request body",
           issues: validation.error.issues,
         },
-        { status: 400 }
-      )
+        { status: 400 },
+      );
     }
 
-    const { productId } = validation.data
+    const { productId } = validation.data;
 
     // TODO: Replace with actual database operations
     // Check if product exists and belongs to tenant
@@ -201,38 +201,35 @@ export async function POST(req: NextRequest) {
       userId: session.user.id,
       productId,
       createdAt: new Date().toISOString(),
-    }
+    };
 
     console.log(
-      `[WISHLIST] Added product ${productId} to wishlist for user ${session.user.id}`
-    )
+      `[WISHLIST] Added product ${productId} to wishlist for user ${session.user.id}`,
+    );
 
     return NextResponse.json(
       {
-        message: 'Product added to wishlist',
+        message: "Product added to wishlist",
         wishlistItem: {
           id: wishlistItem.id,
           productId: wishlistItem.productId,
           addedAt: wishlistItem.createdAt,
         },
       },
-      { status: 201 }
-    )
+      { status: 201 },
+    );
   } catch (error) {
-    console.error('[WISHLIST] POST error:', error)
+    console.error("[WISHLIST] POST error:", error);
 
     if (error instanceof Error) {
-      if (error.message.includes('already in wishlist')) {
-        return NextResponse.json(
-          { error: error.message },
-          { status: 409 }
-        )
+      if (error.message.includes("already in wishlist")) {
+        return NextResponse.json({ error: error.message }, { status: 409 });
       }
     }
 
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }

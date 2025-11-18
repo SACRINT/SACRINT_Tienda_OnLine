@@ -1,17 +1,20 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
-import { useSession } from 'next-auth/react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { CustomerSegmentation, CustomerSegment } from '@/components/admin/CustomerSegmentation'
-import { Download, RefreshCw, Users } from 'lucide-react'
-import Link from 'next/link'
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  CustomerSegmentation,
+  CustomerSegment,
+} from "@/components/admin/CustomerSegmentation";
+import { Download, RefreshCw, Users } from "lucide-react";
+import Link from "next/link";
 
 export default function CustomersPage() {
-  const { data: session } = useSession()
-  const [customers, setCustomers] = useState<CustomerSegment[]>([])
+  const { data: session } = useSession();
+  const [customers, setCustomers] = useState<CustomerSegment[]>([]);
   const [summary, setSummary] = useState({
     champions: 0,
     loyal: 0,
@@ -19,62 +22,62 @@ export default function CustomersPage() {
     lost: 0,
     new: 0,
     promising: 0,
-  })
-  const [loading, setLoading] = useState(true)
+  });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (session?.user?.tenantId) {
-      fetchCustomers()
+      fetchCustomers();
     }
-  }, [session])
+  }, [session]);
 
   const fetchCustomers = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
       const res = await fetch(
-        `/api/customers/segmentation?tenantId=${session?.user?.tenantId}`
-      )
+        `/api/customers/segmentation?tenantId=${session?.user?.tenantId}`,
+      );
       if (res.ok) {
-        const data = await res.json()
-        setCustomers(data.customers)
-        setSummary(data.summary)
+        const data = await res.json();
+        setCustomers(data.customers);
+        setSummary(data.summary);
       }
     } catch (error) {
-      console.error('Error fetching customers:', error)
+      console.error("Error fetching customers:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleExport = async () => {
-    if (!session?.user?.tenantId) return
+    if (!session?.user?.tenantId) return;
 
     try {
       const res = await fetch(
-        `/api/customers/bulk?tenantId=${session.user.tenantId}`
-      )
+        `/api/customers/bulk?tenantId=${session.user.tenantId}`,
+      );
       if (res.ok) {
-        const blob = await res.blob()
-        const url = window.URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = `customers-export-${new Date().toISOString()}.csv`
-        document.body.appendChild(a)
-        a.click()
-        window.URL.revokeObjectURL(url)
-        document.body.removeChild(a)
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `customers-export-${new Date().toISOString()}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
       }
     } catch (error) {
-      console.error('Export error:', error)
+      console.error("Export error:", error);
     }
-  }
+  };
 
   if (loading) {
     return (
       <div className="flex h-96 items-center justify-center">
         <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
-    )
+    );
   }
 
   return (
@@ -136,7 +139,8 @@ export default function CustomersPage() {
                         </div>
                         <div className="text-right">
                           <p className="text-sm text-gray-500">
-                            RFM: {customer.rfmScore.recency}/{customer.rfmScore.frequency}/
+                            RFM: {customer.rfmScore.recency}/
+                            {customer.rfmScore.frequency}/
                             {customer.rfmScore.monetary}
                           </p>
                         </div>
@@ -150,5 +154,5 @@ export default function CustomersPage() {
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }

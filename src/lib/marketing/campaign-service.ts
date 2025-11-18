@@ -10,32 +10,34 @@
  * - Automated campaigns
  */
 
-import { db } from '@/lib/db'
-import { sendEmail } from '@/lib/email/email-service'
-import { EmailTemplate } from '@/lib/db/enums'
+import { db } from "@/lib/db";
+import { sendEmail } from "@/lib/email/email-service";
+import { EmailTemplate } from "@/lib/db/enums";
 
 export interface CreateCampaignOptions {
-  tenantId: string
-  name: string
-  description?: string
-  targetSegments: string[] // RFM segments: champions, loyal, etc.
-  emailTemplate: EmailTemplate
-  emailSubject: string
-  emailData: Record<string, any>
-  scheduledFor?: Date
+  tenantId: string;
+  name: string;
+  description?: string;
+  targetSegments: string[]; // RFM segments: champions, loyal, etc.
+  emailTemplate: EmailTemplate;
+  emailSubject: string;
+  emailData: Record<string, any>;
+  scheduledFor?: Date;
 }
 
 export interface CampaignResult {
-  success: boolean
-  campaignId?: string
-  recipientsCount?: number
-  error?: string
+  success: boolean;
+  campaignId?: string;
+  recipientsCount?: number;
+  error?: string;
 }
 
 /**
  * Create and send marketing campaign
  */
-export async function createCampaign(options: CreateCampaignOptions): Promise<CampaignResult> {
+export async function createCampaign(
+  options: CreateCampaignOptions,
+): Promise<CampaignResult> {
   try {
     const {
       tenantId,
@@ -46,16 +48,16 @@ export async function createCampaign(options: CreateCampaignOptions): Promise<Ca
       emailSubject,
       emailData,
       scheduledFor,
-    } = options
+    } = options;
 
     // Get customers in target segments
-    const customers = await getCustomersInSegments(tenantId, targetSegments)
+    const customers = await getCustomersInSegments(tenantId, targetSegments);
 
     if (customers.length === 0) {
       return {
         success: false,
-        error: 'No customers found in target segments',
-      }
+        error: "No customers found in target segments",
+      };
     }
 
     // Create campaign record (would need Campaign model in Prisma)
@@ -73,21 +75,21 @@ export async function createCampaign(options: CreateCampaignOptions): Promise<Ca
         },
         userId: customer.id,
         tenantId,
-      })
-    )
+      }),
+    );
 
-    await Promise.all(emailPromises)
+    await Promise.all(emailPromises);
 
     return {
       success: true,
       recipientsCount: customers.length,
-    }
+    };
   } catch (error: any) {
-    console.error('[Campaign Service] Create error:', error)
+    console.error("[Campaign Service] Create error:", error);
     return {
       success: false,
       error: error.message,
-    }
+    };
   }
 }
 
@@ -100,13 +102,13 @@ async function getCustomersInSegments(tenantId: string, segments: string[]) {
   const customers = await db.user.findMany({
     where: {
       tenantId,
-      role: 'CUSTOMER',
+      role: "CUSTOMER",
     },
     include: {
       orders: {
         where: {
           status: {
-            in: ['DELIVERED', 'SHIPPED'],
+            in: ["DELIVERED", "SHIPPED"],
           },
         },
         select: {
@@ -115,26 +117,29 @@ async function getCustomersInSegments(tenantId: string, segments: string[]) {
         },
       },
     },
-  })
+  });
 
   // Apply segment filtering (simplified)
   return customers.filter((customer: any) => {
-    const orderCount = customer.orders.length
-    const totalSpent = customer.orders.reduce((sum: number, o: any) => sum + o.total, 0)
+    const orderCount = customer.orders.length;
+    const totalSpent = customer.orders.reduce(
+      (sum: number, o: any) => sum + o.total,
+      0,
+    );
 
     // Simple segmentation logic
-    if (segments.includes('champions')) {
-      return orderCount >= 10 && totalSpent >= 100000
+    if (segments.includes("champions")) {
+      return orderCount >= 10 && totalSpent >= 100000;
     }
-    if (segments.includes('loyal')) {
-      return orderCount >= 5 && totalSpent >= 50000
+    if (segments.includes("loyal")) {
+      return orderCount >= 5 && totalSpent >= 50000;
     }
-    if (segments.includes('new')) {
-      return orderCount === 1
+    if (segments.includes("new")) {
+      return orderCount === 1;
     }
 
-    return true // All customers
-  })
+    return true; // All customers
+  });
 }
 
 /**
@@ -151,7 +156,7 @@ export async function getCampaignAnalytics(campaignId: string) {
     bounced: 0,
     openRate: 0,
     clickRate: 0,
-  }
+  };
 }
 
 /**
@@ -161,20 +166,20 @@ export async function sendWelcomeCampaign(userId: string, tenantId: string) {
   const user = await db.user.findUnique({
     where: { id: userId },
     select: { email: true, name: true },
-  })
+  });
 
-  if (!user) return { success: false, error: 'User not found' }
+  if (!user) return { success: false, error: "User not found" };
 
   return sendEmail({
     to: user.email,
-    subject: 'Welcome to our store!',
+    subject: "Welcome to our store!",
     template: EmailTemplate.WELCOME,
     data: {
       customerName: user.name,
     },
     userId,
     tenantId,
-  })
+  });
 }
 
 /**
@@ -182,8 +187,8 @@ export async function sendWelcomeCampaign(userId: string, tenantId: string) {
  */
 export async function sendAbandonedCartReminder(tenantId: string) {
   // Find carts older than 24 hours with items
-  const cutoffDate = new Date()
-  cutoffDate.setHours(cutoffDate.getHours() - 24)
+  const cutoffDate = new Date();
+  cutoffDate.setHours(cutoffDate.getHours() - 24);
 
   const abandonedCarts = await db.cart.findMany({
     where: {
@@ -207,13 +212,13 @@ export async function sendAbandonedCartReminder(tenantId: string) {
         },
       },
     },
-  })
+  });
 
   const results = await Promise.all(
     abandonedCarts.map((cart: any) =>
       sendEmail({
         to: cart.user.email,
-        subject: 'You left items in your cart',
+        subject: "You left items in your cart",
         template: EmailTemplate.CUSTOM,
         data: {
           customerName: cart.user.name,
@@ -221,12 +226,12 @@ export async function sendAbandonedCartReminder(tenantId: string) {
         },
         userId: cart.user.id,
         tenantId,
-      })
-    )
-  )
+      }),
+    ),
+  );
 
   return {
     success: true,
     sentCount: results.filter((r: any) => r.success).length,
-  }
+  };
 }

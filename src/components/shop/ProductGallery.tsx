@@ -1,171 +1,178 @@
-'use client'
+"use client";
 
-import { useState, useRef, useEffect, useCallback } from 'react'
-import Image from 'next/image'
-import { ChevronLeft, ChevronRight, X, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { useState, useRef, useEffect, useCallback } from "react";
+import Image from "next/image";
+import {
+  ChevronLeft,
+  ChevronRight,
+  X,
+  ZoomIn,
+  ZoomOut,
+  Maximize2,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
 // Mantener compatibilidad con el código existente
 export interface GalleryImage {
-  id: string
-  url: string
-  alt?: string
-  isVideo?: boolean
+  id: string;
+  url: string;
+  alt?: string;
+  isVideo?: boolean;
 }
 
 export interface ProductGalleryProps {
-  images: GalleryImage[]
-  productName: string
-  className?: string
+  images: GalleryImage[];
+  productName: string;
+  className?: string;
 }
 
 export function ProductGallery({ images, productName }: ProductGalleryProps) {
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [isFullscreen, setIsFullscreen] = useState(false)
-  const [scale, setScale] = useState(1)
-  const [position, setPosition] = useState({ x: 0, y: 0 })
-  const [isDragging, setIsDragging] = useState(false)
-  const [startPos, setStartPos] = useState({ x: 0, y: 0 })
-  const [touchStart, setTouchStart] = useState({ x: 0, y: 0 })
-  const [initialPinchDistance, setInitialPinchDistance] = useState(0)
-  const imageRef = useRef<HTMLDivElement>(null)
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [scale, setScale] = useState(1);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [startPos, setStartPos] = useState({ x: 0, y: 0 });
+  const [touchStart, setTouchStart] = useState({ x: 0, y: 0 });
+  const [initialPinchDistance, setInitialPinchDistance] = useState(0);
+  const imageRef = useRef<HTMLDivElement>(null);
 
   // Calcular distancia entre dos puntos táctiles para pinch-to-zoom
   const getDistance = (touch1: React.Touch, touch2: React.Touch) => {
-    const dx = touch1.clientX - touch2.clientX
-    const dy = touch1.clientY - touch2.clientY
-    return Math.sqrt(dx * dx + dy * dy)
-  }
+    const dx = touch1.clientX - touch2.clientX;
+    const dy = touch1.clientY - touch2.clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  };
 
   // Navegación entre imágenes
   const goToNext = useCallback(() => {
-    setCurrentIndex((prev) => (prev + 1) % images.length)
-    resetZoom()
-  }, [images.length])
+    setCurrentIndex((prev) => (prev + 1) % images.length);
+    resetZoom();
+  }, [images.length]);
 
   const goToPrevious = useCallback(() => {
-    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length)
-    resetZoom()
-  }, [images.length])
+    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
+    resetZoom();
+  }, [images.length]);
 
   const goToImage = (index: number) => {
-    setCurrentIndex(index)
-    resetZoom()
-  }
+    setCurrentIndex(index);
+    resetZoom();
+  };
 
   // Control de zoom
   const resetZoom = () => {
-    setScale(1)
-    setPosition({ x: 0, y: 0 })
-  }
+    setScale(1);
+    setPosition({ x: 0, y: 0 });
+  };
 
   const zoomIn = () => {
-    setScale((prev) => Math.min(prev + 0.5, 4))
-  }
+    setScale((prev) => Math.min(prev + 0.5, 4));
+  };
 
   const zoomOut = () => {
     setScale((prev) => {
-      const newScale = Math.max(prev - 0.5, 1)
+      const newScale = Math.max(prev - 0.5, 1);
       if (newScale === 1) {
-        setPosition({ x: 0, y: 0 })
+        setPosition({ x: 0, y: 0 });
       }
-      return newScale
-    })
-  }
+      return newScale;
+    });
+  };
 
   // Manejo de gestos táctiles
   const handleTouchStart = (e: React.TouchEvent) => {
     if (e.touches.length === 1) {
       // Un dedo - preparar para deslizar
-      setTouchStart({ x: e.touches[0].clientX, y: e.touches[0].clientY })
+      setTouchStart({ x: e.touches[0].clientX, y: e.touches[0].clientY });
     } else if (e.touches.length === 2) {
       // Dos dedos - preparar para zoom
-      const distance = getDistance(e.touches[0], e.touches[1])
-      setInitialPinchDistance(distance)
+      const distance = getDistance(e.touches[0], e.touches[1]);
+      setInitialPinchDistance(distance);
     }
-  }
+  };
 
   const handleTouchMove = (e: React.TouchEvent) => {
     if (e.touches.length === 1 && scale === 1) {
       // Deslizar para cambiar imagen (solo si no hay zoom)
-      const deltaX = e.touches[0].clientX - touchStart.x
+      const deltaX = e.touches[0].clientX - touchStart.x;
 
       // Prevenir scroll vertical mientras se desliza horizontalmente
       if (Math.abs(deltaX) > 10) {
-        e.preventDefault()
+        e.preventDefault();
       }
     } else if (e.touches.length === 2) {
       // Pinch to zoom
-      e.preventDefault()
-      const distance = getDistance(e.touches[0], e.touches[1])
-      const scaleChange = distance / initialPinchDistance
-      const newScale = Math.min(Math.max(scale * scaleChange, 1), 4)
-      setScale(newScale)
-      setInitialPinchDistance(distance)
+      e.preventDefault();
+      const distance = getDistance(e.touches[0], e.touches[1]);
+      const scaleChange = distance / initialPinchDistance;
+      const newScale = Math.min(Math.max(scale * scaleChange, 1), 4);
+      setScale(newScale);
+      setInitialPinchDistance(distance);
 
       if (newScale === 1) {
-        setPosition({ x: 0, y: 0 })
+        setPosition({ x: 0, y: 0 });
       }
     } else if (e.touches.length === 1 && scale > 1) {
       // Pan cuando hay zoom
-      const deltaX = e.touches[0].clientX - touchStart.x
-      const deltaY = e.touches[0].clientY - touchStart.y
+      const deltaX = e.touches[0].clientX - touchStart.x;
+      const deltaY = e.touches[0].clientY - touchStart.y;
       setPosition({
         x: position.x + deltaX,
         y: position.y + deltaY,
-      })
-      setTouchStart({ x: e.touches[0].clientX, y: e.touches[0].clientY })
+      });
+      setTouchStart({ x: e.touches[0].clientX, y: e.touches[0].clientY });
     }
-  }
+  };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
     if (e.changedTouches.length === 1 && scale === 1) {
-      const deltaX = e.changedTouches[0].clientX - touchStart.x
+      const deltaX = e.changedTouches[0].clientX - touchStart.x;
 
       // Umbral de 50px para considerar un swipe
       if (deltaX > 50) {
-        goToPrevious()
+        goToPrevious();
       } else if (deltaX < -50) {
-        goToNext()
+        goToNext();
       }
     }
-  }
+  };
 
   // Manejo de teclado para navegación
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (isFullscreen) {
-        if (e.key === 'ArrowLeft') goToPrevious()
-        if (e.key === 'ArrowRight') goToNext()
-        if (e.key === 'Escape') setIsFullscreen(false)
+        if (e.key === "ArrowLeft") goToPrevious();
+        if (e.key === "ArrowRight") goToNext();
+        if (e.key === "Escape") setIsFullscreen(false);
       }
-    }
+    };
 
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [isFullscreen, goToPrevious, goToNext])
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isFullscreen, goToPrevious, goToNext]);
 
   // Prevenir scroll del body cuando está en fullscreen
   useEffect(() => {
     if (isFullscreen) {
-      document.body.style.overflow = 'hidden'
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = 'unset'
+      document.body.style.overflow = "unset";
     }
     return () => {
-      document.body.style.overflow = 'unset'
-    }
-  }, [isFullscreen])
+      document.body.style.overflow = "unset";
+    };
+  }, [isFullscreen]);
 
   if (images.length === 0) {
     return (
       <div className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center">
         <p className="text-gray-400">No hay imágenes disponibles</p>
       </div>
-    )
+    );
   }
 
-  const currentImage = images[currentIndex]
+  const currentImage = images[currentIndex];
 
   return (
     <>
@@ -181,7 +188,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
             onTouchEnd={handleTouchEnd}
             style={{
               transform: `scale(${scale}) translate(${position.x / scale}px, ${position.y / scale}px)`,
-              transition: isDragging ? 'none' : 'transform 0.3s ease-out',
+              transition: isDragging ? "none" : "transform 0.3s ease-out",
             }}
           >
             <Image
@@ -270,10 +277,10 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
                 key={image.id}
                 onClick={() => goToImage(index)}
                 className={cn(
-                  'relative aspect-square rounded-lg overflow-hidden border-2 transition-all',
+                  "relative aspect-square rounded-lg overflow-hidden border-2 transition-all",
                   currentIndex === index
-                    ? 'border-blue-600 ring-2 ring-blue-600 ring-offset-2'
-                    : 'border-transparent hover:border-gray-300'
+                    ? "border-blue-600 ring-2 ring-blue-600 ring-offset-2"
+                    : "border-transparent hover:border-gray-300",
                 )}
               >
                 <Image
@@ -316,7 +323,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
             onTouchEnd={handleTouchEnd}
             style={{
               transform: `scale(${scale}) translate(${position.x / scale}px, ${position.y / scale}px)`,
-              transition: isDragging ? 'none' : 'transform 0.3s ease-out',
+              transition: isDragging ? "none" : "transform 0.3s ease-out",
             }}
           >
             <div className="relative w-full h-full">
@@ -382,5 +389,5 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
         </div>
       )}
     </>
-  )
+  );
 }

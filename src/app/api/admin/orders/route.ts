@@ -1,11 +1,11 @@
 // Admin Orders API
 // GET /api/admin/orders - Get all orders for tenant (STORE_OWNER only)
 
-import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/lib/auth/auth'
-import { getOrdersByTenant, getOrderStats } from '@/lib/db/orders'
-import { OrderFilterSchema } from '@/lib/security/schemas/order-schemas'
-import { USER_ROLES } from '@/lib/types/user-role'
+import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth/auth";
+import { getOrdersByTenant, getOrderStats } from "@/lib/db/orders";
+import { OrderFilterSchema } from "@/lib/security/schemas/order-schemas";
+import { USER_ROLES } from "@/lib/types/user-role";
 
 /**
  * GET /api/admin/orders
@@ -25,68 +25,71 @@ import { USER_ROLES } from '@/lib/types/user-role'
  */
 export async function GET(req: NextRequest) {
   try {
-    const session = await auth()
+    const session = await auth();
 
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { role, tenantId } = session.user
+    const { role, tenantId } = session.user;
 
     if (!tenantId) {
       return NextResponse.json(
-        { error: 'User has no tenant assigned' },
-        { status: 404 }
-      )
+        { error: "User has no tenant assigned" },
+        { status: 404 },
+      );
     }
 
     // Check if user has permission to view all orders
     if (role !== USER_ROLES.STORE_OWNER && role !== USER_ROLES.SUPER_ADMIN) {
       return NextResponse.json(
-        { error: 'Forbidden - Only STORE_OWNER or SUPER_ADMIN can view all orders' },
-        { status: 403 }
-      )
+        {
+          error:
+            "Forbidden - Only STORE_OWNER or SUPER_ADMIN can view all orders",
+        },
+        { status: 403 },
+      );
     }
 
     // Parse query parameters
-    const { searchParams } = new URL(req.url)
+    const { searchParams } = new URL(req.url);
 
     const filters = {
-      page: searchParams.get('page'),
-      limit: searchParams.get('limit'),
-      status: searchParams.get('status'),
-      paymentStatus: searchParams.get('paymentStatus'),
-      startDate: searchParams.get('startDate'),
-      endDate: searchParams.get('endDate'),
-      minAmount: searchParams.get('minAmount'),
-      maxAmount: searchParams.get('maxAmount'),
-      customerId: searchParams.get('customerId'),
-      sort: searchParams.get('sort') || 'date-desc',
-    }
+      page: searchParams.get("page"),
+      limit: searchParams.get("limit"),
+      status: searchParams.get("status"),
+      paymentStatus: searchParams.get("paymentStatus"),
+      startDate: searchParams.get("startDate"),
+      endDate: searchParams.get("endDate"),
+      minAmount: searchParams.get("minAmount"),
+      maxAmount: searchParams.get("maxAmount"),
+      customerId: searchParams.get("customerId"),
+      sort: searchParams.get("sort") || "date-desc",
+    };
 
-    const validation = OrderFilterSchema.safeParse(filters)
+    const validation = OrderFilterSchema.safeParse(filters);
 
     if (!validation.success) {
       return NextResponse.json(
         {
-          error: 'Invalid filters',
+          error: "Invalid filters",
           issues: validation.error.issues,
         },
-        { status: 400 }
-      )
+        { status: 400 },
+      );
     }
 
-    const validatedFilters = validation.data
+    const validatedFilters = validation.data;
 
     // Get orders
-    const result = await getOrdersByTenant(tenantId, validatedFilters as any)
+    const result = await getOrdersByTenant(tenantId, validatedFilters as any);
 
     // Get stats if requested
-    const includeStats = searchParams.get('includeStats') === 'true'
-    let stats = null
+    const includeStats = searchParams.get("includeStats") === "true";
+    let stats = null;
 
     if (includeStats) {
-      stats = await getOrderStats(tenantId)
+      stats = await getOrderStats(tenantId);
     }
 
     return NextResponse.json({
@@ -123,13 +126,13 @@ export async function GET(req: NextRequest) {
       })),
       pagination: result.pagination,
       ...(stats && { stats }),
-    })
+    });
   } catch (error) {
-    console.error('[ADMIN] GET orders error:', error)
+    console.error("[ADMIN] GET orders error:", error);
 
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }

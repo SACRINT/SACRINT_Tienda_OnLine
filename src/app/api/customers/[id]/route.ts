@@ -1,36 +1,33 @@
 // GET /api/customers/:id
 // Get detailed customer information
 
-import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/lib/auth/auth'
-import { db } from '@/lib/db'
+import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth/auth";
+import { db } from "@/lib/db";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
-    const session = await auth()
+    const session = await auth();
 
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const searchParams = req.nextUrl.searchParams
-    const tenantId = searchParams.get('tenantId')
+    const searchParams = req.nextUrl.searchParams;
+    const tenantId = searchParams.get("tenantId");
 
     if (!tenantId) {
-      return NextResponse.json(
-        { error: 'tenantId required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: "tenantId required" }, { status: 400 });
     }
 
     // Get customer with orders and addresses
     const customer = await db.user.findUnique({
       where: {
         id: params.id,
-        role: 'CUSTOMER',
+        role: "CUSTOMER",
       },
       include: {
         orders: {
@@ -49,35 +46,35 @@ export async function GET(
             },
           },
           orderBy: {
-            createdAt: 'desc',
+            createdAt: "desc",
           },
         },
         addresses: {
           orderBy: {
-            isDefault: 'desc',
+            isDefault: "desc",
           },
         },
       },
-    })
+    });
 
     if (!customer) {
       return NextResponse.json(
-        { error: 'Customer not found' },
-        { status: 404 }
-      )
+        { error: "Customer not found" },
+        { status: 404 },
+      );
     }
 
     // Calculate stats
     const completedOrders = customer.orders.filter(
-      (o: any) => o.status !== 'CANCELLED'
-    )
-    const totalOrders = completedOrders.length
+      (o: any) => o.status !== "CANCELLED",
+    );
+    const totalOrders = completedOrders.length;
     const totalSpent = completedOrders.reduce(
       (sum: number, order: any) => sum + order.total,
-      0
-    )
-    const averageOrderValue = totalOrders > 0 ? totalSpent / totalOrders : 0
-    const lastOrder = completedOrders[0]
+      0,
+    );
+    const averageOrderValue = totalOrders > 0 ? totalSpent / totalOrders : 0;
+    const lastOrder = completedOrders[0];
 
     return NextResponse.json({
       id: customer.id,
@@ -93,12 +90,12 @@ export async function GET(
         averageOrderValue,
         lastOrderDate: lastOrder ? lastOrder.createdAt : null,
       },
-    })
+    });
   } catch (error) {
-    console.error('Get customer error:', error)
+    console.error("Get customer error:", error);
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }

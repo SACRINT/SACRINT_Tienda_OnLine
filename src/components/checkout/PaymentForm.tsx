@@ -1,31 +1,26 @@
 // Payment Form Component
 // Stripe Elements integration for payment processing
 
-'use client'
-import Image from 'next/image'
+"use client";
+import Image from "next/image";
 
-import { useState } from 'react'
-import {
-  CreditCard,
-  Lock,
-  AlertCircle,
-  CheckCircle2,
-} from 'lucide-react'
+import { useState } from "react";
+import { CreditCard, Lock, AlertCircle, CheckCircle2 } from "lucide-react";
 
 export interface PaymentFormProps {
-  amount: number
-  onPaymentMethodReady?: (paymentMethodId: string) => void
-  onError?: (error: string) => void
+  amount: number;
+  onPaymentMethodReady?: (paymentMethodId: string) => void;
+  onError?: (error: string) => void;
 }
 
 export interface BillingAddress {
-  fullName: string
-  addressLine1: string
-  addressLine2?: string
-  city: string
-  state: string
-  postalCode: string
-  country: string
+  fullName: string;
+  addressLine1: string;
+  addressLine2?: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
 }
 
 export function PaymentForm({
@@ -33,106 +28,106 @@ export function PaymentForm({
   onPaymentMethodReady,
   onError,
 }: PaymentFormProps) {
-  const [paymentMethod, setPaymentMethod] = useState<'card' | 'paypal'>('card')
-  const [saveCard, setSaveCard] = useState(false)
+  const [paymentMethod, setPaymentMethod] = useState<"card" | "paypal">("card");
+  const [saveCard, setSaveCard] = useState(false);
   const [billingAddress, setBillingAddress] = useState<BillingAddress>({
-    fullName: '',
-    addressLine1: '',
-    addressLine2: '',
-    city: '',
-    state: '',
-    postalCode: '',
-    country: 'United States',
-  })
+    fullName: "",
+    addressLine1: "",
+    addressLine2: "",
+    city: "",
+    state: "",
+    postalCode: "",
+    country: "United States",
+  });
 
   // Mock card details (in production, use Stripe Elements)
   const [cardDetails, setCardDetails] = useState({
-    number: '',
-    expiry: '',
-    cvc: '',
-    name: '',
-  })
+    number: "",
+    expiry: "",
+    cvc: "",
+    name: "",
+  });
 
   const [errors, setErrors] = useState<{
-    number?: string
-    expiry?: string
-    cvc?: string
-    name?: string
-  }>({})
+    number?: string;
+    expiry?: string;
+    cvc?: string;
+    name?: string;
+  }>({});
 
   const validateCardNumber = (number: string): boolean => {
-    const cleaned = number.replace(/\s/g, '')
-    return /^\d{16}$/.test(cleaned)
-  }
+    const cleaned = number.replace(/\s/g, "");
+    return /^\d{16}$/.test(cleaned);
+  };
 
   const validateExpiry = (expiry: string): boolean => {
-    return /^\d{2}\/\d{2}$/.test(expiry)
-  }
+    return /^\d{2}\/\d{2}$/.test(expiry);
+  };
 
   const validateCVC = (cvc: string): boolean => {
-    return /^\d{3,4}$/.test(cvc)
-  }
+    return /^\d{3,4}$/.test(cvc);
+  };
 
   const formatCardNumber = (value: string): string => {
-    const cleaned = value.replace(/\s/g, '')
-    const groups = cleaned.match(/.{1,4}/g) || []
-    return groups.join(' ')
-  }
+    const cleaned = value.replace(/\s/g, "");
+    const groups = cleaned.match(/.{1,4}/g) || [];
+    return groups.join(" ");
+  };
 
   const formatExpiry = (value: string): string => {
-    const cleaned = value.replace(/\D/g, '')
+    const cleaned = value.replace(/\D/g, "");
     if (cleaned.length >= 2) {
-      return `${cleaned.slice(0, 2)}/${cleaned.slice(2, 4)}`
+      return `${cleaned.slice(0, 2)}/${cleaned.slice(2, 4)}`;
     }
-    return cleaned
-  }
+    return cleaned;
+  };
 
   const handleCardNumberChange = (value: string) => {
-    const formatted = formatCardNumber(value)
-    setCardDetails({ ...cardDetails, number: formatted })
+    const formatted = formatCardNumber(value);
+    setCardDetails({ ...cardDetails, number: formatted });
     if (errors.number) {
-      setErrors({ ...errors, number: undefined })
+      setErrors({ ...errors, number: undefined });
     }
-  }
+  };
 
   const handleExpiryChange = (value: string) => {
-    const formatted = formatExpiry(value)
-    setCardDetails({ ...cardDetails, expiry: formatted })
+    const formatted = formatExpiry(value);
+    setCardDetails({ ...cardDetails, expiry: formatted });
     if (errors.expiry) {
-      setErrors({ ...errors, expiry: undefined })
+      setErrors({ ...errors, expiry: undefined });
     }
-  }
+  };
 
   const handleCVCChange = (value: string) => {
-    const cleaned = value.replace(/\D/g, '').slice(0, 4)
-    setCardDetails({ ...cardDetails, cvc: cleaned })
+    const cleaned = value.replace(/\D/g, "").slice(0, 4);
+    setCardDetails({ ...cardDetails, cvc: cleaned });
     if (errors.cvc) {
-      setErrors({ ...errors, cvc: undefined })
+      setErrors({ ...errors, cvc: undefined });
     }
-  }
+  };
 
   const validatePaymentForm = (): boolean => {
-    const newErrors: typeof errors = {}
+    const newErrors: typeof errors = {};
 
     if (!validateCardNumber(cardDetails.number)) {
-      newErrors.number = 'Invalid card number'
+      newErrors.number = "Invalid card number";
     }
 
     if (!validateExpiry(cardDetails.expiry)) {
-      newErrors.expiry = 'Invalid expiry date (MM/YY)'
+      newErrors.expiry = "Invalid expiry date (MM/YY)";
     }
 
     if (!validateCVC(cardDetails.cvc)) {
-      newErrors.cvc = 'Invalid CVC'
+      newErrors.cvc = "Invalid CVC";
     }
 
     if (!cardDetails.name.trim()) {
-      newErrors.name = 'Cardholder name is required'
+      newErrors.name = "Cardholder name is required";
     }
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   return (
     <div className="space-y-6">
@@ -146,22 +141,22 @@ export function PaymentForm({
       {/* Payment Method Tabs */}
       <div className="flex gap-4">
         <button
-          onClick={() => setPaymentMethod('card')}
+          onClick={() => setPaymentMethod("card")}
           className={`flex flex-1 items-center justify-center gap-2 rounded-lg border-2 px-6 py-3 font-medium transition-all ${
-            paymentMethod === 'card'
-              ? 'border-blue-600 bg-blue-50 text-blue-700'
-              : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+            paymentMethod === "card"
+              ? "border-blue-600 bg-blue-50 text-blue-700"
+              : "border-gray-200 bg-white text-gray-700 hover:border-gray-300"
           }`}
         >
           <CreditCard className="h-5 w-5" />
           <span>Credit Card</span>
         </button>
         <button
-          onClick={() => setPaymentMethod('paypal')}
+          onClick={() => setPaymentMethod("paypal")}
           className={`flex flex-1 items-center justify-center gap-2 rounded-lg border-2 px-6 py-3 font-medium transition-all ${
-            paymentMethod === 'paypal'
-              ? 'border-blue-600 bg-blue-50 text-blue-700'
-              : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+            paymentMethod === "paypal"
+              ? "border-blue-600 bg-blue-50 text-blue-700"
+              : "border-gray-200 bg-white text-gray-700 hover:border-gray-300"
           }`}
         >
           <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
@@ -172,7 +167,7 @@ export function PaymentForm({
       </div>
 
       {/* Card Payment Form */}
-      {paymentMethod === 'card' && (
+      {paymentMethod === "card" && (
         <div className="space-y-4">
           {/* Card Number */}
           <div>
@@ -186,7 +181,7 @@ export function PaymentForm({
                 onChange={(e) => handleCardNumberChange(e.target.value)}
                 maxLength={19}
                 className={`w-full rounded-lg border ${
-                  errors.number ? 'border-red-300' : 'border-gray-300'
+                  errors.number ? "border-red-300" : "border-gray-300"
                 } px-4 py-3 pl-12 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500`}
                 placeholder="1234 5678 9012 3456"
               />
@@ -209,13 +204,13 @@ export function PaymentForm({
               type="text"
               value={cardDetails.name}
               onChange={(e) => {
-                setCardDetails({ ...cardDetails, name: e.target.value })
+                setCardDetails({ ...cardDetails, name: e.target.value });
                 if (errors.name) {
-                  setErrors({ ...errors, name: undefined })
+                  setErrors({ ...errors, name: undefined });
                 }
               }}
               className={`mt-1 w-full rounded-lg border ${
-                errors.name ? 'border-red-300' : 'border-gray-300'
+                errors.name ? "border-red-300" : "border-gray-300"
               } px-4 py-3 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500`}
               placeholder="JOHN DOE"
             />
@@ -239,7 +234,7 @@ export function PaymentForm({
                 onChange={(e) => handleExpiryChange(e.target.value)}
                 maxLength={5}
                 className={`mt-1 w-full rounded-lg border ${
-                  errors.expiry ? 'border-red-300' : 'border-gray-300'
+                  errors.expiry ? "border-red-300" : "border-gray-300"
                 } px-4 py-3 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500`}
                 placeholder="MM/YY"
               />
@@ -260,7 +255,7 @@ export function PaymentForm({
                 onChange={(e) => handleCVCChange(e.target.value)}
                 maxLength={4}
                 className={`mt-1 w-full rounded-lg border ${
-                  errors.cvc ? 'border-red-300' : 'border-gray-300'
+                  errors.cvc ? "border-red-300" : "border-gray-300"
                 } px-4 py-3 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500`}
                 placeholder="123"
               />
@@ -310,7 +305,7 @@ export function PaymentForm({
       )}
 
       {/* PayPal Payment */}
-      {paymentMethod === 'paypal' && (
+      {paymentMethod === "paypal" && (
         <div className="space-y-4">
           <div className="rounded-lg border-2 border-dashed border-gray-300 p-8 text-center">
             <svg
@@ -345,5 +340,5 @@ export function PaymentForm({
         </div>
       </div>
     </div>
-  )
+  );
 }

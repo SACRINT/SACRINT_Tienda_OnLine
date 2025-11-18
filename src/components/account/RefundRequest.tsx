@@ -1,46 +1,46 @@
 // Refund Request Component
 // Submit return/refund request for orders
 
-'use client'
-import Image from 'next/image'
+"use client";
+import Image from "next/image";
 
-import { useState } from 'react'
-import { Package, Upload, X, Send, AlertCircle } from 'lucide-react'
+import { useState } from "react";
+import { Package, Upload, X, Send, AlertCircle } from "lucide-react";
 
 export interface RefundRequestProps {
   order: {
-    id: string
-    orderNumber: string
+    id: string;
+    orderNumber: string;
     items: Array<{
-      id: string
-      productName: string
-      productImage?: string
-      quantity: number
-      price: number
-    }>
-  }
-  onSubmit?: (data: RefundRequestData) => Promise<void>
-  onCancel?: () => void
-  isModal?: boolean
+      id: string;
+      productName: string;
+      productImage?: string;
+      quantity: number;
+      price: number;
+    }>;
+  };
+  onSubmit?: (data: RefundRequestData) => Promise<void>;
+  onCancel?: () => void;
+  isModal?: boolean;
 }
 
 export interface RefundRequestData {
-  orderId: string
-  itemIds: string[]
-  reason: string
-  description: string
-  images?: string[]
+  orderId: string;
+  itemIds: string[];
+  reason: string;
+  description: string;
+  images?: string[];
 }
 
 const REFUND_REASONS = [
-  'Defective or damaged product',
-  'Wrong item received',
-  'Item not as described',
-  'Changed my mind',
-  'Found better price elsewhere',
-  'Quality not as expected',
-  'Other',
-]
+  "Defective or damaged product",
+  "Wrong item received",
+  "Item not as described",
+  "Changed my mind",
+  "Found better price elsewhere",
+  "Quality not as expected",
+  "Other",
+];
 
 export function RefundRequest({
   order,
@@ -48,48 +48,48 @@ export function RefundRequest({
   onCancel,
   isModal = false,
 }: RefundRequestProps) {
-  const [selectedItems, setSelectedItems] = useState<string[]>([])
-  const [reason, setReason] = useState('')
-  const [description, setDescription] = useState('')
-  const [images, setImages] = useState<string[]>([])
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const [reason, setReason] = useState("");
+  const [description, setDescription] = useState("");
+  const [images, setImages] = useState<string[]>([]);
   const [errors, setErrors] = useState<{
-    items?: string
-    reason?: string
-    description?: string
-  }>({})
-  const [isSubmitting, setIsSubmitting] = useState(false)
+    items?: string;
+    reason?: string;
+    description?: string;
+  }>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const validateForm = (): boolean => {
-    const newErrors: typeof errors = {}
+    const newErrors: typeof errors = {};
 
     if (selectedItems.length === 0) {
-      newErrors.items = 'Please select at least one item to return'
+      newErrors.items = "Please select at least one item to return";
     }
 
     if (!reason) {
-      newErrors.reason = 'Please select a reason for return'
+      newErrors.reason = "Please select a reason for return";
     }
 
     if (!description.trim()) {
-      newErrors.description = 'Please provide a detailed description'
+      newErrors.description = "Please provide a detailed description";
     } else if (description.trim().length < 20) {
-      newErrors.description = 'Description must be at least 20 characters'
+      newErrors.description = "Description must be at least 20 characters";
     } else if (description.trim().length > 500) {
-      newErrors.description = 'Description must not exceed 500 characters'
+      newErrors.description = "Description must not exceed 500 characters";
     }
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!validateForm()) {
-      return
+      return;
     }
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
 
     try {
       await onSubmit?.({
@@ -98,52 +98,52 @@ export function RefundRequest({
         reason,
         description: description.trim(),
         images,
-      })
+      });
 
       // Reset form on success
-      setSelectedItems([])
-      setReason('')
-      setDescription('')
-      setImages([])
-      setErrors({})
+      setSelectedItems([]);
+      setReason("");
+      setDescription("");
+      setImages([]);
+      setErrors({});
     } catch (error) {
-      console.error('Failed to submit refund request:', error)
+      console.error("Failed to submit refund request:", error);
       setErrors({
-        description: 'Failed to submit request. Please try again.',
-      })
+        description: "Failed to submit request. Please try again.",
+      });
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const handleItemToggle = (itemId: string) => {
     setSelectedItems((prev) =>
       prev.includes(itemId)
         ? prev.filter((id) => id !== itemId)
-        : [...prev, itemId]
-    )
+        : [...prev, itemId],
+    );
     if (errors.items) {
-      setErrors({ ...errors, items: undefined })
+      setErrors({ ...errors, items: undefined });
     }
-  }
+  };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || [])
-    if (files.length === 0) return
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
 
     // In production, upload to cloud storage
     files.forEach((file) => {
-      const reader = new FileReader()
+      const reader = new FileReader();
       reader.onloadend = () => {
-        setImages((prev) => [...prev, reader.result as string])
-      }
-      reader.readAsDataURL(file)
-    })
-  }
+        setImages((prev) => [...prev, reader.result as string]);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
 
   const removeImage = (index: number) => {
-    setImages((prev) => prev.filter((_, i) => i !== index))
-  }
+    setImages((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const FormContent = (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -166,8 +166,8 @@ export function RefundRequest({
               key={item.id}
               className={`flex cursor-pointer items-center gap-4 rounded-lg border ${
                 selectedItems.includes(item.id)
-                  ? 'border-blue-500 bg-blue-50'
-                  : 'border-gray-200 bg-white hover:bg-gray-50'
+                  ? "border-blue-500 bg-blue-50"
+                  : "border-gray-200 bg-white hover:bg-gray-50"
               } p-4 transition-colors`}
             >
               <input
@@ -219,13 +219,13 @@ export function RefundRequest({
           id="return-reason"
           value={reason}
           onChange={(e) => {
-            setReason(e.target.value)
+            setReason(e.target.value);
             if (errors.reason) {
-              setErrors({ ...errors, reason: undefined })
+              setErrors({ ...errors, reason: undefined });
             }
           }}
           className={`mt-1 w-full rounded-lg border ${
-            errors.reason ? 'border-red-300' : 'border-gray-300'
+            errors.reason ? "border-red-300" : "border-gray-300"
           } bg-white px-4 py-2 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500`}
         >
           <option value="">Select a reason</option>
@@ -256,13 +256,13 @@ export function RefundRequest({
           rows={6}
           value={description}
           onChange={(e) => {
-            setDescription(e.target.value)
+            setDescription(e.target.value);
             if (errors.description) {
-              setErrors({ ...errors, description: undefined })
+              setErrors({ ...errors, description: undefined });
             }
           }}
           className={`mt-1 w-full rounded-lg border ${
-            errors.description ? 'border-red-300' : 'border-gray-300'
+            errors.description ? "border-red-300" : "border-gray-300"
           } bg-white px-4 py-2 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500`}
           placeholder="Please provide details about the issue or reason for return..."
           maxLength={500}
@@ -363,11 +363,11 @@ export function RefundRequest({
           className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-2 font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
         >
           <Send className="h-4 w-4" />
-          <span>{isSubmitting ? 'Submitting...' : 'Submit Request'}</span>
+          <span>{isSubmitting ? "Submitting..." : "Submit Request"}</span>
         </button>
       </div>
     </form>
-  )
+  );
 
   if (isModal) {
     return (
@@ -390,7 +390,7 @@ export function RefundRequest({
           <div className="p-6">{FormContent}</div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -400,5 +400,5 @@ export function RefundRequest({
       </h3>
       {FormContent}
     </div>
-  )
+  );
 }

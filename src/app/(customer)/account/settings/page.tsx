@@ -1,11 +1,11 @@
 // Account Settings Page
 // Manage profile, password, notifications, and preferences
 
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { AccountLayout, ProfileForm } from '@/components/account'
-import type { ProfileFormData } from '@/components/account'
+import { useState } from "react";
+import { AccountLayout, ProfileForm } from "@/components/account";
+import type { ProfileFormData } from "@/components/account";
 import {
   User,
   Lock,
@@ -15,40 +15,40 @@ import {
   Shield,
   Trash2,
   Save,
-} from 'lucide-react'
+} from "lucide-react";
 
 // Mock data - In production, fetch from API
 const getMockUser = () => ({
-  name: 'John Doe',
-  email: 'john.doe@example.com',
-  phone: '+1 (555) 123-4567',
-  dateOfBirth: '1990-05-15',
-  image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=John',
-})
+  name: "John Doe",
+  email: "john.doe@example.com",
+  phone: "+1 (555) 123-4567",
+  dateOfBirth: "1990-05-15",
+  image: "https://api.dicebear.com/7.x/avataaars/svg?seed=John",
+});
 
-type SettingsTab = 'profile' | 'security' | 'notifications' | 'preferences'
+type SettingsTab = "profile" | "security" | "notifications" | "preferences";
 
 export default function SettingsPage() {
-  const user = getMockUser()
-  const [activeTab, setActiveTab] = useState<SettingsTab>('profile')
+  const user = getMockUser();
+  const [activeTab, setActiveTab] = useState<SettingsTab>("profile");
 
   const handleSaveProfile = async (data: ProfileFormData) => {
-    console.log('Save profile:', data)
+    console.log("Save profile:", data);
     // In production, make API call
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    alert('Profile updated successfully!')
-  }
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    alert("Profile updated successfully!");
+  };
 
   const tabs: Array<{
-    id: SettingsTab
-    label: string
-    icon: typeof User
+    id: SettingsTab;
+    label: string;
+    icon: typeof User;
   }> = [
-    { id: 'profile', label: 'Profile', icon: User },
-    { id: 'security', label: 'Security', icon: Lock },
-    { id: 'notifications', label: 'Notifications', icon: Bell },
-    { id: 'preferences', label: 'Preferences', icon: Globe },
-  ]
+    { id: "profile", label: "Profile", icon: User },
+    { id: "security", label: "Security", icon: Lock },
+    { id: "notifications", label: "Notifications", icon: Bell },
+    { id: "preferences", label: "Preferences", icon: Globe },
+  ];
 
   return (
     <AccountLayout user={user}>
@@ -65,66 +65,63 @@ export default function SettingsPage() {
         <div className="mb-6 border-b border-gray-200">
           <nav className="-mb-px flex gap-8">
             {tabs.map((tab) => {
-              const Icon = tab.icon
-              const isActive = activeTab === tab.id
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={`flex items-center gap-2 border-b-2 px-1 py-4 text-sm font-medium transition-colors ${
                     isActive
-                      ? 'border-blue-600 text-blue-600'
-                      : 'border-transparent text-gray-600 hover:border-gray-300 hover:text-gray-900'
+                      ? "border-blue-600 text-blue-600"
+                      : "border-transparent text-gray-600 hover:border-gray-300 hover:text-gray-900"
                   }`}
                 >
                   <Icon className="h-5 w-5" />
                   <span>{tab.label}</span>
                 </button>
-              )
+              );
             })}
           </nav>
         </div>
 
         {/* Tab Content */}
         <div>
-          {activeTab === 'profile' && (
-            <ProfileForm
-              initialData={user}
-              onSave={handleSaveProfile}
-            />
+          {activeTab === "profile" && (
+            <ProfileForm initialData={user} onSave={handleSaveProfile} />
           )}
 
-          {activeTab === 'security' && <SecurityTab />}
-          {activeTab === 'notifications' && <NotificationsTab />}
-          {activeTab === 'preferences' && <PreferencesTab />}
+          {activeTab === "security" && <SecurityTab />}
+          {activeTab === "notifications" && <NotificationsTab />}
+          {activeTab === "preferences" && <PreferencesTab />}
         </div>
       </div>
     </AccountLayout>
-  )
+  );
 }
 
 // Security Tab Component
 function SecurityTab() {
-  const [currentPassword, setCurrentPassword] = useState('')
-  const [newPassword, setNewPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const handleChangePassword = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (newPassword !== confirmPassword) {
-      alert('Passwords do not match')
-      return
+      alert("Passwords do not match");
+      return;
     }
 
-    console.log('Change password')
+    console.log("Change password");
     // In production, make API call
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    alert('Password updated successfully!')
-    setCurrentPassword('')
-    setNewPassword('')
-    setConfirmPassword('')
-  }
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    alert("Password updated successfully!");
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
+  };
 
   return (
     <div className="space-y-6">
@@ -206,7 +203,9 @@ function SecurityTab() {
           <div className="flex items-center justify-between rounded-lg bg-gray-50 p-4">
             <div>
               <p className="font-medium text-gray-900">Chrome on MacOS</p>
-              <p className="text-sm text-gray-600">San Francisco, CA • Active now</p>
+              <p className="text-sm text-gray-600">
+                San Francisco, CA • Active now
+              </p>
             </div>
             <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
               Current
@@ -222,7 +221,8 @@ function SecurityTab() {
           <div className="flex-1">
             <h3 className="font-semibold text-red-900">Danger Zone</h3>
             <p className="mt-1 text-sm text-red-800">
-              Once you delete your account, there is no going back. Please be certain.
+              Once you delete your account, there is no going back. Please be
+              certain.
             </p>
             <button className="mt-4 inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700">
               <Trash2 className="h-4 w-4" />
@@ -232,7 +232,7 @@ function SecurityTab() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 // Notifications Tab Component
@@ -242,14 +242,14 @@ function NotificationsTab() {
     promotions: false,
     newsletter: true,
     productRecommendations: false,
-  })
+  });
 
   const [pushNotifications, setPushNotifications] = useState({
     orderShipped: true,
     orderDelivered: true,
     priceDrops: false,
     backInStock: true,
-  })
+  });
 
   return (
     <div className="space-y-6">
@@ -263,7 +263,9 @@ function NotificationsTab() {
             <label key={key} className="flex items-center justify-between">
               <div>
                 <p className="font-medium text-gray-900">
-                  {key.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase())}
+                  {key
+                    .replace(/([A-Z])/g, " $1")
+                    .replace(/^./, (str) => str.toUpperCase())}
                 </p>
                 <p className="text-sm text-gray-600">
                   Get notified about {key.toLowerCase()}
@@ -295,7 +297,9 @@ function NotificationsTab() {
             <label key={key} className="flex items-center justify-between">
               <div>
                 <p className="font-medium text-gray-900">
-                  {key.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase())}
+                  {key
+                    .replace(/([A-Z])/g, " $1")
+                    .replace(/^./, (str) => str.toUpperCase())}
                 </p>
                 <p className="text-sm text-gray-600">
                   Get push notifications for {key.toLowerCase()}
@@ -322,14 +326,14 @@ function NotificationsTab() {
         <span>Save Preferences</span>
       </button>
     </div>
-  )
+  );
 }
 
 // Preferences Tab Component
 function PreferencesTab() {
-  const [language, setLanguage] = useState('en')
-  const [currency, setCurrency] = useState('USD')
-  const [timezone, setTimezone] = useState('America/Los_Angeles')
+  const [language, setLanguage] = useState("en");
+  const [currency, setCurrency] = useState("USD");
+  const [timezone, setTimezone] = useState("America/Los_Angeles");
 
   return (
     <div className="space-y-6">
@@ -389,5 +393,5 @@ function PreferencesTab() {
         <span>Save Preferences</span>
       </button>
     </div>
-  )
+  );
 }

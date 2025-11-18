@@ -1,100 +1,103 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
-import { X, Download, Smartphone } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { useEffect, useState } from "react";
+import { X, Download, Smartphone } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface BeforeInstallPromptEvent extends Event {
-  prompt: () => Promise<void>
-  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
 export function PWAInstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] =
-    useState<BeforeInstallPromptEvent | null>(null)
-  const [showPrompt, setShowPrompt] = useState(false)
-  const [isIOS, setIsIOS] = useState(false)
-  const [isStandalone, setIsStandalone] = useState(false)
+    useState<BeforeInstallPromptEvent | null>(null);
+  const [showPrompt, setShowPrompt] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(false);
 
   useEffect(() => {
     // Check if running in standalone mode
     const isInStandaloneMode = () =>
-      window.matchMedia('(display-mode: standalone)').matches ||
+      window.matchMedia("(display-mode: standalone)").matches ||
       (window.navigator as any).standalone ||
-      document.referrer.includes('android-app://')
+      document.referrer.includes("android-app://");
 
-    setIsStandalone(isInStandaloneMode())
+    setIsStandalone(isInStandaloneMode());
 
     // Check if iOS
-    const checkIsIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
-    setIsIOS(checkIsIOS)
+    const checkIsIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    setIsIOS(checkIsIOS);
 
     // Listen for beforeinstallprompt event (Chrome, Edge, etc.)
     const handleBeforeInstallPrompt = (e: Event) => {
-      e.preventDefault()
-      const promptEvent = e as BeforeInstallPromptEvent
-      setDeferredPrompt(promptEvent)
+      e.preventDefault();
+      const promptEvent = e as BeforeInstallPromptEvent;
+      setDeferredPrompt(promptEvent);
 
       // Check if user has dismissed prompt before
-      const dismissed = localStorage.getItem('pwa-prompt-dismissed')
+      const dismissed = localStorage.getItem("pwa-prompt-dismissed");
       if (!dismissed) {
         // Show prompt after 30 seconds or on second visit
-        const visitCount = parseInt(localStorage.getItem('visit-count') || '0')
+        const visitCount = parseInt(localStorage.getItem("visit-count") || "0");
         if (visitCount > 1) {
-          setTimeout(() => setShowPrompt(true), 30000)
+          setTimeout(() => setShowPrompt(true), 30000);
         }
       }
-    }
+    };
 
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
 
     // Track visit count
-    const visitCount = parseInt(localStorage.getItem('visit-count') || '0')
-    localStorage.setItem('visit-count', String(visitCount + 1))
+    const visitCount = parseInt(localStorage.getItem("visit-count") || "0");
+    localStorage.setItem("visit-count", String(visitCount + 1));
 
     return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
-    }
-  }, [])
+      window.removeEventListener(
+        "beforeinstallprompt",
+        handleBeforeInstallPrompt,
+      );
+    };
+  }, []);
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) {
-      return
+      return;
     }
 
     // Show the install prompt
-    await deferredPrompt.prompt()
+    await deferredPrompt.prompt();
 
     // Wait for the user's response
-    const { outcome } = await deferredPrompt.userChoice
+    const { outcome } = await deferredPrompt.userChoice;
 
-    if (outcome === 'accepted') {
-      console.log('User accepted the install prompt')
+    if (outcome === "accepted") {
+      console.log("User accepted the install prompt");
     } else {
-      console.log('User dismissed the install prompt')
+      console.log("User dismissed the install prompt");
     }
 
     // Clear the deferred prompt
-    setDeferredPrompt(null)
-    setShowPrompt(false)
-  }
+    setDeferredPrompt(null);
+    setShowPrompt(false);
+  };
 
   const handleDismiss = () => {
-    setShowPrompt(false)
-    localStorage.setItem('pwa-prompt-dismissed', 'true')
+    setShowPrompt(false);
+    localStorage.setItem("pwa-prompt-dismissed", "true");
 
     // Re-enable after 7 days
     setTimeout(
       () => {
-        localStorage.removeItem('pwa-prompt-dismissed')
+        localStorage.removeItem("pwa-prompt-dismissed");
       },
-      7 * 24 * 60 * 60 * 1000
-    )
-  }
+      7 * 24 * 60 * 60 * 1000,
+    );
+  };
 
   // Don't show if already installed or dismissed
   if (isStandalone || !showPrompt) {
-    return null
+    return null;
   }
 
   // iOS-specific install instructions
@@ -128,7 +131,7 @@ export function PWAInstallPrompt() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   // Standard install prompt (Chrome, Edge, etc.)
@@ -169,5 +172,5 @@ export function PWAInstallPrompt() {
         </div>
       </div>
     </div>
-  )
+  );
 }

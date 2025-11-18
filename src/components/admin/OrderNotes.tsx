@@ -1,89 +1,94 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { MessageSquare, Send, Loader2, Trash2 } from 'lucide-react'
-import { format } from 'date-fns'
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { MessageSquare, Send, Loader2, Trash2 } from "lucide-react";
+import { format } from "date-fns";
 
 interface OrderNote {
-  id: string
-  content: string
-  type: 'INTERNAL' | 'CUSTOMER'
-  createdAt: string
+  id: string;
+  content: string;
+  type: "INTERNAL" | "CUSTOMER";
+  createdAt: string;
   user: {
-    id: string
-    name: string | null
-    email: string
-  }
+    id: string;
+    name: string | null;
+    email: string;
+  };
 }
 
 interface OrderNotesProps {
-  orderId: string
-  tenantId: string
-  notes: OrderNote[]
-  onRefresh?: () => void
+  orderId: string;
+  tenantId: string;
+  notes: OrderNote[];
+  onRefresh?: () => void;
 }
 
-export function OrderNotes({ orderId, tenantId, notes, onRefresh }: OrderNotesProps) {
-  const [newNote, setNewNote] = useState('')
-  const [noteType, setNoteType] = useState<'INTERNAL' | 'CUSTOMER'>('INTERNAL')
-  const [loading, setLoading] = useState(false)
+export function OrderNotes({
+  orderId,
+  tenantId,
+  notes,
+  onRefresh,
+}: OrderNotesProps) {
+  const [newNote, setNewNote] = useState("");
+  const [noteType, setNoteType] = useState<"INTERNAL" | "CUSTOMER">("INTERNAL");
+  const [loading, setLoading] = useState(false);
 
   const handleAddNote = async () => {
-    if (!newNote.trim()) return
+    if (!newNote.trim()) return;
 
-    setLoading(true)
+    setLoading(true);
     try {
       const res = await fetch(`/api/orders/${orderId}/notes`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           tenantId,
           content: newNote,
           type: noteType,
         }),
-      })
+      });
 
       if (res.ok) {
-        setNewNote('')
-        onRefresh?.()
+        setNewNote("");
+        onRefresh?.();
       } else {
-        alert('Error adding note')
+        alert("Error adding note");
       }
     } catch (error) {
-      console.error('Error:', error)
-      alert('Error adding note')
+      console.error("Error:", error);
+      alert("Error adding note");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleDeleteNote = async (noteId: string) => {
-    if (!confirm('Delete this note?')) return
+    if (!confirm("Delete this note?")) return;
 
     try {
       const res = await fetch(`/api/orders/${orderId}/notes`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           tenantId,
           noteId,
         }),
-      })
+      });
 
       if (res.ok) {
-        onRefresh?.()
+        onRefresh?.();
       } else {
-        alert('Error deleting note')
+        alert("Error deleting note");
       }
     } catch (error) {
-      console.error('Error:', error)
-      alert('Error deleting note')
+      console.error("Error:", error);
+      alert("Error deleting note");
     }
-  }
+  };
 
   return (
     <Card>
@@ -98,16 +103,16 @@ export function OrderNotes({ orderId, tenantId, notes, onRefresh }: OrderNotesPr
         <div className="space-y-3">
           <div className="flex gap-2">
             <Button
-              variant={noteType === 'INTERNAL' ? 'default' : 'outline'}
+              variant={noteType === "INTERNAL" ? "default" : "outline"}
               size="sm"
-              onClick={() => setNoteType('INTERNAL')}
+              onClick={() => setNoteType("INTERNAL")}
             >
               Internal Note
             </Button>
             <Button
-              variant={noteType === 'CUSTOMER' ? 'default' : 'outline'}
+              variant={noteType === "CUSTOMER" ? "default" : "outline"}
               size="sm"
-              onClick={() => setNoteType('CUSTOMER')}
+              onClick={() => setNoteType("CUSTOMER")}
             >
               Customer Note
             </Button>
@@ -118,9 +123,9 @@ export function OrderNotes({ orderId, tenantId, notes, onRefresh }: OrderNotesPr
               value={newNote}
               onChange={(e) => setNewNote(e.target.value)}
               placeholder={
-                noteType === 'INTERNAL'
-                  ? 'Add an internal note (only visible to staff)...'
-                  : 'Add a note for the customer (will be sent via email)...'
+                noteType === "INTERNAL"
+                  ? "Add an internal note (only visible to staff)..."
+                  : "Add a note for the customer (will be sent via email)..."
               }
               rows={2}
               className="flex-1"
@@ -138,10 +143,10 @@ export function OrderNotes({ orderId, tenantId, notes, onRefresh }: OrderNotesPr
             </Button>
           </div>
 
-          {noteType === 'CUSTOMER' && (
+          {noteType === "CUSTOMER" && (
             <p className="text-xs text-yellow-600">
-              Note: Customer notes will be sent via email and visible in their order
-              history.
+              Note: Customer notes will be sent via email and visible in their
+              order history.
             </p>
           )}
         </div>
@@ -157,21 +162,21 @@ export function OrderNotes({ orderId, tenantId, notes, onRefresh }: OrderNotesPr
               <div
                 key={note.id}
                 className={`p-3 rounded-lg border ${
-                  note.type === 'INTERNAL'
-                    ? 'bg-gray-50 border-gray-200'
-                    : 'bg-blue-50 border-blue-200'
+                  note.type === "INTERNAL"
+                    ? "bg-gray-50 border-gray-200"
+                    : "bg-blue-50 border-blue-200"
                 }`}
               >
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <div className="flex items-center gap-2">
                     <Badge
-                      variant={note.type === 'INTERNAL' ? 'outline' : 'default'}
+                      variant={note.type === "INTERNAL" ? "outline" : "default"}
                       className="text-xs"
                     >
-                      {note.type === 'INTERNAL' ? 'Internal' : 'Customer'}
+                      {note.type === "INTERNAL" ? "Internal" : "Customer"}
                     </Badge>
                     <span className="text-xs text-gray-500">
-                      {format(new Date(note.createdAt), 'MMM d, yyyy HH:mm')}
+                      {format(new Date(note.createdAt), "MMM d, yyyy HH:mm")}
                     </span>
                   </div>
                   <Button
@@ -197,5 +202,5 @@ export function OrderNotes({ orderId, tenantId, notes, onRefresh }: OrderNotesPr
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

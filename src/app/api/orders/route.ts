@@ -1,10 +1,10 @@
 // Orders API
 // GET /api/orders - Get user's orders
 
-import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/lib/auth/auth'
-import { getOrdersByUser } from '@/lib/db/orders'
-import { OrderFilterSchema } from '@/lib/security/schemas/order-schemas'
+import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth/auth";
+import { getOrdersByUser } from "@/lib/db/orders";
+import { OrderFilterSchema } from "@/lib/security/schemas/order-schemas";
 
 /**
  * GET /api/orders
@@ -18,50 +18,50 @@ import { OrderFilterSchema } from '@/lib/security/schemas/order-schemas'
  */
 export async function GET(req: NextRequest) {
   try {
-    const session = await auth()
+    const session = await auth();
 
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { tenantId } = session.user
+    const { tenantId } = session.user;
 
     if (!tenantId) {
       return NextResponse.json(
-        { error: 'User has no tenant assigned' },
-        { status: 404 }
-      )
+        { error: "User has no tenant assigned" },
+        { status: 404 },
+      );
     }
 
     // Parse query parameters
-    const { searchParams } = new URL(req.url)
+    const { searchParams } = new URL(req.url);
 
     const filters = {
-      page: searchParams.get('page'),
-      limit: searchParams.get('limit'),
-      status: searchParams.get('status'),
-    }
+      page: searchParams.get("page"),
+      limit: searchParams.get("limit"),
+      status: searchParams.get("status"),
+    };
 
-    const validation = OrderFilterSchema.partial().safeParse(filters)
+    const validation = OrderFilterSchema.partial().safeParse(filters);
 
     if (!validation.success) {
       return NextResponse.json(
         {
-          error: 'Invalid filters',
+          error: "Invalid filters",
           issues: validation.error.issues,
         },
-        { status: 400 }
-      )
+        { status: 400 },
+      );
     }
 
-    const validatedFilters = validation.data
+    const validatedFilters = validation.data;
 
     // Get orders
     const result = await getOrdersByUser(
       session.user.id,
       tenantId,
-      validatedFilters as any
-    )
+      validatedFilters as any,
+    );
 
     return NextResponse.json({
       orders: result.orders.map((order: any) => ({
@@ -90,13 +90,13 @@ export async function GET(req: NextRequest) {
         updatedAt: order.updatedAt,
       })),
       pagination: result.pagination,
-    })
+    });
   } catch (error) {
-    console.error('[ORDERS] GET error:', error)
+    console.error("[ORDERS] GET error:", error);
 
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }

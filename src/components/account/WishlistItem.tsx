@@ -1,29 +1,29 @@
 // Wishlist Item Component
 // Display wishlist product with actions (add to cart, remove)
 
-'use client'
-import Image from 'next/image'
+"use client";
+import Image from "next/image";
 
-import { useState } from 'react'
-import Link from 'next/link'
-import { ShoppingCart, Trash2, Star, Tag, AlertCircle } from 'lucide-react'
+import { useState } from "react";
+import Link from "next/link";
+import { ShoppingCart, Trash2, Star, Tag, AlertCircle } from "lucide-react";
 
 export interface WishlistItemProps {
   item: {
-    id: string
-    productId: string
-    productName: string
-    productSlug: string
-    productImage?: string
-    price: number
-    salePrice?: number
-    inStock: boolean
-    rating?: number
-    reviewCount?: number
-    addedAt: string
-  }
-  onAddToCart?: (itemId: string) => Promise<void>
-  onRemove?: (itemId: string) => Promise<void>
+    id: string;
+    productId: string;
+    productName: string;
+    productSlug: string;
+    productImage?: string;
+    price: number;
+    salePrice?: number;
+    inStock: boolean;
+    rating?: number;
+    reviewCount?: number;
+    addedAt: string;
+  };
+  onAddToCart?: (itemId: string) => Promise<void>;
+  onRemove?: (itemId: string) => Promise<void>;
 }
 
 export function WishlistItem({
@@ -31,52 +31,52 @@ export function WishlistItem({
   onAddToCart,
   onRemove,
 }: WishlistItemProps) {
-  const [isAddingToCart, setIsAddingToCart] = useState(false)
-  const [isRemoving, setIsRemoving] = useState(false)
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [isRemoving, setIsRemoving] = useState(false);
 
-  const displayPrice = item.salePrice || item.price
-  const hasDiscount = item.salePrice && item.salePrice < item.price
+  const displayPrice = item.salePrice || item.price;
+  const hasDiscount = item.salePrice && item.salePrice < item.price;
   const discountPercent = hasDiscount
     ? Math.round(((item.price - item.salePrice!) / item.price) * 100)
-    : 0
+    : 0;
 
   const handleAddToCart = async () => {
-    if (!item.inStock) return
+    if (!item.inStock) return;
 
-    setIsAddingToCart(true)
+    setIsAddingToCart(true);
     try {
-      await onAddToCart?.(item.id)
+      await onAddToCart?.(item.id);
     } catch (error) {
-      console.error('Failed to add to cart:', error)
+      console.error("Failed to add to cart:", error);
     } finally {
-      setIsAddingToCart(false)
+      setIsAddingToCart(false);
     }
-  }
+  };
 
   const handleRemove = async () => {
-    setIsRemoving(true)
+    setIsRemoving(true);
     try {
-      await onRemove?.(item.id)
+      await onRemove?.(item.id);
     } catch (error) {
-      console.error('Failed to remove from wishlist:', error)
-      setIsRemoving(false)
+      console.error("Failed to remove from wishlist:", error);
+      setIsRemoving(false);
     }
-  }
+  };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    })
-  }
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
 
   return (
     <div
       className={`group relative rounded-lg border ${
-        isRemoving ? 'opacity-50' : 'opacity-100'
+        isRemoving ? "opacity-50" : "opacity-100"
       } border-gray-200 bg-white p-4 transition-all hover:shadow-md ${
-        !item.inStock ? 'bg-gray-50' : ''
+        !item.inStock ? "bg-gray-50" : ""
       }`}
     >
       {/* Remove Button */}
@@ -127,8 +127,8 @@ export function WishlistItem({
                       key={i}
                       className={`h-3 w-3 ${
                         i < Math.floor(item.rating!)
-                          ? 'fill-yellow-400 text-yellow-400'
-                          : 'text-gray-300'
+                          ? "fill-yellow-400 text-yellow-400"
+                          : "text-gray-300"
                       }`}
                     />
                   ))}
@@ -179,17 +179,17 @@ export function WishlistItem({
               disabled={!item.inStock || isAddingToCart}
               className={`inline-flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
                 item.inStock
-                  ? 'bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50'
-                  : 'cursor-not-allowed bg-gray-300 text-gray-500'
+                  ? "bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
+                  : "cursor-not-allowed bg-gray-300 text-gray-500"
               }`}
             >
               <ShoppingCart className="h-4 w-4" />
               <span>
                 {isAddingToCart
-                  ? 'Adding...'
+                  ? "Adding..."
                   : item.inStock
-                    ? 'Add to Cart'
-                    : 'Out of Stock'}
+                    ? "Add to Cart"
+                    : "Out of Stock"}
               </span>
             </button>
 
@@ -203,5 +203,5 @@ export function WishlistItem({
         </div>
       </div>
     </div>
-  )
+  );
 }

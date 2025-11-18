@@ -1,8 +1,8 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
-import { useSession } from 'next-auth/react'
-import { subDays } from 'date-fns'
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import { subDays } from "date-fns";
 import {
   Users,
   UserPlus,
@@ -10,37 +10,38 @@ import {
   DollarSign,
   TrendingUp,
   Award,
-} from 'lucide-react'
+} from "lucide-react";
 
-import { PieChart } from '@/components/analytics/charts/PieChart'
-import { BarChart } from '@/components/analytics/charts/BarChart'
-import { DateRangePicker } from '@/components/analytics/filters/DateRangePicker'
+import { PieChart } from "@/components/analytics/charts/PieChart";
+import { BarChart } from "@/components/analytics/charts/BarChart";
+import { DateRangePicker } from "@/components/analytics/filters/DateRangePicker";
 import {
   CustomerMetrics,
   AnalyticsResponse,
   formatCurrency,
   formatNumber,
-} from '@/lib/analytics/types'
+} from "@/lib/analytics/types";
 
 export default function CustomerAnalyticsPage() {
-  const { data: session } = useSession()
-  const [loading, setLoading] = useState(true)
-  const [customerMetrics, setCustomerMetrics] = useState<CustomerMetrics | null>(null)
+  const { data: session } = useSession();
+  const [loading, setLoading] = useState(true);
+  const [customerMetrics, setCustomerMetrics] =
+    useState<CustomerMetrics | null>(null);
   const [dateRange, setDateRange] = useState({
     startDate: subDays(new Date(), 29),
     endDate: new Date(),
-  })
+  });
 
   useEffect(() => {
     if (session?.user?.tenantId) {
-      fetchCustomerData()
+      fetchCustomerData();
     }
-  }, [session, dateRange])
+  }, [session, dateRange]);
 
   const fetchCustomerData = async () => {
-    if (!session?.user?.tenantId) return
+    if (!session?.user?.tenantId) return;
 
-    setLoading(true)
+    setLoading(true);
     try {
       const res = await fetch(
         `/api/analytics/customers?` +
@@ -48,26 +49,28 @@ export default function CustomerAnalyticsPage() {
             tenantId: session.user.tenantId,
             startDate: dateRange.startDate.toISOString(),
             endDate: dateRange.endDate.toISOString(),
-          })
-      )
+          }),
+      );
 
       if (res.ok) {
-        const data: AnalyticsResponse<CustomerMetrics> = await res.json()
-        setCustomerMetrics(data.data)
+        const data: AnalyticsResponse<CustomerMetrics> = await res.json();
+        setCustomerMetrics(data.data);
       }
     } catch (error) {
-      console.error('Failed to fetch customer data:', error)
+      console.error("Failed to fetch customer data:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   if (!session?.user) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <p className="text-gray-600">Please sign in to view customer analytics</p>
+        <p className="text-gray-600">
+          Please sign in to view customer analytics
+        </p>
       </div>
-    )
+    );
   }
 
   return (
@@ -75,7 +78,9 @@ export default function CustomerAnalyticsPage() {
       {/* Header */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Customer Analytics</h1>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Customer Analytics
+          </h1>
           <p className="mt-1 text-gray-600">
             Understand your customer base and buying behavior
           </p>
@@ -89,14 +94,19 @@ export default function CustomerAnalyticsPage() {
         {loading ? (
           <>
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-32 animate-pulse rounded-lg bg-gray-200" />
+              <div
+                key={i}
+                className="h-32 animate-pulse rounded-lg bg-gray-200"
+              />
             ))}
           </>
         ) : customerMetrics ? (
           <>
             <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
               <div className="flex items-center justify-between mb-2">
-                <p className="text-sm font-medium text-gray-600">Total Customers</p>
+                <p className="text-sm font-medium text-gray-600">
+                  Total Customers
+                </p>
                 <Users className="h-5 w-5 text-blue-600" />
               </div>
               <p className="text-3xl font-bold text-gray-900">
@@ -109,7 +119,9 @@ export default function CustomerAnalyticsPage() {
 
             <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
               <div className="flex items-center justify-between mb-2">
-                <p className="text-sm font-medium text-gray-600">New Customers</p>
+                <p className="text-sm font-medium text-gray-600">
+                  New Customers
+                </p>
                 <UserPlus className="h-5 w-5 text-green-600" />
               </div>
               <p className="text-3xl font-bold text-gray-900">
@@ -122,28 +134,28 @@ export default function CustomerAnalyticsPage() {
 
             <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
               <div className="flex items-center justify-between mb-2">
-                <p className="text-sm font-medium text-gray-600">Returning Customers</p>
+                <p className="text-sm font-medium text-gray-600">
+                  Returning Customers
+                </p>
                 <RefreshCw className="h-5 w-5 text-purple-600" />
               </div>
               <p className="text-3xl font-bold text-gray-900">
                 {formatNumber(customerMetrics.returningCustomers)}
               </p>
-              <p className="mt-2 text-xs text-gray-500">
-                Multiple purchases
-              </p>
+              <p className="mt-2 text-xs text-gray-500">Multiple purchases</p>
             </div>
 
             <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
               <div className="flex items-center justify-between mb-2">
-                <p className="text-sm font-medium text-gray-600">Avg Lifetime Value</p>
+                <p className="text-sm font-medium text-gray-600">
+                  Avg Lifetime Value
+                </p>
                 <DollarSign className="h-5 w-5 text-orange-600" />
               </div>
               <p className="text-3xl font-bold text-gray-900">
                 {formatCurrency(customerMetrics.avgLifetimeValue)}
               </p>
-              <p className="mt-2 text-xs text-gray-500">
-                Per customer
-              </p>
+              <p className="mt-2 text-xs text-gray-500">Per customer</p>
             </div>
           </>
         ) : null}
@@ -164,22 +176,24 @@ export default function CustomerAnalyticsPage() {
             <PieChart
               data={[
                 {
-                  name: 'New Customers',
+                  name: "New Customers",
                   value: customerMetrics.newCustomers,
                   percentage:
                     (customerMetrics.newCustomers /
-                      (customerMetrics.newCustomers + customerMetrics.returningCustomers)) *
+                      (customerMetrics.newCustomers +
+                        customerMetrics.returningCustomers)) *
                     100,
-                  color: '#10b981',
+                  color: "#10b981",
                 },
                 {
-                  name: 'Returning Customers',
+                  name: "Returning Customers",
                   value: customerMetrics.returningCustomers,
                   percentage:
                     (customerMetrics.returningCustomers /
-                      (customerMetrics.newCustomers + customerMetrics.returningCustomers)) *
+                      (customerMetrics.newCustomers +
+                        customerMetrics.returningCustomers)) *
                     100,
-                  color: '#8b5cf6',
+                  color: "#8b5cf6",
                 },
               ]}
               formatValue="number"
@@ -226,7 +240,9 @@ export default function CustomerAnalyticsPage() {
                       Customer Retention
                     </p>
                     <p className="text-2xl font-bold text-gray-900 mt-2">
-                      {customerMetrics.newCustomers + customerMetrics.returningCustomers > 0
+                      {customerMetrics.newCustomers +
+                        customerMetrics.returningCustomers >
+                      0
                         ? (
                             (customerMetrics.returningCustomers /
                               (customerMetrics.newCustomers +
@@ -302,12 +318,12 @@ export default function CustomerAnalyticsPage() {
                         <span
                           className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold ${
                             index === 0
-                              ? 'bg-yellow-100 text-yellow-700'
+                              ? "bg-yellow-100 text-yellow-700"
                               : index === 1
-                                ? 'bg-gray-100 text-gray-700'
+                                ? "bg-gray-100 text-gray-700"
                                 : index === 2
-                                  ? 'bg-orange-100 text-orange-700'
-                                  : 'bg-blue-50 text-blue-600'
+                                  ? "bg-orange-100 text-orange-700"
+                                  : "bg-blue-50 text-blue-600"
                           }`}
                         >
                           #{index + 1}
@@ -319,7 +335,9 @@ export default function CustomerAnalyticsPage() {
                         <p className="font-medium text-gray-900">
                           {customer.userName}
                         </p>
-                        <p className="text-sm text-gray-500">{customer.email}</p>
+                        <p className="text-sm text-gray-500">
+                          {customer.email}
+                        </p>
                       </div>
                     </td>
                     <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-600">
@@ -342,5 +360,5 @@ export default function CustomerAnalyticsPage() {
         </div>
       )}
     </div>
-  )
+  );
 }

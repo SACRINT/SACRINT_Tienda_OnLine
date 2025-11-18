@@ -9,30 +9,30 @@
  * - Real-time notification count
  */
 
-import { db } from '@/lib/db'
-import { NotificationType } from '@/lib/db/enums'
+import { db } from "@/lib/db";
+import { NotificationType } from "@/lib/db/enums";
 
 export interface CreateNotificationOptions {
-  userId: string
-  tenantId?: string
-  type: NotificationType
-  title: string
-  message: string
-  actionUrl?: string
-  metadata?: Record<string, any>
+  userId: string;
+  tenantId?: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  actionUrl?: string;
+  metadata?: Record<string, any>;
 }
 
 export interface NotificationResult {
-  success: boolean
-  notificationId?: string
-  error?: string
+  success: boolean;
+  notificationId?: string;
+  error?: string;
 }
 
 /**
  * Create a notification
  */
 export async function createNotification(
-  options: CreateNotificationOptions
+  options: CreateNotificationOptions,
 ): Promise<NotificationResult> {
   try {
     const notification = await db.notification.create({
@@ -45,18 +45,18 @@ export async function createNotification(
         actionUrl: options.actionUrl,
         metadata: options.metadata,
       },
-    })
+    });
 
     return {
       success: true,
       notificationId: notification.id,
-    }
+    };
   } catch (error: any) {
-    console.error('[Notification Service] Create error:', error)
+    console.error("[Notification Service] Create error:", error);
     return {
       success: false,
       error: error.message,
-    }
+    };
   }
 }
 
@@ -65,7 +65,7 @@ export async function createNotification(
  */
 export async function createBulkNotifications(
   userIds: string[],
-  notification: Omit<CreateNotificationOptions, 'userId'>
+  notification: Omit<CreateNotificationOptions, "userId">,
 ): Promise<NotificationResult> {
   try {
     await db.notification.createMany({
@@ -78,52 +78,55 @@ export async function createBulkNotifications(
         actionUrl: notification.actionUrl,
         metadata: notification.metadata,
       })),
-    })
+    });
 
     return {
       success: true,
-    }
+    };
   } catch (error: any) {
-    console.error('[Notification Service] Bulk create error:', error)
+    console.error("[Notification Service] Bulk create error:", error);
     return {
       success: false,
       error: error.message,
-    }
+    };
   }
 }
 
 /**
  * Get user notifications
  */
-export async function getUserNotifications(userId: string, options?: {
-  limit?: number
-  offset?: number
-  unreadOnly?: boolean
-}) {
-  const { limit = 20, offset = 0, unreadOnly = false } = options || {}
+export async function getUserNotifications(
+  userId: string,
+  options?: {
+    limit?: number;
+    offset?: number;
+    unreadOnly?: boolean;
+  },
+) {
+  const { limit = 20, offset = 0, unreadOnly = false } = options || {};
 
-  const where: any = { userId }
+  const where: any = { userId };
   if (unreadOnly) {
-    where.read = false
+    where.read = false;
   }
 
   const [notifications, total, unreadCount] = await Promise.all([
     db.notification.findMany({
       where,
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
       take: limit,
       skip: offset,
     }),
     db.notification.count({ where }),
     db.notification.count({ where: { userId, read: false } }),
-  ])
+  ]);
 
   return {
     notifications,
     total,
     unreadCount,
     hasMore: offset + limit < total,
-  }
+  };
 }
 
 /**
@@ -140,15 +143,15 @@ export async function markAsRead(notificationId: string, userId: string) {
         read: true,
         readAt: new Date(),
       },
-    })
+    });
 
-    return { success: true }
+    return { success: true };
   } catch (error: any) {
-    console.error('[Notification Service] Mark as read error:', error)
+    console.error("[Notification Service] Mark as read error:", error);
     return {
       success: false,
       error: error.message,
-    }
+    };
   }
 }
 
@@ -166,37 +169,40 @@ export async function markAllAsRead(userId: string) {
         read: true,
         readAt: new Date(),
       },
-    })
+    });
 
-    return { success: true }
+    return { success: true };
   } catch (error: any) {
-    console.error('[Notification Service] Mark all as read error:', error)
+    console.error("[Notification Service] Mark all as read error:", error);
     return {
       success: false,
       error: error.message,
-    }
+    };
   }
 }
 
 /**
  * Delete notification
  */
-export async function deleteNotification(notificationId: string, userId: string) {
+export async function deleteNotification(
+  notificationId: string,
+  userId: string,
+) {
   try {
     await db.notification.deleteMany({
       where: {
         id: notificationId,
         userId, // Ensure user owns the notification
       },
-    })
+    });
 
-    return { success: true }
+    return { success: true };
   } catch (error: any) {
-    console.error('[Notification Service] Delete error:', error)
+    console.error("[Notification Service] Delete error:", error);
     return {
       success: false,
       error: error.message,
-    }
+    };
   }
 }
 
@@ -207,15 +213,15 @@ export async function deleteAllNotifications(userId: string) {
   try {
     await db.notification.deleteMany({
       where: { userId },
-    })
+    });
 
-    return { success: true }
+    return { success: true };
   } catch (error: any) {
-    console.error('[Notification Service] Delete all error:', error)
+    console.error("[Notification Service] Delete all error:", error);
     return {
       success: false,
       error: error.message,
-    }
+    };
   }
 }
 
@@ -228,15 +234,15 @@ export async function getUnreadCount(userId: string): Promise<number> {
       userId,
       read: false,
     },
-  })
+  });
 }
 
 /**
  * Get notification statistics for a tenant
  */
 export async function getNotificationStats(tenantId: string, days = 30) {
-  const since = new Date()
-  since.setDate(since.getDate() - days)
+  const since = new Date();
+  since.setDate(since.getDate() - days);
 
   const [total, sent, read, byType] = await Promise.all([
     db.notification.count({
@@ -259,14 +265,14 @@ export async function getNotificationStats(tenantId: string, days = 30) {
       },
     }),
     db.notification.groupBy({
-      by: ['type'],
+      by: ["type"],
       where: {
         tenantId,
         createdAt: { gte: since },
       },
       _count: true,
     }),
-  ])
+  ]);
 
   return {
     total,
@@ -277,7 +283,7 @@ export async function getNotificationStats(tenantId: string, days = 30) {
       type: item.type,
       count: item._count,
     })),
-  }
+  };
 }
 
 /**
@@ -290,7 +296,7 @@ export async function notifyOrderUpdate(
   type: NotificationType,
   title: string,
   message: string,
-  emailTemplate?: any
+  emailTemplate?: any,
 ) {
   // Create in-app notification
   await createNotification({
@@ -301,7 +307,7 @@ export async function notifyOrderUpdate(
     message,
     actionUrl: `/account/orders/${orderId}`,
     metadata: { orderId },
-  })
+  });
 
   // TODO: Send email if user has email notifications enabled
   // Check user notification preferences

@@ -1,10 +1,10 @@
 // Account Dashboard Page
 // Overview of recent orders, wishlist preview, and account quick actions
 
-import { Suspense } from 'react'
-import Link from 'next/link'
-import { AccountLayout, OrderCard } from '@/components/account'
-import type { Order } from '@/components/account'
+import { Suspense } from "react";
+import Link from "next/link";
+import { AccountLayout, OrderCard } from "@/components/account";
+import type { Order } from "@/components/account";
 import {
   ShoppingBag,
   Heart,
@@ -12,29 +12,29 @@ import {
   CreditCard,
   TrendingUp,
   Package,
-} from 'lucide-react'
+} from "lucide-react";
 
 // Mock data - In production, fetch from API
 const getMockUser = () => ({
-  name: 'John Doe',
-  email: 'john.doe@example.com',
-  image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=John',
-})
+  name: "John Doe",
+  email: "john.doe@example.com",
+  image: "https://api.dicebear.com/7.x/avataaars/svg?seed=John",
+});
 
 const getMockRecentOrders = (): Order[] => {
   return [
     {
-      id: '1',
-      orderNumber: 'ORD-2024-001',
-      status: 'delivered',
+      id: "1",
+      orderNumber: "ORD-2024-001",
+      status: "delivered",
       createdAt: new Date(2024, 10, 10).toISOString(),
       items: [
         {
-          id: '1',
-          productId: '1',
-          productName: 'Premium Wireless Headphones',
+          id: "1",
+          productId: "1",
+          productName: "Premium Wireless Headphones",
           productImage:
-            'https://images.unsplash.com/photo-1505740420928-5e560c06d30e',
+            "https://images.unsplash.com/photo-1505740420928-5e560c06d30e",
           quantity: 1,
           price: 249.99,
         },
@@ -44,25 +44,25 @@ const getMockRecentOrders = (): Order[] => {
       tax: 20.0,
       total: 269.99,
       shippingAddress: {
-        fullName: 'John Doe',
-        addressLine1: '123 Main St',
-        city: 'San Francisco',
-        state: 'CA',
-        postalCode: '94102',
+        fullName: "John Doe",
+        addressLine1: "123 Main St",
+        city: "San Francisco",
+        state: "CA",
+        postalCode: "94102",
       },
-      trackingNumber: 'TRK123456789',
+      trackingNumber: "TRK123456789",
       estimatedDelivery: new Date(2024, 10, 15).toISOString(),
     },
     {
-      id: '2',
-      orderNumber: 'ORD-2024-002',
-      status: 'processing',
+      id: "2",
+      orderNumber: "ORD-2024-002",
+      status: "processing",
       createdAt: new Date(2024, 10, 14).toISOString(),
       items: [
         {
-          id: '2',
-          productId: '2',
-          productName: 'Wireless Earbuds Pro',
+          id: "2",
+          productId: "2",
+          productName: "Wireless Earbuds Pro",
           quantity: 2,
           price: 299.98,
         },
@@ -72,27 +72,27 @@ const getMockRecentOrders = (): Order[] => {
       tax: 24.8,
       total: 334.77,
       shippingAddress: {
-        fullName: 'John Doe',
-        addressLine1: '123 Main St',
-        city: 'San Francisco',
-        state: 'CA',
-        postalCode: '94102',
+        fullName: "John Doe",
+        addressLine1: "123 Main St",
+        city: "San Francisco",
+        state: "CA",
+        postalCode: "94102",
       },
     },
-  ]
-}
+  ];
+};
 
 const getMockStats = () => ({
   totalOrders: 12,
   activeOrders: 2,
   wishlistItems: 5,
   savedAddresses: 2,
-})
+});
 
 export default function AccountDashboardPage() {
-  const user = getMockUser()
-  const recentOrders = getMockRecentOrders()
-  const stats = getMockStats()
+  const user = getMockUser();
+  const recentOrders = getMockRecentOrders();
+  const stats = getMockStats();
 
   return (
     <AccountLayout user={user}>
@@ -100,7 +100,7 @@ export default function AccountDashboardPage() {
         {/* Welcome Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">
-            Welcome back, {user.name.split(' ')[0]}!
+            Welcome back, {user.name.split(" ")[0]}!
           </h1>
           <p className="mt-2 text-gray-600">
             Here&apos;s an overview of your account activity
@@ -217,7 +217,7 @@ export default function AccountDashboardPage() {
                       (window.location.href = `/account/orders/${id}`)
                     }
                     onDownloadInvoice={(id) =>
-                      console.log('Download invoice:', id)
+                      console.log("Download invoice:", id)
                     }
                   />
                 ))}
@@ -244,7 +244,7 @@ export default function AccountDashboardPage() {
         </div>
       </div>
     </AccountLayout>
-  )
+  );
 }
 
 // Stat Card Component
@@ -255,18 +255,18 @@ function StatCard({
   color,
   href,
 }: {
-  icon: typeof ShoppingBag
-  label: string
-  value: number
-  color: 'blue' | 'purple' | 'red' | 'green'
-  href: string
+  icon: typeof ShoppingBag;
+  label: string;
+  value: number;
+  color: "blue" | "purple" | "red" | "green";
+  href: string;
 }) {
   const colorClasses = {
-    blue: 'bg-blue-50 text-blue-600',
-    purple: 'bg-purple-50 text-purple-600',
-    red: 'bg-red-50 text-red-600',
-    green: 'bg-green-50 text-green-600',
-  }
+    blue: "bg-blue-50 text-blue-600",
+    purple: "bg-purple-50 text-purple-600",
+    red: "bg-red-50 text-red-600",
+    green: "bg-green-50 text-green-600",
+  };
 
   return (
     <Link
@@ -283,7 +283,7 @@ function StatCard({
         </div>
       </div>
     </Link>
-  )
+  );
 }
 
 // Quick Action Card Component
@@ -293,10 +293,10 @@ function QuickActionCard({
   description,
   href,
 }: {
-  icon: typeof ShoppingBag
-  title: string
-  description: string
-  href: string
+  icon: typeof ShoppingBag;
+  title: string;
+  description: string;
+  href: string;
 }) {
   return (
     <Link
@@ -315,5 +315,5 @@ function QuickActionCard({
         </div>
       </div>
     </Link>
-  )
+  );
 }

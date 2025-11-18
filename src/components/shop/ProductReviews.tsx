@@ -1,35 +1,35 @@
 // Product Reviews Component
 // Displays product reviews with ratings, pagination, and sorting
 
-'use client'
-import Image from 'next/image'
+"use client";
+import Image from "next/image";
 
-import { useState } from 'react'
-import { Star, ThumbsUp, VerifiedIcon, ChevronDown } from 'lucide-react'
+import { useState } from "react";
+import { Star, ThumbsUp, VerifiedIcon, ChevronDown } from "lucide-react";
 
 export interface Review {
-  id: string
-  userId: string
-  userName: string
-  userImage?: string
-  rating: number
-  title: string
-  content: string
-  isVerifiedPurchase: boolean
-  createdAt: string
-  helpfulCount: number
-  isHelpful?: boolean
+  id: string;
+  userId: string;
+  userName: string;
+  userImage?: string;
+  rating: number;
+  title: string;
+  content: string;
+  isVerifiedPurchase: boolean;
+  createdAt: string;
+  helpfulCount: number;
+  isHelpful?: boolean;
 }
 
 export interface ProductReviewsProps {
-  reviews: Review[]
-  averageRating: number
-  totalReviews: number
-  ratingDistribution: { stars: number; count: number; percentage: number }[]
-  onLoadMore?: () => void
-  onMarkHelpful?: (reviewId: string) => void
-  hasMore?: boolean
-  className?: string
+  reviews: Review[];
+  averageRating: number;
+  totalReviews: number;
+  ratingDistribution: { stars: number; count: number; percentage: number }[];
+  onLoadMore?: () => void;
+  onMarkHelpful?: (reviewId: string) => void;
+  hasMore?: boolean;
+  className?: string;
 }
 
 export function ProductReviews({
@@ -40,35 +40,39 @@ export function ProductReviews({
   onLoadMore,
   onMarkHelpful,
   hasMore = false,
-  className = '',
+  className = "",
 }: ProductReviewsProps) {
-  const [sortBy, setSortBy] = useState<'recent' | 'helpful' | 'rating'>('recent')
+  const [sortBy, setSortBy] = useState<"recent" | "helpful" | "rating">(
+    "recent",
+  );
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    })
-  }
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
 
   const sortedReviews = [...reviews].sort((a, b) => {
-    if (sortBy === 'recent') {
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    } else if (sortBy === 'helpful') {
-      return b.helpfulCount - a.helpfulCount
-    } else if (sortBy === 'rating') {
-      return b.rating - a.rating
+    if (sortBy === "recent") {
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    } else if (sortBy === "helpful") {
+      return b.helpfulCount - a.helpfulCount;
+    } else if (sortBy === "rating") {
+      return b.rating - a.rating;
     }
-    return 0
-  })
+    return 0;
+  });
 
   return (
     <div className={`w-full ${className}`}>
       {/* Rating Summary */}
       <div className="mb-8 rounded-lg border border-gray-200 bg-white p-6">
-        <h3 className="mb-4 text-xl font-bold text-gray-900">Customer Reviews</h3>
+        <h3 className="mb-4 text-xl font-bold text-gray-900">
+          Customer Reviews
+        </h3>
 
         <div className="flex flex-col gap-6 md:flex-row md:items-start md:gap-12">
           {/* Average Rating */}
@@ -82,14 +86,15 @@ export function ProductReviews({
                   key={i}
                   className={`h-5 w-5 ${
                     i < Math.floor(averageRating)
-                      ? 'fill-yellow-400 text-yellow-400'
-                      : 'text-gray-300'
+                      ? "fill-yellow-400 text-yellow-400"
+                      : "text-gray-300"
                   }`}
                 />
               ))}
             </div>
             <p className="text-sm text-gray-600">
-              Based on {totalReviews} {totalReviews === 1 ? 'review' : 'reviews'}
+              Based on {totalReviews}{" "}
+              {totalReviews === 1 ? "review" : "reviews"}
             </p>
           </div>
 
@@ -179,8 +184,8 @@ export function ProductReviews({
                           key={i}
                           className={`h-4 w-4 ${
                             i < review.rating
-                              ? 'fill-yellow-400 text-yellow-400'
-                              : 'text-gray-300'
+                              ? "fill-yellow-400 text-yellow-400"
+                              : "text-gray-300"
                           }`}
                         />
                       ))}
@@ -207,8 +212,8 @@ export function ProductReviews({
                 onClick={() => onMarkHelpful?.(review.id)}
                 className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
                   review.isHelpful
-                    ? 'bg-blue-50 text-blue-700'
-                    : 'text-gray-600 hover:bg-gray-100'
+                    ? "bg-blue-50 text-blue-700"
+                    : "text-gray-600 hover:bg-gray-100"
                 }`}
               >
                 <ThumbsUp className="h-4 w-4" />
@@ -248,5 +253,5 @@ export function ProductReviews({
         </div>
       )}
     </div>
-  )
+  );
 }

@@ -1,35 +1,35 @@
 // Orders Page
 // Display all orders with filtering and pagination
 
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { AccountLayout, LazyOrderCard } from '@/components/account'
-import type { Order } from '@/components/account'
-import { LazyLoad, OrderCardSkeleton } from '@/components/shared/LazyLoad'
-import { Search, Filter, Download, ChevronDown } from 'lucide-react'
+import { useState } from "react";
+import { AccountLayout, LazyOrderCard } from "@/components/account";
+import type { Order } from "@/components/account";
+import { LazyLoad, OrderCardSkeleton } from "@/components/shared/LazyLoad";
+import { Search, Filter, Download, ChevronDown } from "lucide-react";
 
 // Mock data - In production, fetch from API
 const getMockUser = () => ({
-  name: 'John Doe',
-  email: 'john.doe@example.com',
-  image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=John',
-})
+  name: "John Doe",
+  email: "john.doe@example.com",
+  image: "https://api.dicebear.com/7.x/avataaars/svg?seed=John",
+});
 
 const getMockOrders = (): Order[] => {
   return [
     {
-      id: '1',
-      orderNumber: 'ORD-2024-001',
-      status: 'delivered',
+      id: "1",
+      orderNumber: "ORD-2024-001",
+      status: "delivered",
       createdAt: new Date(2024, 10, 10).toISOString(),
       items: [
         {
-          id: '1',
-          productId: '1',
-          productName: 'Premium Wireless Headphones',
+          id: "1",
+          productId: "1",
+          productName: "Premium Wireless Headphones",
           productImage:
-            'https://images.unsplash.com/photo-1505740420928-5e560c06d30e',
+            "https://images.unsplash.com/photo-1505740420928-5e560c06d30e",
           quantity: 1,
           price: 249.99,
         },
@@ -39,27 +39,27 @@ const getMockOrders = (): Order[] => {
       tax: 20.0,
       total: 269.99,
       shippingAddress: {
-        fullName: 'John Doe',
-        addressLine1: '123 Main St',
-        city: 'San Francisco',
-        state: 'CA',
-        postalCode: '94102',
+        fullName: "John Doe",
+        addressLine1: "123 Main St",
+        city: "San Francisco",
+        state: "CA",
+        postalCode: "94102",
       },
-      trackingNumber: 'TRK123456789',
+      trackingNumber: "TRK123456789",
       estimatedDelivery: new Date(2024, 10, 15).toISOString(),
     },
     {
-      id: '2',
-      orderNumber: 'ORD-2024-002',
-      status: 'processing',
+      id: "2",
+      orderNumber: "ORD-2024-002",
+      status: "processing",
       createdAt: new Date(2024, 10, 14).toISOString(),
       items: [
         {
-          id: '2',
-          productId: '2',
-          productName: 'Wireless Earbuds Pro',
+          id: "2",
+          productId: "2",
+          productName: "Wireless Earbuds Pro",
           productImage:
-            'https://images.unsplash.com/photo-1590658268037-6bf12165a8df',
+            "https://images.unsplash.com/photo-1590658268037-6bf12165a8df",
           quantity: 2,
           price: 299.98,
         },
@@ -69,23 +69,23 @@ const getMockOrders = (): Order[] => {
       tax: 24.8,
       total: 334.77,
       shippingAddress: {
-        fullName: 'John Doe',
-        addressLine1: '123 Main St',
-        city: 'San Francisco',
-        state: 'CA',
-        postalCode: '94102',
+        fullName: "John Doe",
+        addressLine1: "123 Main St",
+        city: "San Francisco",
+        state: "CA",
+        postalCode: "94102",
       },
     },
     {
-      id: '3',
-      orderNumber: 'ORD-2024-003',
-      status: 'shipped',
+      id: "3",
+      orderNumber: "ORD-2024-003",
+      status: "shipped",
       createdAt: new Date(2024, 9, 28).toISOString(),
       items: [
         {
-          id: '3',
-          productId: '3',
-          productName: 'Studio Monitor Headphones',
+          id: "3",
+          productId: "3",
+          productName: "Studio Monitor Headphones",
           quantity: 1,
           price: 349.99,
         },
@@ -95,25 +95,25 @@ const getMockOrders = (): Order[] => {
       tax: 28.0,
       total: 377.99,
       shippingAddress: {
-        fullName: 'John Doe',
-        addressLine1: '123 Main St',
-        city: 'San Francisco',
-        state: 'CA',
-        postalCode: '94102',
+        fullName: "John Doe",
+        addressLine1: "123 Main St",
+        city: "San Francisco",
+        state: "CA",
+        postalCode: "94102",
       },
-      trackingNumber: 'TRK987654321',
+      trackingNumber: "TRK987654321",
       estimatedDelivery: new Date(2024, 11, 1).toISOString(),
     },
     {
-      id: '4',
-      orderNumber: 'ORD-2024-004',
-      status: 'pending',
+      id: "4",
+      orderNumber: "ORD-2024-004",
+      status: "pending",
       createdAt: new Date(2024, 9, 20).toISOString(),
       items: [
         {
-          id: '4',
-          productId: '4',
-          productName: 'Portable Bluetooth Speaker',
+          id: "4",
+          productId: "4",
+          productName: "Portable Bluetooth Speaker",
           quantity: 1,
           price: 129.99,
         },
@@ -123,23 +123,23 @@ const getMockOrders = (): Order[] => {
       tax: 11.2,
       total: 151.18,
       shippingAddress: {
-        fullName: 'John Doe',
-        addressLine1: '123 Main St',
-        city: 'San Francisco',
-        state: 'CA',
-        postalCode: '94102',
+        fullName: "John Doe",
+        addressLine1: "123 Main St",
+        city: "San Francisco",
+        state: "CA",
+        postalCode: "94102",
       },
     },
     {
-      id: '5',
-      orderNumber: 'ORD-2024-005',
-      status: 'cancelled',
+      id: "5",
+      orderNumber: "ORD-2024-005",
+      status: "cancelled",
       createdAt: new Date(2024, 9, 15).toISOString(),
       items: [
         {
-          id: '5',
-          productId: '5',
-          productName: 'Wireless Gaming Mouse',
+          id: "5",
+          productId: "5",
+          productName: "Wireless Gaming Mouse",
           quantity: 1,
           price: 89.99,
         },
@@ -149,65 +149,75 @@ const getMockOrders = (): Order[] => {
       tax: 7.68,
       total: 103.66,
       shippingAddress: {
-        fullName: 'John Doe',
-        addressLine1: '123 Main St',
-        city: 'San Francisco',
-        state: 'CA',
-        postalCode: '94102',
+        fullName: "John Doe",
+        addressLine1: "123 Main St",
+        city: "San Francisco",
+        state: "CA",
+        postalCode: "94102",
       },
     },
-  ]
-}
+  ];
+};
 
-type OrderStatus = 'all' | 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
+type OrderStatus =
+  | "all"
+  | "pending"
+  | "processing"
+  | "shipped"
+  | "delivered"
+  | "cancelled";
 
 export default function OrdersPage() {
-  const user = getMockUser()
-  const allOrders = getMockOrders()
+  const user = getMockUser();
+  const allOrders = getMockOrders();
 
-  const [statusFilter, setStatusFilter] = useState<OrderStatus>('all')
-  const [searchQuery, setSearchQuery] = useState('')
-  const [sortBy, setSortBy] = useState<'recent' | 'oldest' | 'total'>('recent')
+  const [statusFilter, setStatusFilter] = useState<OrderStatus>("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState<"recent" | "oldest" | "total">("recent");
 
   // Filter and sort orders
   const filteredOrders = allOrders
     .filter((order) => {
       // Status filter
-      if (statusFilter !== 'all' && order.status !== statusFilter) {
-        return false
+      if (statusFilter !== "all" && order.status !== statusFilter) {
+        return false;
       }
 
       // Search filter
       if (searchQuery) {
-        const query = searchQuery.toLowerCase()
+        const query = searchQuery.toLowerCase();
         return (
           order.orderNumber.toLowerCase().includes(query) ||
           order.items.some((item) =>
-            item.productName.toLowerCase().includes(query)
+            item.productName.toLowerCase().includes(query),
           )
-        )
+        );
       }
 
-      return true
+      return true;
     })
     .sort((a, b) => {
-      if (sortBy === 'recent') {
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      } else if (sortBy === 'oldest') {
-        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      if (sortBy === "recent") {
+        return (
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+      } else if (sortBy === "oldest") {
+        return (
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        );
       } else {
-        return b.total - a.total
+        return b.total - a.total;
       }
-    })
+    });
 
   const statusCounts = {
     all: allOrders.length,
-    pending: allOrders.filter((o) => o.status === 'pending').length,
-    processing: allOrders.filter((o) => o.status === 'processing').length,
-    shipped: allOrders.filter((o) => o.status === 'shipped').length,
-    delivered: allOrders.filter((o) => o.status === 'delivered').length,
-    cancelled: allOrders.filter((o) => o.status === 'cancelled').length,
-  }
+    pending: allOrders.filter((o) => o.status === "pending").length,
+    processing: allOrders.filter((o) => o.status === "processing").length,
+    shipped: allOrders.filter((o) => o.status === "shipped").length,
+    delivered: allOrders.filter((o) => o.status === "delivered").length,
+    cancelled: allOrders.filter((o) => o.status === "cancelled").length,
+  };
 
   return (
     <AccountLayout user={user}>
@@ -225,12 +235,12 @@ export default function OrdersPage() {
           <div className="flex gap-2 border-b border-gray-200">
             {(
               [
-                'all',
-                'pending',
-                'processing',
-                'shipped',
-                'delivered',
-                'cancelled',
+                "all",
+                "pending",
+                "processing",
+                "shipped",
+                "delivered",
+                "cancelled",
               ] as OrderStatus[]
             ).map((status) => (
               <button
@@ -238,8 +248,8 @@ export default function OrdersPage() {
                 onClick={() => setStatusFilter(status)}
                 className={`whitespace-nowrap border-b-2 px-4 py-3 text-sm font-medium transition-colors ${
                   statusFilter === status
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-gray-600 hover:border-gray-300 hover:text-gray-900'
+                    ? "border-blue-600 text-blue-600"
+                    : "border-transparent text-gray-600 hover:border-gray-300 hover:text-gray-900"
                 }`}
               >
                 {status.charAt(0).toUpperCase() + status.slice(1)}
@@ -308,10 +318,10 @@ export default function OrdersPage() {
                     (window.location.href = `/account/orders/${id}`)
                   }
                   onDownloadInvoice={(id) =>
-                    console.log('Download invoice:', id)
+                    console.log("Download invoice:", id)
                   }
                   onRequestReturn={(id) =>
-                    console.log('Request return for:', id)
+                    console.log("Request return for:", id)
                   }
                 />
               ))}
@@ -325,14 +335,14 @@ export default function OrdersPage() {
             </h3>
             <p className="mt-2 text-sm text-gray-600">
               {searchQuery
-                ? 'Try adjusting your search or filters'
-                : 'No orders match the selected status'}
+                ? "Try adjusting your search or filters"
+                : "No orders match the selected status"}
             </p>
             {searchQuery && (
               <button
                 onClick={() => {
-                  setSearchQuery('')
-                  setStatusFilter('all')
+                  setSearchQuery("");
+                  setStatusFilter("all");
                 }}
                 className="mt-4 text-sm font-medium text-blue-600 hover:text-blue-700"
               >
@@ -343,5 +353,5 @@ export default function OrdersPage() {
         )}
       </div>
     </AccountLayout>
-  )
+  );
 }

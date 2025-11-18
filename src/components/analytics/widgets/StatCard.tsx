@@ -1,49 +1,54 @@
-'use client'
+"use client";
 
-import { TrendingUp, TrendingDown, Minus, LucideIcon } from 'lucide-react'
-import { formatCurrency, formatNumber, formatPercentage, Metric } from '@/lib/analytics/types'
+import { TrendingUp, TrendingDown, Minus, LucideIcon } from "lucide-react";
+import {
+  formatCurrency,
+  formatNumber,
+  formatPercentage,
+  Metric,
+} from "@/lib/analytics/types";
 
 interface StatCardProps {
-  title: string
-  metric: Metric
-  icon?: LucideIcon
-  formatType?: 'currency' | 'number' | 'percentage'
-  description?: string
-  loading?: boolean
+  title: string;
+  metric: Metric;
+  icon?: LucideIcon;
+  formatType?: "currency" | "number" | "percentage";
+  description?: string;
+  loading?: boolean;
 }
 
 export function StatCard({
   title,
   metric,
   icon: Icon,
-  formatType = 'number',
+  formatType = "number",
   description,
   loading = false,
 }: StatCardProps) {
   const formatValue = (value: number) => {
     switch (formatType) {
-      case 'currency':
-        return formatCurrency(value)
-      case 'percentage':
-        return `${value.toFixed(2)}%`
+      case "currency":
+        return formatCurrency(value);
+      case "percentage":
+        return `${value.toFixed(2)}%`;
       default:
-        return formatNumber(value)
+        return formatNumber(value);
     }
-  }
+  };
 
   const TrendIcon =
-    metric.trend === 'up'
+    metric.trend === "up"
       ? TrendingUp
-      : metric.trend === 'down'
+      : metric.trend === "down"
         ? TrendingDown
-        : Minus
+        : Minus;
 
   const trendColor =
-    metric.trend === 'up'
-      ? 'text-green-600 bg-green-50'
-      : metric.trend === 'down'
-        ? 'text-red-600 bg-red-50'
-        : 'text-gray-600 bg-gray-50'
+    metric.trend === "up"
+      ? "text-green-600 bg-green-50"
+      : metric.trend === "down"
+        ? "text-red-600 bg-red-50"
+        : "text-gray-600 bg-gray-50";
 
   if (loading) {
     return (
@@ -54,7 +59,7 @@ export function StatCard({
           <div className="h-3 w-20 bg-gray-200 rounded"></div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -78,7 +83,9 @@ export function StatCard({
 
       {/* Trend and Comparison */}
       <div className="flex items-center gap-2">
-        <div className={`inline-flex items-center gap-1 rounded-full px-2 py-1 ${trendColor}`}>
+        <div
+          className={`inline-flex items-center gap-1 rounded-full px-2 py-1 ${trendColor}`}
+        >
           <TrendIcon className="h-3 w-3" />
           <span className="text-xs font-semibold">
             {formatPercentage(Math.abs(metric.change))}
@@ -94,7 +101,7 @@ export function StatCard({
         <p className="mt-3 text-xs text-gray-500">{description}</p>
       )}
     </div>
-  )
+  );
 }
 
 // Skeleton loader para stat cards
@@ -107,5 +114,5 @@ export function StatCardSkeleton() {
         <div className="h-3 w-20 bg-gray-200 rounded"></div>
       </div>
     </div>
-  )
+  );
 }

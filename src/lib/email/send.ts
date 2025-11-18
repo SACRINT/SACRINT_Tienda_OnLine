@@ -1,39 +1,39 @@
 // Email Sending Functions
 // High-level functions to send transactional emails using Resend
 
-import { resend, EMAIL_CONFIG, isEmailEnabled } from './client'
-import { OrderConfirmationEmail } from './templates/order-confirmation'
-import { PaymentFailedEmail } from './templates/payment-failed'
-import { render } from '@react-email/components'
+import { resend, EMAIL_CONFIG, isEmailEnabled } from "./client";
+import { OrderConfirmationEmail } from "./templates/order-confirmation";
+import { PaymentFailedEmail } from "./templates/payment-failed";
+import { render } from "@react-email/components";
 
 export interface OrderEmailData {
-  orderNumber: string
-  customerName: string
-  customerEmail: string
-  orderTotal: number
-  orderDate: string
+  orderNumber: string;
+  customerName: string;
+  customerEmail: string;
+  orderTotal: number;
+  orderDate: string;
   items: Array<{
-    name: string
-    quantity: number
-    price: number
-  }>
+    name: string;
+    quantity: number;
+    price: number;
+  }>;
   shippingAddress: {
-    street: string
-    city: string
-    state: string
-    postalCode: string
-    country: string
-  }
-  trackingUrl?: string
+    street: string;
+    city: string;
+    state: string;
+    postalCode: string;
+    country: string;
+  };
+  trackingUrl?: string;
 }
 
 export interface PaymentFailedEmailData {
-  orderNumber: string
-  customerName: string
-  customerEmail: string
-  orderTotal: number
-  failureReason?: string
-  retryUrl: string
+  orderNumber: string;
+  customerName: string;
+  customerEmail: string;
+  orderTotal: number;
+  failureReason?: string;
+  retryUrl: string;
 }
 
 /**
@@ -43,8 +43,10 @@ export interface PaymentFailedEmailData {
  */
 export async function sendOrderConfirmationEmail(data: OrderEmailData) {
   if (!isEmailEnabled()) {
-    console.warn('[EMAIL] Email functionality is disabled. Skipping order confirmation email.')
-    return null
+    console.warn(
+      "[EMAIL] Email functionality is disabled. Skipping order confirmation email.",
+    );
+    return null;
   }
 
   try {
@@ -57,8 +59,8 @@ export async function sendOrderConfirmationEmail(data: OrderEmailData) {
         items: data.items,
         shippingAddress: data.shippingAddress,
         trackingUrl: data.trackingUrl,
-      })
-    )
+      }),
+    );
 
     const result = await resend.emails.send({
       from: EMAIL_CONFIG.fromEmail,
@@ -67,17 +69,19 @@ export async function sendOrderConfirmationEmail(data: OrderEmailData) {
       subject: `Order Confirmation - ${data.orderNumber}`,
       html: emailHtml,
       tags: [
-        { name: 'type', value: 'order-confirmation' },
-        { name: 'order-number', value: data.orderNumber },
+        { name: "type", value: "order-confirmation" },
+        { name: "order-number", value: data.orderNumber },
       ],
-    })
+    });
 
-    console.log(`[EMAIL] Order confirmation sent to ${data.customerEmail} for order ${data.orderNumber}`)
+    console.log(
+      `[EMAIL] Order confirmation sent to ${data.customerEmail} for order ${data.orderNumber}`,
+    );
 
-    return result
+    return result;
   } catch (error) {
-    console.error('[EMAIL] Error sending order confirmation email:', error)
-    throw error
+    console.error("[EMAIL] Error sending order confirmation email:", error);
+    throw error;
   }
 }
 
@@ -88,8 +92,10 @@ export async function sendOrderConfirmationEmail(data: OrderEmailData) {
  */
 export async function sendPaymentFailedEmail(data: PaymentFailedEmailData) {
   if (!isEmailEnabled()) {
-    console.warn('[EMAIL] Email functionality is disabled. Skipping payment failed email.')
-    return null
+    console.warn(
+      "[EMAIL] Email functionality is disabled. Skipping payment failed email.",
+    );
+    return null;
   }
 
   try {
@@ -100,8 +106,8 @@ export async function sendPaymentFailedEmail(data: PaymentFailedEmailData) {
         orderTotal: data.orderTotal,
         failureReason: data.failureReason,
         retryUrl: data.retryUrl,
-      })
-    )
+      }),
+    );
 
     const result = await resend.emails.send({
       from: EMAIL_CONFIG.fromEmail,
@@ -110,17 +116,19 @@ export async function sendPaymentFailedEmail(data: PaymentFailedEmailData) {
       subject: `Payment Failed - ${data.orderNumber}`,
       html: emailHtml,
       tags: [
-        { name: 'type', value: 'payment-failed' },
-        { name: 'order-number', value: data.orderNumber },
+        { name: "type", value: "payment-failed" },
+        { name: "order-number", value: data.orderNumber },
       ],
-    })
+    });
 
-    console.log(`[EMAIL] Payment failed notification sent to ${data.customerEmail} for order ${data.orderNumber}`)
+    console.log(
+      `[EMAIL] Payment failed notification sent to ${data.customerEmail} for order ${data.orderNumber}`,
+    );
 
-    return result
+    return result;
   } catch (error) {
-    console.error('[EMAIL] Error sending payment failed email:', error)
-    throw error
+    console.error("[EMAIL] Error sending payment failed email:", error);
+    throw error;
   }
 }
 
@@ -136,11 +144,13 @@ export async function sendSimpleEmail(
   to: string,
   subject: string,
   text: string,
-  html?: string
+  html?: string,
 ) {
   if (!isEmailEnabled()) {
-    console.warn('[EMAIL] Email functionality is disabled. Skipping simple email.')
-    return null
+    console.warn(
+      "[EMAIL] Email functionality is disabled. Skipping simple email.",
+    );
+    return null;
   }
 
   try {
@@ -151,13 +161,13 @@ export async function sendSimpleEmail(
       subject,
       text,
       html,
-    })
+    });
 
-    console.log(`[EMAIL] Simple email sent to ${to}`)
+    console.log(`[EMAIL] Simple email sent to ${to}`);
 
-    return result
+    return result;
   } catch (error) {
-    console.error('[EMAIL] Error sending simple email:', error)
-    throw error
+    console.error("[EMAIL] Error sending simple email:", error);
+    throw error;
   }
 }

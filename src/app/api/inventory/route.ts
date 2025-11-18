@@ -4,16 +4,16 @@
  * POST - Adjust inventory
  */
 
-import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/lib/auth/auth'
+import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth/auth";
 import {
   getLowStockProducts,
   getOutOfStockProducts,
   adjustInventory,
   bulkStockUpdate,
-} from '@/lib/inventory/inventory-service'
-import { z } from 'zod'
-import { InventoryReason } from '@/lib/db/enums'
+} from "@/lib/inventory/inventory-service";
+import { z } from "zod";
+import { InventoryReason } from "@/lib/db/enums";
 
 const adjustInventorySchema = z.object({
   adjustments: z.array(
@@ -22,25 +22,25 @@ const adjustInventorySchema = z.object({
       variantId: z.string().cuid().optional(),
       adjustment: z.number(),
       reason: z.nativeEnum(InventoryReason),
-    })
+    }),
   ),
-})
+});
 
 export async function GET(req: NextRequest) {
   try {
-    const session = await auth()
-    if (!session?.user || session.user.role === 'CUSTOMER') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    const session = await auth();
+    if (!session?.user || session.user.role === "CUSTOMER") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const { searchParams } = new URL(req.url)
-    const tenantId = searchParams.get('tenantId')!
-    const threshold = parseInt(searchParams.get('threshold') || '10')
+    const { searchParams } = new URL(req.url);
+    const tenantId = searchParams.get("tenantId")!;
+    const threshold = parseInt(searchParams.get("threshold") || "10");
 
     const [lowStock, outOfStock] = await Promise.all([
       getLowStockProducts(tenantId, threshold),
       getOutOfStockProducts(tenantId),
-    ])
+    ]);
 
     return NextResponse.json({
       lowStock,
@@ -50,39 +50,48 @@ export async function GET(req: NextRequest) {
         outOfStockCount: outOfStock.length,
         threshold,
       },
-    })
+    });
   } catch (error: any) {
-    console.error('[Inventory API] GET error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    console.error("[Inventory API] GET error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await auth()
-    if (!session?.user || session.user.role === 'CUSTOMER') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    const session = await auth();
+    if (!session?.user || session.user.role === "CUSTOMER") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const body = await req.json()
-    const data = adjustInventorySchema.parse(body)
+    const body = await req.json();
+    const data = adjustInventorySchema.parse(body);
 
     const result = await adjustInventory(
       data.adjustments,
       session.user.id,
-      session.user.tenantId!
-    )
+      session.user.tenantId!,
+    );
 
     if (!result.success) {
-      return NextResponse.json({ error: result.error }, { status: 400 })
+      return NextResponse.json({ error: result.error }, { status: 400 });
     }
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ success: true });
   } catch (error: any) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: 'Invalid request', details: error.issues }, { status: 400 })
+      return NextResponse.json(
+        { error: "Invalid request", details: error.issues },
+        { status: 400 },
+      );
     }
-    console.error('[Inventory API] POST error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    console.error("[Inventory API] POST error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }

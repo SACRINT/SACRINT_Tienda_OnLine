@@ -1,45 +1,51 @@
 // POST /api/orders/:id/notes
 // Add notes to orders (internal only - stored in order.adminNotes)
 
-import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/lib/auth/auth'
-import { db } from '@/lib/db'
-import { z } from 'zod'
+import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth/auth";
+import { db } from "@/lib/db";
+import { z } from "zod";
 
 const CreateNoteSchema = z.object({
   tenantId: z.string().cuid(),
   content: z.string().min(1),
-})
+});
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
-    const session = await auth()
+    const session = await auth();
 
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (session.user.role !== 'STORE_OWNER' && session.user.role !== 'SUPER_ADMIN') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    if (
+      session.user.role !== "STORE_OWNER" &&
+      session.user.role !== "SUPER_ADMIN"
+    ) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const body = await req.json()
-    const validation = CreateNoteSchema.safeParse(body)
+    const body = await req.json();
+    const validation = CreateNoteSchema.safeParse(body);
 
     if (!validation.success) {
       return NextResponse.json(
-        { error: 'Invalid request', details: validation.error.issues },
-        { status: 400 }
-      )
+        { error: "Invalid request", details: validation.error.issues },
+        { status: 400 },
+      );
     }
 
-    const { tenantId, content } = validation.data
+    const { tenantId, content } = validation.data;
 
-    if (session.user.role === 'STORE_OWNER' && session.user.tenantId !== tenantId) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    if (
+      session.user.role === "STORE_OWNER" &&
+      session.user.tenantId !== tenantId
+    ) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     // Verify order exists and belongs to tenant
@@ -48,35 +54,35 @@ export async function POST(
         id: params.id,
         tenantId,
       },
-    })
+    });
 
     if (!order) {
-      return NextResponse.json({ error: 'Order not found' }, { status: 404 })
+      return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
     // Append note to adminNotes field
-    const existingNotes = order.adminNotes ? `${order.adminNotes}\n---\n` : ''
-    const timestamp = new Date().toISOString()
-    const updatedNotes = `${existingNotes}[${timestamp}] ${session.user.name || session.user.email}:\n${content}`
+    const existingNotes = order.adminNotes ? `${order.adminNotes}\n---\n` : "";
+    const timestamp = new Date().toISOString();
+    const updatedNotes = `${existingNotes}[${timestamp}] ${session.user.name || session.user.email}:\n${content}`;
 
     const updatedOrder = await db.order.update({
       where: { id: params.id },
       data: {
         adminNotes: updatedNotes,
       },
-    })
+    });
 
     return NextResponse.json({
       success: true,
-      message: 'Note added successfully',
+      message: "Note added successfully",
       adminNotes: updatedOrder.adminNotes,
-    })
+    });
   } catch (error) {
-    console.error('Create note error:', error)
+    console.error("Create note error:", error);
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }
 
@@ -84,23 +90,20 @@ export async function POST(
 // Get notes for an order (stored in adminNotes)
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
-    const session = await auth()
+    const session = await auth();
 
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const searchParams = req.nextUrl.searchParams
-    const tenantId = searchParams.get('tenantId')
+    const searchParams = req.nextUrl.searchParams;
+    const tenantId = searchParams.get("tenantId");
 
     if (!tenantId) {
-      return NextResponse.json(
-        { error: 'tenantId required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: "tenantId required" }, { status: 400 });
     }
 
     // Verify tenant access
@@ -109,21 +112,21 @@ export async function GET(
         id: params.id,
         tenantId,
       },
-    })
+    });
 
     if (!order) {
-      return NextResponse.json({ error: 'Order not found' }, { status: 404 })
+      return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
     return NextResponse.json({
-      notes: order.adminNotes || '',
-    })
+      notes: order.adminNotes || "",
+    });
   } catch (error) {
-    console.error('Get notes error:', error)
+    console.error("Get notes error:", error);
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }
 
@@ -131,37 +134,43 @@ export async function GET(
 // Clear all notes for an order
 const DeleteNoteSchema = z.object({
   tenantId: z.string().cuid(),
-})
+});
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
-    const session = await auth()
+    const session = await auth();
 
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (session.user.role !== 'STORE_OWNER' && session.user.role !== 'SUPER_ADMIN') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    if (
+      session.user.role !== "STORE_OWNER" &&
+      session.user.role !== "SUPER_ADMIN"
+    ) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const body = await req.json()
-    const validation = DeleteNoteSchema.safeParse(body)
+    const body = await req.json();
+    const validation = DeleteNoteSchema.safeParse(body);
 
     if (!validation.success) {
       return NextResponse.json(
-        { error: 'Invalid request', details: validation.error.issues },
-        { status: 400 }
-      )
+        { error: "Invalid request", details: validation.error.issues },
+        { status: 400 },
+      );
     }
 
-    const { tenantId } = validation.data
+    const { tenantId } = validation.data;
 
-    if (session.user.role === 'STORE_OWNER' && session.user.tenantId !== tenantId) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    if (
+      session.user.role === "STORE_OWNER" &&
+      session.user.tenantId !== tenantId
+    ) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     // Verify order exists and belongs to tenant
@@ -170,10 +179,10 @@ export async function DELETE(
         id: params.id,
         tenantId,
       },
-    })
+    });
 
     if (!order) {
-      return NextResponse.json({ error: 'Order not found' }, { status: 404 })
+      return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
     // Clear all notes
@@ -182,17 +191,17 @@ export async function DELETE(
       data: {
         adminNotes: null,
       },
-    })
+    });
 
     return NextResponse.json({
       success: true,
-      message: 'All notes cleared',
-    })
+      message: "All notes cleared",
+    });
   } catch (error) {
-    console.error('Delete notes error:', error)
+    console.error("Delete notes error:", error);
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }
