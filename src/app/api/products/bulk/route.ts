@@ -171,20 +171,12 @@ export async function POST(req: NextRequest) {
         )
     }
 
-    // Log activity
-    await db.activityLog.create({
-      data: {
-        tenantId,
-        userId: session.user.id,
-        action: `BULK_${operation.toUpperCase()}`,
-        entityType: 'PRODUCT',
-        entityId: productIds[0], // First product as reference
-        metadata: {
-          productCount: productIds.length,
-          productIds,
-          value,
-        },
-      },
+    // TODO: Log activity - implement with dedicated activity log model if needed
+    console.log('[Bulk Products API] Bulk operation completed', {
+      tenantId,
+      userId: session.user.id,
+      operation,
+      productCount: productIds.length,
     })
 
     return NextResponse.json({

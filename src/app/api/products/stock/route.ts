@@ -58,25 +58,8 @@ export async function GET(req: NextRequest) {
     // Calculate total inventory value
     const totalValue = products.reduce((sum: number, p: any) => sum + p.price * p.stock, 0)
 
-    // Get recent stock changes (from activity logs)
-    const recentChanges = await db.activityLog.findMany({
-      where: {
-        tenantId,
-        action: { in: ['BULK_UPDATESTOCK', 'PRODUCT_UPDATE'] },
-        createdAt: {
-          gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // Last 7 days
-        },
-      },
-      include: {
-        user: {
-          select: { id: true, name: true, email: true },
-        },
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-      take: 50,
-    })
+    // TODO: Implement activity log model for tracking recent stock changes
+    const recentChanges = []
 
     return NextResponse.json({
       summary: {
@@ -174,21 +157,14 @@ export async function PATCH(req: NextRequest) {
       data: { stock: newStock },
     })
 
-    // Log activity
-    await db.activityLog.create({
-      data: {
-        tenantId,
-        userId: session.user.id,
-        action: 'STOCK_ADJUSTMENT',
-        entityType: 'PRODUCT',
-        entityId: productId,
-        metadata: {
-          previousStock: product.stock,
-          newStock,
-          adjustment,
-          reason: reason || 'Manual adjustment',
-        },
-      },
+    // TODO: Log activity - implement with dedicated activity log model if needed
+    console.log('[Stock Adjustment] Stock updated', {
+      tenantId,
+      productId,
+      userId: session.user.id,
+      previousStock: product.stock,
+      newStock,
+      adjustment,
     })
 
     return NextResponse.json({

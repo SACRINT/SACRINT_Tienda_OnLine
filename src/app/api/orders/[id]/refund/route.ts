@@ -119,33 +119,23 @@ export async function POST(
       },
     })
 
-    // Log refund activity
-    await db.activityLog.create({
-      data: {
-        tenantId,
-        userId: session.user.id,
-        action: 'ORDER_REFUND',
-        entityType: 'ORDER',
-        entityId: params.id,
-        metadata: {
-          refundId: refund.id,
-          amount: refundAmount,
-          reason: reason || 'requested_by_customer',
-          note,
-          stripeRefundId: refund.id,
-        },
-      },
+    // TODO: Log activity - implement with dedicated activity log model if needed
+    console.log('[Refund API] Refund processed', {
+      tenantId,
+      orderId: params.id,
+      userId: session.user.id,
+      refundId: refund.id,
+      amount: refundAmount,
+      reason: reason || 'requested_by_customer',
     })
 
-    // Add internal note
-    await db.orderNote.create({
+    // Add refund note to order adminNotes
+    const refundNote = `[${new Date().toISOString()}] Refund processed: $${(refundAmount / 100).toFixed(2)}. ${note || ''} (Stripe Refund ID: ${refund.id})`
+    const existingNotes = order.adminNotes ? `${order.adminNotes}\n---\n` : ''
+    await db.order.update({
+      where: { id: params.id },
       data: {
-        orderId: params.id,
-        userId: session.user.id,
-        content: `Refund processed: $${(refundAmount / 100).toFixed(2)}. ${
-          note || ''
-        } (Stripe Refund ID: ${refund.id})`,
-        type: 'INTERNAL',
+        adminNotes: `${existingNotes}${refundNote}`,
       },
     })
 
@@ -201,37 +191,8 @@ export async function GET(
       )
     }
 
-    // Get refund history from activity logs
-    const refunds = await db.activityLog.findMany({
-      where: {
-        tenantId,
-        entityType: 'ORDER',
-        entityId: params.id,
-        action: 'ORDER_REFUND',
-      },
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    })
-
-    const formattedRefunds = refunds.map((log: any) => ({
-      id: log.id,
-      amount: log.metadata?.amount,
-      reason: log.metadata?.reason,
-      note: log.metadata?.note,
-      stripeRefundId: log.metadata?.stripeRefundId,
-      createdAt: log.createdAt,
-      user: log.user,
-    }))
+    // TODO: Implement refund history tracking - currently returning empty for future implementation
+    const formattedRefunds = []
 
     return NextResponse.json({
       refunds: formattedRefunds,
