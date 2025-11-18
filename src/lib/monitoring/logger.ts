@@ -126,16 +126,9 @@ class Logger {
 
   private async storeAuditLog(action: string, userId: string, details: Record<string, any>) {
     try {
-      const { db } = await import('../db/client')
-
-      await db.auditLog.create({
-        data: {
-          action,
-          userId,
-          details: JSON.stringify(details),
-          timestamp: new Date(),
-        },
-      })
+      // TODO: Implement audit log storage when auditLog model is added to Prisma schema
+      // For now, just log to console
+      console.log('[AUDIT]', { action, userId, details, timestamp: new Date().toISOString() })
     } catch (error) {
       console.error('Failed to store audit log:', error)
     }

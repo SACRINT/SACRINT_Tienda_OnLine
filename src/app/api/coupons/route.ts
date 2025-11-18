@@ -137,7 +137,13 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const coupon = await createCoupon(tenantId, validation.data)
+    // Cast type to match CouponType enum from Prisma
+    const couponData = {
+      ...validation.data,
+      type: validation.data.type as 'PERCENTAGE' | 'FIXED',
+    }
+
+    const coupon = await createCoupon(tenantId, couponData)
 
     console.log('[COUPONS] Created new coupon:', coupon.id, 'by user:', session.user.id)
 

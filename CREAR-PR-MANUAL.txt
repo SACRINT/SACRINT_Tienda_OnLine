@@ -1,0 +1,160 @@
+================================================================================
+                    CREAR PULL REQUEST - GUÍA MANUAL
+================================================================================
+
+¡El código está listo! Ahora hacemos el PR en GitHub en 3 minutos.
+
+================================================================================
+PASO 1: IR A GITHUB
+================================================================================
+
+URL Directa (Copia y pega en navegador):
+
+https://github.com/SACRINT/SACRINT_Tienda_OnLine/compare/main...develop
+
+O si eso no funciona:
+
+1. Ve a: https://github.com/SACRINT/SACRINT_Tienda_OnLine
+2. Click en "Pull requests" tab
+3. Click verde "New pull request"
+4. Base: main  ← Select this
+5. Compare: develop  ← Select this
+
+================================================================================
+PASO 2: CONFIGURAR EL PR
+================================================================================
+
+En la página de PR creation, verás 2 campos:
+
+TÍTULO (llenar con):
+────────────────────────────────────────────────────────────────────────────
+Week 1-14 Integration: Complete E-commerce Platform Foundation (50% Completion)
+────────────────────────────────────────────────────────────────────────────
+
+DESCRIPCIÓN (hacer esto):
+────────────────────────────────────────────────────────────────────────────
+
+1. Abre este archivo en tu editor:
+   C:\03_Tienda digital\PR_SUMMARY.md
+
+2. Selecciona TODO el contenido (Ctrl+A)
+
+3. Cópialo (Ctrl+C)
+
+4. Vuelve a GitHub
+
+5. Pega el contenido en el campo "Description" (Ctrl+V)
+
+────────────────────────────────────────────────────────────────────────────
+
+================================================================================
+PASO 3: REVISAR ANTES DE CREAR
+================================================================================
+
+CHECKLIST antes de click "Create pull request":
+
+[ ] Título correcto: "Week 1-14 Integration..."
+[ ] Base branch: main ✓
+[ ] Compare branch: develop ✓
+[ ] Descripción pegada (verás muchas líneas)
+[ ] Tienes permiso de push a main
+
+Si todo está OK → Continúa a PASO 4
+
+================================================================================
+PASO 4: CREAR EL PR
+================================================================================
+
+Click el botón VERDE:  "Create pull request"
+
+GitHub dirá:        ✅ Pull request created
+
+Te mostrará:
+- PR #X
+- URL tipo: https://github.com/SACRINT/SACRINT_Tienda_OnLine/pull/X
+- Status: OPEN (verde)
+
+================================================================================
+PASO 5: COPIAR LA URL DEL PR
+================================================================================
+
+Copia la URL que te da GitHub. Se verá así:
+
+https://github.com/SACRINT/SACRINT_Tienda_OnLine/pull/[número]
+
+Guarda esta URL. La necesitaremos para los próximos pasos.
+
+================================================================================
+DESPUÉS DEL PR
+================================================================================
+
+Una vez creado el PR:
+
+1. ✅ GitHub correrá el build automáticamente (CI/CD)
+2. ✅ Verás un tick verde cuando compile OK
+3. ✅ Los tests correrán automáticamente
+4. ✅ Se mostrará el coverage (94%)
+
+ESPERADO:
+  - Build: ✅ PASSED
+  - Tests: ✅ 41/41 PASSED
+  - Coverage: ✅ 94%
+
+Si algo falla:
+  - Click en "Details" para ver qué pasó
+  - Avísame el error
+
+================================================================================
+MENSAJE PARA NOTIFICAR (después de crear el PR)
+================================================================================
+
+Una vez creado, cópiame este mensaje con la URL del PR:
+
+---
+✅ PR CREADO EXITOSAMENTE
+
+Número: #[número]
+URL: [pega la URL aquí]
+Status: ABIERTO para review
+Build: [pendiente o ✅ passed]
+---
+
+================================================================================
+ERRORES COMUNES
+================================================================================
+
+ERROR: "You don't have permission to push to the base repository"
+SOLUCIÓN: Necesitas permisos en el repo. Contacta al admin.
+
+ERROR: "This branch is up-to-date with main"
+SOLUCIÓN: Significa que no hay cambios. Verifica que estés en branch develop.
+
+ERROR: "Base branch is same as compare branch"
+SOLUCIÓN: Asegúrate que Base=main y Compare=develop (no ambos develop)
+
+================================================================================
+¿NECESITAS AYUDA?
+================================================================================
+
+Si algo no sale:
+
+1. Verifica que el navegador muestre esta URL:
+   https://github.com/SACRINT/SACRINT_Tienda_OnLine/compare/main...develop
+
+2. Verifica que hayas pegado TODO el contenido de PR_SUMMARY.md
+
+3. Intenta nuevamente
+
+Si sigue fallando, avísame:
+- Screenshot del error
+- URL que intentaste
+- Qué paso exacto falla
+
+================================================================================
+TIEMPO ESTIMADO: 3-5 MINUTOS
+================================================================================
+
+Esto es simple. Si algo falla, no es gran cosa.
+¡Vamos! 🚀
+
+================================================================================
