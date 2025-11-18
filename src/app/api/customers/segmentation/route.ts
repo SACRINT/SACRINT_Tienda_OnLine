@@ -155,16 +155,16 @@ export async function GET(req: NextRequest) {
 
     // Calculate summary
     const summary = {
-      champions: customersWithRFM.filter((c) => c.segment === 'champions').length,
-      loyal: customersWithRFM.filter((c) => c.segment === 'loyal').length,
-      promising: customersWithRFM.filter((c) => c.segment === 'promising').length,
-      new: customersWithRFM.filter((c) => c.segment === 'new').length,
-      at_risk: customersWithRFM.filter((c) => c.segment === 'at_risk').length,
-      lost: customersWithRFM.filter((c) => c.segment === 'lost').length,
+      champions: customersWithRFM.filter((c: any) => c.segment === 'champions').length,
+      loyal: customersWithRFM.filter((c: any) => c.segment === 'loyal').length,
+      promising: customersWithRFM.filter((c: any) => c.segment === 'promising').length,
+      new: customersWithRFM.filter((c: any) => c.segment === 'new').length,
+      atRisk: customersWithRFM.filter((c: any) => c.segment === 'at_risk').length,
+      lost: customersWithRFM.filter((c: any) => c.segment === 'lost').length,
     }
 
     // Sort by RFM total score descending
-    customersWithRFM.sort((a, b) => b.rfmScore.total - a.rfmScore.total)
+    customersWithRFM.sort((a: any, b: any) => b.rfmScore.total - a.rfmScore.total)
 
     return NextResponse.json({
       customers: customersWithRFM,

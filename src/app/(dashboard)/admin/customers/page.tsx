@@ -15,7 +15,7 @@ export default function CustomersPage() {
   const [summary, setSummary] = useState({
     champions: 0,
     loyal: 0,
-    at_risk: 0,
+    atRisk: 0,
     lost: 0,
     new: 0,
     promising: 0,
