@@ -186,7 +186,7 @@ export async function GET(
     }
 
     // TODO: Implement refund history tracking - currently returning empty for future implementation
-    const formattedRefunds = []
+    const formattedRefunds: any[] = []
 
     return NextResponse.json({
       refunds: formattedRefunds,
