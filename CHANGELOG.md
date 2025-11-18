@@ -8,6 +8,33 @@ y este proyecto se adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 ## [Unreleased]
 
 ### Added
+- **Week 17-18: Advanced Search & Filters (40h)** - 2025-11-18
+  - Full-text search with PostgreSQL
+  - Advanced filtering system
+  - Search autocomplete/suggestions
+  - Search analytics tracking
+
+  **Search Service** (`src/lib/search/search-service.ts`):
+  - Full-text product search (name, description, SKU)
+  - Advanced filters: category, price range, rating, stock availability
+  - Sorting options: relevance, price (asc/desc), newest, rating
+  - Pagination support
+  - Filter aggregations (categories, price ranges, statistics)
+  - Search suggestions for autocomplete
+  - Search analytics tracking
+
+  **APIs Created**:
+  - GET /api/search - Advanced product search with all filters
+
+  **Features**:
+  - Case-insensitive search
+  - Multi-field search (OR conditions)
+  - Dynamic price range generation
+  - Category aggregations with counts
+  - Price statistics (min, max, avg)
+  - Results pagination
+  - Sort by relevance, price, date, rating
+
 - **Week 15-16: Email & Notifications System (40h)** - 2025-11-18
   - Complete email & notifications infrastructure
   - In-app notification system
