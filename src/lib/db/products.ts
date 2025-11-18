@@ -747,8 +747,9 @@ export async function getRelatedProducts(
   // 1. Same category (highest priority)
   // 2. Similar price range (±30%)
   // 3. Overlapping tags
-  const priceMin = product.basePrice * 0.7
-  const priceMax = product.basePrice * 1.3
+  const basePrice = Number(product.basePrice)
+  const priceMin = basePrice * 0.7
+  const priceMax = basePrice * 1.3
 
   const relatedProducts = await db.product.findMany({
     where: {

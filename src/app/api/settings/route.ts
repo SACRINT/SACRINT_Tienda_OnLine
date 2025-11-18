@@ -54,13 +54,13 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    // Get tenant with settings
+    // Get tenant with basic info
     const tenant = await db.tenant.findUnique({
       where: { id: tenantId },
       select: {
         id: true,
         name: true,
-        settings: true,
+        featureFlags: true,
       },
     })
 
@@ -87,7 +87,7 @@ export async function GET(req: NextRequest) {
       enableTax: true,
     }
 
-    const settings = { ...defaultSettings, ...(tenant.settings as any) }
+    const settings = { ...defaultSettings, ...(tenant.featureFlags as any) }
 
     return NextResponse.json({
       settings,
@@ -129,31 +129,24 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    // Update tenant settings
+    // Update tenant feature flags (stored as JSON)
     const updated = await db.tenant.update({
       where: { id: tenantId },
       data: {
-        settings: settings as any,
+        featureFlags: settings as any,
       },
     })
 
-    // Log activity
-    await db.activityLog.create({
-      data: {
-        tenantId,
-        userId: session.user.id,
-        action: 'SETTINGS_UPDATE',
-        entityType: 'TENANT',
-        entityId: tenantId,
-        metadata: {
-          updatedFields: Object.keys(settings),
-        },
-      },
+    // TODO: Activity logging - implement with dedicated activity log model if needed
+    console.log('[Settings API] Tenant settings updated', {
+      tenantId,
+      userId: session.user.id,
+      updatedFields: Object.keys(settings),
     })
 
     return NextResponse.json({
       success: true,
-      settings: updated.settings,
+      settings: settings,
     })
   } catch (error) {
     console.error('Update settings error:', error)

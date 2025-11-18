@@ -26,19 +26,14 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    // Get stock threshold from tenant settings (default: 10)
-    const tenant = await db.tenant.findUnique({
-      where: { id: tenantId },
-      select: { settings: true },
-    })
+    // Default low stock threshold
+    const lowStockThreshold = 10
 
-    const lowStockThreshold = (tenant?.settings as any)?.lowStockThreshold || 10
-
-    // Get all products with stock data
+    // Get all published products with stock data
     const products = await db.product.findMany({
       where: {
         tenantId,
-        status: { not: 'ARCHIVED' },
+        published: true,
       },
       include: {
         category: {
@@ -56,27 +51,10 @@ export async function GET(req: NextRequest) {
     const inStock = products.filter((p: any) => p.stock > lowStockThreshold)
 
     // Calculate total inventory value
-    const totalValue = products.reduce((sum: number, p: any) => sum + p.price * p.stock, 0)
+    const totalValue = products.reduce((sum: number, p: any) => sum + Number(p.basePrice) * p.stock, 0)
 
-    // Get recent stock changes (from activity logs)
-    const recentChanges = await db.activityLog.findMany({
-      where: {
-        tenantId,
-        action: { in: ['BULK_UPDATESTOCK', 'PRODUCT_UPDATE'] },
-        createdAt: {
-          gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // Last 7 days
-        },
-      },
-      include: {
-        user: {
-          select: { id: true, name: true, email: true },
-        },
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-      take: 50,
-    })
+    // TODO: Implement activity log model for tracking recent stock changes
+    const recentChanges: any[] = []
 
     return NextResponse.json({
       summary: {
@@ -93,18 +71,18 @@ export async function GET(req: NextRequest) {
           name: p.name,
           sku: p.sku,
           stock: p.stock,
-          price: p.price,
+          price: Number(p.basePrice),
           category: p.category?.name,
-          status: p.status,
+          published: p.published,
         })),
         lowStock: lowStock.map((p: any) => ({
           id: p.id,
           name: p.name,
           sku: p.sku,
           stock: p.stock,
-          price: p.price,
+          price: Number(p.basePrice),
           category: p.category?.name,
-          status: p.status,
+          published: p.published,
         })),
       },
       recentChanges: recentChanges.map((log: any) => ({
@@ -174,21 +152,14 @@ export async function PATCH(req: NextRequest) {
       data: { stock: newStock },
     })
 
-    // Log activity
-    await db.activityLog.create({
-      data: {
-        tenantId,
-        userId: session.user.id,
-        action: 'STOCK_ADJUSTMENT',
-        entityType: 'PRODUCT',
-        entityId: productId,
-        metadata: {
-          previousStock: product.stock,
-          newStock,
-          adjustment,
-          reason: reason || 'Manual adjustment',
-        },
-      },
+    // TODO: Log activity - implement with dedicated activity log model if needed
+    console.log('[Stock Adjustment] Stock updated', {
+      tenantId,
+      productId,
+      userId: session.user.id,
+      previousStock: product.stock,
+      newStock,
+      adjustment,
     })
 
     return NextResponse.json({

@@ -62,8 +62,7 @@ export async function searchProducts(options: SearchOptions): Promise<SearchResu
   // Build where clause
   const where: any = {
     tenantId,
-    status: 'PUBLISHED',
-    deletedAt: null,
+    published: true,
   }
 
   // Full-text search
@@ -82,9 +81,9 @@ export async function searchProducts(options: SearchOptions): Promise<SearchResu
 
   // Price range filter
   if (minPrice !== undefined || maxPrice !== undefined) {
-    where.price = {}
-    if (minPrice !== undefined) where.price.gte = minPrice
-    if (maxPrice !== undefined) where.price.lte = maxPrice
+    where.basePrice = {}
+    if (minPrice !== undefined) where.basePrice.gte = minPrice
+    if (maxPrice !== undefined) where.basePrice.lte = maxPrice
   }
 
   // Stock filter
@@ -117,15 +116,15 @@ export async function searchProducts(options: SearchOptions): Promise<SearchResu
     // Get category aggregations
     db.product.groupBy({
       by: ['categoryId'],
-      where: { ...where, categoryId: { not: null } },
+      where: { ...where, categoryId: { not: null as any } },
       _count: true,
     }),
     // Get price statistics
     db.product.aggregate({
       where,
-      _avg: { price: true },
-      _max: { price: true },
-      _min: { price: true },
+      _avg: { basePrice: true },
+      _max: { basePrice: true },
+      _min: { basePrice: true },
     }),
   ])
 
@@ -150,10 +149,10 @@ export async function searchProducts(options: SearchOptions): Promise<SearchResu
         name: categoryMap.get(c.categoryId!) || 'Unknown',
         count: c._count,
       })),
-      priceRanges: generatePriceRanges(stats._min.price || 0, stats._max.price || 0),
-      avgPrice: stats._avg.price || 0,
-      maxPrice: stats._max.price || 0,
-      minPrice: stats._min.price || 0,
+      priceRanges: generatePriceRanges(Number(stats._min.basePrice) || 0, Number(stats._max.basePrice) || 0),
+      avgPrice: Number(stats._avg.basePrice) || 0,
+      maxPrice: Number(stats._max.basePrice) || 0,
+      minPrice: Number(stats._min.basePrice) || 0,
     },
   }
 }
@@ -165,7 +164,7 @@ export async function getSearchSuggestions(query: string, tenantId: string, limi
   const products = await db.product.findMany({
     where: {
       tenantId,
-      status: 'PUBLISHED',
+      published: true,
       OR: [
         { name: { contains: query, mode: 'insensitive' } },
         { description: { contains: query, mode: 'insensitive' } },
@@ -175,7 +174,7 @@ export async function getSearchSuggestions(query: string, tenantId: string, limi
       id: true,
       name: true,
       slug: true,
-      price: true,
+      basePrice: true,
       images: {
         take: 1,
         orderBy: { order: 'asc' },
@@ -189,7 +188,7 @@ export async function getSearchSuggestions(query: string, tenantId: string, limi
     id: p.id,
     name: p.name,
     slug: p.slug,
-    price: p.price,
+    price: Number(p.basePrice),
     image: p.images[0]?.url,
   }))
 }
@@ -217,9 +216,9 @@ export async function getPopularSearches(tenantId: string, limit = 10) {
 function getOrderByClause(sortBy: string): any {
   switch (sortBy) {
     case 'price_asc':
-      return { price: 'asc' }
+      return { basePrice: 'asc' }
     case 'price_desc':
-      return { price: 'desc' }
+      return { basePrice: 'desc' }
     case 'newest':
       return { createdAt: 'desc' }
     case 'rating':

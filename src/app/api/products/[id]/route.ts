@@ -121,19 +121,12 @@ export async function PATCH(
       data: updates,
     })
 
-    // Log activity
-    await db.activityLog.create({
-      data: {
-        tenantId,
-        userId: session.user.id,
-        action: 'PRODUCT_UPDATE',
-        entityType: 'PRODUCT',
-        entityId: params.id,
-        metadata: {
-          updates,
-          quickEdit: true,
-        },
-      },
+    // TODO: Log activity - implement with dedicated activity log model if needed
+    console.log('[Product API] Product updated (quick edit)', {
+      tenantId,
+      productId: params.id,
+      userId: session.user.id,
+      updates,
     })
 
     return NextResponse.json({
@@ -232,16 +225,11 @@ export async function PUT(
       })
     }
 
-    // Log activity
-    await db.activityLog.create({
-      data: {
-        tenantId,
-        userId: session.user.id,
-        action: 'PRODUCT_UPDATE',
-        entityType: 'PRODUCT',
-        entityId: params.id,
-        metadata: { fullUpdate: true },
-      },
+    // TODO: Log activity - implement with dedicated activity log model if needed
+    console.log('[Product API] Product updated (full update)', {
+      tenantId,
+      productId: params.id,
+      userId: session.user.id,
     })
 
     return NextResponse.json({
@@ -302,27 +290,20 @@ export async function DELETE(
       )
     }
 
-    // Soft delete
+    // Mark as unpublished (soft delete via published flag)
     const deleted = await db.product.update({
       where: { id: params.id },
       data: {
-        status: 'ARCHIVED',
-        deletedAt: new Date(),
+        published: false,
       },
     })
 
-    // Log activity
-    await db.activityLog.create({
-      data: {
-        tenantId,
-        userId: session.user.id,
-        action: 'PRODUCT_DELETE',
-        entityType: 'PRODUCT',
-        entityId: params.id,
-        metadata: {
-          productName: existing.name,
-        },
-      },
+    // TODO: Log activity - implement with dedicated activity log model if needed
+    console.log('[Product API] Product deleted', {
+      tenantId,
+      productId: params.id,
+      userId: session.user.id,
+      productName: existing.name,
     })
 
     return NextResponse.json({

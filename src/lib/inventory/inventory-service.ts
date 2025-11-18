@@ -273,14 +273,14 @@ export async function getLowStockProducts(tenantId: string, threshold = 10) {
     where: {
       tenantId,
       stock: { lte: threshold, gt: 0 },
-      status: 'PUBLISHED',
+      published: true,
     },
     select: {
       id: true,
       name: true,
       sku: true,
       stock: true,
-      price: true,
+      basePrice: true,
     },
     orderBy: { stock: 'asc' },
   })
@@ -294,13 +294,13 @@ export async function getOutOfStockProducts(tenantId: string) {
     where: {
       tenantId,
       stock: 0,
-      status: 'PUBLISHED',
+      published: true,
     },
     select: {
       id: true,
       name: true,
       sku: true,
-      price: true,
+      basePrice: true,
     },
   })
 }
