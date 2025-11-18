@@ -8,7 +8,7 @@ import { OrderFilterSchema } from "@/lib/security/schemas/order-schemas";
 import { USER_ROLES } from "@/lib/types/user-role";
 
 // Force dynamic rendering for this API route
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 /**
  * GET /api/admin/orders

@@ -7,7 +7,7 @@ import { getRelatedProducts } from "@/lib/db/products";
 import { z } from "zod";
 
 // Force dynamic rendering for this API route
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 /**
  * GET /api/products/[id]/related

@@ -8,7 +8,7 @@ import { getReviewById, updateReview, deleteReview } from "@/lib/db/reviews";
 import { UpdateReviewSchema } from "@/lib/security/schemas/review-schemas";
 
 // Force dynamic rendering for this API route
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 /**
  * PATCH /api/reviews/[id]

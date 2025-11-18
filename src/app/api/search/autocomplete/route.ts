@@ -7,7 +7,7 @@ import { getSearchSuggestions } from "@/lib/db/search";
 import { z } from "zod";
 
 // Force dynamic rendering for this API route
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 const AutocompleteSchema = z.object({
   q: z.string().min(1).max(100),

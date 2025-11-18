@@ -10,7 +10,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/auth";
 
 // Force dynamic rendering for this API route
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 import { z } from "zod";
 
 const preferencesSchema = z.object({

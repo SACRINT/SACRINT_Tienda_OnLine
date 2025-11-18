@@ -8,7 +8,7 @@ import { getOrderById } from "@/lib/db/orders";
 import { ReserveInventorySchema } from "@/lib/security/schemas/review-schemas";
 
 // Force dynamic rendering for this API route
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 /**
  * POST /api/inventory/reserve

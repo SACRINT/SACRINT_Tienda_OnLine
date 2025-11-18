@@ -8,7 +8,7 @@ import { db } from "@/lib/db";
 import { z } from "zod";
 
 // Force dynamic rendering for this API route
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 const BulkOperationSchema = z.object({
   tenantId: z.string().uuid(),

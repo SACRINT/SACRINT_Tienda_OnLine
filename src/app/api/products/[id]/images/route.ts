@@ -13,7 +13,7 @@ import { USER_ROLES } from "@/lib/types/user-role";
 import { z } from "zod";
 
 // Force dynamic rendering for this API route
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 const AddImageSchema = z.object({
   url: z.string().url("Invalid image URL"),

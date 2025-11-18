@@ -7,7 +7,7 @@ import { getRecentOrders } from "@/lib/db/dashboard";
 import { RecentOrdersSchema } from "@/lib/security/schemas/dashboard-schemas";
 
 // Force dynamic rendering for this API route
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 /**
  * GET /api/admin/dashboard/orders

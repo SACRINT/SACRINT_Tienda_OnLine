@@ -133,7 +133,7 @@ const DELIVERY_ESTIMATES = {
 const DIM_WEIGHT_DIVISOR = 139; // For domestic shipping
 
 // Force dynamic rendering for this API route
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   try {

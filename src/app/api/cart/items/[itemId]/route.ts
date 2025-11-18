@@ -8,7 +8,7 @@ import { updateCartItemQuantity, removeCartItem } from "@/lib/db/cart";
 import { UpdateCartItemSchema } from "@/lib/security/schemas/order-schemas";
 
 // Force dynamic rendering for this API route
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 /**
  * PATCH /api/cart/items/[itemId]

@@ -7,7 +7,7 @@ import { ConfirmReservationSchema } from "@/lib/security/schemas/review-schemas"
 import { db } from "@/lib/db/client";
 
 // Force dynamic rendering for this API route
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 /**
  * POST /api/inventory/confirm
