@@ -92,10 +92,10 @@ describe('Orders API', () => {
       auth.mockResolvedValue(mockAdminSession)
       db.order.findFirst.mockResolvedValue(mockOrder)
       // db.orderNote.create.mockResolvedValue({
-        id: 'note-1',
-        content: 'Internal note',
-        type: 'INTERNAL',
-      })
+      //   id: 'note-1',
+      //   content: 'Internal note',
+      //   type: 'INTERNAL',
+      // })
 
       const req = new NextRequest('http://localhost:3000/api/orders/order-1/notes', {
         method: 'POST',

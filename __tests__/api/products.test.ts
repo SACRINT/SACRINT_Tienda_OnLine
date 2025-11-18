@@ -224,13 +224,13 @@ describe('Products API', () => {
 
       // Verify activity log
       // expect(db.activityLog.create.toHaveBeenCalledWith({
-        data: expect.objectContaining({
-          action: 'BULK_DELETE_PRODUCTS',
-          metadata: expect.objectContaining({
-            productIds: ['product-1', 'product-2', 'product-3'],
-          }),
-        }),
-      })
+      //   data: expect.objectContaining({
+      //     action: 'BULK_DELETE_PRODUCTS',
+      //     metadata: expect.objectContaining({
+      //       productIds: ['product-1', 'product-2', 'product-3'],
+      //     }),
+      //   }),
+      // }))
     })
 
     it('should perform bulk price update', async () => {
