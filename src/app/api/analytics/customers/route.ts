@@ -2,15 +2,14 @@
 // Customer analytics and insights
 
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth/config'
+import { auth } from '@/lib/auth/auth'
 import { getCustomerMetrics } from '@/lib/analytics/queries'
 import { AnalyticsResponse, CustomerMetrics } from '@/lib/analytics/types'
 import { subDays } from 'date-fns'
 
 export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await auth()
 
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

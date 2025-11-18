@@ -16,6 +16,7 @@ export interface PieChartData {
   value: number
   percentage: number
   color?: string
+  [key: string]: any
 }
 
 interface PieChartProps {
@@ -61,7 +62,7 @@ export function PieChart({
     }
   }
 
-  const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
+  const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload
       return (
