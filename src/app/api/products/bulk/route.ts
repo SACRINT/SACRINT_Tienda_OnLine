@@ -55,15 +55,14 @@ export async function POST(req: NextRequest) {
 
     switch (operation) {
       case 'delete':
-        // Soft delete products
+        // Soft delete products (unpublish)
         result = await db.product.updateMany({
           where: {
             id: { in: productIds },
             tenantId,
           },
           data: {
-            status: 'ARCHIVED',
-            deletedAt: new Date(),
+            published: false,
           },
         })
         break
@@ -75,7 +74,7 @@ export async function POST(req: NextRequest) {
             tenantId,
           },
           data: {
-            status: 'ACTIVE',
+            published: true,
           },
         })
         break
@@ -87,7 +86,7 @@ export async function POST(req: NextRequest) {
             tenantId,
           },
           data: {
-            status: 'DRAFT',
+            published: false,
           },
         })
         break
