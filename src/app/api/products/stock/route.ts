@@ -34,11 +34,11 @@ export async function GET(req: NextRequest) {
 
     const lowStockThreshold = (tenant?.settings as any)?.lowStockThreshold || 10
 
-    // Get all products with stock data
+    // Get all published products with stock data
     const products = await db.product.findMany({
       where: {
         tenantId,
-        status: { not: 'ARCHIVED' },
+        published: true,
       },
       include: {
         category: {
@@ -78,7 +78,7 @@ export async function GET(req: NextRequest) {
           stock: p.stock,
           price: p.price,
           category: p.category?.name,
-          status: p.status,
+          published: p.published,
         })),
         lowStock: lowStock.map((p: any) => ({
           id: p.id,
@@ -87,7 +87,7 @@ export async function GET(req: NextRequest) {
           stock: p.stock,
           price: p.price,
           category: p.category?.name,
-          status: p.status,
+          published: p.published,
         })),
       },
       recentChanges: recentChanges.map((log: any) => ({

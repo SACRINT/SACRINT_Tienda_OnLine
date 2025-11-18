@@ -290,12 +290,11 @@ export async function DELETE(
       )
     }
 
-    // Soft delete
+    // Mark as unpublished (soft delete via published flag)
     const deleted = await db.product.update({
       where: { id: params.id },
       data: {
-        status: 'ARCHIVED',
-        deletedAt: new Date(),
+        published: false,
       },
     })
 
