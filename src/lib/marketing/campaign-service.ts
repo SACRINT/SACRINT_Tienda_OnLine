@@ -202,7 +202,7 @@ export async function sendAbandonedCartReminder(tenantId: string) {
       items: {
         include: {
           product: {
-            select: { name: true, price: true },
+            select: { name: true, basePrice: true },
           },
         },
       },
