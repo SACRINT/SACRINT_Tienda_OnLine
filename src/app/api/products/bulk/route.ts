@@ -105,7 +105,7 @@ export async function POST(req: NextRequest) {
             tenantId,
           },
           data: {
-            price: value,
+            basePrice: value,
           },
         })
         break
@@ -243,9 +243,9 @@ export async function GET(req: NextRequest) {
       product.sku || '',
       `"${(product.description || '').replace(/"/g, '""')}"`,
       product.category?.name || '',
-      product.price.toString(),
+      product.basePrice.toString(),
       product.stock.toString(),
-      product.status,
+      product.published ? 'PUBLISHED' : 'DRAFT',
       product.createdAt.toISOString(),
     ])
 

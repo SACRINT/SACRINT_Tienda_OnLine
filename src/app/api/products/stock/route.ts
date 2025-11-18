@@ -26,13 +26,8 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    // Get stock threshold from tenant settings (default: 10)
-    const tenant = await db.tenant.findUnique({
-      where: { id: tenantId },
-      select: { settings: true },
-    })
-
-    const lowStockThreshold = (tenant?.settings as any)?.lowStockThreshold || 10
+    // Default low stock threshold
+    const lowStockThreshold = 10
 
     // Get all published products with stock data
     const products = await db.product.findMany({
@@ -56,7 +51,7 @@ export async function GET(req: NextRequest) {
     const inStock = products.filter((p: any) => p.stock > lowStockThreshold)
 
     // Calculate total inventory value
-    const totalValue = products.reduce((sum: number, p: any) => sum + p.price * p.stock, 0)
+    const totalValue = products.reduce((sum: number, p: any) => sum + Number(p.basePrice) * p.stock, 0)
 
     // TODO: Implement activity log model for tracking recent stock changes
     const recentChanges: any[] = []
@@ -76,7 +71,7 @@ export async function GET(req: NextRequest) {
           name: p.name,
           sku: p.sku,
           stock: p.stock,
-          price: p.price,
+          price: Number(p.basePrice),
           category: p.category?.name,
           published: p.published,
         })),
@@ -85,7 +80,7 @@ export async function GET(req: NextRequest) {
           name: p.name,
           sku: p.sku,
           stock: p.stock,
-          price: p.price,
+          price: Number(p.basePrice),
           category: p.category?.name,
           published: p.published,
         })),

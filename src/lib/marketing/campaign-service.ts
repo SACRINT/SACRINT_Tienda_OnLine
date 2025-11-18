@@ -120,7 +120,7 @@ async function getCustomersInSegments(tenantId: string, segments: string[]) {
   // Apply segment filtering (simplified)
   return customers.filter((customer) => {
     const orderCount = customer.orders.length
-    const totalSpent = customer.orders.reduce((sum, o) => sum + o.total, 0)
+    const totalSpent = customer.orders.reduce((sum, o) => sum + Number(o.total), 0)
 
     // Simple segmentation logic
     if (segments.includes('champions')) {
@@ -202,7 +202,7 @@ export async function sendAbandonedCartReminder(tenantId: string) {
       items: {
         include: {
           product: {
-            select: { name: true, price: true },
+            select: { name: true, basePrice: true },
           },
         },
       },
