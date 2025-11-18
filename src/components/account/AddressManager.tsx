@@ -1,9 +1,9 @@
 // Address Manager Component
 // CRUD operations for shipping/billing addresses
 
-'use client'
+"use client";
 
-import { useState } from 'react'
+import { useState } from "react";
 import {
   MapPin,
   Plus,
@@ -13,28 +13,28 @@ import {
   Home,
   Building2,
   X,
-} from 'lucide-react'
+} from "lucide-react";
 
 export interface Address {
-  id: string
-  type: 'shipping' | 'billing'
-  fullName: string
-  addressLine1: string
-  addressLine2?: string
-  city: string
-  state: string
-  postalCode: string
-  country: string
-  phone: string
-  isDefault: boolean
+  id: string;
+  type: "shipping" | "billing";
+  fullName: string;
+  addressLine1: string;
+  addressLine2?: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+  phone: string;
+  isDefault: boolean;
 }
 
 export interface AddressManagerProps {
-  addresses: Address[]
-  onAdd?: (address: Omit<Address, 'id'>) => Promise<void>
-  onUpdate?: (id: string, address: Partial<Address>) => Promise<void>
-  onDelete?: (id: string) => Promise<void>
-  onSetDefault?: (id: string) => Promise<void>
+  addresses: Address[];
+  onAdd?: (address: Omit<Address, "id">) => Promise<void>;
+  onUpdate?: (id: string, address: Partial<Address>) => Promise<void>;
+  onDelete?: (id: string) => Promise<void>;
+  onSetDefault?: (id: string) => Promise<void>;
 }
 
 export function AddressManager({
@@ -44,9 +44,9 @@ export function AddressManager({
   onDelete,
   onSetDefault,
 }: AddressManagerProps) {
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
-  const [editingId, setEditingId] = useState<string | null>(null)
-  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   return (
     <div className="space-y-6 p-6">
@@ -105,22 +105,20 @@ export function AddressManager({
       {(isAddModalOpen || editingId) && (
         <AddressFormModal
           address={
-            editingId
-              ? addresses.find((a) => a.id === editingId)
-              : undefined
+            editingId ? addresses.find((a) => a.id === editingId) : undefined
           }
           onSave={async (data) => {
             if (editingId) {
-              await onUpdate?.(editingId, data)
-              setEditingId(null)
+              await onUpdate?.(editingId, data);
+              setEditingId(null);
             } else {
-              await onAdd?.(data as Omit<Address, 'id'>)
-              setIsAddModalOpen(false)
+              await onAdd?.(data as Omit<Address, "id">);
+              setIsAddModalOpen(false);
             }
           }}
           onClose={() => {
-            setIsAddModalOpen(false)
-            setEditingId(null)
+            setIsAddModalOpen(false);
+            setEditingId(null);
           }}
         />
       )}
@@ -129,14 +127,14 @@ export function AddressManager({
       {deletingId && (
         <DeleteConfirmModal
           onConfirm={async () => {
-            await onDelete?.(deletingId)
-            setDeletingId(null)
+            await onDelete?.(deletingId);
+            setDeletingId(null);
           }}
           onCancel={() => setDeletingId(null)}
         />
       )}
     </div>
-  )
+  );
 }
 
 // Address Card Component
@@ -146,19 +144,19 @@ function AddressCard({
   onDelete,
   onSetDefault,
 }: {
-  address: Address
-  onEdit: () => void
-  onDelete: () => void
-  onSetDefault: () => void
+  address: Address;
+  onEdit: () => void;
+  onDelete: () => void;
+  onSetDefault: () => void;
 }) {
-  const Icon = address.type === 'billing' ? Building2 : Home
+  const Icon = address.type === "billing" ? Building2 : Home;
 
   return (
     <div
       className={`relative rounded-lg border ${
         address.isDefault
-          ? 'border-blue-500 bg-blue-50'
-          : 'border-gray-200 bg-white'
+          ? "border-blue-500 bg-blue-50"
+          : "border-gray-200 bg-white"
       } p-4`}
     >
       {/* Default Badge */}
@@ -216,7 +214,7 @@ function AddressCard({
         </button>
       </div>
     </div>
-  )
+  );
 }
 
 // Address Form Modal Component
@@ -225,38 +223,38 @@ function AddressFormModal({
   onSave,
   onClose,
 }: {
-  address?: Address
-  onSave: (data: Partial<Address>) => Promise<void>
-  onClose: () => void
+  address?: Address;
+  onSave: (data: Partial<Address>) => Promise<void>;
+  onClose: () => void;
 }) {
   const [formData, setFormData] = useState<Partial<Address>>(
     address || {
-      type: 'shipping',
-      fullName: '',
-      addressLine1: '',
-      addressLine2: '',
-      city: '',
-      state: '',
-      postalCode: '',
-      country: 'United States',
-      phone: '',
+      type: "shipping",
+      fullName: "",
+      addressLine1: "",
+      addressLine2: "",
+      city: "",
+      state: "",
+      postalCode: "",
+      country: "United States",
+      phone: "",
       isDefault: false,
-    }
-  )
+    },
+  );
 
-  const [isSaving, setIsSaving] = useState(false)
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSaving(true)
+    e.preventDefault();
+    setIsSaving(true);
     try {
-      await onSave(formData)
+      await onSave(formData);
     } catch (error) {
-      console.error('Failed to save address:', error)
+      console.error("Failed to save address:", error);
     } finally {
-      setIsSaving(false)
+      setIsSaving(false);
     }
-  }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
@@ -265,7 +263,7 @@ function AddressFormModal({
           {/* Modal Header */}
           <div className="flex items-center justify-between border-b border-gray-200 p-6">
             <h3 className="text-xl font-semibold text-gray-900">
-              {address ? 'Edit Address' : 'Add New Address'}
+              {address ? "Edit Address" : "Add New Address"}
             </h3>
             <button
               type="button"
@@ -447,13 +445,13 @@ function AddressFormModal({
               disabled={isSaving}
               className="rounded-lg bg-blue-600 px-6 py-2 font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
             >
-              {isSaving ? 'Saving...' : 'Save Address'}
+              {isSaving ? "Saving..." : "Save Address"}
             </button>
           </div>
         </form>
       </div>
     </div>
-  )
+  );
 }
 
 // Delete Confirmation Modal
@@ -461,8 +459,8 @@ function DeleteConfirmModal({
   onConfirm,
   onCancel,
 }: {
-  onConfirm: () => void
-  onCancel: () => void
+  onConfirm: () => void;
+  onCancel: () => void;
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
@@ -488,5 +486,5 @@ function DeleteConfirmModal({
         </div>
       </div>
     </div>
-  )
+  );
 }

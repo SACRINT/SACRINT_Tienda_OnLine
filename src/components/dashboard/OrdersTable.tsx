@@ -1,96 +1,96 @@
-'use client'
+"use client";
 
-import Link from 'next/link'
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
+import Link from "next/link";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
 interface Order {
-  id: string
-  orderNumber: string
-  total: any // Handles Decimal type from Prisma, can be number, string, or Decimal
-  status: string
-  createdAt: Date
+  id: string;
+  orderNumber: string;
+  total: any; // Handles Decimal type from Prisma, can be number, string, or Decimal
+  status: string;
+  createdAt: Date;
   user: {
-    name: string | null
-    email: string
-  }
+    name: string | null;
+    email: string;
+  };
 }
 
 interface OrdersTableProps {
-  orders: Order[]
-  currentPage: number
+  orders: Order[];
+  currentPage: number;
 }
 
 const statusColors = {
-  PENDING: 'bg-yellow-100 text-yellow-800',
-  PROCESSING: 'bg-blue-100 text-blue-800',
-  PAID: 'bg-green-100 text-green-800',
-  SHIPPED: 'bg-purple-100 text-purple-800',
-  DELIVERED: 'bg-green-100 text-green-800',
-  CANCELLED: 'bg-red-100 text-red-800',
-  FAILED: 'bg-red-100 text-red-800',
-}
+  PENDING: "bg-yellow-100 text-yellow-800",
+  PROCESSING: "bg-blue-100 text-blue-800",
+  PAID: "bg-green-100 text-green-800",
+  SHIPPED: "bg-purple-100 text-purple-800",
+  DELIVERED: "bg-green-100 text-green-800",
+  CANCELLED: "bg-red-100 text-red-800",
+  FAILED: "bg-red-100 text-red-800",
+};
 
 const statusLabels = {
-  PENDING: 'Pendiente',
-  PROCESSING: 'Procesando',
-  PAID: 'Pagado',
-  SHIPPED: 'Enviado',
-  DELIVERED: 'Entregado',
-  CANCELLED: 'Cancelado',
-  FAILED: 'Fallido',
-}
+  PENDING: "Pendiente",
+  PROCESSING: "Procesando",
+  PAID: "Pagado",
+  SHIPPED: "Enviado",
+  DELIVERED: "Entregado",
+  CANCELLED: "Cancelado",
+  FAILED: "Fallido",
+};
 
 export function OrdersTable({ orders, currentPage }: OrdersTableProps) {
-  const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [statusFilter, setStatusFilter] = useState<string>("all");
 
   const handleStatusFilter = (status: string) => {
-    const params = new URLSearchParams(window.location.search)
-    if (status !== 'all') {
-      params.set('status', status)
+    const params = new URLSearchParams(window.location.search);
+    if (status !== "all") {
+      params.set("status", status);
     } else {
-      params.delete('status')
+      params.delete("status");
     }
-    params.set('page', '1')
-    window.location.href = `?${params.toString()}`
-  }
+    params.set("page", "1");
+    window.location.href = `?${params.toString()}`;
+  };
 
   return (
     <div className="space-y-4">
       {/* Filters */}
       <div className="flex gap-2 flex-wrap">
         <Button
-          variant={statusFilter === 'all' ? 'default' : 'outline'}
+          variant={statusFilter === "all" ? "default" : "outline"}
           size="sm"
-          onClick={() => handleStatusFilter('all')}
+          onClick={() => handleStatusFilter("all")}
         >
           Todas
         </Button>
         <Button
-          variant={statusFilter === 'PENDING' ? 'default' : 'outline'}
+          variant={statusFilter === "PENDING" ? "default" : "outline"}
           size="sm"
-          onClick={() => handleStatusFilter('PENDING')}
+          onClick={() => handleStatusFilter("PENDING")}
         >
           Pendientes
         </Button>
         <Button
-          variant={statusFilter === 'PAID' ? 'default' : 'outline'}
+          variant={statusFilter === "PAID" ? "default" : "outline"}
           size="sm"
-          onClick={() => handleStatusFilter('PAID')}
+          onClick={() => handleStatusFilter("PAID")}
         >
           Pagadas
         </Button>
         <Button
-          variant={statusFilter === 'SHIPPED' ? 'default' : 'outline'}
+          variant={statusFilter === "SHIPPED" ? "default" : "outline"}
           size="sm"
-          onClick={() => handleStatusFilter('SHIPPED')}
+          onClick={() => handleStatusFilter("SHIPPED")}
         >
           Enviadas
         </Button>
         <Button
-          variant={statusFilter === 'DELIVERED' ? 'default' : 'outline'}
+          variant={statusFilter === "DELIVERED" ? "default" : "outline"}
           size="sm"
-          onClick={() => handleStatusFilter('DELIVERED')}
+          onClick={() => handleStatusFilter("DELIVERED")}
         >
           Entregadas
         </Button>
@@ -136,9 +136,11 @@ export function OrdersTable({ orders, currentPage }: OrdersTableProps) {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">
-                      {order.user.name || 'Sin nombre'}
+                      {order.user.name || "Sin nombre"}
                     </div>
-                    <div className="text-sm text-gray-500">{order.user.email}</div>
+                    <div className="text-sm text-gray-500">
+                      {order.user.email}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     ${parseFloat(String(order.total)).toFixed(2)}
@@ -146,15 +148,18 @@ export function OrdersTable({ orders, currentPage }: OrdersTableProps) {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
                       className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        statusColors[order.status as keyof typeof statusColors] ||
-                        'bg-gray-100 text-gray-800'
+                        statusColors[
+                          order.status as keyof typeof statusColors
+                        ] || "bg-gray-100 text-gray-800"
                       }`}
                     >
-                      {statusLabels[order.status as keyof typeof statusLabels] || order.status}
+                      {statusLabels[
+                        order.status as keyof typeof statusLabels
+                      ] || order.status}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(order.createdAt).toLocaleDateString('es-ES')}
+                    {new Date(order.createdAt).toLocaleDateString("es-ES")}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <Link
@@ -173,9 +178,7 @@ export function OrdersTable({ orders, currentPage }: OrdersTableProps) {
 
       {/* Pagination */}
       <div className="flex items-center justify-between">
-        <p className="text-sm text-gray-700">
-          Página {currentPage}
-        </p>
+        <p className="text-sm text-gray-700">Página {currentPage}</p>
         <div className="flex gap-2">
           {currentPage > 1 && (
             <Link href={`?page=${currentPage - 1}`}>
@@ -194,5 +197,5 @@ export function OrdersTable({ orders, currentPage }: OrdersTableProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }

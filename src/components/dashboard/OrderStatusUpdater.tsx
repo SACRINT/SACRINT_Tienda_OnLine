@@ -1,54 +1,54 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/button'
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 
 interface OrderStatusUpdaterProps {
-  orderId: string
-  currentStatus: string
+  orderId: string;
+  currentStatus: string;
 }
 
 const statuses = [
-  { value: 'PENDING', label: 'Pendiente' },
-  { value: 'PROCESSING', label: 'Procesando' },
-  { value: 'PAID', label: 'Pagado' },
-  { value: 'SHIPPED', label: 'Enviado' },
-  { value: 'DELIVERED', label: 'Entregado' },
-  { value: 'CANCELLED', label: 'Cancelado' },
-]
+  { value: "PENDING", label: "Pendiente" },
+  { value: "PROCESSING", label: "Procesando" },
+  { value: "PAID", label: "Pagado" },
+  { value: "SHIPPED", label: "Enviado" },
+  { value: "DELIVERED", label: "Entregado" },
+  { value: "CANCELLED", label: "Cancelado" },
+];
 
 export function OrderStatusUpdater({
   orderId,
   currentStatus,
 }: OrderStatusUpdaterProps) {
-  const router = useRouter()
-  const [status, setStatus] = useState(currentStatus)
-  const [loading, setLoading] = useState(false)
+  const router = useRouter();
+  const [status, setStatus] = useState(currentStatus);
+  const [loading, setLoading] = useState(false);
 
   const handleUpdateStatus = async () => {
-    if (status === currentStatus) return
+    if (status === currentStatus) return;
 
-    setLoading(true)
+    setLoading(true);
     try {
       const res = await fetch(`/api/orders/${orderId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status }),
-      })
+      });
 
       if (res.ok) {
-        router.refresh()
-        alert('Estado actualizado correctamente')
+        router.refresh();
+        alert("Estado actualizado correctamente");
       } else {
-        alert('Error al actualizar el estado')
+        alert("Error al actualizar el estado");
       }
     } catch (error) {
-      alert('Error al actualizar el estado')
+      alert("Error al actualizar el estado");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="space-y-4">
@@ -70,9 +70,9 @@ export function OrderStatusUpdater({
           disabled={loading}
           className="w-full bg-blue-600 hover:bg-blue-700"
         >
-          {loading ? 'Actualizando...' : 'Actualizar Estado'}
+          {loading ? "Actualizando..." : "Actualizar Estado"}
         </Button>
       )}
     </div>
-  )
+  );
 }

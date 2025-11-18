@@ -1,118 +1,134 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
-import { useSession } from 'next-auth/react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Settings, Store, CreditCard, Truck, Mail, Save, Loader2 } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+} from "@/components/ui/select";
+import {
+  Settings,
+  Store,
+  CreditCard,
+  Truck,
+  Mail,
+  Save,
+  Loader2,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface StoreSettings {
-  storeName: string
-  storeDescription: string
-  storeEmail: string
-  storePhone: string
-  currency: string
-  timezone: string
-  lowStockThreshold: number
-  enableInventoryTracking: boolean
-  stripePublishableKey: string
-  stripeSecretKey: string
-  enableShipping: boolean
-  freeShippingThreshold: number
-  defaultShippingCost: number
-  taxRate: number
-  enableTax: boolean
+  storeName: string;
+  storeDescription: string;
+  storeEmail: string;
+  storePhone: string;
+  currency: string;
+  timezone: string;
+  lowStockThreshold: number;
+  enableInventoryTracking: boolean;
+  stripePublishableKey: string;
+  stripeSecretKey: string;
+  enableShipping: boolean;
+  freeShippingThreshold: number;
+  defaultShippingCost: number;
+  taxRate: number;
+  enableTax: boolean;
 }
 
 export default function SettingsPage() {
-  const { data: session } = useSession()
-  const router = useRouter()
+  const { data: session } = useSession();
+  const router = useRouter();
   const [settings, setSettings] = useState<StoreSettings>({
-    storeName: '',
-    storeDescription: '',
-    storeEmail: '',
-    storePhone: '',
-    currency: 'USD',
-    timezone: 'America/New_York',
+    storeName: "",
+    storeDescription: "",
+    storeEmail: "",
+    storePhone: "",
+    currency: "USD",
+    timezone: "America/New_York",
     lowStockThreshold: 10,
     enableInventoryTracking: true,
-    stripePublishableKey: '',
-    stripeSecretKey: '',
+    stripePublishableKey: "",
+    stripeSecretKey: "",
     enableShipping: true,
     freeShippingThreshold: 5000,
     defaultShippingCost: 999,
     taxRate: 8.5,
     enableTax: true,
-  })
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
+  });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (session?.user?.tenantId) {
-      fetchSettings()
+      fetchSettings();
     }
-  }, [session])
+  }, [session]);
 
   const fetchSettings = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
-      const res = await fetch(`/api/settings?tenantId=${session?.user?.tenantId}`)
+      const res = await fetch(
+        `/api/settings?tenantId=${session?.user?.tenantId}`,
+      );
       if (res.ok) {
-        const data = await res.json()
-        setSettings(data.settings)
+        const data = await res.json();
+        setSettings(data.settings);
       }
     } catch (error) {
-      console.error('Error fetching settings:', error)
+      console.error("Error fetching settings:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleSave = async () => {
-    if (!session?.user?.tenantId) return
+    if (!session?.user?.tenantId) return;
 
-    setSaving(true)
+    setSaving(true);
     try {
-      const res = await fetch('/api/settings', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           tenantId: session.user.tenantId,
           settings,
         }),
-      })
+      });
 
       if (res.ok) {
-        alert('Settings saved successfully')
+        alert("Settings saved successfully");
       } else {
-        alert('Error saving settings')
+        alert("Error saving settings");
       }
     } catch (error) {
-      console.error('Error saving settings:', error)
-      alert('Error saving settings')
+      console.error("Error saving settings:", error);
+      alert("Error saving settings");
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
   if (loading) {
     return (
       <div className="flex h-96 items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
-    )
+    );
   }
 
   return (
@@ -182,7 +198,10 @@ export default function SettingsPage() {
                   id="storeDescription"
                   value={settings.storeDescription}
                   onChange={(e) =>
-                    setSettings({ ...settings, storeDescription: e.target.value })
+                    setSettings({
+                      ...settings,
+                      storeDescription: e.target.value,
+                    })
                   }
                   placeholder="Describe your store..."
                   rows={4}
@@ -248,10 +267,18 @@ export default function SettingsPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="America/New_York">Eastern Time</SelectItem>
-                      <SelectItem value="America/Chicago">Central Time</SelectItem>
-                      <SelectItem value="America/Denver">Mountain Time</SelectItem>
-                      <SelectItem value="America/Los_Angeles">Pacific Time</SelectItem>
+                      <SelectItem value="America/New_York">
+                        Eastern Time
+                      </SelectItem>
+                      <SelectItem value="America/Chicago">
+                        Central Time
+                      </SelectItem>
+                      <SelectItem value="America/Denver">
+                        Mountain Time
+                      </SelectItem>
+                      <SelectItem value="America/Los_Angeles">
+                        Pacific Time
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -283,7 +310,9 @@ export default function SettingsPage() {
           <Card>
             <CardHeader>
               <CardTitle>Stripe Configuration</CardTitle>
-              <CardDescription>Configure your Stripe payment gateway</CardDescription>
+              <CardDescription>
+                Configure your Stripe payment gateway
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -292,7 +321,10 @@ export default function SettingsPage() {
                   id="stripePublishableKey"
                   value={settings.stripePublishableKey}
                   onChange={(e) =>
-                    setSettings({ ...settings, stripePublishableKey: e.target.value })
+                    setSettings({
+                      ...settings,
+                      stripePublishableKey: e.target.value,
+                    })
                   }
                   placeholder="pk_test_..."
                 />
@@ -305,7 +337,10 @@ export default function SettingsPage() {
                   type="password"
                   value={settings.stripeSecretKey}
                   onChange={(e) =>
-                    setSettings({ ...settings, stripeSecretKey: e.target.value })
+                    setSettings({
+                      ...settings,
+                      stripeSecretKey: e.target.value,
+                    })
                   }
                   placeholder="sk_test_..."
                 />
@@ -329,7 +364,10 @@ export default function SettingsPage() {
                   step="0.1"
                   value={settings.taxRate}
                   onChange={(e) =>
-                    setSettings({ ...settings, taxRate: parseFloat(e.target.value) })
+                    setSettings({
+                      ...settings,
+                      taxRate: parseFloat(e.target.value),
+                    })
                   }
                   min="0"
                   max="100"
@@ -343,7 +381,9 @@ export default function SettingsPage() {
           <Card>
             <CardHeader>
               <CardTitle>Shipping Settings</CardTitle>
-              <CardDescription>Configure shipping costs and thresholds</CardDescription>
+              <CardDescription>
+                Configure shipping costs and thresholds
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -402,12 +442,13 @@ export default function SettingsPage() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-gray-500">
-                Email notification templates and settings will be configured here.
+                Email notification templates and settings will be configured
+                here.
               </p>
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }

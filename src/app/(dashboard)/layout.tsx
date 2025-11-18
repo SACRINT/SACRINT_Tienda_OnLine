@@ -10,17 +10,21 @@
  * - Responsive design
  */
 
-import { redirect } from 'next/navigation'
-import Link from 'next/link'
-import { ReactNode } from 'react'
-import { auth } from '@/lib/auth/auth'
-import { USER_ROLES } from '@/lib/types/user-role'
-import { LogoutButton } from '@/components/auth/LogoutButton'
-import DashboardSidebar from '@/components/dashboard/DashboardSidebar'
-import DashboardHeader from '@/components/dashboard/DashboardHeader'
+import { redirect } from "next/navigation";
+import Link from "next/link";
+import { ReactNode } from "react";
+import { auth } from "@/lib/auth/auth";
+import { USER_ROLES } from "@/lib/types/user-role";
+import { LogoutButton } from "@/components/auth/LogoutButton";
+import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
+import DashboardHeader from "@/components/dashboard/DashboardHeader";
 
-export default async function DashboardLayout({ children }: { children: ReactNode }) {
-  const session = await auth()
+export default async function DashboardLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  const session = await auth();
 
   // =====================================================
   // AUTHENTICATION & AUTHORIZATION CHECKS
@@ -28,7 +32,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
 
   // 1. Require authentication
   if (!session?.user) {
-    redirect('/login')
+    redirect("/login");
   }
 
   // 2. Require STORE_OWNER or SUPER_ADMIN role (RBAC)
@@ -36,12 +40,12 @@ export default async function DashboardLayout({ children }: { children: ReactNod
     session.user.role !== USER_ROLES.STORE_OWNER &&
     session.user.role !== USER_ROLES.SUPER_ADMIN
   ) {
-    redirect('/')
+    redirect("/");
   }
 
   // 3. Require tenant assignment (except for SUPER_ADMIN)
   if (!session.user.tenantId && session.user.role !== USER_ROLES.SUPER_ADMIN) {
-    redirect('/onboarding')
+    redirect("/onboarding");
   }
 
   // =====================================================
@@ -49,17 +53,17 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   // =====================================================
 
   const user = {
-    name: session.user.name || 'User',
-    email: session.user.email || '',
+    name: session.user.name || "User",
+    email: session.user.email || "",
     role: session.user.role,
     tenantId: session.user.tenantId,
-  }
+  };
 
   // TODO: Fetch store name from tenant data
-  const storeName = 'Mi Tienda'
+  const storeName = "Mi Tienda";
 
   // TODO: Fetch real notification count from database
-  const notificationCount = 0
+  const notificationCount = 0;
 
   // =====================================================
   // RENDER LAYOUT
@@ -83,5 +87,5 @@ export default async function DashboardLayout({ children }: { children: ReactNod
         <main className="p-4 md:p-8">{children}</main>
       </div>
     </div>
-  )
+  );
 }

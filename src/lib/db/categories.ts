@@ -1,8 +1,8 @@
 // Data Access Layer - Categories
 // Reusable database operations for category management with tenant isolation
 
-import { db } from './client'
-import { getCurrentUserTenantId, ensureTenantAccess } from './tenant'
+import { db } from "./client";
+import { getCurrentUserTenantId, ensureTenantAccess } from "./tenant";
 
 /**
  * Get all categories for a tenant (tree structure)
@@ -10,11 +10,11 @@ import { getCurrentUserTenantId, ensureTenantAccess } from './tenant'
 export async function getCategoriesByTenant(
   tenantId: string,
   options?: {
-    includeSubcategories?: boolean
-    parentId?: string | null
-  }
+    includeSubcategories?: boolean;
+    parentId?: string | null;
+  },
 ) {
-  await ensureTenantAccess(tenantId)
+  await ensureTenantAccess(tenantId);
 
   return db.category.findMany({
     where: {
@@ -22,11 +22,13 @@ export async function getCategoriesByTenant(
       parentId: options?.parentId !== undefined ? options.parentId : undefined,
     },
     include: {
-      subcategories: options?.includeSubcategories ? {
-        include: {
-          subcategories: true, // 2 levels deep
-        },
-      } : false,
+      subcategories: options?.includeSubcategories
+        ? {
+            include: {
+              subcategories: true, // 2 levels deep
+            },
+          }
+        : false,
       _count: {
         select: {
           products: true,
@@ -34,8 +36,8 @@ export async function getCategoriesByTenant(
         },
       },
     },
-    orderBy: { name: 'asc' },
-  })
+    orderBy: { name: "asc" },
+  });
 }
 
 /**
@@ -44,12 +46,12 @@ export async function getCategoriesByTenant(
  * @param categoryId - Category ID to retrieve
  */
 export async function getCategoryById(tenantId: string, categoryId: string) {
-  await ensureTenantAccess(tenantId)
+  await ensureTenantAccess(tenantId);
 
   return db.category.findFirst({
     where: {
       id: categoryId,
-      tenantId
+      tenantId,
     },
     include: {
       parent: true,
@@ -64,14 +66,14 @@ export async function getCategoryById(tenantId: string, categoryId: string) {
         select: { products: true, subcategories: true },
       },
     },
-  })
+  });
 }
 
 /**
  * Get category by slug (within tenant)
  */
 export async function getCategoryBySlug(tenantId: string, slug: string) {
-  await ensureTenantAccess(tenantId)
+  await ensureTenantAccess(tenantId);
 
   return db.category.findUnique({
     where: {
@@ -83,21 +85,21 @@ export async function getCategoryBySlug(tenantId: string, slug: string) {
         select: { products: true },
       },
     },
-  })
+  });
 }
 
 /**
  * Create new category
  */
 export async function createCategory(data: {
-  tenantId: string
-  name: string
-  slug: string
-  description?: string
-  image?: string
-  parentId?: string | null
+  tenantId: string;
+  name: string;
+  slug: string;
+  description?: string;
+  image?: string;
+  parentId?: string | null;
 }) {
-  await ensureTenantAccess(data.tenantId)
+  await ensureTenantAccess(data.tenantId);
 
   // Validate parent category exists and belongs to same tenant
   if (data.parentId) {
@@ -106,10 +108,12 @@ export async function createCategory(data: {
         id: data.parentId,
         tenantId: data.tenantId,
       },
-    })
+    });
 
     if (!parentCategory) {
-      throw new Error('Parent category not found or does not belong to this tenant')
+      throw new Error(
+        "Parent category not found or does not belong to this tenant",
+      );
     }
   }
 
@@ -121,10 +125,10 @@ export async function createCategory(data: {
         slug: data.slug,
       },
     },
-  })
+  });
 
   if (existingSlug) {
-    throw new Error('Category slug already exists in this tenant')
+    throw new Error("Category slug already exists in this tenant");
   }
 
   return db.category.create({
@@ -135,7 +139,7 @@ export async function createCategory(data: {
         select: { products: true },
       },
     },
-  })
+  });
 }
 
 /**
@@ -143,17 +147,17 @@ export async function createCategory(data: {
  */
 export async function updateCategory(
   categoryId: string,
-  data: Record<string, any>
+  data: Record<string, any>,
 ) {
   const category = await db.category.findUnique({
     where: { id: categoryId },
-  })
+  });
 
   if (!category) {
-    throw new Error('Category not found')
+    throw new Error("Category not found");
   }
 
-  await ensureTenantAccess(category.tenantId)
+  await ensureTenantAccess(category.tenantId);
 
   return db.category.update({
     where: { id: categoryId },
@@ -165,7 +169,7 @@ export async function updateCategory(
         select: { products: true },
       },
     },
-  })
+  });
 }
 
 /**
@@ -183,17 +187,19 @@ export async function deleteCategory(categoryId: string) {
         },
       },
     },
-  })
+  });
 
   if (!category) {
-    throw new Error('Category not found')
+    throw new Error("Category not found");
   }
 
-  await ensureTenantAccess(category.tenantId)
+  await ensureTenantAccess(category.tenantId);
 
   // Cannot delete if has subcategories
   if (category._count.subcategories > 0) {
-    throw new Error('Cannot delete category with subcategories. Delete subcategories first.')
+    throw new Error(
+      "Cannot delete category with subcategories. Delete subcategories first.",
+    );
   }
 
   // If has products, set their category to null (uncategorized)
@@ -201,20 +207,20 @@ export async function deleteCategory(categoryId: string) {
     await db.product.updateMany({
       where: { categoryId },
       data: { categoryId: null as any },
-    })
+    });
   }
 
   // Delete category
   return db.category.delete({
     where: { id: categoryId },
-  })
+  });
 }
 
 /**
  * Get category tree (hierarchical structure)
  */
 export async function getCategoryTree(tenantId: string) {
-  await ensureTenantAccess(tenantId)
+  await ensureTenantAccess(tenantId);
 
   // Get top-level categories (no parent)
   const topLevelCategories = await db.category.findMany({
@@ -230,33 +236,30 @@ export async function getCategoryTree(tenantId: string) {
             select: { products: true },
           },
         },
-        orderBy: { name: 'asc' },
+        orderBy: { name: "asc" },
       },
       _count: {
         select: { products: true },
       },
     },
-    orderBy: { name: 'asc' },
-  })
+    orderBy: { name: "asc" },
+  });
 
-  return topLevelCategories
+  return topLevelCategories;
 }
 
 /**
  * Search categories by name
  */
-export async function searchCategories(
-  tenantId: string,
-  searchTerm: string
-) {
-  await ensureTenantAccess(tenantId)
+export async function searchCategories(tenantId: string, searchTerm: string) {
+  await ensureTenantAccess(tenantId);
 
   return db.category.findMany({
     where: {
       tenantId,
       name: {
         contains: searchTerm,
-        mode: 'insensitive',
+        mode: "insensitive",
       },
     },
     include: {
@@ -265,20 +268,20 @@ export async function searchCategories(
         select: { products: true },
       },
     },
-    orderBy: { name: 'asc' },
+    orderBy: { name: "asc" },
     take: 20,
-  })
+  });
 }
 
 /**
  * Count categories by tenant
  */
 export async function countCategoriesByTenant(tenantId: string) {
-  await ensureTenantAccess(tenantId)
+  await ensureTenantAccess(tenantId);
 
   return db.category.count({
     where: { tenantId },
-  })
+  });
 }
 
 /**
@@ -287,16 +290,16 @@ export async function countCategoriesByTenant(tenantId: string) {
 export async function isCategorySlugAvailable(
   tenantId: string,
   slug: string,
-  excludeCategoryId?: string
+  excludeCategoryId?: string,
 ): Promise<boolean> {
   const existing = await db.category.findUnique({
     where: {
       tenantId_slug: { tenantId, slug },
     },
-  })
+  });
 
-  if (!existing) return true
-  if (excludeCategoryId && existing.id === excludeCategoryId) return true
+  if (!existing) return true;
+  if (excludeCategoryId && existing.id === excludeCategoryId) return true;
 
-  return false
+  return false;
 }

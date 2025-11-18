@@ -1,12 +1,12 @@
 // Account Layout Component
 // Sidebar navigation layout for customer account pages
 
-'use client'
-import Image from 'next/image'
+"use client";
+import Image from "next/image";
 
-import { ReactNode } from 'react'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { ReactNode } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   User,
   ShoppingBag,
@@ -16,66 +16,66 @@ import {
   FileText,
   LogOut,
   ChevronRight,
-} from 'lucide-react'
+} from "lucide-react";
 
 export interface AccountLayoutProps {
-  children: ReactNode
+  children: ReactNode;
   user?: {
-    name: string
-    email: string
-    image?: string
-  }
+    name: string;
+    email: string;
+    image?: string;
+  };
 }
 
 interface NavItem {
-  label: string
-  href: string
-  icon: typeof User
-  badge?: number
+  label: string;
+  href: string;
+  icon: typeof User;
+  badge?: number;
 }
 
 export function AccountLayout({ children, user }: AccountLayoutProps) {
-  const pathname = usePathname()
+  const pathname = usePathname();
 
   const navigation: NavItem[] = [
     {
-      label: 'Overview',
-      href: '/account',
+      label: "Overview",
+      href: "/account",
       icon: User,
     },
     {
-      label: 'Orders',
-      href: '/account/orders',
+      label: "Orders",
+      href: "/account/orders",
       icon: ShoppingBag,
     },
     {
-      label: 'Wishlist',
-      href: '/account/wishlist',
+      label: "Wishlist",
+      href: "/account/wishlist",
       icon: Heart,
     },
     {
-      label: 'Addresses',
-      href: '/account/addresses',
+      label: "Addresses",
+      href: "/account/addresses",
       icon: MapPin,
     },
     {
-      label: 'Settings',
-      href: '/account/settings',
+      label: "Settings",
+      href: "/account/settings",
       icon: Settings,
     },
     {
-      label: 'Invoices',
-      href: '/account/invoices',
+      label: "Invoices",
+      href: "/account/invoices",
       icon: FileText,
     },
-  ]
+  ];
 
   const isActiveRoute = (href: string) => {
-    if (href === '/account') {
-      return pathname === href
+    if (href === "/account") {
+      return pathname === href;
     }
-    return pathname.startsWith(href)
-  }
+    return pathname.startsWith(href);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -131,8 +131,8 @@ export function AccountLayout({ children, user }: AccountLayoutProps) {
               {/* Navigation Links */}
               <nav className="p-2">
                 {navigation.map((item) => {
-                  const Icon = item.icon
-                  const isActive = isActiveRoute(item.href)
+                  const Icon = item.icon;
+                  const isActive = isActiveRoute(item.href);
 
                   return (
                     <Link
@@ -140,16 +140,16 @@ export function AccountLayout({ children, user }: AccountLayoutProps) {
                       href={item.href}
                       className={`group flex items-center justify-between rounded-lg px-4 py-3 text-sm font-medium transition-colors ${
                         isActive
-                          ? 'bg-blue-50 text-blue-700'
-                          : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                          ? "bg-blue-50 text-blue-700"
+                          : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
                       }`}
                     >
                       <div className="flex items-center gap-3">
                         <Icon
                           className={`h-5 w-5 ${
                             isActive
-                              ? 'text-blue-600'
-                              : 'text-gray-400 group-hover:text-gray-600'
+                              ? "text-blue-600"
+                              : "text-gray-400 group-hover:text-gray-600"
                           }`}
                         />
                         <span>{item.label}</span>
@@ -163,14 +163,14 @@ export function AccountLayout({ children, user }: AccountLayoutProps) {
                         <ChevronRight className="h-4 w-4 text-blue-600" />
                       )}
                     </Link>
-                  )
+                  );
                 })}
 
                 {/* Logout Button */}
                 <button
                   onClick={() => {
                     // In production, this would call the logout API
-                    window.location.href = '/api/auth/signout'
+                    window.location.href = "/api/auth/signout";
                   }}
                   className="mt-4 flex w-full items-center gap-3 rounded-lg border-t border-gray-200 px-4 py-3 pt-6 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 hover:text-red-600"
                 >
@@ -205,5 +205,5 @@ export function AccountLayout({ children, user }: AccountLayoutProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }

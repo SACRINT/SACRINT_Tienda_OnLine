@@ -1,23 +1,29 @@
-import { auth } from '@/lib/auth/auth'
-import { getUsersByTenant } from '@/lib/db/users'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { auth } from "@/lib/auth/auth";
+import { getUsersByTenant } from "@/lib/db/users";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 export default async function CustomersPage({
   searchParams,
 }: {
-  searchParams: { page?: string }
+  searchParams: { page?: string };
 }) {
-  const session = await auth()
+  const session = await auth();
 
   if (!session?.user?.tenantId) {
-    return <div>No tenant found</div>
+    return <div>No tenant found</div>;
   }
 
-  const page = parseInt(searchParams.page || '1')
-  const pageSize = 20
-  const skip = (page - 1) * pageSize
+  const page = parseInt(searchParams.page || "1");
+  const pageSize = 20;
+  const skip = (page - 1) * pageSize;
 
-  const customers = await getUsersByTenant(session.user.tenantId)
+  const customers = await getUsersByTenant(session.user.tenantId);
 
   return (
     <div className="space-y-6">
@@ -57,7 +63,10 @@ export default async function CustomersPage({
               <tbody className="bg-white divide-y divide-gray-200">
                 {customers.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
+                    <td
+                      colSpan={4}
+                      className="px-6 py-8 text-center text-gray-500"
+                    >
                       No hay clientes registrados
                     </td>
                   </tr>
@@ -67,11 +76,11 @@ export default async function CustomersPage({
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold">
-                            {customer.name?.charAt(0).toUpperCase() || 'U'}
+                            {customer.name?.charAt(0).toUpperCase() || "U"}
                           </div>
                           <div className="ml-4">
                             <div className="text-sm font-medium text-gray-900">
-                              {customer.name || 'Sin nombre'}
+                              {customer.name || "Sin nombre"}
                             </div>
                           </div>
                         </div>
@@ -80,7 +89,9 @@ export default async function CustomersPage({
                         {customer.email}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(customer.createdAt).toLocaleDateString('es-ES')}
+                        {new Date(customer.createdAt).toLocaleDateString(
+                          "es-ES",
+                        )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {customer._count?.orders || 0}
@@ -94,5 +105,5 @@ export default async function CustomersPage({
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

@@ -1,9 +1,12 @@
 // Wishlist Item API
 // DELETE /api/users/wishlist/[id] - Remove item from wishlist
 
-import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/lib/auth/auth'
-import { z } from 'zod'
+import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth/auth";
+import { z } from "zod";
+
+// Force dynamic rendering for this API route
+export const dynamic = "force-dynamic";
 
 /**
  * DELETE /api/users/wishlist/[id]
@@ -12,32 +15,32 @@ import { z } from 'zod'
  */
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
-    const session = await auth()
+    const session = await auth();
 
     if (!session?.user?.id) {
       return NextResponse.json(
-        { error: 'Unauthorized - You must be logged in' },
-        { status: 401 }
-      )
+        { error: "Unauthorized - You must be logged in" },
+        { status: 401 },
+      );
     }
 
-    const wishlistItemId = params.id
+    const wishlistItemId = params.id;
 
     // Validate ID is UUID
-    const uuidSchema = z.string().uuid('Invalid wishlist item ID')
-    const validation = uuidSchema.safeParse(wishlistItemId)
+    const uuidSchema = z.string().uuid("Invalid wishlist item ID");
+    const validation = uuidSchema.safeParse(wishlistItemId);
 
     if (!validation.success) {
       return NextResponse.json(
         {
-          error: 'Invalid wishlist item ID',
+          error: "Invalid wishlist item ID",
           issues: validation.error.issues,
         },
-        { status: 400 }
-      )
+        { status: 400 },
+      );
     }
 
     // TODO: Replace with actual database operation
@@ -62,28 +65,28 @@ export async function DELETE(
     // })
 
     console.log(
-      `[WISHLIST] Removed item ${wishlistItemId} from wishlist for user ${session.user.id}`
-    )
+      `[WISHLIST] Removed item ${wishlistItemId} from wishlist for user ${session.user.id}`,
+    );
 
     return NextResponse.json({
-      message: 'Item removed from wishlist',
+      message: "Item removed from wishlist",
       itemId: wishlistItemId,
-    })
+    });
   } catch (error) {
-    console.error('[WISHLIST] DELETE error:', error)
+    console.error("[WISHLIST] DELETE error:", error);
 
     if (error instanceof Error) {
-      if (error.message.includes('not found')) {
+      if (error.message.includes("not found")) {
         return NextResponse.json(
-          { error: 'Wishlist item not found' },
-          { status: 404 }
-        )
+          { error: "Wishlist item not found" },
+          { status: 404 },
+        );
       }
     }
 
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }

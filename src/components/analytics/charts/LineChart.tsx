@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import {
   LineChart as RechartsLineChart,
@@ -10,53 +10,53 @@ import {
   Legend,
   ResponsiveContainer,
   TooltipProps,
-} from 'recharts'
-import { formatCurrency, formatNumber } from '@/lib/analytics/types'
+} from "recharts";
+import { formatCurrency, formatNumber } from "@/lib/analytics/types";
 
 export interface LineChartData {
-  date: string
-  value: number
-  label?: string
-  previousValue?: number
+  date: string;
+  value: number;
+  label?: string;
+  previousValue?: number;
 }
 
 interface LineChartProps {
-  data: LineChartData[]
-  dataKey?: string
-  xAxisKey?: string
-  title?: string
-  height?: number
-  showGrid?: boolean
-  showLegend?: boolean
-  showComparison?: boolean
-  formatValue?: 'currency' | 'number' | 'percentage'
-  color?: string
-  comparisonColor?: string
+  data: LineChartData[];
+  dataKey?: string;
+  xAxisKey?: string;
+  title?: string;
+  height?: number;
+  showGrid?: boolean;
+  showLegend?: boolean;
+  showComparison?: boolean;
+  formatValue?: "currency" | "number" | "percentage";
+  color?: string;
+  comparisonColor?: string;
 }
 
 export function LineChart({
   data,
-  dataKey = 'value',
-  xAxisKey = 'date',
+  dataKey = "value",
+  xAxisKey = "date",
   title,
   height = 300,
   showGrid = true,
   showLegend = true,
   showComparison = false,
-  formatValue = 'number',
-  color = '#3b82f6',
-  comparisonColor = '#94a3b8',
+  formatValue = "number",
+  color = "#3b82f6",
+  comparisonColor = "#94a3b8",
 }: LineChartProps) {
   const formatValueFn = (value: number) => {
     switch (formatValue) {
-      case 'currency':
-        return formatCurrency(value)
-      case 'percentage':
-        return `${value.toFixed(2)}%`
+      case "currency":
+        return formatCurrency(value);
+      case "percentage":
+        return `${value.toFixed(2)}%`;
       default:
-        return formatNumber(value)
+        return formatNumber(value);
     }
-  }
+  };
 
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
@@ -68,22 +68,22 @@ export function LineChart({
           <p className="mt-1 text-sm text-gray-600">
             <span className="font-medium" style={{ color }}>
               {payload[0].name}:
-            </span>{' '}
+            </span>{" "}
             {formatValueFn(payload[0].value as number)}
           </p>
           {showComparison && payload[1] && (
             <p className="mt-1 text-sm text-gray-600">
               <span className="font-medium" style={{ color: comparisonColor }}>
                 {payload[1].name}:
-              </span>{' '}
+              </span>{" "}
               {formatValueFn(payload[1].value as number)}
             </p>
           )}
         </div>
-      )
+      );
     }
-    return null
-  }
+    return null;
+  };
 
   return (
     <div className="w-full">
@@ -135,5 +135,5 @@ export function LineChart({
         </RechartsLineChart>
       </ResponsiveContainer>
     </div>
-  )
+  );
 }

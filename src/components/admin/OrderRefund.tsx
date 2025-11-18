@@ -1,17 +1,17 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -20,20 +20,26 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { DollarSign, AlertTriangle, CheckCircle, Loader2, RotateCcw } from 'lucide-react'
-import { formatCurrency } from '@/lib/analytics/types'
-import { format } from 'date-fns'
+} from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  DollarSign,
+  AlertTriangle,
+  CheckCircle,
+  Loader2,
+  RotateCcw,
+} from "lucide-react";
+import { formatCurrency } from "@/lib/analytics/types";
+import { format } from "date-fns";
 
 interface OrderRefundProps {
-  orderId: string
-  tenantId: string
-  orderTotal: number
-  refundedAmount: number
-  stripePaymentIntentId: string | null
-  onRefundSuccess?: () => void
+  orderId: string;
+  tenantId: string;
+  orderTotal: number;
+  refundedAmount: number;
+  stripePaymentIntentId: string | null;
+  onRefundSuccess?: () => void;
 }
 
 export function OrderRefund({
@@ -44,64 +50,68 @@ export function OrderRefund({
   stripePaymentIntentId,
   onRefundSuccess,
 }: OrderRefundProps) {
-  const [isOpen, setIsOpen] = useState(false)
-  const [refundAmount, setRefundAmount] = useState('')
-  const [reason, setReason] = useState<'duplicate' | 'fraudulent' | 'requested_by_customer'>(
-    'requested_by_customer'
-  )
-  const [note, setNote] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [isOpen, setIsOpen] = useState(false);
+  const [refundAmount, setRefundAmount] = useState("");
+  const [reason, setReason] = useState<
+    "duplicate" | "fraudulent" | "requested_by_customer"
+  >("requested_by_customer");
+  const [note, setNote] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const maxRefundable = orderTotal - refundedAmount
-  const isFullyRefunded = refundedAmount >= orderTotal
-  const canRefund = stripePaymentIntentId && !isFullyRefunded
+  const maxRefundable = orderTotal - refundedAmount;
+  const isFullyRefunded = refundedAmount >= orderTotal;
+  const canRefund = stripePaymentIntentId && !isFullyRefunded;
 
   const handleRefund = async () => {
-    if (!canRefund) return
+    if (!canRefund) return;
 
-    const amount = refundAmount ? parseFloat(refundAmount) * 100 : maxRefundable
+    const amount = refundAmount
+      ? parseFloat(refundAmount) * 100
+      : maxRefundable;
 
     if (amount <= 0 || amount > maxRefundable) {
-      alert(`Invalid amount. Maximum refundable: ${formatCurrency(maxRefundable)}`)
-      return
+      alert(
+        `Invalid amount. Maximum refundable: ${formatCurrency(maxRefundable)}`,
+      );
+      return;
     }
 
-    if (!confirm(`Confirm refund of ${formatCurrency(amount)}?`)) return
+    if (!confirm(`Confirm refund of ${formatCurrency(amount)}?`)) return;
 
-    setLoading(true)
+    setLoading(true);
     try {
       const res = await fetch(`/api/orders/${orderId}/refund`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           tenantId,
           amount,
           reason,
           note,
         }),
-      })
+      });
 
-      const data = await res.json()
+      const data = await res.json();
 
       if (res.ok) {
-        setIsOpen(false)
-        setRefundAmount('')
-        setNote('')
-        onRefundSuccess?.()
+        setIsOpen(false);
+        setRefundAmount("");
+        setNote("");
+        onRefundSuccess?.();
       } else {
-        alert(data.error || 'Refund failed')
+        alert(data.error || "Refund failed");
       }
     } catch (error) {
-      console.error('Refund error:', error)
-      alert('Refund failed')
+      console.error("Refund error:", error);
+      alert("Refund failed");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleFullRefund = () => {
-    setRefundAmount((maxRefundable / 100).toFixed(2))
-  }
+    setRefundAmount((maxRefundable / 100).toFixed(2));
+  };
 
   return (
     <Card>
@@ -131,7 +141,9 @@ export function OrderRefund({
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-gray-500">Order Total:</span>
-                      <span className="font-medium">{formatCurrency(orderTotal)}</span>
+                      <span className="font-medium">
+                        {formatCurrency(orderTotal)}
+                      </span>
                     </div>
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-gray-500">Already Refunded:</span>
@@ -140,7 +152,9 @@ export function OrderRefund({
                       </span>
                     </div>
                     <div className="flex items-center justify-between text-sm border-t pt-2">
-                      <span className="text-gray-900 font-medium">Max Refundable:</span>
+                      <span className="text-gray-900 font-medium">
+                        Max Refundable:
+                      </span>
                       <span className="font-bold text-green-600">
                         {formatCurrency(maxRefundable)}
                       </span>
@@ -172,7 +186,10 @@ export function OrderRefund({
 
                   <div className="space-y-2">
                     <Label htmlFor="reason">Reason</Label>
-                    <Select value={reason} onValueChange={(value: any) => setReason(value)}>
+                    <Select
+                      value={reason}
+                      onValueChange={(value: any) => setReason(value)}
+                    >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -202,7 +219,8 @@ export function OrderRefund({
                     <div className="text-sm text-yellow-800">
                       <p className="font-medium">Refunds cannot be undone</p>
                       <p className="mt-1">
-                        This will process a refund via Stripe and update the order status.
+                        This will process a refund via Stripe and update the
+                        order status.
                       </p>
                     </div>
                   </div>
@@ -235,7 +253,9 @@ export function OrderRefund({
         <div className="grid grid-cols-2 gap-4">
           <div>
             <p className="text-sm text-gray-500">Order Total</p>
-            <p className="text-lg font-semibold">{formatCurrency(orderTotal)}</p>
+            <p className="text-lg font-semibold">
+              {formatCurrency(orderTotal)}
+            </p>
           </div>
           <div>
             <p className="text-sm text-gray-500">Refunded Amount</p>
@@ -248,7 +268,9 @@ export function OrderRefund({
         {isFullyRefunded && (
           <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
             <CheckCircle className="h-5 w-5 text-red-600" />
-            <span className="text-sm font-medium text-red-900">Fully Refunded</span>
+            <span className="text-sm font-medium text-red-900">
+              Fully Refunded
+            </span>
           </div>
         )}
 
@@ -262,27 +284,27 @@ export function OrderRefund({
         )}
       </CardContent>
     </Card>
-  )
+  );
 }
 
 // Refund History Component
 interface RefundHistoryProps {
   refunds: Array<{
-    id: string
-    amount: number
-    reason: string
-    note?: string
-    stripeRefundId: string
-    createdAt: string
+    id: string;
+    amount: number;
+    reason: string;
+    note?: string;
+    stripeRefundId: string;
+    createdAt: string;
     user: {
-      name: string | null
-      email: string
-    }
-  }>
+      name: string | null;
+      email: string;
+    };
+  }>;
 }
 
 export function RefundHistory({ refunds }: RefundHistoryProps) {
-  if (refunds.length === 0) return null
+  if (refunds.length === 0) return null;
 
   return (
     <Card>
@@ -302,7 +324,7 @@ export function RefundHistory({ refunds }: RefundHistoryProps) {
                     -{formatCurrency(refund.amount)}
                   </p>
                   <p className="text-sm text-gray-600">
-                    Reason: {refund.reason.replace(/_/g, ' ')}
+                    Reason: {refund.reason.replace(/_/g, " ")}
                   </p>
                   {refund.note && (
                     <p className="text-sm text-gray-500">{refund.note}</p>
@@ -316,10 +338,10 @@ export function RefundHistory({ refunds }: RefundHistoryProps) {
                 </div>
                 <div className="text-right">
                   <p className="text-xs text-gray-500">
-                    {format(new Date(refund.createdAt), 'MMM d, yyyy')}
+                    {format(new Date(refund.createdAt), "MMM d, yyyy")}
                   </p>
                   <p className="text-xs text-gray-400">
-                    {format(new Date(refund.createdAt), 'HH:mm')}
+                    {format(new Date(refund.createdAt), "HH:mm")}
                   </p>
                 </div>
               </div>
@@ -328,5 +350,5 @@ export function RefundHistory({ refunds }: RefundHistoryProps) {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

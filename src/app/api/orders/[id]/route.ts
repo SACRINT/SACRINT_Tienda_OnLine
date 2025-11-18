@@ -2,11 +2,14 @@
 // GET /api/orders/[id] - Get order details
 // PATCH /api/orders/[id] - Update order status (STORE_OWNER only)
 
-import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/lib/auth/auth'
-import { getOrderById, updateOrderStatus } from '@/lib/db/orders'
-import { OrderStatusUpdateSchema } from '@/lib/security/schemas/order-schemas'
-import { USER_ROLES } from '@/lib/types/user-role'
+import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth/auth";
+import { getOrderById, updateOrderStatus } from "@/lib/db/orders";
+import { OrderStatusUpdateSchema } from "@/lib/security/schemas/order-schemas";
+import { USER_ROLES } from "@/lib/types/user-role";
+
+// Force dynamic rendering for this API route
+export const dynamic = "force-dynamic";
 
 /**
  * GET /api/orders/[id]
@@ -14,38 +17,42 @@ import { USER_ROLES } from '@/lib/types/user-role'
  */
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
-    const session = await auth()
+    const session = await auth();
 
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { tenantId } = session.user
+    const { tenantId } = session.user;
 
     if (!tenantId) {
       return NextResponse.json(
-        { error: 'User has no tenant assigned' },
-        { status: 404 }
-      )
+        { error: "User has no tenant assigned" },
+        { status: 404 },
+      );
     }
 
-    const orderId = params.id
+    const orderId = params.id;
 
-    const order = await getOrderById(orderId, tenantId)
+    const order = await getOrderById(orderId, tenantId);
 
     if (!order) {
-      return NextResponse.json({ error: 'Order not found' }, { status: 404 })
+      return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
     // Verify user has access to this order
-    if (order.userId !== session.user.id && session.user.role !== USER_ROLES.STORE_OWNER && session.user.role !== USER_ROLES.SUPER_ADMIN) {
+    if (
+      order.userId !== session.user.id &&
+      session.user.role !== USER_ROLES.STORE_OWNER &&
+      session.user.role !== USER_ROLES.SUPER_ADMIN
+    ) {
       return NextResponse.json(
-        { error: 'Forbidden - You do not have access to this order' },
-        { status: 403 }
-      )
+        { error: "Forbidden - You do not have access to this order" },
+        { status: 403 },
+      );
     }
 
     return NextResponse.json({
@@ -76,16 +83,18 @@ export async function GET(
           postalCode: order.shippingAddress.postalCode,
           country: order.shippingAddress.country,
         },
-        billingAddress: order.billingAddress ? {
-          name: order.billingAddress.name,
-          email: order.billingAddress.email,
-          phone: order.billingAddress.phone,
-          street: order.billingAddress.street,
-          city: order.billingAddress.city,
-          state: order.billingAddress.state,
-          postalCode: order.billingAddress.postalCode,
-          country: order.billingAddress.country,
-        } : null,
+        billingAddress: order.billingAddress
+          ? {
+              name: order.billingAddress.name,
+              email: order.billingAddress.email,
+              phone: order.billingAddress.phone,
+              street: order.billingAddress.street,
+              city: order.billingAddress.city,
+              state: order.billingAddress.state,
+              postalCode: order.billingAddress.postalCode,
+              country: order.billingAddress.country,
+            }
+          : null,
         items: order.items.map((item: any) => ({
           id: item.id,
           quantity: item.quantity,
@@ -97,12 +106,14 @@ export async function GET(
             slug: item.product.slug,
             image: item.product.images[0]?.url || null,
           },
-          variant: item.variant ? {
-            id: item.variant.id,
-            size: item.variant.size,
-            color: item.variant.color,
-            model: item.variant.model,
-          } : null,
+          variant: item.variant
+            ? {
+                id: item.variant.id,
+                size: item.variant.size,
+                color: item.variant.color,
+                model: item.variant.model,
+              }
+            : null,
         })),
         user: {
           id: order.user.id,
@@ -113,18 +124,18 @@ export async function GET(
         createdAt: order.createdAt,
         updatedAt: order.updatedAt,
       },
-    })
+    });
   } catch (error) {
-    console.error('[ORDERS] GET [id] error:', error)
+    console.error("[ORDERS] GET [id] error:", error);
 
-    if (error instanceof Error && error.message.includes('Forbidden')) {
-      return NextResponse.json({ error: error.message }, { status: 403 })
+    if (error instanceof Error && error.message.includes("Forbidden")) {
+      return NextResponse.json({ error: error.message }, { status: 403 });
     }
 
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }
 
@@ -134,61 +145,66 @@ export async function GET(
  */
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
-    const session = await auth()
+    const session = await auth();
 
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { role, tenantId } = session.user
+    const { role, tenantId } = session.user;
 
     if (!tenantId) {
       return NextResponse.json(
-        { error: 'User has no tenant assigned' },
-        { status: 404 }
-      )
+        { error: "User has no tenant assigned" },
+        { status: 404 },
+      );
     }
 
     // Check if user has permission to update orders
     if (role !== USER_ROLES.STORE_OWNER && role !== USER_ROLES.SUPER_ADMIN) {
       return NextResponse.json(
-        { error: 'Forbidden - Only STORE_OWNER or SUPER_ADMIN can update orders' },
-        { status: 403 }
-      )
+        {
+          error:
+            "Forbidden - Only STORE_OWNER or SUPER_ADMIN can update orders",
+        },
+        { status: 403 },
+      );
     }
 
-    const orderId = params.id
+    const orderId = params.id;
 
-    const body = await req.json()
-    const validation = OrderStatusUpdateSchema.safeParse(body)
+    const body = await req.json();
+    const validation = OrderStatusUpdateSchema.safeParse(body);
 
     if (!validation.success) {
       return NextResponse.json(
         {
-          error: 'Invalid data',
+          error: "Invalid data",
           issues: validation.error.issues,
         },
-        { status: 400 }
-      )
+        { status: 400 },
+      );
     }
 
-    const { status, trackingNumber, adminNotes } = validation.data
+    const { status, trackingNumber, adminNotes } = validation.data;
 
     try {
       const order = await updateOrderStatus(
         orderId,
         status,
         trackingNumber,
-        adminNotes
-      )
+        adminNotes,
+      );
 
-      console.log(`[ORDERS] Updated order ${orderId} status to ${status} by user ${session.user.id}`)
+      console.log(
+        `[ORDERS] Updated order ${orderId} status to ${status} by user ${session.user.id}`,
+      );
 
       return NextResponse.json({
-        message: 'Order updated successfully',
+        message: "Order updated successfully",
         order: {
           id: order.id,
           orderNumber: order.orderNumber,
@@ -197,24 +213,24 @@ export async function PATCH(
           adminNotes: order.adminNotes,
           updatedAt: order.updatedAt,
         },
-      })
+      });
     } catch (error) {
-      console.error('[ORDERS] PATCH error:', error)
+      console.error("[ORDERS] PATCH error:", error);
 
       return NextResponse.json(
         {
-          error: 'Failed to update order',
-          message: error instanceof Error ? error.message : 'Unknown error',
+          error: "Failed to update order",
+          message: error instanceof Error ? error.message : "Unknown error",
         },
-        { status: 400 }
-      )
+        { status: 400 },
+      );
     }
   } catch (error) {
-    console.error('[ORDERS] PATCH error:', error)
+    console.error("[ORDERS] PATCH error:", error);
 
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }

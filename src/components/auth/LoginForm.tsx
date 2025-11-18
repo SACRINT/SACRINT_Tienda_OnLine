@@ -1,13 +1,13 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import * as z from 'zod'
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Form,
   FormControl,
@@ -15,45 +15,42 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
+} from "@/components/ui/form";
 
 // Zod schema para validación (mismo que backend)
 const loginSchema = z.object({
-  email: z
-    .string()
-    .min(1, 'El email es requerido')
-    .email('Email inválido'),
+  email: z.string().min(1, "El email es requerido").email("Email inválido"),
   password: z
     .string()
-    .min(6, 'La contraseña debe tener al menos 6 caracteres')
-    .max(255, 'La contraseña es demasiado larga'),
-})
+    .min(6, "La contraseña debe tener al menos 6 caracteres")
+    .max(255, "La contraseña es demasiado larga"),
+});
 
-type LoginFormValues = z.infer<typeof loginSchema>
+type LoginFormValues = z.infer<typeof loginSchema>;
 
 export function LoginForm() {
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: '',
-      password: '',
+      email: "",
+      password: "",
     },
-  })
+  });
 
   const onSubmit = async (data: LoginFormValues) => {
-    setIsLoading(true)
-    setError(null)
+    setIsLoading(true);
+    setError(null);
 
     try {
       // TODO: Integrar con API de NextAuth.js cuando Arquitecto A termine
       // Por ahora, solo mostramos un mensaje
-      console.log('Login attempt:', data)
+      console.log("Login attempt:", data);
 
       // Simulación de llamada a API
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       // TODO: Descomentar cuando el endpoint esté listo:
       // const response = await fetch('/api/auth/signin', {
@@ -69,13 +66,13 @@ export function LoginForm() {
       // const result = await response.json()
       // router.push('/dashboard')
 
-      alert('Login exitoso (mockup) - Integración con backend pendiente')
+      alert("Login exitoso (mockup) - Integración con backend pendiente");
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al iniciar sesión')
+      setError(err instanceof Error ? err.message : "Error al iniciar sesión");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -130,14 +127,14 @@ export function LoginForm() {
             className="w-full bg-primary hover:bg-primary/90"
             disabled={isLoading}
           >
-            {isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+            {isLoading ? "Iniciando sesión..." : "Iniciar Sesión"}
           </Button>
         </form>
       </Form>
 
       <div className="text-center text-sm">
         <p className="text-gray-600">
-          ¿No tienes cuenta?{' '}
+          ¿No tienes cuenta?{" "}
           <Link
             href="/signup"
             className="font-medium text-primary hover:text-accent"
@@ -153,9 +150,7 @@ export function LoginForm() {
           <span className="w-full border-t border-gray-300" />
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-white px-2 text-gray-500">
-            O continuar con
-          </span>
+          <span className="bg-white px-2 text-gray-500">O continuar con</span>
         </div>
       </div>
 
@@ -166,7 +161,7 @@ export function LoginForm() {
         className="w-full"
         onClick={() => {
           // TODO: Integrar con Google OAuth cuando esté listo
-          alert('Google OAuth - Integración pendiente')
+          alert("Google OAuth - Integración pendiente");
         }}
       >
         <svg
@@ -187,5 +182,5 @@ export function LoginForm() {
         Iniciar sesión con Google
       </Button>
     </div>
-  )
+  );
 }

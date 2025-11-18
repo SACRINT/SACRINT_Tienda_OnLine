@@ -1,15 +1,15 @@
-import { auth } from '@/lib/auth/auth'
-import { getCategoriesByTenant } from '@/lib/db/categories'
-import { ProductForm } from '@/components/dashboard/ProductForm'
+import { auth } from "@/lib/auth/auth";
+import { getCategoriesByTenant } from "@/lib/db/categories";
+import { ProductForm } from "@/components/dashboard/ProductForm";
 
 export default async function NewProductPage() {
-  const session = await auth()
+  const session = await auth();
 
   if (!session?.user?.tenantId) {
-    return <div>No tenant found</div>
+    return <div>No tenant found</div>;
   }
 
-  const categories = await getCategoriesByTenant(session.user.tenantId)
+  const categories = await getCategoriesByTenant(session.user.tenantId);
 
   return (
     <div className="space-y-6">
@@ -22,5 +22,5 @@ export default async function NewProductPage() {
 
       <ProductForm categories={categories} />
     </div>
-  )
+  );
 }

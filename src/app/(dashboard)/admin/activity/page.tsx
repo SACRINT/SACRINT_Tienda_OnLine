@@ -1,18 +1,24 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
-import { useSession } from 'next-auth/react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -20,7 +26,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from "@/components/ui/table";
 import {
   Activity,
   Filter,
@@ -31,60 +37,60 @@ import {
   DollarSign,
   Settings,
   FileText,
-} from 'lucide-react'
-import { format } from 'date-fns'
+} from "lucide-react";
+import { format } from "date-fns";
 
 interface ActivityLog {
-  id: string
-  action: string
-  entityType: string
-  entityId: string
-  metadata: any
-  createdAt: string
+  id: string;
+  action: string;
+  entityType: string;
+  entityId: string;
+  metadata: any;
+  createdAt: string;
   user: {
-    id: string
-    name: string | null
-    email: string
-  }
+    id: string;
+    name: string | null;
+    email: string;
+  };
 }
 
 export default function ActivityLogsPage() {
-  const { data: session } = useSession()
-  const [logs, setLogs] = useState<ActivityLog[]>([])
-  const [loading, setLoading] = useState(true)
+  const { data: session } = useSession();
+  const [logs, setLogs] = useState<ActivityLog[]>([]);
+  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState({
-    action: '',
-    entityType: '',
-    userId: '',
-  })
+    action: "",
+    entityType: "",
+    userId: "",
+  });
 
   useEffect(() => {
     if (session?.user?.tenantId) {
-      fetchLogs()
+      fetchLogs();
     }
-  }, [session])
+  }, [session]);
 
   const fetchLogs = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
       const params = new URLSearchParams({
-        tenantId: session?.user?.tenantId || '',
+        tenantId: session?.user?.tenantId || "",
         ...(filter.action && { action: filter.action }),
         ...(filter.entityType && { entityType: filter.entityType }),
         ...(filter.userId && { userId: filter.userId }),
-      })
+      });
 
-      const res = await fetch(`/api/activity?${params.toString()}`)
+      const res = await fetch(`/api/activity?${params.toString()}`);
       if (res.ok) {
-        const data = await res.json()
-        setLogs(data.logs)
+        const data = await res.json();
+        setLogs(data.logs);
       }
     } catch (error) {
-      console.error('Error fetching logs:', error)
+      console.error("Error fetching logs:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const getActionIcon = (entityType: string) => {
     const icons: Record<string, any> = {
@@ -93,26 +99,31 @@ export default function ActivityLogsPage() {
       USER: User,
       TENANT: Settings,
       REFUND: DollarSign,
-    }
-    const Icon = icons[entityType] || FileText
-    return <Icon className="h-4 w-4" />
-  }
+    };
+    const Icon = icons[entityType] || FileText;
+    return <Icon className="h-4 w-4" />;
+  };
 
   const getActionBadge = (action: string) => {
-    if (action.includes('CREATE')) return <Badge className="bg-green-500">Create</Badge>
-    if (action.includes('UPDATE')) return <Badge className="bg-blue-500">Update</Badge>
-    if (action.includes('DELETE')) return <Badge className="bg-red-500">Delete</Badge>
-    if (action.includes('REFUND')) return <Badge className="bg-orange-500">Refund</Badge>
-    if (action.includes('BULK')) return <Badge className="bg-purple-500">Bulk</Badge>
-    return <Badge variant="outline">{action}</Badge>
-  }
+    if (action.includes("CREATE"))
+      return <Badge className="bg-green-500">Create</Badge>;
+    if (action.includes("UPDATE"))
+      return <Badge className="bg-blue-500">Update</Badge>;
+    if (action.includes("DELETE"))
+      return <Badge className="bg-red-500">Delete</Badge>;
+    if (action.includes("REFUND"))
+      return <Badge className="bg-orange-500">Refund</Badge>;
+    if (action.includes("BULK"))
+      return <Badge className="bg-purple-500">Bulk</Badge>;
+    return <Badge variant="outline">{action}</Badge>;
+  };
 
   if (loading) {
     return (
       <div className="flex h-96 items-center justify-center">
         <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
-    )
+    );
   }
 
   return (
@@ -145,7 +156,9 @@ export default function ActivityLogsPage() {
               <label className="text-sm font-medium">Action Type</label>
               <Select
                 value={filter.action}
-                onValueChange={(value) => setFilter({ ...filter, action: value })}
+                onValueChange={(value) =>
+                  setFilter({ ...filter, action: value })
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="All actions" />
@@ -153,7 +166,9 @@ export default function ActivityLogsPage() {
                 <SelectContent>
                   <SelectItem value="">All Actions</SelectItem>
                   <SelectItem value="PRODUCT_UPDATE">Product Update</SelectItem>
-                  <SelectItem value="ORDER_STATUS_UPDATE">Order Status</SelectItem>
+                  <SelectItem value="ORDER_STATUS_UPDATE">
+                    Order Status
+                  </SelectItem>
                   <SelectItem value="ORDER_REFUND">Refund</SelectItem>
                   <SelectItem value="BULK_">Bulk Operations</SelectItem>
                   <SelectItem value="SETTINGS_UPDATE">Settings</SelectItem>
@@ -165,7 +180,9 @@ export default function ActivityLogsPage() {
               <label className="text-sm font-medium">Entity Type</label>
               <Select
                 value={filter.entityType}
-                onValueChange={(value) => setFilter({ ...filter, entityType: value })}
+                onValueChange={(value) =>
+                  setFilter({ ...filter, entityType: value })
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="All entities" />
@@ -197,7 +214,9 @@ export default function ActivityLogsPage() {
         </CardHeader>
         <CardContent>
           {logs.length === 0 ? (
-            <p className="text-sm text-gray-500 text-center py-8">No activity logs found</p>
+            <p className="text-sm text-gray-500 text-center py-8">
+              No activity logs found
+            </p>
           ) : (
             <Table>
               <TableHeader>
@@ -213,7 +232,7 @@ export default function ActivityLogsPage() {
                 {logs.map((log) => (
                   <TableRow key={log.id}>
                     <TableCell className="text-sm text-gray-600">
-                      {format(new Date(log.createdAt), 'MMM d, HH:mm:ss')}
+                      {format(new Date(log.createdAt), "MMM d, HH:mm:ss")}
                     </TableCell>
                     <TableCell>{getActionBadge(log.action)}</TableCell>
                     <TableCell>
@@ -245,5 +264,5 @@ export default function ActivityLogsPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

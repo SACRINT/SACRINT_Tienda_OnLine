@@ -1,9 +1,9 @@
 // Cart Data Access Layer
 // CRUD and validation functions for shopping cart management
 
-import { db } from './client'
-import { ensureTenantAccess } from './tenant'
-import { checkProductStock, reserveStock, releaseStock } from './products'
+import { db } from "./client";
+import { ensureTenantAccess } from "./tenant";
+import { checkProductStock, reserveStock, releaseStock } from "./products";
 
 /**
  * Creates or retrieves existing cart for a user
@@ -12,7 +12,7 @@ import { checkProductStock, reserveStock, releaseStock } from './products'
  * @returns Cart with items
  */
 export async function getOrCreateCart(userId: string, tenantId: string) {
-  await ensureTenantAccess(tenantId)
+  await ensureTenantAccess(tenantId);
 
   let cart = await db.cart.findUnique({
     where: {
@@ -33,7 +33,7 @@ export async function getOrCreateCart(userId: string, tenantId: string) {
               published: true,
               images: {
                 take: 1,
-                orderBy: { order: 'asc' },
+                orderBy: { order: "asc" },
               },
             },
           },
@@ -50,7 +50,7 @@ export async function getOrCreateCart(userId: string, tenantId: string) {
         },
       },
     },
-  })
+  });
 
   if (!cart) {
     cart = await db.cart.create({
@@ -73,7 +73,7 @@ export async function getOrCreateCart(userId: string, tenantId: string) {
                 published: true,
                 images: {
                   take: 1,
-                  orderBy: { order: 'asc' },
+                  orderBy: { order: "asc" },
                 },
               },
             },
@@ -90,10 +90,10 @@ export async function getOrCreateCart(userId: string, tenantId: string) {
           },
         },
       },
-    })
+    });
   }
 
-  return cart
+  return cart;
 }
 
 /**
@@ -103,12 +103,12 @@ export async function getOrCreateCart(userId: string, tenantId: string) {
  * @returns Cart with items or null
  */
 export async function getCartById(tenantId: string, cartId: string) {
-  await ensureTenantAccess(tenantId)
+  await ensureTenantAccess(tenantId);
 
   const cart = await db.cart.findFirst({
     where: {
       id: cartId,
-      tenantId
+      tenantId,
     },
     include: {
       items: {
@@ -125,7 +125,7 @@ export async function getCartById(tenantId: string, cartId: string) {
               published: true,
               images: {
                 take: 1,
-                orderBy: { order: 'asc' },
+                orderBy: { order: "asc" },
               },
             },
           },
@@ -142,9 +142,9 @@ export async function getCartById(tenantId: string, cartId: string) {
         },
       },
     },
-  })
+  });
 
-  return cart
+  return cart;
 }
 
 /**
@@ -161,20 +161,20 @@ export async function addItemToCart(
   cartId: string,
   productId: string,
   variantId: string | null | undefined,
-  quantity: number
+  quantity: number,
 ) {
-  await ensureTenantAccess(tenantId)
+  await ensureTenantAccess(tenantId);
 
   // Get cart and validate tenant access
-  const cart = await getCartById(tenantId, cartId)
+  const cart = await getCartById(tenantId, cartId);
 
   if (!cart) {
-    throw new Error('Cart not found or does not belong to tenant')
+    throw new Error("Cart not found or does not belong to tenant");
   }
 
   // Validate quantity
   if (quantity <= 0) {
-    throw new Error('Quantity must be positive')
+    throw new Error("Quantity must be positive");
   }
 
   // Check if product is available and in stock
@@ -183,29 +183,29 @@ export async function addItemToCart(
     include: {
       variants: variantId ? { where: { id: variantId } } : undefined,
     },
-  })
+  });
 
   if (!product) {
-    throw new Error('Product not found')
+    throw new Error("Product not found");
   }
 
   if (!product.published) {
-    throw new Error('Product is not available for purchase')
+    throw new Error("Product is not available for purchase");
   }
 
   if (product.tenantId !== cart.tenantId) {
-    throw new Error('Product does not belong to this store')
+    throw new Error("Product does not belong to this store");
   }
 
   // Validate stock
-  let availableStock: number
+  let availableStock: number;
 
   if (variantId && product.variants.length > 0) {
-    const variant = product.variants[0]
-    availableStock = variant.stock
+    const variant = product.variants[0];
+    availableStock = variant.stock;
   } else {
-    const stockInfo = await checkProductStock(tenantId, productId)
-    availableStock = stockInfo.availableStock
+    const stockInfo = await checkProductStock(tenantId, productId);
+    availableStock = stockInfo.availableStock;
   }
 
   // Check if item already exists
@@ -217,29 +217,29 @@ export async function addItemToCart(
       productId,
       variantId: variantId ?? null,
     },
-  })
+  });
 
-  let newQuantity = quantity
+  let newQuantity = quantity;
 
   if (existingItem) {
-    newQuantity = existingItem.quantity + quantity
+    newQuantity = existingItem.quantity + quantity;
   }
 
   if (newQuantity > availableStock) {
     throw new Error(
-      `Insufficient stock. Available: ${availableStock}, Requested: ${newQuantity}`
-    )
+      `Insufficient stock. Available: ${availableStock}, Requested: ${newQuantity}`,
+    );
   }
 
   // Get current price (variant price or product price)
-  let currentPrice = product.salePrice || product.basePrice
+  let currentPrice = product.salePrice || product.basePrice;
 
   if (variantId && product.variants.length > 0 && product.variants[0].price) {
-    currentPrice = product.variants[0].price
+    currentPrice = product.variants[0].price;
   }
 
   // Update or create cart item
-  let cartItem
+  let cartItem;
   if (existingItem) {
     cartItem = await db.cartItem.update({
       where: {
@@ -249,24 +249,24 @@ export async function addItemToCart(
         quantity: newQuantity,
         priceSnapshot: currentPrice,
       },
-    include: {
-      product: {
-        select: {
-          id: true,
-          name: true,
-          slug: true,
-          basePrice: true,
-          salePrice: true,
-          stock: true,
-          images: {
-            take: 1,
-            orderBy: { order: 'asc' },
+      include: {
+        product: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            basePrice: true,
+            salePrice: true,
+            stock: true,
+            images: {
+              take: 1,
+              orderBy: { order: "asc" },
+            },
           },
         },
+        variant: true,
       },
-      variant: true,
-    },
-    })
+    });
   } else {
     cartItem = await db.cartItem.create({
       data: {
@@ -287,16 +287,16 @@ export async function addItemToCart(
             stock: true,
             images: {
               take: 1,
-              orderBy: { order: 'asc' },
+              orderBy: { order: "asc" },
             },
           },
         },
         variant: true,
       },
-    })
+    });
   }
 
-  return cartItem
+  return cartItem;
 }
 
 /**
@@ -309,46 +309,46 @@ export async function addItemToCart(
 export async function updateCartItemQuantity(
   tenantId: string,
   cartItemId: string,
-  quantity: number
+  quantity: number,
 ) {
-  await ensureTenantAccess(tenantId)
+  await ensureTenantAccess(tenantId);
 
   if (quantity <= 0) {
-    throw new Error('Quantity must be positive. Use removeCartItem to delete.')
+    throw new Error("Quantity must be positive. Use removeCartItem to delete.");
   }
 
   const cartItem = await db.cartItem.findFirst({
     where: {
       id: cartItemId,
       cart: {
-        tenantId
-      }
+        tenantId,
+      },
     },
     include: {
       cart: true,
       product: true,
       variant: true,
     },
-  })
+  });
 
   if (!cartItem) {
-    throw new Error('Cart item not found or does not belong to tenant')
+    throw new Error("Cart item not found or does not belong to tenant");
   }
 
   // Check stock availability
-  let availableStock: number
+  let availableStock: number;
 
   if (cartItem.variant) {
-    availableStock = cartItem.variant.stock
+    availableStock = cartItem.variant.stock;
   } else {
-    const stockInfo = await checkProductStock(tenantId, cartItem.productId)
-    availableStock = stockInfo.availableStock
+    const stockInfo = await checkProductStock(tenantId, cartItem.productId);
+    availableStock = stockInfo.availableStock;
   }
 
   if (quantity > availableStock) {
     throw new Error(
-      `Insufficient stock. Available: ${availableStock}, Requested: ${quantity}`
-    )
+      `Insufficient stock. Available: ${availableStock}, Requested: ${quantity}`,
+    );
   }
 
   // Update quantity
@@ -365,15 +365,15 @@ export async function updateCartItemQuantity(
           salePrice: true,
           images: {
             take: 1,
-            orderBy: { order: 'asc' },
+            orderBy: { order: "asc" },
           },
         },
       },
       variant: true,
     },
-  })
+  });
 
-  return updated
+  return updated;
 }
 
 /**
@@ -386,20 +386,20 @@ export async function removeCartItem(cartItemId: string) {
     include: {
       cart: true,
     },
-  })
+  });
 
   if (!cartItem) {
-    throw new Error('Cart item not found')
+    throw new Error("Cart item not found");
   }
 
   // Validate tenant access
-  await ensureTenantAccess(cartItem.cart.tenantId)
+  await ensureTenantAccess(cartItem.cart.tenantId);
 
   await db.cartItem.delete({
     where: { id: cartItemId },
-  })
+  });
 
-  return { success: true }
+  return { success: true };
 }
 
 /**
@@ -408,19 +408,19 @@ export async function removeCartItem(cartItemId: string) {
  * @param cartId - Cart ID
  */
 export async function clearCart(tenantId: string, cartId: string) {
-  await ensureTenantAccess(tenantId)
+  await ensureTenantAccess(tenantId);
 
-  const cart = await getCartById(tenantId, cartId)
+  const cart = await getCartById(tenantId, cartId);
 
   if (!cart) {
-    throw new Error('Cart not found or does not belong to tenant')
+    throw new Error("Cart not found or does not belong to tenant");
   }
 
   await db.cartItem.deleteMany({
     where: { cartId },
-  })
+  });
 
-  return { success: true }
+  return { success: true };
 }
 
 /**
@@ -435,39 +435,42 @@ export async function getCartTotal(
   tenantId: string,
   cartId: string,
   shippingCost: number = 0,
-  taxRate: number = 0.16
+  taxRate: number = 0.16,
 ) {
-  await ensureTenantAccess(tenantId)
+  await ensureTenantAccess(tenantId);
 
-  const cart = await getCartById(tenantId, cartId)
+  const cart = await getCartById(tenantId, cartId);
 
   if (!cart) {
-    throw new Error('Cart not found or does not belong to tenant')
+    throw new Error("Cart not found or does not belong to tenant");
   }
 
   // Calculate subtotal from cart items
   const subtotal = cart.items.reduce((sum: any, item: any) => {
-    const price = Number(item.priceSnapshot)
-    return sum + price * item.quantity
-  }, 0)
+    const price = Number(item.priceSnapshot);
+    return sum + price * item.quantity;
+  }, 0);
 
   // Free shipping if subtotal > $100
-  const finalShippingCost = subtotal > 1000 ? 0 : shippingCost
+  const finalShippingCost = subtotal > 1000 ? 0 : shippingCost;
 
   // Calculate tax on subtotal only
-  const tax = subtotal * taxRate
+  const tax = subtotal * taxRate;
 
   // Calculate total
-  const total = subtotal + finalShippingCost + tax
+  const total = subtotal + finalShippingCost + tax;
 
   return {
     subtotal: Number(subtotal.toFixed(2)),
     shippingCost: Number(finalShippingCost.toFixed(2)),
     tax: Number(tax.toFixed(2)),
     total: Number(total.toFixed(2)),
-    itemCount: cart.items.reduce((sum: any, item: any) => sum + item.quantity, 0),
+    itemCount: cart.items.reduce(
+      (sum: any, item: any) => sum + item.quantity,
+      0,
+    ),
     items: cart.items.length,
-  }
+  };
 }
 
 /**
@@ -480,74 +483,79 @@ export async function getCartTotal(
  * @param cartId - Cart ID
  * @returns Validation result with warnings
  */
-export async function validateCartBeforeCheckout(tenantId: string, cartId: string) {
-  await ensureTenantAccess(tenantId)
+export async function validateCartBeforeCheckout(
+  tenantId: string,
+  cartId: string,
+) {
+  await ensureTenantAccess(tenantId);
 
-  const cart = await getCartById(tenantId, cartId)
+  const cart = await getCartById(tenantId, cartId);
 
   if (!cart) {
-    throw new Error('Cart not found or does not belong to tenant')
+    throw new Error("Cart not found or does not belong to tenant");
   }
 
   if (cart.items.length === 0) {
-    throw new Error('Cart is empty')
+    throw new Error("Cart is empty");
   }
 
-  const warnings: string[] = []
-  const errors: string[] = []
+  const warnings: string[] = [];
+  const errors: string[] = [];
 
   // Validate each item
   for (const item of cart.items) {
     const product = await db.product.findUnique({
       where: { id: item.productId },
       include: {
-        variants: item.variantId ? { where: { id: item.variantId } } : undefined,
+        variants: item.variantId
+          ? { where: { id: item.variantId } }
+          : undefined,
       },
-    })
+    });
 
     // Check if product still exists
     if (!product) {
-      errors.push(`Product "${item.product.name}" no longer exists`)
-      continue
+      errors.push(`Product "${item.product.name}" no longer exists`);
+      continue;
     }
 
     // Check if product is published
     if (!product.published) {
-      errors.push(`Product "${product.name}" is no longer available`)
-      continue
+      errors.push(`Product "${product.name}" is no longer available`);
+      continue;
     }
 
     // Check stock
-    let availableStock: number
-    let currentPrice: number = Number(product.salePrice || product.basePrice)
+    let availableStock: number;
+    let currentPrice: number = Number(product.salePrice || product.basePrice);
 
     if (item.variant && product.variants.length > 0) {
-      const variant = product.variants[0]
-      availableStock = variant.stock
+      const variant = product.variants[0];
+      availableStock = variant.stock;
       if (variant.price) {
-        currentPrice = Number(variant.price)
+        currentPrice = Number(variant.price);
       }
     } else {
-      const stockInfo = await checkProductStock(tenantId, product.id)
-      availableStock = stockInfo.availableStock
+      const stockInfo = await checkProductStock(tenantId, product.id);
+      availableStock = stockInfo.availableStock;
     }
 
     if (item.quantity > availableStock) {
       errors.push(
-        `Insufficient stock for "${product.name}". Available: ${availableStock}, In cart: ${item.quantity}`
-      )
+        `Insufficient stock for "${product.name}". Available: ${availableStock}, In cart: ${item.quantity}`,
+      );
     }
 
     // Check price changes (>10% difference triggers warning)
-    const priceSnapshot = Number(item.priceSnapshot)
-    const currentPriceNum = Number(currentPrice)
-    const priceDifference = Math.abs(currentPriceNum - priceSnapshot)
-    const percentChange = (priceDifference / priceSnapshot) * 100
+    const priceSnapshot = Number(item.priceSnapshot);
+    const currentPriceNum = Number(currentPrice);
+    const priceDifference = Math.abs(currentPriceNum - priceSnapshot);
+    const percentChange = (priceDifference / priceSnapshot) * 100;
 
     if (percentChange > 10) {
       warnings.push(
-        `Price changed for "${product.name}". Was $${priceSnapshot.toFixed(2)}, now $${currentPriceNum.toFixed(2)}`
-      )
+        `Price changed for "${product.name}". Was $${priceSnapshot.toFixed(2)}, now $${currentPriceNum.toFixed(2)}`,
+      );
     }
   }
 
@@ -555,7 +563,7 @@ export async function validateCartBeforeCheckout(tenantId: string, cartId: strin
     isValid: errors.length === 0,
     errors,
     warnings,
-  }
+  };
 }
 
 /**
@@ -565,7 +573,7 @@ export async function validateCartBeforeCheckout(tenantId: string, cartId: strin
  * @returns Cart or null
  */
 export async function getUserCart(userId: string, tenantId: string) {
-  await ensureTenantAccess(tenantId)
+  await ensureTenantAccess(tenantId);
 
   return await db.cart.findUnique({
     where: {
@@ -586,7 +594,7 @@ export async function getUserCart(userId: string, tenantId: string) {
               published: true,
               images: {
                 take: 1,
-                orderBy: { order: 'asc' },
+                orderBy: { order: "asc" },
               },
             },
           },
@@ -603,5 +611,5 @@ export async function getUserCart(userId: string, tenantId: string) {
         },
       },
     },
-  })
+  });
 }

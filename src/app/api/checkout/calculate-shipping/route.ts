@@ -1,9 +1,9 @@
 // Shipping Calculation API
 // POST /api/checkout/calculate-shipping - Calculate shipping costs based on weight and zone
 
-import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/lib/auth/auth'
-import { z } from 'zod'
+import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth/auth";
+import { z } from "zod";
 
 // Shipping calculation schema
 const ShippingCalculationSchema = z.object({
@@ -27,11 +27,14 @@ const ShippingCalculationSchema = z.object({
             height: z.number().positive(),
           })
           .optional(),
-      })
+      }),
     )
     .min(1),
-  shippingMethod: z.enum(['standard', 'express', 'overnight']).optional().default('standard'),
-})
+  shippingMethod: z
+    .enum(["standard", "express", "overnight"])
+    .optional()
+    .default("standard"),
+});
 
 // US Shipping Zones (based on state)
 // Zone 1: West Coast
@@ -97,7 +100,7 @@ const STATE_SHIPPING_ZONES: Record<string, number> = {
   // Special zones
   AK: 6, // Alaska - Premium
   HI: 6, // Hawaii - Premium
-}
+};
 
 // Base shipping rates by weight tier and zone
 // [weight in lbs, zone1, zone2, zone3, zone4, zone5, zone6]
@@ -110,117 +113,123 @@ const WEIGHT_BASED_RATES = [
   { maxWeight: 30, zones: [22.99, 25.99, 28.99, 31.99, 34.99, 64.99] },
   { maxWeight: 50, zones: [32.99, 36.99, 40.99, 44.99, 48.99, 89.99] },
   { maxWeight: Infinity, zones: [49.99, 54.99, 59.99, 64.99, 69.99, 124.99] }, // 50+ lbs
-]
+];
 
 // Shipping method multipliers
 const SHIPPING_METHOD_MULTIPLIERS = {
   standard: 1.0, // 5-7 business days
   express: 1.8, // 2-3 business days
   overnight: 3.5, // 1 business day
-}
+};
 
 // Delivery estimates
 const DELIVERY_ESTIMATES = {
-  standard: '5-7 business days',
-  express: '2-3 business days',
-  overnight: '1 business day',
-}
+  standard: "5-7 business days",
+  express: "2-3 business days",
+  overnight: "1 business day",
+};
 
 // Dimensional weight divisor (industry standard)
-const DIM_WEIGHT_DIVISOR = 139 // For domestic shipping
+const DIM_WEIGHT_DIVISOR = 139; // For domestic shipping
+
+// Force dynamic rendering for this API route
+export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   try {
     // Authenticate user
-    const session = await auth()
+    const session = await auth();
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Parse and validate request body
-    const body = await req.json()
-    const validation = ShippingCalculationSchema.safeParse(body)
+    const body = await req.json();
+    const validation = ShippingCalculationSchema.safeParse(body);
 
     if (!validation.success) {
       return NextResponse.json(
         {
-          error: 'Invalid request data',
+          error: "Invalid request data",
           details: validation.error.issues,
         },
-        { status: 400 }
-      )
+        { status: 400 },
+      );
     }
 
-    const { tenantId, shippingAddress, items, shippingMethod } = validation.data
+    const { tenantId, shippingAddress, items, shippingMethod } =
+      validation.data;
 
     // Verify tenant access
     if (session.user.tenantId !== tenantId) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     // Only calculate for US addresses (in production, use carrier APIs for international)
     if (
-      shippingAddress.country.toUpperCase() !== 'UNITED STATES' &&
-      shippingAddress.country.toUpperCase() !== 'USA' &&
-      shippingAddress.country.toUpperCase() !== 'US'
+      shippingAddress.country.toUpperCase() !== "UNITED STATES" &&
+      shippingAddress.country.toUpperCase() !== "USA" &&
+      shippingAddress.country.toUpperCase() !== "US"
     ) {
       return NextResponse.json(
         {
-          error: 'International shipping not supported',
-          message: 'Please contact support for international shipping quotes',
+          error: "International shipping not supported",
+          message: "Please contact support for international shipping quotes",
         },
-        { status: 400 }
-      )
+        { status: 400 },
+      );
     }
 
     // Get shipping zone
-    const stateCode = shippingAddress.state.toUpperCase()
-    const shippingZone = STATE_SHIPPING_ZONES[stateCode] || 3 // Default to zone 3 if unknown
+    const stateCode = shippingAddress.state.toUpperCase();
+    const shippingZone = STATE_SHIPPING_ZONES[stateCode] || 3; // Default to zone 3 if unknown
 
     // Calculate total actual weight
     const actualWeight = items.reduce((sum, item) => {
-      return sum + (item.weight || 1) * item.quantity
-    }, 0)
+      return sum + (item.weight || 1) * item.quantity;
+    }, 0);
 
     // Calculate dimensional weight for each item
-    let dimensionalWeight = 0
+    let dimensionalWeight = 0;
     items.forEach((item) => {
       if (item.dimensions) {
-        const { length, width, height } = item.dimensions
-        const dimWeight = (length * width * height) / DIM_WEIGHT_DIVISOR
-        dimensionalWeight += dimWeight * item.quantity
+        const { length, width, height } = item.dimensions;
+        const dimWeight = (length * width * height) / DIM_WEIGHT_DIVISOR;
+        dimensionalWeight += dimWeight * item.quantity;
       }
-    })
+    });
 
     // Use the greater of actual weight or dimensional weight
-    const billingWeight = Math.max(actualWeight, dimensionalWeight)
+    const billingWeight = Math.max(actualWeight, dimensionalWeight);
 
     // Find appropriate rate tier
-    const rateTier = WEIGHT_BASED_RATES.find((tier) => billingWeight <= tier.maxWeight)
+    const rateTier = WEIGHT_BASED_RATES.find(
+      (tier) => billingWeight <= tier.maxWeight,
+    );
     if (!rateTier) {
       return NextResponse.json(
         {
-          error: 'Package too heavy',
-          message: 'Please contact support for freight shipping quotes',
+          error: "Package too heavy",
+          message: "Please contact support for freight shipping quotes",
         },
-        { status: 400 }
-      )
+        { status: 400 },
+      );
     }
 
     // Get base rate for zone
-    const baseRate = rateTier.zones[shippingZone - 1]
+    const baseRate = rateTier.zones[shippingZone - 1];
 
     // Apply shipping method multiplier
-    const methodMultiplier = SHIPPING_METHOD_MULTIPLIERS[shippingMethod]
-    const shippingCost = baseRate * methodMultiplier
+    const methodMultiplier = SHIPPING_METHOD_MULTIPLIERS[shippingMethod];
+    const shippingCost = baseRate * methodMultiplier;
 
     // Calculate handling fee (flat $2 for orders under $50)
-    const subtotal = items.reduce((sum, item) => sum + item.quantity, 0) * 25 // Rough estimate
-    const handlingFee = subtotal < 50 ? 2.0 : 0
+    const subtotal = items.reduce((sum, item) => sum + item.quantity, 0) * 25; // Rough estimate
+    const handlingFee = subtotal < 50 ? 2.0 : 0;
 
     // Free shipping for orders over $100 with standard shipping
-    const isFreeShipping = subtotal >= 100 && shippingMethod === 'standard'
-    const finalCost = isFreeShipping ? 0 : shippingCost + handlingFee
+    const isFreeShipping = subtotal >= 100 && shippingMethod === "standard";
+    const finalCost = isFreeShipping ? 0 : shippingCost + handlingFee;
 
     // Return shipping calculation
     return NextResponse.json(
@@ -250,32 +259,49 @@ export async function POST(req: NextRequest) {
         },
         availableMethods: [
           {
-            method: 'standard',
-            cost: isFreeShipping ? 0 : parseFloat((baseRate * SHIPPING_METHOD_MULTIPLIERS.standard + handlingFee).toFixed(2)),
+            method: "standard",
+            cost: isFreeShipping
+              ? 0
+              : parseFloat(
+                  (
+                    baseRate * SHIPPING_METHOD_MULTIPLIERS.standard +
+                    handlingFee
+                  ).toFixed(2),
+                ),
             estimatedDelivery: DELIVERY_ESTIMATES.standard,
             isFree: isFreeShipping,
           },
           {
-            method: 'express',
-            cost: parseFloat((baseRate * SHIPPING_METHOD_MULTIPLIERS.express + handlingFee).toFixed(2)),
+            method: "express",
+            cost: parseFloat(
+              (
+                baseRate * SHIPPING_METHOD_MULTIPLIERS.express +
+                handlingFee
+              ).toFixed(2),
+            ),
             estimatedDelivery: DELIVERY_ESTIMATES.express,
             isFree: false,
           },
           {
-            method: 'overnight',
-            cost: parseFloat((baseRate * SHIPPING_METHOD_MULTIPLIERS.overnight + handlingFee).toFixed(2)),
+            method: "overnight",
+            cost: parseFloat(
+              (
+                baseRate * SHIPPING_METHOD_MULTIPLIERS.overnight +
+                handlingFee
+              ).toFixed(2),
+            ),
             estimatedDelivery: DELIVERY_ESTIMATES.overnight,
             isFree: false,
           },
         ],
       },
-      { status: 200 }
-    )
+      { status: 200 },
+    );
   } catch (error) {
-    console.error('Shipping calculation error:', error)
+    console.error("Shipping calculation error:", error);
     return NextResponse.json(
-      { error: 'Failed to calculate shipping' },
-      { status: 500 }
-    )
+      { error: "Failed to calculate shipping" },
+      { status: 500 },
+    );
   }
 }

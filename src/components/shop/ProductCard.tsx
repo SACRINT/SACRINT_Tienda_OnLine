@@ -1,26 +1,26 @@
 // Product Card Component
 // Displays product preview with image, price, rating, and actions
 
-'use client'
+"use client";
 
-import { useState } from 'react'
-import Image from 'next/image'
-import Link from 'next/link'
-import { Heart, ShoppingCart, Star } from 'lucide-react'
+import { useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { Heart, ShoppingCart, Star } from "lucide-react";
 
 export interface ProductCardProps {
-  id: string
-  name: string
-  slug: string
-  image: string
-  price: number
-  salePrice?: number | null
-  rating: number
-  reviewCount: number
-  inStock: boolean
-  category?: string
-  onAddToCart?: (productId: string) => void
-  onToggleWishlist?: (productId: string) => void
+  id: string;
+  name: string;
+  slug: string;
+  image: string;
+  price: number;
+  salePrice?: number | null;
+  rating: number;
+  reviewCount: number;
+  inStock: boolean;
+  category?: string;
+  onAddToCart?: (productId: string) => void;
+  onToggleWishlist?: (productId: string) => void;
 }
 
 export function ProductCard({
@@ -37,30 +37,30 @@ export function ProductCard({
   onAddToCart,
   onToggleWishlist,
 }: ProductCardProps) {
-  const [isHovering, setIsHovering] = useState(false)
-  const [isInWishlist, setIsInWishlist] = useState(false)
-  const [imageError, setImageError] = useState(false)
+  const [isHovering, setIsHovering] = useState(false);
+  const [isInWishlist, setIsInWishlist] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
-  const displayPrice = salePrice && salePrice < price ? salePrice : price
-  const hasDiscount = salePrice && salePrice < price
+  const displayPrice = salePrice && salePrice < price ? salePrice : price;
+  const hasDiscount = salePrice && salePrice < price;
   const discountPercent = hasDiscount
     ? Math.round(((price - salePrice) / price) * 100)
-    : 0
+    : 0;
 
   const handleAddToCart = (e: React.MouseEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (inStock && onAddToCart) {
-      onAddToCart(id)
+      onAddToCart(id);
     }
-  }
+  };
 
   const handleToggleWishlist = (e: React.MouseEvent) => {
-    e.preventDefault()
-    setIsInWishlist(!isInWishlist)
+    e.preventDefault();
+    setIsInWishlist(!isInWishlist);
     if (onToggleWishlist) {
-      onToggleWishlist(id)
+      onToggleWishlist(id);
     }
-  }
+  };
 
   return (
     <Link
@@ -111,9 +111,7 @@ export function ProductCard({
           >
             <Heart
               className={`h-5 w-5 transition-colors ${
-                isInWishlist
-                  ? 'fill-red-500 text-red-500'
-                  : 'text-gray-600'
+                isInWishlist ? "fill-red-500 text-red-500" : "text-gray-600"
               }`}
             />
           </button>
@@ -141,8 +139,8 @@ export function ProductCard({
                   key={i}
                   className={`h-4 w-4 ${
                     i < Math.floor(rating)
-                      ? 'fill-yellow-400 text-yellow-400'
-                      : 'text-gray-300'
+                      ? "fill-yellow-400 text-yellow-400"
+                      : "text-gray-300"
                   }`}
                 />
               ))}
@@ -171,10 +169,10 @@ export function ProductCard({
             className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 font-semibold text-white transition-all hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-gray-400 disabled:hover:bg-gray-400"
           >
             <ShoppingCart className="h-5 w-5" />
-            <span>{inStock ? 'Add to Cart' : 'Notify Me'}</span>
+            <span>{inStock ? "Add to Cart" : "Notify Me"}</span>
           </button>
         </div>
       </article>
     </Link>
-  )
+  );
 }

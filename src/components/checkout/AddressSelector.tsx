@@ -1,17 +1,17 @@
 // Address Selector Component
 // Select existing address or add new one for checkout
 
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { MapPin, Plus, Check, Edit2, X } from 'lucide-react'
-import type { Address } from '@/components/account'
+import { useState } from "react";
+import { MapPin, Plus, Check, Edit2, X } from "lucide-react";
+import type { Address } from "@/components/account";
 
 export interface AddressSelectorProps {
-  addresses: Address[]
-  selectedAddressId?: string
-  onAddressSelect: (address: Address) => void
-  onAddNewAddress?: (address: Omit<Address, 'id'>) => Promise<void>
+  addresses: Address[];
+  selectedAddressId?: string;
+  onAddressSelect: (address: Address) => void;
+  onAddNewAddress?: (address: Omit<Address, "id">) => Promise<void>;
 }
 
 export function AddressSelector({
@@ -20,48 +20,48 @@ export function AddressSelector({
   onAddressSelect,
   onAddNewAddress,
 }: AddressSelectorProps) {
-  const [isAddingNew, setIsAddingNew] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
+  const [isAddingNew, setIsAddingNew] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const [newAddress, setNewAddress] = useState<Partial<Address>>({
-    type: 'shipping',
-    fullName: '',
-    addressLine1: '',
-    addressLine2: '',
-    city: '',
-    state: '',
-    postalCode: '',
-    country: 'United States',
-    phone: '',
+    type: "shipping",
+    fullName: "",
+    addressLine1: "",
+    addressLine2: "",
+    city: "",
+    state: "",
+    postalCode: "",
+    country: "United States",
+    phone: "",
     isDefault: false,
-  })
+  });
 
   const handleSaveNewAddress = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSaving(true)
+    e.preventDefault();
+    setIsSaving(true);
 
     try {
-      await onAddNewAddress?.(newAddress as Omit<Address, 'id'>)
-      setIsAddingNew(false)
+      await onAddNewAddress?.(newAddress as Omit<Address, "id">);
+      setIsAddingNew(false);
       // Reset form
       setNewAddress({
-        type: 'shipping',
-        fullName: '',
-        addressLine1: '',
-        addressLine2: '',
-        city: '',
-        state: '',
-        postalCode: '',
-        country: 'United States',
-        phone: '',
+        type: "shipping",
+        fullName: "",
+        addressLine1: "",
+        addressLine2: "",
+        city: "",
+        state: "",
+        postalCode: "",
+        country: "United States",
+        phone: "",
         isDefault: false,
-      })
+      });
     } catch (error) {
-      console.error('Failed to save address:', error)
+      console.error("Failed to save address:", error);
     } finally {
-      setIsSaving(false)
+      setIsSaving(false);
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -83,8 +83,8 @@ export function AddressSelector({
               onClick={() => onAddressSelect(address)}
               className={`relative rounded-lg border-2 p-4 text-left transition-all ${
                 selectedAddressId === address.id
-                  ? 'border-blue-600 bg-blue-50'
-                  : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-md'
+                  ? "border-blue-600 bg-blue-50"
+                  : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-md"
               }`}
             >
               {/* Selected Checkmark */}
@@ -110,7 +110,9 @@ export function AddressSelector({
               <div className="flex items-start gap-3">
                 <MapPin className="mt-1 h-5 w-5 flex-shrink-0 text-gray-400" />
                 <div className="flex-1">
-                  <p className="font-semibold text-gray-900">{address.fullName}</p>
+                  <p className="font-semibold text-gray-900">
+                    {address.fullName}
+                  </p>
                   <div className="mt-2 space-y-1 text-sm text-gray-600">
                     <p>{address.addressLine1}</p>
                     {address.addressLine2 && <p>{address.addressLine2}</p>}
@@ -319,12 +321,12 @@ export function AddressSelector({
                 disabled={isSaving}
                 className="rounded-lg bg-blue-600 px-6 py-2 font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
               >
-                {isSaving ? 'Saving...' : 'Save Address'}
+                {isSaving ? "Saving..." : "Save Address"}
               </button>
             </div>
           </form>
         </div>
       )}
     </div>
-  )
+  );
 }

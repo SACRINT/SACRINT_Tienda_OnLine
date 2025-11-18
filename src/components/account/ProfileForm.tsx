@@ -1,30 +1,30 @@
 // Profile Form Component
 // Edit user profile information (name, email, phone, etc.)
 
-'use client'
-import Image from 'next/image'
+"use client";
+import Image from "next/image";
 
-import { useState } from 'react'
-import { User, Mail, Phone, Calendar, Upload, Save, X } from 'lucide-react'
+import { useState } from "react";
+import { User, Mail, Phone, Calendar, Upload, Save, X } from "lucide-react";
 
 export interface ProfileFormProps {
   initialData?: {
-    name: string
-    email: string
-    phone?: string
-    image?: string
-    dateOfBirth?: string
-  }
-  onSave?: (data: ProfileFormData) => Promise<void>
-  onCancel?: () => void
+    name: string;
+    email: string;
+    phone?: string;
+    image?: string;
+    dateOfBirth?: string;
+  };
+  onSave?: (data: ProfileFormData) => Promise<void>;
+  onCancel?: () => void;
 }
 
 export interface ProfileFormData {
-  name: string
-  email: string
-  phone: string
-  dateOfBirth: string
-  image?: string
+  name: string;
+  email: string;
+  phone: string;
+  dateOfBirth: string;
+  image?: string;
 }
 
 export function ProfileForm({
@@ -33,94 +33,96 @@ export function ProfileForm({
   onCancel,
 }: ProfileFormProps) {
   const [formData, setFormData] = useState<ProfileFormData>({
-    name: initialData?.name || '',
-    email: initialData?.email || '',
-    phone: initialData?.phone || '',
-    dateOfBirth: initialData?.dateOfBirth || '',
-    image: initialData?.image || '',
-  })
+    name: initialData?.name || "",
+    email: initialData?.email || "",
+    phone: initialData?.phone || "",
+    dateOfBirth: initialData?.dateOfBirth || "",
+    image: initialData?.image || "",
+  });
 
-  const [errors, setErrors] = useState<Partial<Record<keyof ProfileFormData, string>>>({})
-  const [isSaving, setIsSaving] = useState(false)
+  const [errors, setErrors] = useState<
+    Partial<Record<keyof ProfileFormData, string>>
+  >({});
+  const [isSaving, setIsSaving] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | undefined>(
-    initialData?.image
-  )
+    initialData?.image,
+  );
 
   const validateForm = (): boolean => {
-    const newErrors: Partial<Record<keyof ProfileFormData, string>> = {}
+    const newErrors: Partial<Record<keyof ProfileFormData, string>> = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = 'Name is required'
+      newErrors.name = "Name is required";
     } else if (formData.name.trim().length < 2) {
-      newErrors.name = 'Name must be at least 2 characters'
+      newErrors.name = "Name must be at least 2 characters";
     }
 
     if (!formData.email.trim()) {
-      newErrors.email = 'Email is required'
+      newErrors.email = "Email is required";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Invalid email format'
+      newErrors.email = "Invalid email format";
     }
 
     if (formData.phone && !/^\+?[\d\s()-]{10,}$/.test(formData.phone)) {
-      newErrors.phone = 'Invalid phone number'
+      newErrors.phone = "Invalid phone number";
     }
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleChange = (field: keyof ProfileFormData, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
+    setFormData((prev) => ({ ...prev, [field]: value }));
     // Clear error for this field when user starts typing
     if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: undefined }))
+      setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
-  }
+  };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+    const file = e.target.files?.[0];
     if (file) {
       // In production, upload to cloud storage (Vercel Blob, Cloudinary, etc.)
-      const reader = new FileReader()
+      const reader = new FileReader();
       reader.onloadend = () => {
-        const result = reader.result as string
-        setImagePreview(result)
-        setFormData((prev) => ({ ...prev, image: result }))
-      }
-      reader.readAsDataURL(file)
+        const result = reader.result as string;
+        setImagePreview(result);
+        setFormData((prev) => ({ ...prev, image: result }));
+      };
+      reader.readAsDataURL(file);
     }
-  }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!validateForm()) {
-      return
+      return;
     }
 
-    setIsSaving(true)
+    setIsSaving(true);
 
     try {
-      await onSave?.(formData)
+      await onSave?.(formData);
     } catch (error) {
-      console.error('Failed to save profile:', error)
-      setErrors({ name: 'Failed to save profile. Please try again.' })
+      console.error("Failed to save profile:", error);
+      setErrors({ name: "Failed to save profile. Please try again." });
     } finally {
-      setIsSaving(false)
+      setIsSaving(false);
     }
-  }
+  };
 
   const handleReset = () => {
     setFormData({
-      name: initialData?.name || '',
-      email: initialData?.email || '',
-      phone: initialData?.phone || '',
-      dateOfBirth: initialData?.dateOfBirth || '',
-      image: initialData?.image || '',
-    })
-    setImagePreview(initialData?.image)
-    setErrors({})
-  }
+      name: initialData?.name || "",
+      email: initialData?.email || "",
+      phone: initialData?.phone || "",
+      dateOfBirth: initialData?.dateOfBirth || "",
+      image: initialData?.image || "",
+    });
+    setImagePreview(initialData?.image);
+    setErrors({});
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 p-6">
@@ -147,15 +149,15 @@ export function ProfileForm({
               />
             ) : (
               <div className="flex h-24 w-24 items-center justify-center rounded-full bg-gray-200 text-3xl font-bold text-gray-500">
-                {formData.name.charAt(0).toUpperCase() || 'U'}
+                {formData.name.charAt(0).toUpperCase() || "U"}
               </div>
             )}
             {imagePreview && (
               <button
                 type="button"
                 onClick={() => {
-                  setImagePreview(undefined)
-                  setFormData((prev) => ({ ...prev, image: '' }))
+                  setImagePreview(undefined);
+                  setFormData((prev) => ({ ...prev, image: "" }));
                 }}
                 className="absolute -right-2 -top-2 rounded-full bg-red-100 p-1 text-red-600 hover:bg-red-200"
                 aria-label="Remove image"
@@ -200,9 +202,9 @@ export function ProfileForm({
             id="name"
             type="text"
             value={formData.name}
-            onChange={(e) => handleChange('name', e.target.value)}
+            onChange={(e) => handleChange("name", e.target.value)}
             className={`w-full rounded-lg border ${
-              errors.name ? 'border-red-300' : 'border-gray-300'
+              errors.name ? "border-red-300" : "border-gray-300"
             } bg-white py-2 pl-10 pr-4 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500`}
             placeholder="John Doe"
           />
@@ -226,9 +228,9 @@ export function ProfileForm({
             id="email"
             type="email"
             value={formData.email}
-            onChange={(e) => handleChange('email', e.target.value)}
+            onChange={(e) => handleChange("email", e.target.value)}
             className={`w-full rounded-lg border ${
-              errors.email ? 'border-red-300' : 'border-gray-300'
+              errors.email ? "border-red-300" : "border-gray-300"
             } bg-white py-2 pl-10 pr-4 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500`}
             placeholder="john@example.com"
           />
@@ -252,9 +254,9 @@ export function ProfileForm({
             id="phone"
             type="tel"
             value={formData.phone}
-            onChange={(e) => handleChange('phone', e.target.value)}
+            onChange={(e) => handleChange("phone", e.target.value)}
             className={`w-full rounded-lg border ${
-              errors.phone ? 'border-red-300' : 'border-gray-300'
+              errors.phone ? "border-red-300" : "border-gray-300"
             } bg-white py-2 pl-10 pr-4 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500`}
             placeholder="+1 (555) 123-4567"
           />
@@ -278,7 +280,7 @@ export function ProfileForm({
             id="dateOfBirth"
             type="date"
             value={formData.dateOfBirth}
-            onChange={(e) => handleChange('dateOfBirth', e.target.value)}
+            onChange={(e) => handleChange("dateOfBirth", e.target.value)}
             className="w-full rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-4 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
@@ -300,9 +302,9 @@ export function ProfileForm({
           className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-2 font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
         >
           <Save className="h-4 w-4" />
-          <span>{isSaving ? 'Saving...' : 'Save Changes'}</span>
+          <span>{isSaving ? "Saving..." : "Save Changes"}</span>
         </button>
       </div>
     </form>
-  )
+  );
 }

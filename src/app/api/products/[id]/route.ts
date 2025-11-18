@@ -1,32 +1,32 @@
 // GET /api/products/:id
 // GET, PUT, PATCH, DELETE operations for individual product
 
-import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/lib/auth/auth'
+import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth/auth";
 
-import { db } from '@/lib/db'
-import { z } from 'zod'
+import { db } from "@/lib/db";
+import { z } from "zod";
+
+// Force dynamic rendering for this API route
+export const dynamic = "force-dynamic";
 
 // GET single product
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
-    const session = await auth()
+    const session = await auth();
 
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const searchParams = req.nextUrl.searchParams
-    const tenantId = searchParams.get('tenantId')
+    const searchParams = req.nextUrl.searchParams;
+    const tenantId = searchParams.get("tenantId");
 
     if (!tenantId) {
-      return NextResponse.json(
-        { error: 'tenantId required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: "tenantId required" }, { status: 400 });
     }
 
     const product = await db.product.findFirst({
@@ -39,22 +39,19 @@ export async function GET(
         images: true,
         variants: true,
       },
-    })
+    });
 
     if (!product) {
-      return NextResponse.json(
-        { error: 'Product not found' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
-    return NextResponse.json(product)
+    return NextResponse.json(product);
   } catch (error) {
-    console.error('Get product error:', error)
+    console.error("Get product error:", error);
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }
 
@@ -65,39 +62,45 @@ const QuickUpdateSchema = z.object({
   description: z.string().optional(),
   price: z.number().positive().optional(),
   stock: z.number().int().min(0).optional(),
-  status: z.enum(['ACTIVE', 'DRAFT', 'ARCHIVED']).optional(),
-})
+  status: z.enum(["ACTIVE", "DRAFT", "ARCHIVED"]).optional(),
+});
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
-    const session = await auth()
+    const session = await auth();
 
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (session.user.role !== 'STORE_OWNER' && session.user.role !== 'SUPER_ADMIN') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    if (
+      session.user.role !== "STORE_OWNER" &&
+      session.user.role !== "SUPER_ADMIN"
+    ) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const body = await req.json()
-    const validation = QuickUpdateSchema.safeParse(body)
+    const body = await req.json();
+    const validation = QuickUpdateSchema.safeParse(body);
 
     if (!validation.success) {
       return NextResponse.json(
-        { error: 'Invalid request', details: validation.error.issues },
-        { status: 400 }
-      )
+        { error: "Invalid request", details: validation.error.issues },
+        { status: 400 },
+      );
     }
 
-    const { tenantId, ...updates } = validation.data
+    const { tenantId, ...updates } = validation.data;
 
     // Validate tenant access
-    if (session.user.role === 'STORE_OWNER' && session.user.tenantId !== tenantId) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    if (
+      session.user.role === "STORE_OWNER" &&
+      session.user.tenantId !== tenantId
+    ) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     // Verify product exists and belongs to tenant
@@ -106,46 +109,36 @@ export async function PATCH(
         id: params.id,
         tenantId,
       },
-    })
+    });
 
     if (!existing) {
-      return NextResponse.json(
-        { error: 'Product not found' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
     // Update product
     const updated = await db.product.update({
       where: { id: params.id },
       data: updates,
-    })
+    });
 
-    // Log activity
-    await db.activityLog.create({
-      data: {
-        tenantId,
-        userId: session.user.id,
-        action: 'PRODUCT_UPDATE',
-        entityType: 'PRODUCT',
-        entityId: params.id,
-        metadata: {
-          updates,
-          quickEdit: true,
-        },
-      },
-    })
+    // TODO: Log activity - implement with dedicated activity log model if needed
+    console.log("[Product API] Product updated (quick edit)", {
+      tenantId,
+      productId: params.id,
+      userId: session.user.id,
+      updates,
+    });
 
     return NextResponse.json({
       success: true,
       product: updated,
-    })
+    });
   } catch (error) {
-    console.error('Patch product error:', error)
+    console.error("Patch product error:", error);
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }
 
@@ -156,41 +149,47 @@ const UpdateProductSchema = z.object({
   description: z.string().optional(),
   price: z.number().positive(),
   stock: z.number().int().min(0),
-  status: z.enum(['ACTIVE', 'DRAFT', 'ARCHIVED']),
+  status: z.enum(["ACTIVE", "DRAFT", "ARCHIVED"]),
   categoryId: z.string().uuid().optional(),
   sku: z.string().optional(),
   images: z.array(z.string().url()).optional(),
-})
+});
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
-    const session = await auth()
+    const session = await auth();
 
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (session.user.role !== 'STORE_OWNER' && session.user.role !== 'SUPER_ADMIN') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    if (
+      session.user.role !== "STORE_OWNER" &&
+      session.user.role !== "SUPER_ADMIN"
+    ) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const body = await req.json()
-    const validation = UpdateProductSchema.safeParse(body)
+    const body = await req.json();
+    const validation = UpdateProductSchema.safeParse(body);
 
     if (!validation.success) {
       return NextResponse.json(
-        { error: 'Invalid request', details: validation.error.issues },
-        { status: 400 }
-      )
+        { error: "Invalid request", details: validation.error.issues },
+        { status: 400 },
+      );
     }
 
-    const { tenantId, images, ...data } = validation.data
+    const { tenantId, images, ...data } = validation.data;
 
-    if (session.user.role === 'STORE_OWNER' && session.user.tenantId !== tenantId) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    if (
+      session.user.role === "STORE_OWNER" &&
+      session.user.tenantId !== tenantId
+    ) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     // Verify product exists and belongs to tenant
@@ -199,27 +198,24 @@ export async function PUT(
         id: params.id,
         tenantId,
       },
-    })
+    });
 
     if (!existing) {
-      return NextResponse.json(
-        { error: 'Product not found' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
     // Update product
     const updated = await db.product.update({
       where: { id: params.id },
       data,
-    })
+    });
 
     // Update images if provided
     if (images) {
       // Delete old images
       await db.productImage.deleteMany({
         where: { productId: params.id },
-      })
+      });
 
       // Create new images
       await db.productImage.createMany({
@@ -229,62 +225,60 @@ export async function PUT(
           altText: `${data.name} - Image ${index + 1}`,
           order: index,
         })),
-      })
+      });
     }
 
-    // Log activity
-    await db.activityLog.create({
-      data: {
-        tenantId,
-        userId: session.user.id,
-        action: 'PRODUCT_UPDATE',
-        entityType: 'PRODUCT',
-        entityId: params.id,
-        metadata: { fullUpdate: true },
-      },
-    })
+    // TODO: Log activity - implement with dedicated activity log model if needed
+    console.log("[Product API] Product updated (full update)", {
+      tenantId,
+      productId: params.id,
+      userId: session.user.id,
+    });
 
     return NextResponse.json({
       success: true,
       product: updated,
-    })
+    });
   } catch (error) {
-    console.error('Update product error:', error)
+    console.error("Update product error:", error);
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }
 
 // DELETE (soft delete)
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
-    const session = await auth()
+    const session = await auth();
 
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (session.user.role !== 'STORE_OWNER' && session.user.role !== 'SUPER_ADMIN') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    if (
+      session.user.role !== "STORE_OWNER" &&
+      session.user.role !== "SUPER_ADMIN"
+    ) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const searchParams = req.nextUrl.searchParams
-    const tenantId = searchParams.get('tenantId')
+    const searchParams = req.nextUrl.searchParams;
+    const tenantId = searchParams.get("tenantId");
 
     if (!tenantId) {
-      return NextResponse.json(
-        { error: 'tenantId required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: "tenantId required" }, { status: 400 });
     }
 
-    if (session.user.role === 'STORE_OWNER' && session.user.tenantId !== tenantId) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    if (
+      session.user.role === "STORE_OWNER" &&
+      session.user.tenantId !== tenantId
+    ) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     // Verify product exists and belongs to tenant
@@ -293,47 +287,37 @@ export async function DELETE(
         id: params.id,
         tenantId,
       },
-    })
+    });
 
     if (!existing) {
-      return NextResponse.json(
-        { error: 'Product not found' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
-    // Soft delete
+    // Mark as unpublished (soft delete via published flag)
     const deleted = await db.product.update({
       where: { id: params.id },
       data: {
-        status: 'ARCHIVED',
-        deletedAt: new Date(),
+        published: false,
       },
-    })
+    });
 
-    // Log activity
-    await db.activityLog.create({
-      data: {
-        tenantId,
-        userId: session.user.id,
-        action: 'PRODUCT_DELETE',
-        entityType: 'PRODUCT',
-        entityId: params.id,
-        metadata: {
-          productName: existing.name,
-        },
-      },
-    })
+    // TODO: Log activity - implement with dedicated activity log model if needed
+    console.log("[Product API] Product deleted", {
+      tenantId,
+      productId: params.id,
+      userId: session.user.id,
+      productName: existing.name,
+    });
 
     return NextResponse.json({
       success: true,
       product: deleted,
-    })
+    });
   } catch (error) {
-    console.error('Delete product error:', error)
+    console.error("Delete product error:", error);
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }

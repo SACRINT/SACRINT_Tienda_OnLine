@@ -1,83 +1,92 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface Category {
-  id: string
-  name: string
+  id: string;
+  name: string;
 }
 
 interface ProductFormProps {
   product?: {
-    id: string
-    name: string
-    description: string | null
-    basePrice: number | any
-    salePrice?: number | any | null
-    stock: number
-    sku: string | null
-    categoryId: string | null
-    published: boolean
-    featured?: boolean
-  }
-  categories: Category[]
+    id: string;
+    name: string;
+    description: string | null;
+    basePrice: number | any;
+    salePrice?: number | any | null;
+    stock: number;
+    sku: string | null;
+    categoryId: string | null;
+    published: boolean;
+    featured?: boolean;
+  };
+  categories: Category[];
 }
 
 export function ProductForm({ product, categories }: ProductFormProps) {
-  const router = useRouter()
-  const [loading, setLoading] = useState(false)
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    name: product?.name || '',
-    description: product?.description || '',
+    name: product?.name || "",
+    description: product?.description || "",
     basePrice: product?.basePrice || 0,
-    salePrice: product?.salePrice || '',
+    salePrice: product?.salePrice || "",
     stock: product?.stock || 0,
-    sku: product?.sku || '',
-    categoryId: product?.categoryId || '',
+    sku: product?.sku || "",
+    categoryId: product?.categoryId || "",
     published: product?.published !== undefined ? product.published : false,
     featured: product?.featured !== undefined ? product.featured : false,
-  })
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
+    e.preventDefault();
+    setLoading(true);
 
     try {
-      const url = product ? `/api/products/${product.id}` : '/api/products'
-      const method = product ? 'PATCH' : 'POST'
+      const url = product ? `/api/products/${product.id}` : "/api/products";
+      const method = product ? "PATCH" : "POST";
 
       const res = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
-      })
+      });
 
       if (res.ok) {
-        router.push('/dashboard/products')
-        router.refresh()
+        router.push("/dashboard/products");
+        router.refresh();
       } else {
-        const error = await res.json()
-        alert(error.message || 'Error al guardar el producto')
+        const error = await res.json();
+        alert(error.message || "Error al guardar el producto");
       }
     } catch (error) {
-      alert('Error al guardar el producto')
+      alert("Error al guardar el producto");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
+  ) => {
+    const { name, value, type } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: type === 'number' ? parseFloat(value) || 0 : type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
-    }))
-  }
+      [name]:
+        type === "number"
+          ? parseFloat(value) || 0
+          : type === "checkbox"
+            ? (e.target as HTMLInputElement).checked
+            : value,
+    }));
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -234,16 +243,16 @@ export function ProductForm({ product, categories }: ProductFormProps) {
           disabled={loading}
           className="bg-blue-600 hover:bg-blue-700"
         >
-          {loading ? 'Guardando...' : product ? 'Actualizar Producto' : 'Crear Producto'}
+          {loading
+            ? "Guardando..."
+            : product
+              ? "Actualizar Producto"
+              : "Crear Producto"}
         </Button>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => router.back()}
-        >
+        <Button type="button" variant="outline" onClick={() => router.back()}>
           Cancelar
         </Button>
       </div>
     </form>
-  )
+  );
 }

@@ -1,25 +1,28 @@
 // Order Return Request API
 // POST /api/orders/[id]/return - Request return/refund for an order
 
-import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/lib/auth/auth'
-import { z } from 'zod'
+import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth/auth";
+import { z } from "zod";
+
+// Force dynamic rendering for this API route
+export const dynamic = "force-dynamic";
 
 // Validation schema for return request
 const ReturnRequestSchema = z.object({
   itemIds: z
-    .array(z.string().uuid('Invalid item ID'))
-    .min(1, 'At least one item must be selected'),
+    .array(z.string().uuid("Invalid item ID"))
+    .min(1, "At least one item must be selected"),
   reason: z
     .string()
-    .min(1, 'Reason is required')
-    .max(200, 'Reason must not exceed 200 characters'),
+    .min(1, "Reason is required")
+    .max(200, "Reason must not exceed 200 characters"),
   description: z
     .string()
-    .min(20, 'Description must be at least 20 characters')
-    .max(500, 'Description must not exceed 500 characters'),
-  images: z.array(z.string().url('Invalid image URL')).optional(),
-})
+    .min(20, "Description must be at least 20 characters")
+    .max(500, "Description must not exceed 500 characters"),
+  images: z.array(z.string().url("Invalid image URL")).optional(),
+});
 
 /**
  * POST /api/orders/[id]/return
@@ -34,57 +37,57 @@ const ReturnRequestSchema = z.object({
  */
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
-    const session = await auth()
+    const session = await auth();
 
     if (!session?.user?.id) {
       return NextResponse.json(
-        { error: 'Unauthorized - You must be logged in' },
-        { status: 401 }
-      )
+        { error: "Unauthorized - You must be logged in" },
+        { status: 401 },
+      );
     }
 
-    const { tenantId } = session.user
-    const orderId = params.id
+    const { tenantId } = session.user;
+    const orderId = params.id;
 
     if (!tenantId) {
       return NextResponse.json(
-        { error: 'User has no tenant assigned' },
-        { status: 404 }
-      )
+        { error: "User has no tenant assigned" },
+        { status: 404 },
+      );
     }
 
     // Validate order ID is UUID
-    const uuidSchema = z.string().uuid('Invalid order ID')
-    const orderIdValidation = uuidSchema.safeParse(orderId)
+    const uuidSchema = z.string().uuid("Invalid order ID");
+    const orderIdValidation = uuidSchema.safeParse(orderId);
 
     if (!orderIdValidation.success) {
       return NextResponse.json(
         {
-          error: 'Invalid order ID',
+          error: "Invalid order ID",
           issues: orderIdValidation.error.issues,
         },
-        { status: 400 }
-      )
+        { status: 400 },
+      );
     }
 
     // Parse and validate request body
-    const body = await req.json()
-    const validation = ReturnRequestSchema.safeParse(body)
+    const body = await req.json();
+    const validation = ReturnRequestSchema.safeParse(body);
 
     if (!validation.success) {
       return NextResponse.json(
         {
-          error: 'Invalid request body',
+          error: "Invalid request body",
           issues: validation.error.issues,
         },
-        { status: 400 }
-      )
+        { status: 400 },
+      );
     }
 
-    const { itemIds, reason, description, images } = validation.data
+    const { itemIds, reason, description, images } = validation.data;
 
     // TODO: Replace with actual database operations
     // Verify order exists and belongs to user
@@ -179,20 +182,20 @@ export async function POST(
       reason,
       description,
       images: images || [],
-      status: 'PENDING',
+      status: "PENDING",
       createdAt: new Date().toISOString(),
-    }
+    };
 
     console.log(
-      `[RETURNS] Created return request ${returnRequest.id} for order ${orderId} by user ${session.user.id}`
-    )
+      `[RETURNS] Created return request ${returnRequest.id} for order ${orderId} by user ${session.user.id}`,
+    );
 
     // TODO: Send notification email to customer and admin
     // await sendReturnRequestEmail(session.user.email, returnRequest)
 
     return NextResponse.json(
       {
-        message: 'Return request submitted successfully',
+        message: "Return request submitted successfully",
         returnRequest: {
           id: returnRequest.id,
           orderId: returnRequest.orderId,
@@ -202,29 +205,23 @@ export async function POST(
           createdAt: returnRequest.createdAt,
         },
       },
-      { status: 201 }
-    )
+      { status: 201 },
+    );
   } catch (error) {
-    console.error('[RETURNS] POST error:', error)
+    console.error("[RETURNS] POST error:", error);
 
     if (error instanceof Error) {
-      if (error.message.includes('not found')) {
-        return NextResponse.json(
-          { error: 'Order not found' },
-          { status: 404 }
-        )
+      if (error.message.includes("not found")) {
+        return NextResponse.json({ error: "Order not found" }, { status: 404 });
       }
-      if (error.message.includes('window')) {
-        return NextResponse.json(
-          { error: error.message },
-          { status: 400 }
-        )
+      if (error.message.includes("window")) {
+        return NextResponse.json({ error: error.message }, { status: 400 });
       }
     }
 
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }

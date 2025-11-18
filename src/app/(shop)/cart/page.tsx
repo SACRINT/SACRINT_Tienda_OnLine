@@ -1,10 +1,10 @@
+"use client";
+
 // Shopping Cart Page
 // Display cart items with quantity control and checkout button
 
-'use client'
-
-import { useState } from 'react'
-import Link from 'next/link'
+import { useState } from "react";
+import Link from "next/link";
 import {
   ShoppingCart,
   Trash2,
@@ -13,99 +13,102 @@ import {
   ArrowRight,
   ShoppingBag,
   Tag,
-} from 'lucide-react'
-import { SwipeableCartItem } from '@/components/cart/SwipeableCartItem'
-import type { CartItem as SwipeableCartItemType } from '@/components/cart/SwipeableCartItem'
+} from "lucide-react";
+import { SwipeableCartItem } from "@/components/cart/SwipeableCartItem";
+import type { CartItem as SwipeableCartItemType } from "@/components/cart/SwipeableCartItem";
 
 interface CartItem {
-  id: string
-  productId: string
-  productName: string
-  productSlug: string
-  productImage?: string
-  price: number
-  quantity: number
-  stock: number
-  variantInfo?: string
+  id: string;
+  productId: string;
+  productName: string;
+  productSlug: string;
+  productImage?: string;
+  price: number;
+  quantity: number;
+  stock: number;
+  variantInfo?: string;
 }
 
 // Mock cart data
 const getMockCartItems = (): CartItem[] => {
   return [
     {
-      id: '1',
-      productId: '1',
-      productName: 'Premium Wireless Headphones',
-      productSlug: 'premium-wireless-headphones',
+      id: "1",
+      productId: "1",
+      productName: "Premium Wireless Headphones",
+      productSlug: "premium-wireless-headphones",
       productImage:
-        'https://images.unsplash.com/photo-1505740420928-5e560c06d30e',
+        "https://images.unsplash.com/photo-1505740420928-5e560c06d30e",
       price: 249.99,
       quantity: 1,
       stock: 45,
     },
     {
-      id: '2',
-      productId: '2',
-      productName: 'Wireless Earbuds Pro',
-      productSlug: 'wireless-earbuds-pro',
+      id: "2",
+      productId: "2",
+      productName: "Wireless Earbuds Pro",
+      productSlug: "wireless-earbuds-pro",
       productImage:
-        'https://images.unsplash.com/photo-1590658268037-6bf12165a8df',
+        "https://images.unsplash.com/photo-1590658268037-6bf12165a8df",
       price: 149.99,
       quantity: 2,
       stock: 120,
-      variantInfo: 'Color: Black',
+      variantInfo: "Color: Black",
     },
-  ]
-}
+  ];
+};
 
 export default function CartPage() {
-  const [cartItems, setCartItems] = useState<CartItem[]>(getMockCartItems())
-  const [couponCode, setCouponCode] = useState('')
+  const [cartItems, setCartItems] = useState<CartItem[]>(getMockCartItems());
+  const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<{
-    code: string
-    discount: number
-  } | null>(null)
+    code: string;
+    discount: number;
+  } | null>(null);
 
   const updateQuantity = (itemId: string, newQuantity: number) => {
     setCartItems((items) =>
       items.map((item) =>
         item.id === itemId
-          ? { ...item, quantity: Math.max(1, Math.min(newQuantity, item.stock)) }
-          : item
-      )
-    )
-  }
+          ? {
+              ...item,
+              quantity: Math.max(1, Math.min(newQuantity, item.stock)),
+            }
+          : item,
+      ),
+    );
+  };
 
   const removeItem = (itemId: string) => {
-    setCartItems((items) => items.filter((item) => item.id !== itemId))
-  }
+    setCartItems((items) => items.filter((item) => item.id !== itemId));
+  };
 
   const applyCoupon = () => {
     // Mock coupon validation
-    if (couponCode.toUpperCase() === 'SAVE10') {
+    if (couponCode.toUpperCase() === "SAVE10") {
       setAppliedCoupon({
         code: couponCode.toUpperCase(),
         discount: subtotal * 0.1,
-      })
-      setCouponCode('')
+      });
+      setCouponCode("");
     } else {
-      alert('Invalid coupon code')
+      alert("Invalid coupon code");
     }
-  }
+  };
 
   const removeCoupon = () => {
-    setAppliedCoupon(null)
-  }
+    setAppliedCoupon(null);
+  };
 
   // Calculations
   const subtotal = cartItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
-    0
-  )
-  const shipping = subtotal > 50 ? 0 : 5.99
-  const tax = subtotal * 0.08 // 8% tax
-  const discount = appliedCoupon?.discount || 0
-  const total = subtotal + shipping + tax - discount
+    0,
+  );
+  const shipping = subtotal > 50 ? 0 : 5.99;
+  const tax = subtotal * 0.08; // 8% tax
+  const discount = appliedCoupon?.discount || 0;
+  const total = subtotal + shipping + tax - discount;
 
   if (cartItems.length === 0) {
     return (
@@ -129,7 +132,7 @@ export default function CartPage() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -137,10 +140,12 @@ export default function CartPage() {
       <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-4 md:mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Shopping Cart</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+            Shopping Cart
+          </h1>
           <p className="mt-2 text-sm md:text-base text-gray-600">
-            {cartItems.length} {cartItems.length === 1 ? 'item' : 'items'} in your
-            cart
+            {cartItems.length} {cartItems.length === 1 ? "item" : "items"} in
+            your cart
           </p>
         </div>
 
@@ -153,12 +158,12 @@ export default function CartPage() {
                 const swipeableItem: SwipeableCartItemType = {
                   id: item.id,
                   name: item.productName,
-                  image: item.productImage || '',
+                  image: item.productImage || "",
                   price: item.price,
                   quantity: item.quantity,
                   stock: item.stock,
                   variant: item.variantInfo,
-                }
+                };
 
                 return (
                   <SwipeableCartItem
@@ -167,7 +172,7 @@ export default function CartPage() {
                     onQuantityChange={updateQuantity}
                     onRemove={removeItem}
                   />
-                )
+                );
               })}
             </div>
 
@@ -302,5 +307,5 @@ export default function CartPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

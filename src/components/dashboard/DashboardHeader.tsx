@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 /**
  * DashboardHeader Component
@@ -12,69 +12,82 @@
  * - Responsive design
  */
 
-import { useState, useRef, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { Search, Bell, User, Settings, LogOut, ChevronDown } from 'lucide-react'
-import { signOut } from 'next-auth/react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { cn } from '@/lib/utils/cn'
+import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import {
+  Search,
+  Bell,
+  User,
+  Settings,
+  LogOut,
+  ChevronDown,
+} from "lucide-react";
+import { signOut } from "next-auth/react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils/cn";
 
 interface DashboardHeaderProps {
   user: {
-    name: string
-    email: string
-    role: string
-    tenantId?: string | null
-  }
-  storeName?: string
-  notificationCount?: number
+    name: string;
+    email: string;
+    role: string;
+    tenantId?: string | null;
+  };
+  storeName?: string;
+  notificationCount?: number;
 }
 
 export default function DashboardHeader({
   user,
-  storeName = 'Mi Tienda',
+  storeName = "Mi Tienda",
   notificationCount = 0,
 }: DashboardHeaderProps) {
-  const router = useRouter()
-  const [searchQuery, setSearchQuery] = useState('')
-  const [userMenuOpen, setUserMenuOpen] = useState(false)
-  const [notificationsOpen, setNotificationsOpen] = useState(false)
-  const userMenuRef = useRef<HTMLDivElement>(null)
-  const notificationsRef = useRef<HTMLDivElement>(null)
+  const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+  const notificationsRef = useRef<HTMLDivElement>(null);
 
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
-        setUserMenuOpen(false)
+      if (
+        userMenuRef.current &&
+        !userMenuRef.current.contains(event.target as Node)
+      ) {
+        setUserMenuOpen(false);
       }
-      if (notificationsRef.current && !notificationsRef.current.contains(event.target as Node)) {
-        setNotificationsOpen(false)
+      if (
+        notificationsRef.current &&
+        !notificationsRef.current.contains(event.target as Node)
+      ) {
+        setNotificationsOpen(false);
       }
-    }
+    };
 
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (searchQuery.trim()) {
       // Navigate to search results page
-      router.push(`/dashboard/search?q=${encodeURIComponent(searchQuery)}`)
-      setSearchQuery('')
+      router.push(`/dashboard/search?q=${encodeURIComponent(searchQuery)}`);
+      setSearchQuery("");
     }
-  }
+  };
 
   const handleLogout = async () => {
-    await signOut({ callbackUrl: '/login' })
-  }
+    await signOut({ callbackUrl: "/login" });
+  };
 
   const getUserInitial = (name: string) => {
-    return name.charAt(0).toUpperCase()
-  }
+    return name.charAt(0).toUpperCase();
+  };
 
   return (
     <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:px-8 sticky top-0 z-30">
@@ -117,7 +130,7 @@ export default function DashboardHeader({
             <Bell className="h-5 w-5" />
             {notificationCount > 0 && (
               <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center font-medium">
-                {notificationCount > 9 ? '9+' : notificationCount}
+                {notificationCount > 9 ? "9+" : notificationCount}
               </span>
             )}
           </Button>
@@ -141,8 +154,12 @@ export default function DashboardHeader({
                     className="block px-4 py-3 hover:bg-gray-50 transition-colors"
                     onClick={() => setNotificationsOpen(false)}
                   >
-                    <p className="text-sm font-medium text-gray-900">Nueva orden recibida</p>
-                    <p className="text-xs text-gray-500 mt-1">Orden #123 - $150.00</p>
+                    <p className="text-sm font-medium text-gray-900">
+                      Nueva orden recibida
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Orden #123 - $150.00
+                    </p>
                     <p className="text-xs text-gray-400 mt-1">Hace 5 minutos</p>
                   </Link>
                 </div>
@@ -179,8 +196,8 @@ export default function DashboardHeader({
             </div>
             <ChevronDown
               className={cn(
-                'h-4 w-4 text-gray-400 transition-transform hidden md:block',
-                userMenuOpen && 'transform rotate-180'
+                "h-4 w-4 text-gray-400 transition-transform hidden md:block",
+                userMenuOpen && "transform rotate-180",
               )}
             />
           </button>
@@ -230,5 +247,5 @@ export default function DashboardHeader({
         </div>
       </div>
     </header>
-  )
+  );
 }

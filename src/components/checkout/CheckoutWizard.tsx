@@ -1,124 +1,128 @@
 // Checkout Wizard Component
 // Multi-step checkout flow with 4 steps
 
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { Check, ChevronLeft, ChevronRight, ShoppingBag } from 'lucide-react'
+import { useState, useEffect } from "react";
+import { Check, ChevronLeft, ChevronRight, ShoppingBag } from "lucide-react";
 
 export interface CheckoutWizardProps {
-  initialStep?: number
-  onComplete?: (data: CheckoutData) => Promise<void>
-  children: React.ReactNode[]
+  initialStep?: number;
+  onComplete?: (data: CheckoutData) => Promise<void>;
+  children: React.ReactNode[];
 }
 
 export interface CheckoutData {
-  shippingAddress?: any
-  shippingMethod?: any
-  paymentMethod?: any
-  orderReview?: any
+  shippingAddress?: any;
+  shippingMethod?: any;
+  paymentMethod?: any;
+  orderReview?: any;
 }
 
 export interface StepConfig {
-  id: string
-  title: string
-  description: string
+  id: string;
+  title: string;
+  description: string;
 }
 
 const STEPS: StepConfig[] = [
   {
-    id: 'shipping',
-    title: 'Shipping Address',
-    description: 'Where should we deliver your order?',
+    id: "shipping",
+    title: "Shipping Address",
+    description: "Where should we deliver your order?",
   },
   {
-    id: 'method',
-    title: 'Shipping Method',
-    description: 'How fast do you need it?',
+    id: "method",
+    title: "Shipping Method",
+    description: "How fast do you need it?",
   },
   {
-    id: 'payment',
-    title: 'Payment',
-    description: 'How would you like to pay?',
+    id: "payment",
+    title: "Payment",
+    description: "How would you like to pay?",
   },
   {
-    id: 'review',
-    title: 'Review Order',
-    description: 'Confirm your order details',
+    id: "review",
+    title: "Review Order",
+    description: "Confirm your order details",
   },
-]
+];
 
 export function CheckoutWizard({
   initialStep = 0,
   onComplete,
   children,
 }: CheckoutWizardProps) {
-  const [currentStep, setCurrentStep] = useState(initialStep)
-  const [checkoutData, setCheckoutData] = useState<CheckoutData>({})
-  const [isProcessing, setIsProcessing] = useState(false)
+  const [currentStep, setCurrentStep] = useState(initialStep);
+  const [checkoutData, setCheckoutData] = useState<CheckoutData>({});
+  const [isProcessing, setIsProcessing] = useState(false);
 
   // Save to localStorage on data change
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('checkoutData', JSON.stringify(checkoutData))
+    if (typeof window !== "undefined") {
+      localStorage.setItem("checkoutData", JSON.stringify(checkoutData));
     }
-  }, [checkoutData])
+  }, [checkoutData]);
 
   // Load from localStorage on mount
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('checkoutData')
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("checkoutData");
       if (saved) {
         try {
-          setCheckoutData(JSON.parse(saved))
+          setCheckoutData(JSON.parse(saved));
         } catch (e) {
-          console.error('Failed to parse saved checkout data:', e)
+          console.error("Failed to parse saved checkout data:", e);
         }
       }
     }
-  }, [])
+  }, []);
 
   const updateCheckoutData = (stepData: Partial<CheckoutData>) => {
-    setCheckoutData((prev) => ({ ...prev, ...stepData }))
-  }
+    setCheckoutData((prev) => ({ ...prev, ...stepData }));
+  };
 
   const goToNextStep = () => {
     if (currentStep < STEPS.length - 1) {
-      setCurrentStep(currentStep + 1)
-      window.scrollTo({ top: 0, behavior: 'smooth' })
+      setCurrentStep(currentStep + 1);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
-  }
+  };
 
   const goToPreviousStep = () => {
     if (currentStep > 0) {
-      setCurrentStep(currentStep - 1)
-      window.scrollTo({ top: 0, behavior: 'smooth' })
+      setCurrentStep(currentStep - 1);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
-  }
+  };
 
   const goToStep = (stepIndex: number) => {
-    if (stepIndex >= 0 && stepIndex < STEPS.length && stepIndex <= currentStep) {
-      setCurrentStep(stepIndex)
-      window.scrollTo({ top: 0, behavior: 'smooth' })
+    if (
+      stepIndex >= 0 &&
+      stepIndex < STEPS.length &&
+      stepIndex <= currentStep
+    ) {
+      setCurrentStep(stepIndex);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
-  }
+  };
 
   const handleComplete = async () => {
-    setIsProcessing(true)
+    setIsProcessing(true);
     try {
-      await onComplete?.(checkoutData)
+      await onComplete?.(checkoutData);
       // Clear saved data on successful completion
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('checkoutData')
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("checkoutData");
       }
     } catch (error) {
-      console.error('Checkout failed:', error)
+      console.error("Checkout failed:", error);
     } finally {
-      setIsProcessing(false)
+      setIsProcessing(false);
     }
-  }
+  };
 
-  const isLastStep = currentStep === STEPS.length - 1
+  const isLastStep = currentStep === STEPS.length - 1;
 
   return (
     <div className="min-h-screen bg-gray-50 py-4 md:py-8">
@@ -127,7 +131,9 @@ export function CheckoutWizard({
         <div className="mb-4 md:mb-8 text-center">
           <div className="mb-2 md:mb-4 flex items-center justify-center gap-2 md:gap-3">
             <ShoppingBag className="h-6 w-6 md:h-8 md:w-8 text-blue-600" />
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Checkout</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+              Checkout
+            </h1>
           </div>
           <p className="text-sm md:text-base text-gray-600">
             Complete your purchase in {STEPS.length} easy steps
@@ -144,22 +150,26 @@ export function CheckoutWizard({
                   onClick={() => goToStep(index)}
                   disabled={index > currentStep}
                   className={`group relative flex items-center justify-center touch-manipulation ${
-                    index <= currentStep ? 'cursor-pointer' : 'cursor-not-allowed'
+                    index <= currentStep
+                      ? "cursor-pointer"
+                      : "cursor-not-allowed"
                   }`}
                 >
                   <div
                     className={`flex h-8 w-8 md:h-12 md:w-12 items-center justify-center rounded-full border-2 transition-all active:scale-95 ${
                       index < currentStep
-                        ? 'border-green-500 bg-green-500 text-white'
+                        ? "border-green-500 bg-green-500 text-white"
                         : index === currentStep
-                          ? 'border-blue-600 bg-blue-600 text-white'
-                          : 'border-gray-300 bg-white text-gray-400'
+                          ? "border-blue-600 bg-blue-600 text-white"
+                          : "border-gray-300 bg-white text-gray-400"
                     }`}
                   >
                     {index < currentStep ? (
                       <Check className="h-4 w-4 md:h-6 md:w-6" />
                     ) : (
-                      <span className="text-sm md:text-base font-semibold">{index + 1}</span>
+                      <span className="text-sm md:text-base font-semibold">
+                        {index + 1}
+                      </span>
                     )}
                   </div>
 
@@ -167,12 +177,14 @@ export function CheckoutWizard({
                   <div className="absolute top-12 md:top-14 hidden w-32 flex-col items-center md:flex">
                     <p
                       className={`text-sm font-medium ${
-                        index <= currentStep ? 'text-gray-900' : 'text-gray-500'
+                        index <= currentStep ? "text-gray-900" : "text-gray-500"
                       }`}
                     >
                       {step.title}
                     </p>
-                    <p className="mt-1 text-xs text-gray-500">{step.description}</p>
+                    <p className="mt-1 text-xs text-gray-500">
+                      {step.description}
+                    </p>
                   </div>
                 </button>
 
@@ -180,7 +192,7 @@ export function CheckoutWizard({
                 {index < STEPS.length - 1 && (
                   <div
                     className={`h-0.5 md:h-1 flex-1 transition-all ${
-                      index < currentStep ? 'bg-green-500' : 'bg-gray-300'
+                      index < currentStep ? "bg-green-500" : "bg-gray-300"
                     }`}
                   />
                 )}
@@ -269,8 +281,8 @@ export function CheckoutWizard({
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 // Export step configuration for use in other components
-export { STEPS }
+export { STEPS };

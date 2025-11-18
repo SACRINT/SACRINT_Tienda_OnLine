@@ -1,4 +1,10 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 export default function DashboardPage() {
   // TODO: Obtener datos reales cuando el backend esté listo
@@ -7,7 +13,7 @@ export default function DashboardPage() {
     totalRevenue: 0,
     totalProducts: 0,
     totalCustomers: 0,
-  }
+  };
 
   return (
     <div className="space-y-8">
@@ -80,9 +86,7 @@ export default function DashboardPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Productos
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Productos</CardTitle>
             <svg
               className="h-4 w-4 text-gray-600"
               fill="none"
@@ -107,9 +111,7 @@ export default function DashboardPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Clientes
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Clientes</CardTitle>
             <svg
               className="h-4 w-4 text-gray-600"
               fill="none"
@@ -137,9 +139,7 @@ export default function DashboardPage() {
       <Card>
         <CardHeader>
           <CardTitle>Acciones Rápidas</CardTitle>
-          <CardDescription>
-            Comienza a gestionar tu tienda
-          </CardDescription>
+          <CardDescription>Comienza a gestionar tu tienda</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-3">
           <button className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary transition-colors">
@@ -201,5 +201,5 @@ export default function DashboardPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

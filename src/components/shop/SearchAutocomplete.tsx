@@ -1,29 +1,29 @@
 // Search Autocomplete Component
 // Real-time search with autocomplete suggestions
 
-'use client'
-import Image from 'next/image'
+"use client";
+import Image from "next/image";
 
-import { useState, useEffect, useRef } from 'react'
-import { Search, X, TrendingUp, Clock } from 'lucide-react'
-import Link from 'next/link'
+import { useState, useEffect, useRef } from "react";
+import { Search, X, TrendingUp, Clock } from "lucide-react";
+import Link from "next/link";
 
 export interface SearchSuggestion {
-  id: string
-  name: string
-  slug: string
-  price: number
-  image?: string
-  category?: string
+  id: string;
+  name: string;
+  slug: string;
+  price: number;
+  image?: string;
+  category?: string;
 }
 
 export interface SearchAutocompleteProps {
-  onSearch?: (query: string) => void
-  onSuggestionsFetch?: (query: string) => Promise<SearchSuggestion[]>
-  recentSearches?: string[]
-  trendingSearches?: string[]
-  placeholder?: string
-  className?: string
+  onSearch?: (query: string) => void;
+  onSuggestionsFetch?: (query: string) => Promise<SearchSuggestion[]>;
+  recentSearches?: string[];
+  trendingSearches?: string[];
+  placeholder?: string;
+  className?: string;
 }
 
 export function SearchAutocomplete({
@@ -31,42 +31,42 @@ export function SearchAutocomplete({
   onSuggestionsFetch,
   recentSearches = [],
   trendingSearches = [],
-  placeholder = 'Search products...',
-  className = '',
+  placeholder = "Search products...",
+  className = "",
 }: SearchAutocompleteProps) {
-  const [query, setQuery] = useState('')
-  const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([])
-  const [isOpen, setIsOpen] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [selectedIndex, setSelectedIndex] = useState(-1)
-  const inputRef = useRef<HTMLInputElement>(null)
-  const dropdownRef = useRef<HTMLDivElement>(null)
+  const [query, setQuery] = useState("");
+  const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
+  const [isOpen, setIsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Fetch suggestions when query changes
   useEffect(() => {
     const fetchSuggestions = async () => {
       if (query.length < 2) {
-        setSuggestions([])
-        return
+        setSuggestions([]);
+        return;
       }
 
-      setIsLoading(true)
+      setIsLoading(true);
       try {
         if (onSuggestionsFetch) {
-          const results = await onSuggestionsFetch(query)
-          setSuggestions(results)
+          const results = await onSuggestionsFetch(query);
+          setSuggestions(results);
         }
       } catch (error) {
-        console.error('Error fetching suggestions:', error)
-        setSuggestions([])
+        console.error("Error fetching suggestions:", error);
+        setSuggestions([]);
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
+    };
 
-    const debounceTimer = setTimeout(fetchSuggestions, 300)
-    return () => clearTimeout(debounceTimer)
-  }, [query, onSuggestionsFetch])
+    const debounceTimer = setTimeout(fetchSuggestions, 300);
+    return () => clearTimeout(debounceTimer);
+  }, [query, onSuggestionsFetch]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -76,51 +76,55 @@ export function SearchAutocomplete({
         !dropdownRef.current.contains(event.target as Node) &&
         !inputRef.current?.contains(event.target as Node)
       ) {
-        setIsOpen(false)
+        setIsOpen(false);
       }
-    }
+    };
 
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (query.trim()) {
-      onSearch?.(query)
-      setIsOpen(false)
-      inputRef.current?.blur()
+      onSearch?.(query);
+      setIsOpen(false);
+      inputRef.current?.blur();
     }
-  }
+  };
 
   const handleClear = () => {
-    setQuery('')
-    setSuggestions([])
-    setIsOpen(false)
-    inputRef.current?.focus()
-  }
+    setQuery("");
+    setSuggestions([]);
+    setIsOpen(false);
+    inputRef.current?.focus();
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (!isOpen) return
+    if (!isOpen) return;
 
-    if (e.key === 'ArrowDown') {
-      e.preventDefault()
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
       setSelectedIndex((prev) =>
-        prev < suggestions.length - 1 ? prev + 1 : prev
-      )
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault()
-      setSelectedIndex((prev) => (prev > 0 ? prev - 1 : -1))
-    } else if (e.key === 'Enter' && selectedIndex >= 0) {
-      e.preventDefault()
-      const suggestion = suggestions[selectedIndex]
-      window.location.href = `/shop/products/${suggestion.slug}`
-    } else if (e.key === 'Escape') {
-      setIsOpen(false)
+        prev < suggestions.length - 1 ? prev + 1 : prev,
+      );
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setSelectedIndex((prev) => (prev > 0 ? prev - 1 : -1));
+    } else if (e.key === "Enter" && selectedIndex >= 0) {
+      e.preventDefault();
+      const suggestion = suggestions[selectedIndex];
+      window.location.href = `/shop/products/${suggestion.slug}`;
+    } else if (e.key === "Escape") {
+      setIsOpen(false);
     }
-  }
+  };
 
-  const showDropdown = isOpen && (query.length >= 2 || recentSearches.length > 0 || trendingSearches.length > 0)
+  const showDropdown =
+    isOpen &&
+    (query.length >= 2 ||
+      recentSearches.length > 0 ||
+      trendingSearches.length > 0);
 
   return (
     <div className={`relative w-full ${className}`}>
@@ -172,9 +176,7 @@ export function SearchAutocomplete({
                   key={suggestion.id}
                   href={`/shop/products/${suggestion.slug}`}
                   className={`flex items-center gap-4 border-b border-gray-100 p-4 transition-colors last:border-0 ${
-                    index === selectedIndex
-                      ? 'bg-blue-50'
-                      : 'hover:bg-gray-50'
+                    index === selectedIndex ? "bg-blue-50" : "hover:bg-gray-50"
                   }`}
                   onClick={() => setIsOpen(false)}
                 >
@@ -222,8 +224,8 @@ export function SearchAutocomplete({
                   <button
                     key={index}
                     onClick={() => {
-                      setQuery(search)
-                      onSearch?.(search)
+                      setQuery(search);
+                      onSearch?.(search);
                     }}
                     className="block w-full rounded-lg px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
                   >
@@ -246,8 +248,8 @@ export function SearchAutocomplete({
                   <button
                     key={index}
                     onClick={() => {
-                      setQuery(search)
-                      onSearch?.(search)
+                      setQuery(search);
+                      onSearch?.(search);
                     }}
                     className="rounded-full bg-gray-100 px-4 py-1.5 text-sm text-gray-700 hover:bg-gray-200"
                   >
@@ -260,5 +262,5 @@ export function SearchAutocomplete({
         </div>
       )}
     </div>
-  )
+  );
 }

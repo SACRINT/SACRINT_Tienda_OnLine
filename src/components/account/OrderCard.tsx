@@ -1,11 +1,11 @@
 // Order Card Component
 // Display order summary with status, items, and actions
 
-'use client'
-import Image from 'next/image'
+"use client";
+import Image from "next/image";
 
-import { useState } from 'react'
-import Link from 'next/link'
+import { useState } from "react";
+import Link from "next/link";
 import {
   Package,
   Truck,
@@ -16,107 +16,107 @@ import {
   ChevronDown,
   ChevronUp,
   Eye,
-} from 'lucide-react'
+} from "lucide-react";
 
 export interface OrderItem {
-  id: string
-  productId: string
-  productName: string
-  productImage?: string
-  quantity: number
-  price: number
-  variantInfo?: string
+  id: string;
+  productId: string;
+  productName: string;
+  productImage?: string;
+  quantity: number;
+  price: number;
+  variantInfo?: string;
 }
 
 export interface Order {
-  id: string
-  orderNumber: string
-  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
-  createdAt: string
-  items: OrderItem[]
-  subtotal: number
-  shipping: number
-  tax: number
-  discount?: number
-  total: number
+  id: string;
+  orderNumber: string;
+  status: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
+  createdAt: string;
+  items: OrderItem[];
+  subtotal: number;
+  shipping: number;
+  tax: number;
+  discount?: number;
+  total: number;
   shippingAddress: {
-    fullName: string
-    addressLine1: string
-    city: string
-    state: string
-    postalCode: string
-  }
-  trackingNumber?: string
-  estimatedDelivery?: string
+    fullName: string;
+    addressLine1: string;
+    city: string;
+    state: string;
+    postalCode: string;
+  };
+  trackingNumber?: string;
+  estimatedDelivery?: string;
 }
 
 export interface OrderCardProps {
-  order: Order
-  onViewDetails?: (orderId: string) => void
-  onDownloadInvoice?: (orderId: string) => void
-  onRequestReturn?: (orderId: string) => void
-  variant?: 'compact' | 'expanded'
+  order: Order;
+  onViewDetails?: (orderId: string) => void;
+  onDownloadInvoice?: (orderId: string) => void;
+  onRequestReturn?: (orderId: string) => void;
+  variant?: "compact" | "expanded";
 }
 
 const STATUS_CONFIG = {
   pending: {
-    label: 'Pending',
+    label: "Pending",
     icon: Clock,
-    color: 'text-yellow-600',
-    bgColor: 'bg-yellow-50',
-    borderColor: 'border-yellow-200',
+    color: "text-yellow-600",
+    bgColor: "bg-yellow-50",
+    borderColor: "border-yellow-200",
   },
   processing: {
-    label: 'Processing',
+    label: "Processing",
     icon: Package,
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-50',
-    borderColor: 'border-blue-200',
+    color: "text-blue-600",
+    bgColor: "bg-blue-50",
+    borderColor: "border-blue-200",
   },
   shipped: {
-    label: 'Shipped',
+    label: "Shipped",
     icon: Truck,
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-50',
-    borderColor: 'border-purple-200',
+    color: "text-purple-600",
+    bgColor: "bg-purple-50",
+    borderColor: "border-purple-200",
   },
   delivered: {
-    label: 'Delivered',
+    label: "Delivered",
     icon: CheckCircle,
-    color: 'text-green-600',
-    bgColor: 'bg-green-50',
-    borderColor: 'border-green-200',
+    color: "text-green-600",
+    bgColor: "bg-green-50",
+    borderColor: "border-green-200",
   },
   cancelled: {
-    label: 'Cancelled',
+    label: "Cancelled",
     icon: XCircle,
-    color: 'text-red-600',
-    bgColor: 'bg-red-50',
-    borderColor: 'border-red-200',
+    color: "text-red-600",
+    bgColor: "bg-red-50",
+    borderColor: "border-red-200",
   },
-}
+};
 
 export function OrderCard({
   order,
   onViewDetails,
   onDownloadInvoice,
   onRequestReturn,
-  variant = 'compact',
+  variant = "compact",
 }: OrderCardProps) {
-  const [isExpanded, setIsExpanded] = useState(variant === 'expanded')
-  const statusConfig = STATUS_CONFIG[order.status]
-  const StatusIcon = statusConfig.icon
+  const [isExpanded, setIsExpanded] = useState(variant === "expanded");
+  const statusConfig = STATUS_CONFIG[order.status];
+  const StatusIcon = statusConfig.icon;
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    })
-  }
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
 
-  const canRequestReturn = order.status === 'delivered'
-  const canTrack = order.status === 'shipped' && order.trackingNumber
+  const canRequestReturn = order.status === "delivered";
+  const canTrack = order.status === "shipped" && order.trackingNumber;
 
   return (
     <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
@@ -154,7 +154,7 @@ export function OrderCard({
             <button
               onClick={() => setIsExpanded(!isExpanded)}
               className="rounded-lg border border-gray-300 p-2 text-gray-600 hover:bg-gray-100"
-              aria-label={isExpanded ? 'Collapse' : 'Expand'}
+              aria-label={isExpanded ? "Collapse" : "Expand"}
             >
               {isExpanded ? (
                 <ChevronUp className="h-5 w-5" />
@@ -286,7 +286,7 @@ export function OrderCard({
               </p>
               <p>{order.shippingAddress.addressLine1}</p>
               <p>
-                {order.shippingAddress.city}, {order.shippingAddress.state}{' '}
+                {order.shippingAddress.city}, {order.shippingAddress.state}{" "}
                 {order.shippingAddress.postalCode}
               </p>
             </div>
@@ -325,7 +325,7 @@ export function OrderCard({
         {!isExpanded && (
           <div className="ml-auto text-right">
             <p className="text-sm text-gray-600">
-              {order.items.length} item{order.items.length !== 1 ? 's' : ''}
+              {order.items.length} item{order.items.length !== 1 ? "s" : ""}
             </p>
             <p className="font-semibold text-gray-900">
               ${order.total.toFixed(2)}
@@ -334,5 +334,5 @@ export function OrderCard({
         )}
       </div>
     </div>
-  )
+  );
 }

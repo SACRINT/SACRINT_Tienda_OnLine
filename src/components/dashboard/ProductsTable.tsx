@@ -1,152 +1,158 @@
-'use client'
+"use client";
 
-import Image from 'next/image'
-import Link from 'next/link'
-import { useState } from 'react'
-import { useSession } from 'next-auth/react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Checkbox } from '@/components/ui/checkbox'
-import { BulkActions, PRODUCT_BULK_ACTIONS } from '@/components/admin/BulkActions'
-import { AdvancedFilters, PRODUCT_FILTERS } from '@/components/admin/AdvancedFilters'
-import { QuickEdit } from '@/components/admin/QuickEdit'
-import { formatCurrency } from '@/lib/analytics/types'
+import Image from "next/image";
+import Link from "next/link";
+import { useState } from "react";
+import { useSession } from "next-auth/react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  BulkActions,
+  PRODUCT_BULK_ACTIONS,
+} from "@/components/admin/BulkActions";
+import {
+  AdvancedFilters,
+  PRODUCT_FILTERS,
+} from "@/components/admin/AdvancedFilters";
+import { QuickEdit } from "@/components/admin/QuickEdit";
+import { formatCurrency } from "@/lib/analytics/types";
 
 interface Product {
-  id: string
-  name: string
-  sku: string | null
-  basePrice: number | any
-  salePrice?: number | any | null
-  stock: number
-  published: boolean
-  featured?: boolean
-  images: { url: string }[]
-  category: { name: string } | null
+  id: string;
+  name: string;
+  sku: string | null;
+  basePrice: number | any;
+  salePrice?: number | any | null;
+  stock: number;
+  published: boolean;
+  featured?: boolean;
+  images: { url: string }[];
+  category: { name: string } | null;
 }
 
 interface ProductsTableProps {
-  products: Product[]
-  currentPage: number
+  products: Product[];
+  currentPage: number;
 }
 
 export function ProductsTable({ products, currentPage }: ProductsTableProps) {
-  const { data: session } = useSession()
-  const [search, setSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState<string>('all')
-  const [selectedProducts, setSelectedProducts] = useState<string[]>([])
-  const [filterValues, setFilterValues] = useState<Record<string, any>>({})
+  const { data: session } = useSession();
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
+  const [filterValues, setFilterValues] = useState<Record<string, any>>({});
 
   const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
-    const params = new URLSearchParams(window.location.search)
+    e.preventDefault();
+    const params = new URLSearchParams(window.location.search);
     if (search) {
-      params.set('search', search)
+      params.set("search", search);
     } else {
-      params.delete('search')
+      params.delete("search");
     }
-    params.set('page', '1')
-    window.location.href = `?${params.toString()}`
-  }
+    params.set("page", "1");
+    window.location.href = `?${params.toString()}`;
+  };
 
   const handleStatusFilter = (status: string) => {
-    const params = new URLSearchParams(window.location.search)
-    if (status !== 'all') {
-      params.set('status', status)
+    const params = new URLSearchParams(window.location.search);
+    if (status !== "all") {
+      params.set("status", status);
     } else {
-      params.delete('status')
+      params.delete("status");
     }
-    params.set('page', '1')
-    window.location.href = `?${params.toString()}`
-  }
+    params.set("page", "1");
+    window.location.href = `?${params.toString()}`;
+  };
 
   const handleDelete = async (productId: string) => {
-    if (!confirm('¿Estás seguro de eliminar este producto?')) return
+    if (!confirm("¿Estás seguro de eliminar este producto?")) return;
 
     try {
       const res = await fetch(`/api/products/${productId}`, {
-        method: 'DELETE',
-      })
+        method: "DELETE",
+      });
 
       if (res.ok) {
-        window.location.reload()
+        window.location.reload();
       } else {
-        alert('Error al eliminar el producto')
+        alert("Error al eliminar el producto");
       }
     } catch (error) {
-      alert('Error al eliminar el producto')
+      alert("Error al eliminar el producto");
     }
-  }
+  };
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedProducts(products.map((p) => p.id))
+      setSelectedProducts(products.map((p) => p.id));
     } else {
-      setSelectedProducts([])
+      setSelectedProducts([]);
     }
-  }
+  };
 
   const handleSelectProduct = (productId: string, checked: boolean) => {
     if (checked) {
-      setSelectedProducts([...selectedProducts, productId])
+      setSelectedProducts([...selectedProducts, productId]);
     } else {
-      setSelectedProducts(selectedProducts.filter((id) => id !== productId))
+      setSelectedProducts(selectedProducts.filter((id) => id !== productId));
     }
-  }
+  };
 
   const handleBulkAction = async (actionId: string, value?: any) => {
-    if (!session?.user?.tenantId) return
+    if (!session?.user?.tenantId) return;
 
     try {
-      const res = await fetch('/api/products/bulk', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/products/bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           tenantId: session.user.tenantId,
           productIds: selectedProducts,
           operation: actionId,
           value,
         }),
-      })
+      });
 
       if (res.ok) {
-        setSelectedProducts([])
-        window.location.reload()
+        setSelectedProducts([]);
+        window.location.reload();
       } else {
-        alert('Error en la operación masiva')
+        alert("Error en la operación masiva");
       }
     } catch (error) {
-      alert('Error en la operación masiva')
+      alert("Error en la operación masiva");
     }
-  }
+  };
 
   const handleClearSelection = () => {
-    setSelectedProducts([])
-  }
+    setSelectedProducts([]);
+  };
 
   const handleFilterChange = (newFilters: Record<string, any>) => {
-    setFilterValues(newFilters)
+    setFilterValues(newFilters);
     // Apply filters to URL
-    const params = new URLSearchParams(window.location.search)
+    const params = new URLSearchParams(window.location.search);
     Object.entries(newFilters).forEach(([key, value]) => {
-      if (value !== null && value !== undefined && value !== '') {
-        params.set(key, value)
+      if (value !== null && value !== undefined && value !== "") {
+        params.set(key, value);
       } else {
-        params.delete(key)
+        params.delete(key);
       }
-    })
-    params.set('page', '1')
-    window.location.href = `?${params.toString()}`
-  }
+    });
+    params.set("page", "1");
+    window.location.href = `?${params.toString()}`;
+  };
 
   const handleClearFilters = () => {
-    setFilterValues({})
-    window.location.href = window.location.pathname
-  }
+    setFilterValues({});
+    window.location.href = window.location.pathname;
+  };
 
   const handleQuickEditSuccess = () => {
-    window.location.reload()
-  }
+    window.location.reload();
+  };
 
   return (
     <div className="space-y-4">
@@ -175,7 +181,10 @@ export function ProductsTable({ products, currentPage }: ProductsTableProps) {
             <tr>
               <th className="px-4 py-3 text-left">
                 <Checkbox
-                  checked={selectedProducts.length === products.length && products.length > 0}
+                  checked={
+                    selectedProducts.length === products.length &&
+                    products.length > 0
+                  }
                   onCheckedChange={handleSelectAll}
                 />
               </th>
@@ -211,11 +220,11 @@ export function ProductsTable({ products, currentPage }: ProductsTableProps) {
               </tr>
             ) : (
               products.map((product) => {
-                const isSelected = selectedProducts.includes(product.id)
+                const isSelected = selectedProducts.includes(product.id);
                 return (
                   <tr
                     key={product.id}
-                    className={`hover:bg-gray-50 ${isSelected ? 'bg-blue-50' : ''}`}
+                    className={`hover:bg-gray-50 ${isSelected ? "bg-blue-50" : ""}`}
                   >
                     <td className="px-4 py-4">
                       <Checkbox
@@ -242,10 +251,10 @@ export function ProductsTable({ products, currentPage }: ProductsTableProps) {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {product.sku || '-'}
+                      {product.sku || "-"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {product.category?.name || '-'}
+                      {product.category?.name || "-"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {session?.user?.tenantId ? (
@@ -277,11 +286,11 @@ export function ProductsTable({ products, currentPage }: ProductsTableProps) {
                       <span
                         className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                           product.published
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-red-100 text-red-800'
+                            ? "bg-green-100 text-green-800"
+                            : "bg-red-100 text-red-800"
                         }`}
                       >
-                        {product.published ? 'Publicado' : 'Borrador'}
+                        {product.published ? "Publicado" : "Borrador"}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
@@ -299,7 +308,7 @@ export function ProductsTable({ products, currentPage }: ProductsTableProps) {
                       </button>
                     </td>
                   </tr>
-                )
+                );
               })
             )}
           </tbody>
@@ -308,9 +317,7 @@ export function ProductsTable({ products, currentPage }: ProductsTableProps) {
 
       {/* Pagination */}
       <div className="flex items-center justify-between">
-        <p className="text-sm text-gray-700">
-          Página {currentPage}
-        </p>
+        <p className="text-sm text-gray-700">Página {currentPage}</p>
         <div className="flex gap-2">
           {currentPage > 1 && (
             <Link href={`?page=${currentPage - 1}`}>
@@ -329,5 +336,5 @@ export function ProductsTable({ products, currentPage }: ProductsTableProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }

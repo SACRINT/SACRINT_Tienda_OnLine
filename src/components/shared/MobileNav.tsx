@@ -1,8 +1,8 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   Home,
   ShoppingBag,
@@ -16,116 +16,116 @@ import {
   Settings,
   LogOut,
   ChevronRight,
-} from 'lucide-react'
-import { cn } from '@/lib/utils'
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface NavItem {
-  label: string
-  href: string
-  icon: React.ComponentType<{ className?: string }>
+  label: string;
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
 }
 
 const bottomNavItems: NavItem[] = [
-  { label: 'Home', href: '/', icon: Home },
-  { label: 'Shop', href: '/shop', icon: ShoppingBag },
-  { label: 'Wishlist', href: '/account/wishlist', icon: Heart },
-  { label: 'Cart', href: '/cart', icon: ShoppingCart },
-  { label: 'Account', href: '/account', icon: User },
-]
+  { label: "Home", href: "/", icon: Home },
+  { label: "Shop", href: "/shop", icon: ShoppingBag },
+  { label: "Wishlist", href: "/account/wishlist", icon: Heart },
+  { label: "Cart", href: "/cart", icon: ShoppingCart },
+  { label: "Account", href: "/account", icon: User },
+];
 
 const menuItems = [
-  { label: 'Home', href: '/', icon: Home },
-  { label: 'Shop', href: '/shop', icon: ShoppingBag },
-  { label: 'My Orders', href: '/account/orders', icon: Package },
-  { label: 'Wishlist', href: '/account/wishlist', icon: Heart },
-  { label: 'Cart', href: '/cart', icon: ShoppingCart },
-  { label: 'Account', href: '/account', icon: User },
-  { label: 'Settings', href: '/account/settings', icon: Settings },
-]
+  { label: "Home", href: "/", icon: Home },
+  { label: "Shop", href: "/shop", icon: ShoppingBag },
+  { label: "My Orders", href: "/account/orders", icon: Package },
+  { label: "Wishlist", href: "/account/wishlist", icon: Heart },
+  { label: "Cart", href: "/cart", icon: ShoppingCart },
+  { label: "Account", href: "/account", icon: User },
+  { label: "Settings", href: "/account/settings", icon: Settings },
+];
 
 export function MobileBottomNav() {
-  const pathname = usePathname()
-  const [cartCount, setCartCount] = useState(0)
+  const pathname = usePathname();
+  const [cartCount, setCartCount] = useState(0);
 
   useEffect(() => {
     // Get cart count from localStorage or context
     const updateCartCount = () => {
-      const cart = localStorage.getItem('cart')
+      const cart = localStorage.getItem("cart");
       if (cart) {
-        const items = JSON.parse(cart)
-        setCartCount(items.length || 0)
+        const items = JSON.parse(cart);
+        setCartCount(items.length || 0);
       }
-    }
+    };
 
-    updateCartCount()
+    updateCartCount();
 
     // Listen for cart updates
-    window.addEventListener('storage', updateCartCount)
-    window.addEventListener('cart-updated', updateCartCount)
+    window.addEventListener("storage", updateCartCount);
+    window.addEventListener("cart-updated", updateCartCount);
 
     return () => {
-      window.removeEventListener('storage', updateCartCount)
-      window.removeEventListener('cart-updated', updateCartCount)
-    }
-  }, [])
+      window.removeEventListener("storage", updateCartCount);
+      window.removeEventListener("cart-updated", updateCartCount);
+    };
+  }, []);
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40 safe-area-inset-bottom">
       <div className="grid grid-cols-5 h-16">
         {bottomNavItems.map((item) => {
-          const Icon = item.icon
-          const isActive = pathname === item.href
-          const isCart = item.href === '/cart'
+          const Icon = item.icon;
+          const isActive = pathname === item.href;
+          const isCart = item.href === "/cart";
 
           return (
             <Link
               key={item.href}
               href={item.href}
               className={cn(
-                'flex flex-col items-center justify-center gap-1 transition-colors relative',
+                "flex flex-col items-center justify-center gap-1 transition-colors relative",
                 isActive
-                  ? 'text-blue-600'
-                  : 'text-gray-600 hover:text-gray-900 active:text-blue-600'
+                  ? "text-blue-600"
+                  : "text-gray-600 hover:text-gray-900 active:text-blue-600",
               )}
             >
               <div className="relative">
                 <Icon className="h-5 w-5" />
                 {isCart && cartCount > 0 && (
                   <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold">
-                    {cartCount > 9 ? '9+' : cartCount}
+                    {cartCount > 9 ? "9+" : cartCount}
                   </span>
                 )}
               </div>
               <span className="text-xs font-medium">{item.label}</span>
             </Link>
-          )
+          );
         })}
       </div>
     </nav>
-  )
+  );
 }
 
 export function MobileHamburgerMenu() {
-  const [isOpen, setIsOpen] = useState(false)
-  const pathname = usePathname()
+  const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
 
   // Close menu when route changes
   useEffect(() => {
-    setIsOpen(false)
-  }, [pathname])
+    setIsOpen(false);
+  }, [pathname]);
 
   // Prevent body scroll when menu is open
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden'
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = 'unset'
+      document.body.style.overflow = "unset";
     }
 
     return () => {
-      document.body.style.overflow = 'unset'
-    }
-  }, [isOpen])
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen]);
 
   return (
     <>
@@ -149,8 +149,8 @@ export function MobileHamburgerMenu() {
       {/* Slide-out Menu */}
       <div
         className={cn(
-          'fixed top-0 left-0 h-full w-80 max-w-[85vw] bg-white z-50 transform transition-transform duration-300 ease-in-out md:hidden',
-          isOpen ? 'translate-x-0' : '-translate-x-full'
+          "fixed top-0 left-0 h-full w-80 max-w-[85vw] bg-white z-50 transform transition-transform duration-300 ease-in-out md:hidden",
+          isOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
         {/* Header */}
@@ -181,16 +181,16 @@ export function MobileHamburgerMenu() {
         <nav className="flex-1 overflow-y-auto">
           <ul className="py-2">
             {menuItems.map((item) => {
-              const Icon = item.icon
-              const isActive = pathname === item.href
+              const Icon = item.icon;
+              const isActive = pathname === item.href;
 
               return (
                 <li key={item.href}>
                   <Link
                     href={item.href}
                     className={cn(
-                      'flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition-colors',
-                      isActive && 'bg-blue-50 text-blue-600'
+                      "flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition-colors",
+                      isActive && "bg-blue-50 text-blue-600",
                     )}
                   >
                     <div className="flex items-center gap-3">
@@ -200,7 +200,7 @@ export function MobileHamburgerMenu() {
                     <ChevronRight className="h-5 w-5 text-gray-400" />
                   </Link>
                 </li>
-              )
+              );
             })}
           </ul>
         </nav>
@@ -214,5 +214,5 @@ export function MobileHamburgerMenu() {
         </div>
       </div>
     </>
-  )
+  );
 }

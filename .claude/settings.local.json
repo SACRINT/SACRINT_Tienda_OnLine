@@ -8,7 +8,11 @@
       "Bash(git pull:*)",
       "Bash(git merge:*)",
       "Bash(git fetch:*)",
-      "Bash(npx prisma generate:*)"
+      "Bash(npx prisma generate:*)",
+      "Bash(npm run build:*)",
+      "Bash(findstr:*)",
+      "Bash(git add:*)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []

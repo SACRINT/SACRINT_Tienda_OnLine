@@ -1,32 +1,39 @@
 // Filter Sidebar Component
 // Advanced filtering for products (price, category, rating, availability)
 
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { X, ChevronDown, ChevronUp, DollarSign, Star, Package } from 'lucide-react'
+import { useState, useEffect } from "react";
+import {
+  X,
+  ChevronDown,
+  ChevronUp,
+  DollarSign,
+  Star,
+  Package,
+} from "lucide-react";
 
 export interface FilterOptions {
-  categories?: { id: string; name: string; count: number }[]
-  priceRange?: { min: number; max: number }
-  ratings?: number[]
+  categories?: { id: string; name: string; count: number }[];
+  priceRange?: { min: number; max: number };
+  ratings?: number[];
 }
 
 export interface ActiveFilters {
-  categories: string[]
-  priceMin?: number
-  priceMax?: number
-  minRating?: number
-  inStock?: boolean
-  onSale?: boolean
+  categories: string[];
+  priceMin?: number;
+  priceMax?: number;
+  minRating?: number;
+  inStock?: boolean;
+  onSale?: boolean;
 }
 
 export interface FilterSidebarProps {
-  options: FilterOptions
-  activeFilters: ActiveFilters
-  onFilterChange: (filters: ActiveFilters) => void
-  onClearAll?: () => void
-  className?: string
+  options: FilterOptions;
+  activeFilters: ActiveFilters;
+  onFilterChange: (filters: ActiveFilters) => void;
+  onClearAll?: () => void;
+  className?: string;
 }
 
 export function FilterSidebar({
@@ -34,76 +41,77 @@ export function FilterSidebar({
   activeFilters,
   onFilterChange,
   onClearAll,
-  className = '',
+  className = "",
 }: FilterSidebarProps) {
   const [expandedSections, setExpandedSections] = useState({
     categories: true,
     price: true,
     rating: true,
     availability: true,
-  })
+  });
 
   const [localPriceMin, setLocalPriceMin] = useState(
-    activeFilters.priceMin?.toString() || ''
-  )
+    activeFilters.priceMin?.toString() || "",
+  );
   const [localPriceMax, setLocalPriceMax] = useState(
-    activeFilters.priceMax?.toString() || ''
-  )
+    activeFilters.priceMax?.toString() || "",
+  );
 
   const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections((prev) => ({
       ...prev,
       [section]: !prev[section],
-    }))
-  }
+    }));
+  };
 
   const handleCategoryToggle = (categoryId: string) => {
     const newCategories = activeFilters.categories.includes(categoryId)
       ? activeFilters.categories.filter((id) => id !== categoryId)
-      : [...activeFilters.categories, categoryId]
+      : [...activeFilters.categories, categoryId];
 
     onFilterChange({
       ...activeFilters,
       categories: newCategories,
-    })
-  }
+    });
+  };
 
   const handlePriceChange = () => {
-    const min = localPriceMin ? parseFloat(localPriceMin) : undefined
-    const max = localPriceMax ? parseFloat(localPriceMax) : undefined
+    const min = localPriceMin ? parseFloat(localPriceMin) : undefined;
+    const max = localPriceMax ? parseFloat(localPriceMax) : undefined;
 
     onFilterChange({
       ...activeFilters,
       priceMin: min,
       priceMax: max,
-    })
-  }
+    });
+  };
 
   const handleRatingChange = (rating: number) => {
     onFilterChange({
       ...activeFilters,
       minRating: activeFilters.minRating === rating ? undefined : rating,
-    })
-  }
+    });
+  };
 
-  const handleAvailabilityToggle = (type: 'inStock' | 'onSale') => {
+  const handleAvailabilityToggle = (type: "inStock" | "onSale") => {
     onFilterChange({
       ...activeFilters,
       [type]: !activeFilters[type],
-    })
-  }
+    });
+  };
 
   const getActiveFilterCount = () => {
-    let count = 0
-    if (activeFilters.categories.length > 0) count += activeFilters.categories.length
-    if (activeFilters.priceMin || activeFilters.priceMax) count += 1
-    if (activeFilters.minRating) count += 1
-    if (activeFilters.inStock) count += 1
-    if (activeFilters.onSale) count += 1
-    return count
-  }
+    let count = 0;
+    if (activeFilters.categories.length > 0)
+      count += activeFilters.categories.length;
+    if (activeFilters.priceMin || activeFilters.priceMax) count += 1;
+    if (activeFilters.minRating) count += 1;
+    if (activeFilters.inStock) count += 1;
+    if (activeFilters.onSale) count += 1;
+    return count;
+  };
 
-  const activeCount = getActiveFilterCount()
+  const activeCount = getActiveFilterCount();
 
   return (
     <aside className={`w-full ${className}`}>
@@ -132,7 +140,7 @@ export function FilterSidebar({
         {options.categories && options.categories.length > 0 && (
           <div className="border-b border-gray-200">
             <button
-              onClick={() => toggleSection('categories')}
+              onClick={() => toggleSection("categories")}
               className="flex w-full items-center justify-between p-4 text-left transition-colors hover:bg-gray-50"
             >
               <span className="font-semibold text-gray-900">Categories</span>
@@ -172,7 +180,7 @@ export function FilterSidebar({
         {options.priceRange && (
           <div className="border-b border-gray-200">
             <button
-              onClick={() => toggleSection('price')}
+              onClick={() => toggleSection("price")}
               className="flex w-full items-center justify-between p-4 text-left transition-colors hover:bg-gray-50"
             >
               <div className="flex items-center gap-2">
@@ -221,7 +229,7 @@ export function FilterSidebar({
         {/* Rating */}
         <div className="border-b border-gray-200">
           <button
-            onClick={() => toggleSection('rating')}
+            onClick={() => toggleSection("rating")}
             className="flex w-full items-center justify-between p-4 text-left transition-colors hover:bg-gray-50"
           >
             <div className="flex items-center gap-2">
@@ -242,8 +250,8 @@ export function FilterSidebar({
                   onClick={() => handleRatingChange(rating)}
                   className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left transition-colors ${
                     activeFilters.minRating === rating
-                      ? 'bg-blue-50 text-blue-900'
-                      : 'hover:bg-gray-50'
+                      ? "bg-blue-50 text-blue-900"
+                      : "hover:bg-gray-50"
                   }`}
                 >
                   <div className="flex items-center">
@@ -252,8 +260,8 @@ export function FilterSidebar({
                         key={i}
                         className={`h-4 w-4 ${
                           i < rating
-                            ? 'fill-yellow-400 text-yellow-400'
-                            : 'text-gray-300'
+                            ? "fill-yellow-400 text-yellow-400"
+                            : "text-gray-300"
                         }`}
                       />
                     ))}
@@ -268,7 +276,7 @@ export function FilterSidebar({
         {/* Availability */}
         <div>
           <button
-            onClick={() => toggleSection('availability')}
+            onClick={() => toggleSection("availability")}
             className="flex w-full items-center justify-between p-4 text-left transition-colors hover:bg-gray-50"
           >
             <div className="flex items-center gap-2">
@@ -287,7 +295,7 @@ export function FilterSidebar({
                 <input
                   type="checkbox"
                   checked={activeFilters.inStock || false}
-                  onChange={() => handleAvailabilityToggle('inStock')}
+                  onChange={() => handleAvailabilityToggle("inStock")}
                   className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
                 />
                 <span className="text-sm text-gray-700 group-hover:text-gray-900">
@@ -298,7 +306,7 @@ export function FilterSidebar({
                 <input
                   type="checkbox"
                   checked={activeFilters.onSale || false}
-                  onChange={() => handleAvailabilityToggle('onSale')}
+                  onChange={() => handleAvailabilityToggle("onSale")}
                   className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
                 />
                 <span className="text-sm text-gray-700 group-hover:text-gray-900">
@@ -310,5 +318,5 @@ export function FilterSidebar({
         </div>
       </div>
     </aside>
-  )
+  );
 }

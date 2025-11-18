@@ -1,11 +1,11 @@
 // Data Access Layer - Coupons
 // Database operations for coupon/discount management with tenant isolation
 
-import { db } from './client'
-import { ensureTenantAccess } from './tenant'
+import { db } from "./client";
+import { ensureTenantAccess } from "./tenant";
 
-export type CouponType = 'PERCENTAGE' | 'FIXED'
-export type CouponStatus = 'ACTIVE' | 'INACTIVE' | 'EXPIRED'
+export type CouponType = "PERCENTAGE" | "FIXED";
+export type CouponStatus = "ACTIVE" | "INACTIVE" | "EXPIRED";
 
 /**
  * Get all coupons for a tenant
@@ -15,35 +15,35 @@ export type CouponStatus = 'ACTIVE' | 'INACTIVE' | 'EXPIRED'
 export async function getCouponsByTenant(
   tenantId: string,
   filters?: {
-    status?: CouponStatus
-    type?: CouponType
-    includeExpired?: boolean
-  }
+    status?: CouponStatus;
+    type?: CouponType;
+    includeExpired?: boolean;
+  },
 ) {
-  await ensureTenantAccess(tenantId)
+  await ensureTenantAccess(tenantId);
 
   const where: any = {
     tenantId,
-  }
+  };
 
   if (filters?.status) {
-    where.isActive = filters.status === 'ACTIVE'
+    where.isActive = filters.status === "ACTIVE";
   }
 
   if (filters?.type) {
-    where.type = filters.type
+    where.type = filters.type;
   }
 
   if (!filters?.includeExpired) {
     where.expiresAt = {
       gte: new Date(),
-    }
+    };
   }
 
   return db.coupon.findMany({
     where,
-    orderBy: { createdAt: 'desc' },
-  })
+    orderBy: { createdAt: "desc" },
+  });
 }
 
 /**
@@ -52,14 +52,14 @@ export async function getCouponsByTenant(
  * @param couponId - Coupon ID to retrieve
  */
 export async function getCouponById(tenantId: string, couponId: string) {
-  await ensureTenantAccess(tenantId)
+  await ensureTenantAccess(tenantId);
 
   return db.coupon.findFirst({
     where: {
       id: couponId,
       tenantId,
     },
-  })
+  });
 }
 
 /**
@@ -68,14 +68,14 @@ export async function getCouponById(tenantId: string, couponId: string) {
  * @param code - Coupon code to retrieve
  */
 export async function getCouponByCode(tenantId: string, code: string) {
-  await ensureTenantAccess(tenantId)
+  await ensureTenantAccess(tenantId);
 
   return db.coupon.findFirst({
     where: {
       code: code.toUpperCase(),
       tenantId,
     },
-  })
+  });
 }
 
 /**
@@ -89,11 +89,11 @@ export async function getCouponByCode(tenantId: string, code: string) {
 export async function validateCoupon(
   tenantId: string,
   code: string,
-  orderTotal: number
+  orderTotal: number,
 ) {
-  await ensureTenantAccess(tenantId)
+  await ensureTenantAccess(tenantId);
 
-  const now = new Date()
+  const now = new Date();
 
   const coupon = await db.coupon.findFirst({
     where: {
@@ -106,23 +106,26 @@ export async function validateCoupon(
         gte: now,
       },
     },
-  })
+  });
 
   if (!coupon) {
-    throw new Error('Coupon not found or expired')
+    throw new Error("Coupon not found or expired");
   }
 
   // Check if usage limit reached
   if (coupon.maxUses !== null && coupon.usedCount >= coupon.maxUses) {
-    throw new Error('Coupon usage limit reached')
+    throw new Error("Coupon usage limit reached");
   }
 
   // Check minimum purchase amount
-  if (coupon.minPurchase && orderTotal < parseFloat(String(coupon.minPurchase))) {
-    throw new Error(`Minimum purchase amount is $${coupon.minPurchase}`)
+  if (
+    coupon.minPurchase &&
+    orderTotal < parseFloat(String(coupon.minPurchase))
+  ) {
+    throw new Error(`Minimum purchase amount is $${coupon.minPurchase}`);
   }
 
-  return coupon
+  return coupon;
 }
 
 /**
@@ -133,35 +136,35 @@ export async function validateCoupon(
  */
 export function calculateDiscount(
   coupon: {
-    type: string
-    value: number | any
-    maxDiscount?: number | any | null
+    type: string;
+    value: number | any;
+    maxDiscount?: number | any | null;
   },
-  orderTotal: number
+  orderTotal: number,
 ): number {
-  let discountAmount = 0
-  const value = parseFloat(String(coupon.value))
+  let discountAmount = 0;
+  const value = parseFloat(String(coupon.value));
 
-  if (coupon.type === 'PERCENTAGE') {
-    discountAmount = (orderTotal * value) / 100
+  if (coupon.type === "PERCENTAGE") {
+    discountAmount = (orderTotal * value) / 100;
 
     // Apply max discount limit if set
     if (coupon.maxDiscount) {
-      const maxDiscountValue = parseFloat(String(coupon.maxDiscount))
+      const maxDiscountValue = parseFloat(String(coupon.maxDiscount));
       if (discountAmount > maxDiscountValue) {
-        discountAmount = maxDiscountValue
+        discountAmount = maxDiscountValue;
       }
     }
-  } else if (coupon.type === 'FIXED') {
-    discountAmount = value
+  } else if (coupon.type === "FIXED") {
+    discountAmount = value;
 
     // Discount cannot exceed order total
     if (discountAmount > orderTotal) {
-      discountAmount = orderTotal
+      discountAmount = orderTotal;
     }
   }
 
-  return Math.round(discountAmount * 100) / 100 // Round to 2 decimals
+  return Math.round(discountAmount * 100) / 100; // Round to 2 decimals
 }
 
 /**
@@ -169,18 +172,21 @@ export function calculateDiscount(
  * @param tenantId - Tenant ID to validate access
  * @param data - Coupon data to create
  */
-export async function createCoupon(tenantId: string, data: {
-  code: string
-  type: CouponType
-  value: number
-  maxDiscount?: number | null
-  minPurchase?: number | null
-  maxUses?: number | null
-  startDate?: Date
-  expiresAt?: Date | null
-  description?: string | null
-}) {
-  await ensureTenantAccess(tenantId)
+export async function createCoupon(
+  tenantId: string,
+  data: {
+    code: string;
+    type: CouponType;
+    value: number;
+    maxDiscount?: number | null;
+    minPurchase?: number | null;
+    maxUses?: number | null;
+    startDate?: Date;
+    expiresAt?: Date | null;
+    description?: string | null;
+  },
+) {
+  await ensureTenantAccess(tenantId);
 
   // Check if code already exists
   const existing = await db.coupon.findFirst({
@@ -188,10 +194,10 @@ export async function createCoupon(tenantId: string, data: {
       code: data.code.toUpperCase(),
       tenantId,
     },
-  })
+  });
 
   if (existing) {
-    throw new Error('Coupon code already exists')
+    throw new Error("Coupon code already exists");
   }
 
   return db.coupon.create({
@@ -204,11 +210,12 @@ export async function createCoupon(tenantId: string, data: {
       minPurchase: data.minPurchase || null,
       maxUses: data.maxUses || null,
       startDate: data.startDate || new Date(),
-      expiresAt: data.expiresAt || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+      expiresAt:
+        data.expiresAt || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
       description: data.description || null,
       usedCount: 0,
     },
-  })
+  });
 }
 
 /**
@@ -221,38 +228,38 @@ export async function updateCoupon(
   tenantId: string,
   couponId: string,
   data: {
-    value?: number
-    maxDiscount?: number | null
-    minPurchase?: number | null
-    maxUses?: number | null
-    expiresAt?: Date | null
-    description?: string | null
-  }
+    value?: number;
+    maxDiscount?: number | null;
+    minPurchase?: number | null;
+    maxUses?: number | null;
+    expiresAt?: Date | null;
+    description?: string | null;
+  },
 ) {
-  await ensureTenantAccess(tenantId)
+  await ensureTenantAccess(tenantId);
 
   // Verify coupon belongs to tenant
   const coupon = await db.coupon.findFirst({
     where: { id: couponId, tenantId },
-  })
+  });
 
   if (!coupon) {
-    throw new Error('Coupon not found or does not belong to tenant')
+    throw new Error("Coupon not found or does not belong to tenant");
   }
 
   // Filter out undefined fields to avoid Prisma type errors
-  const updateData: any = {}
-  if (data.value !== undefined) updateData.value = data.value
-  if (data.maxDiscount !== undefined) updateData.maxDiscount = data.maxDiscount
-  if (data.minPurchase !== undefined) updateData.minPurchase = data.minPurchase
-  if (data.maxUses !== undefined) updateData.maxUses = data.maxUses
-  if (data.expiresAt !== undefined) updateData.expiresAt = data.expiresAt
-  if (data.description !== undefined) updateData.description = data.description
+  const updateData: any = {};
+  if (data.value !== undefined) updateData.value = data.value;
+  if (data.maxDiscount !== undefined) updateData.maxDiscount = data.maxDiscount;
+  if (data.minPurchase !== undefined) updateData.minPurchase = data.minPurchase;
+  if (data.maxUses !== undefined) updateData.maxUses = data.maxUses;
+  if (data.expiresAt !== undefined) updateData.expiresAt = data.expiresAt;
+  if (data.description !== undefined) updateData.description = data.description;
 
   return db.coupon.update({
     where: { id: couponId },
     data: updateData,
-  })
+  });
 }
 
 /**
@@ -261,20 +268,20 @@ export async function updateCoupon(
  * @param couponId - Coupon ID to delete
  */
 export async function deleteCoupon(tenantId: string, couponId: string) {
-  await ensureTenantAccess(tenantId)
+  await ensureTenantAccess(tenantId);
 
   // Verify coupon belongs to tenant
   const coupon = await db.coupon.findFirst({
     where: { id: couponId, tenantId },
-  })
+  });
 
   if (!coupon) {
-    throw new Error('Coupon not found or does not belong to tenant')
+    throw new Error("Coupon not found or does not belong to tenant");
   }
 
   return db.coupon.delete({
     where: { id: couponId },
-  })
+  });
 }
 
 /**
@@ -290,7 +297,7 @@ export async function incrementCouponUsage(couponId: string) {
         increment: 1,
       },
     },
-  })
+  });
 }
 
 /**
@@ -299,14 +306,14 @@ export async function incrementCouponUsage(couponId: string) {
  * @param couponId - Coupon ID to get stats for
  */
 export async function getCouponStats(tenantId: string, couponId: string) {
-  await ensureTenantAccess(tenantId)
+  await ensureTenantAccess(tenantId);
 
   const coupon = await db.coupon.findFirst({
     where: { id: couponId, tenantId },
-  })
+  });
 
   if (!coupon) {
-    throw new Error('Coupon not found or does not belong to tenant')
+    throw new Error("Coupon not found or does not belong to tenant");
   }
 
   // Calculate total revenue from coupon usage
@@ -319,23 +326,24 @@ export async function getCouponStats(tenantId: string, couponId: string) {
       discount: true,
       total: true,
     },
-  })
+  });
 
   const totalDiscountGiven = ordersWithCoupon.reduce(
     (sum: number, order: any) => sum + parseFloat(String(order.discount || 0)),
-    0
-  )
+    0,
+  );
 
   const totalRevenue = ordersWithCoupon.reduce(
     (sum: number, order: any) => sum + parseFloat(String(order.total || 0)),
-    0
-  )
+    0,
+  );
 
   return {
     coupon,
     usageCount: ordersWithCoupon.length,
     totalDiscountGiven,
     totalRevenue,
-    averageOrderValue: ordersWithCoupon.length > 0 ? totalRevenue / ordersWithCoupon.length : 0,
-  }
+    averageOrderValue:
+      ordersWithCoupon.length > 0 ? totalRevenue / ordersWithCoupon.length : 0,
+  };
 }

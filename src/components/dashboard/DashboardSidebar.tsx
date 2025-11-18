@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 /**
  * DashboardSidebar Component
@@ -12,10 +12,10 @@
  * - RBAC-aware navigation
  */
 
-import { useState } from 'react'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { signOut } from 'next-auth/react'
+import { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { signOut } from "next-auth/react";
 import {
   Home,
   Package,
@@ -25,79 +25,79 @@ import {
   LogOut,
   Menu,
   X,
-  User
-} from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils/cn'
+  User,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils/cn";
 
 interface DashboardSidebarProps {
   user: {
-    name: string
-    email: string
-    role: string
-    tenantId?: string | null
-  }
+    name: string;
+    email: string;
+    role: string;
+    tenantId?: string | null;
+  };
 }
 
 interface NavItem {
-  name: string
-  href: string
-  icon: React.ComponentType<{ className?: string }>
-  roles?: string[] // If specified, only show for these roles
+  name: string;
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+  roles?: string[]; // If specified, only show for these roles
 }
 
 const navigationItems: NavItem[] = [
   {
-    name: 'Dashboard',
-    href: '/dashboard',
+    name: "Dashboard",
+    href: "/dashboard",
     icon: Home,
   },
   {
-    name: 'Productos',
-    href: '/dashboard/products',
+    name: "Productos",
+    href: "/dashboard/products",
     icon: Package,
   },
   {
-    name: 'Órdenes',
-    href: '/dashboard/orders',
+    name: "Órdenes",
+    href: "/dashboard/orders",
     icon: ShoppingCart,
   },
   {
-    name: 'Análisis',
-    href: '/dashboard/analytics',
+    name: "Análisis",
+    href: "/dashboard/analytics",
     icon: BarChart3,
   },
   {
-    name: 'Configuración',
-    href: '/dashboard/settings',
+    name: "Configuración",
+    href: "/dashboard/settings",
     icon: Settings,
   },
-]
+];
 
 export default function DashboardSidebar({ user }: DashboardSidebarProps) {
-  const pathname = usePathname()
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const pathname = usePathname();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = async () => {
-    await signOut({ callbackUrl: '/login' })
-  }
+    await signOut({ callbackUrl: "/login" });
+  };
 
   const isActiveRoute = (href: string) => {
-    if (href === '/dashboard') {
-      return pathname === href
+    if (href === "/dashboard") {
+      return pathname === href;
     }
-    return pathname?.startsWith(href)
-  }
+    return pathname?.startsWith(href);
+  };
 
   const getUserInitial = (name: string) => {
-    return name.charAt(0).toUpperCase()
-  }
+    return name.charAt(0).toUpperCase();
+  };
 
   // Filter navigation items based on user role if needed
-  const visibleNavItems = navigationItems.filter(item => {
-    if (!item.roles) return true
-    return item.roles.includes(user.role)
-  })
+  const visibleNavItems = navigationItems.filter((item) => {
+    if (!item.roles) return true;
+    return item.roles.includes(user.role);
+  });
 
   return (
     <>
@@ -126,9 +126,9 @@ export default function DashboardSidebar({ user }: DashboardSidebarProps) {
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed left-0 top-0 z-40 h-screen w-64 bg-primary text-white transition-transform duration-300',
-          'lg:translate-x-0',
-          mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+          "fixed left-0 top-0 z-40 h-screen w-64 bg-primary text-white transition-transform duration-300",
+          "lg:translate-x-0",
+          mobileMenuOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
         <div className="flex h-full flex-col">
@@ -146,8 +146,8 @@ export default function DashboardSidebar({ user }: DashboardSidebarProps) {
           {/* Navigation */}
           <nav className="flex-1 space-y-1 px-3 py-4 overflow-y-auto">
             {visibleNavItems.map((item) => {
-              const Icon = item.icon
-              const active = isActiveRoute(item.href)
+              const Icon = item.icon;
+              const active = isActiveRoute(item.href);
 
               return (
                 <Link
@@ -155,16 +155,16 @@ export default function DashboardSidebar({ user }: DashboardSidebarProps) {
                   href={item.href}
                   onClick={() => setMobileMenuOpen(false)}
                   className={cn(
-                    'flex items-center rounded-lg px-4 py-2.5 text-sm font-medium transition-colors',
+                    "flex items-center rounded-lg px-4 py-2.5 text-sm font-medium transition-colors",
                     active
-                      ? 'bg-primary-light text-white'
-                      : 'text-white/80 hover:bg-primary-light hover:text-white'
+                      ? "bg-primary-light text-white"
+                      : "text-white/80 hover:bg-primary-light hover:text-white",
                   )}
                 >
                   <Icon className="mr-3 h-5 w-5" />
                   {item.name}
                 </Link>
-              )
+              );
             })}
           </nav>
 
@@ -214,5 +214,5 @@ export default function DashboardSidebar({ user }: DashboardSidebarProps) {
       {/* Spacer for desktop layout */}
       <div className="hidden lg:block w-64 flex-shrink-0" aria-hidden="true" />
     </>
-  )
+  );
 }

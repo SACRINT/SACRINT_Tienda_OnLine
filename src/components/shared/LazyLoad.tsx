@@ -1,17 +1,21 @@
-'use client'
+"use client";
 
-import { Suspense, ComponentType, lazy } from 'react'
-import Image from 'next/image'
-import { Loader2 } from 'lucide-react'
+import { Suspense, ComponentType, lazy } from "react";
+import Image from "next/image";
+import { Loader2 } from "lucide-react";
 
 interface LazyLoadProps {
-  children: React.ReactNode
-  fallback?: React.ReactNode
-  minHeight?: string
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+  minHeight?: string;
 }
 
 // Componente de carga genérico
-export function LoadingSpinner({ message = 'Cargando...' }: { message?: string }) {
+export function LoadingSpinner({
+  message = "Cargando...",
+}: {
+  message?: string;
+}) {
   return (
     <div className="flex items-center justify-center py-8">
       <div className="flex flex-col items-center gap-3">
@@ -19,7 +23,7 @@ export function LoadingSpinner({ message = 'Cargando...' }: { message?: string }
         <p className="text-sm text-gray-600">{message}</p>
       </div>
     </div>
-  )
+  );
 }
 
 // Skeleton para tarjetas de productos
@@ -30,7 +34,7 @@ export function ProductCardSkeleton() {
       <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
       <div className="h-4 bg-gray-200 rounded w-1/2" />
     </div>
-  )
+  );
 }
 
 // Skeleton para lista de órdenes
@@ -46,7 +50,7 @@ export function OrderCardSkeleton() {
         <div className="h-4 bg-gray-200 rounded w-2/3" />
       </div>
     </div>
-  )
+  );
 }
 
 // Grid de productos skeleton
@@ -57,34 +61,38 @@ export function ProductGridSkeleton({ count = 8 }: { count?: number }) {
         <ProductCardSkeleton key={i} />
       ))}
     </div>
-  )
+  );
 }
 
 // Wrapper de Suspense con fallback personalizado
-export function LazyLoad({ children, fallback, minHeight = '200px' }: LazyLoadProps) {
+export function LazyLoad({
+  children,
+  fallback,
+  minHeight = "200px",
+}: LazyLoadProps) {
   const defaultFallback = (
     <div style={{ minHeight }} className="flex items-center justify-center">
       <LoadingSpinner />
     </div>
-  )
+  );
 
-  return <Suspense fallback={fallback || defaultFallback}>{children}</Suspense>
+  return <Suspense fallback={fallback || defaultFallback}>{children}</Suspense>;
 }
 
 // HOC para crear componentes lazy con configuración
 export function createLazyComponent<T extends ComponentType<any>>(
   importFn: () => Promise<{ default: T }>,
-  fallback?: React.ReactNode
+  fallback?: React.ReactNode,
 ) {
-  const LazyComponent = lazy(importFn)
+  const LazyComponent = lazy(importFn);
 
   return function LazyWrapper(props: React.ComponentProps<T>) {
     return (
       <Suspense fallback={fallback || <LoadingSpinner />}>
         <LazyComponent {...props} />
       </Suspense>
-    )
-  }
+    );
+  };
 }
 
 // Componente para lazy loading de imágenes con Intersection Observer
@@ -96,12 +104,12 @@ export function LazyImage({
   height = 500,
   onLoad,
 }: {
-  src: string
-  alt: string
-  className?: string
-  width?: number
-  height?: number
-  onLoad?: () => void
+  src: string;
+  alt: string;
+  className?: string;
+  width?: number;
+  height?: number;
+  onLoad?: () => void;
 }) {
   return (
     <Image
@@ -113,5 +121,5 @@ export function LazyImage({
       loading="lazy"
       onLoad={onLoad}
     />
-  )
+  );
 }

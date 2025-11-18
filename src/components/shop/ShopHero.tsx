@@ -1,37 +1,37 @@
 // Shop Hero Component
 // Hero section for shop homepage with CTA and background
 
-'use client'
+"use client";
 
-import { useState } from 'react'
-import Link from 'next/link'
-import { ArrowRight, Search, ShoppingBag, Sparkles } from 'lucide-react'
+import { useState } from "react";
+import Link from "next/link";
+import { ArrowRight, Search, ShoppingBag, Sparkles } from "lucide-react";
 
 interface ShopHeroProps {
-  title?: string
-  subtitle?: string
-  ctaText?: string
-  ctaLink?: string
-  backgroundImage?: string
-  showSearch?: boolean
+  title?: string;
+  subtitle?: string;
+  ctaText?: string;
+  ctaLink?: string;
+  backgroundImage?: string;
+  showSearch?: boolean;
 }
 
 export function ShopHero({
-  title = 'Discover Amazing Products',
-  subtitle = 'Shop the latest trends and find exactly what you need',
-  ctaText = 'Shop Now',
-  ctaLink = '/shop',
-  backgroundImage = 'https://images.unsplash.com/photo-1441986300917-64674bd600d8',
+  title = "Discover Amazing Products",
+  subtitle = "Shop the latest trends and find exactly what you need",
+  ctaText = "Shop Now",
+  ctaLink = "/shop",
+  backgroundImage = "https://images.unsplash.com/photo-1441986300917-64674bd600d8",
   showSearch = true,
 }: ShopHeroProps) {
-  const [searchQuery, setSearchQuery] = useState('')
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (searchQuery.trim()) {
-      window.location.href = `/shop/search?q=${encodeURIComponent(searchQuery)}`
+      window.location.href = `/shop/search?q=${encodeURIComponent(searchQuery)}`;
     }
-  }
+  };
 
   return (
     <section className="relative w-full overflow-hidden">
@@ -68,10 +68,7 @@ export function ShopHero({
 
           {/* Search Bar */}
           {showSearch && (
-            <form
-              onSubmit={handleSearch}
-              className="mt-8 w-full max-w-2xl"
-            >
+            <form onSubmit={handleSearch} className="mt-8 w-full max-w-2xl">
               <div className="flex flex-col gap-3 sm:flex-row">
                 <div className="relative flex-1">
                   <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
@@ -120,25 +117,19 @@ export function ShopHero({
               <div className="text-3xl font-bold text-white sm:text-4xl">
                 10K+
               </div>
-              <div className="mt-1 text-sm text-gray-300">
-                Products
-              </div>
+              <div className="mt-1 text-sm text-gray-300">Products</div>
             </div>
             <div className="text-center lg:text-left">
               <div className="text-3xl font-bold text-white sm:text-4xl">
                 50K+
               </div>
-              <div className="mt-1 text-sm text-gray-300">
-                Happy Customers
-              </div>
+              <div className="mt-1 text-sm text-gray-300">Happy Customers</div>
             </div>
             <div className="col-span-2 text-center sm:col-span-1 lg:text-left">
               <div className="text-3xl font-bold text-white sm:text-4xl">
                 4.9/5
               </div>
-              <div className="mt-1 text-sm text-gray-300">
-                Average Rating
-              </div>
+              <div className="mt-1 text-sm text-gray-300">Average Rating</div>
             </div>
           </div>
         </div>
@@ -147,5 +138,5 @@ export function ShopHero({
       {/* Decorative Elements */}
       <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent" />
     </section>
-  )
+  );
 }

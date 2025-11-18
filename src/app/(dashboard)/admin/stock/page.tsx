@@ -1,12 +1,18 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
-import { useSession } from 'next-auth/react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -15,7 +21,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog'
+} from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -23,8 +29,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+} from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   AlertCircle,
   AlertTriangle,
@@ -35,115 +41,119 @@ import {
   Plus,
   Minus,
   RefreshCw,
-} from 'lucide-react'
-import { formatCurrency } from '@/lib/analytics/types'
-import { format } from 'date-fns'
+} from "lucide-react";
+import { formatCurrency } from "@/lib/analytics/types";
+import { format } from "date-fns";
 
 interface StockData {
   summary: {
-    totalProducts: number
-    outOfStockCount: number
-    lowStockCount: number
-    inStockCount: number
-    totalInventoryValue: number
-    lowStockThreshold: number
-  }
+    totalProducts: number;
+    outOfStockCount: number;
+    lowStockCount: number;
+    inStockCount: number;
+    totalInventoryValue: number;
+    lowStockThreshold: number;
+  };
   products: {
-    outOfStock: Product[]
-    lowStock: Product[]
-  }
-  recentChanges: StockChange[]
-  generatedAt: string
+    outOfStock: Product[];
+    lowStock: Product[];
+  };
+  recentChanges: StockChange[];
+  generatedAt: string;
 }
 
 interface Product {
-  id: string
-  name: string
-  sku: string | null
-  stock: number
-  price: number
-  category: string | null
-  status: string
+  id: string;
+  name: string;
+  sku: string | null;
+  stock: number;
+  price: number;
+  category: string | null;
+  status: string;
 }
 
 interface StockChange {
-  id: string
-  action: string
-  entityId: string
-  metadata: any
-  createdAt: string
+  id: string;
+  action: string;
+  entityId: string;
+  metadata: any;
+  createdAt: string;
   user: {
-    id: string
-    name: string | null
-    email: string
-  }
+    id: string;
+    name: string | null;
+    email: string;
+  };
 }
 
 export default function StockManagementPage() {
-  const { data: session } = useSession()
-  const [stockData, setStockData] = useState<StockData | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [adjustingProduct, setAdjustingProduct] = useState<Product | null>(null)
-  const [adjustment, setAdjustment] = useState<number>(0)
-  const [reason, setReason] = useState('')
-  const [submitting, setSubmitting] = useState(false)
+  const { data: session } = useSession();
+  const [stockData, setStockData] = useState<StockData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [adjustingProduct, setAdjustingProduct] = useState<Product | null>(
+    null,
+  );
+  const [adjustment, setAdjustment] = useState<number>(0);
+  const [reason, setReason] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const fetchStockData = async () => {
-    if (!session?.user?.tenantId) return
+    if (!session?.user?.tenantId) return;
 
-    setLoading(true)
+    setLoading(true);
     try {
-      const res = await fetch(`/api/products/stock?tenantId=${session.user.tenantId}`)
+      const res = await fetch(
+        `/api/products/stock?tenantId=${session.user.tenantId}`,
+      );
       if (res.ok) {
-        const data = await res.json()
-        setStockData(data)
+        const data = await res.json();
+        setStockData(data);
       }
     } catch (error) {
-      console.error('Error fetching stock data:', error)
+      console.error("Error fetching stock data:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    fetchStockData()
-  }, [session])
+    fetchStockData();
+  }, [session]);
 
   const handleStockAdjustment = async () => {
-    if (!adjustingProduct || !session?.user?.tenantId) return
+    if (!adjustingProduct || !session?.user?.tenantId) return;
 
-    setSubmitting(true)
+    setSubmitting(true);
     try {
-      const res = await fetch('/api/products/stock', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/products/stock", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           tenantId: session.user.tenantId,
           productId: adjustingProduct.id,
           adjustment,
           reason,
         }),
-      })
+      });
 
       if (res.ok) {
-        setAdjustingProduct(null)
-        setAdjustment(0)
-        setReason('')
-        fetchStockData()
+        setAdjustingProduct(null);
+        setAdjustment(0);
+        setReason("");
+        fetchStockData();
       }
     } catch (error) {
-      console.error('Error adjusting stock:', error)
+      console.error("Error adjusting stock:", error);
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
-  }
+  };
 
   if (loading) {
     return (
       <div className="flex h-96 items-center justify-center">
         <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
-    )
+    );
   }
 
   if (!stockData) {
@@ -151,7 +161,7 @@ export default function StockManagementPage() {
       <div className="flex h-96 items-center justify-center">
         <p className="text-muted-foreground">Failed to load stock data</p>
       </div>
-    )
+    );
   }
 
   return (
@@ -167,11 +177,15 @@ export default function StockManagementPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Products</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Total Products
+            </CardTitle>
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stockData.summary.totalProducts}</div>
+            <div className="text-2xl font-bold">
+              {stockData.summary.totalProducts}
+            </div>
             <p className="text-xs text-muted-foreground">Active products</p>
           </CardContent>
         </Card>
@@ -206,7 +220,9 @@ export default function StockManagementPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Inventory Value</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Inventory Value
+            </CardTitle>
             <TrendingUp className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
@@ -263,9 +279,11 @@ export default function StockManagementPage() {
                   <TableBody>
                     {stockData.products.outOfStock.map((product) => (
                       <TableRow key={product.id}>
-                        <TableCell className="font-medium">{product.name}</TableCell>
-                        <TableCell>{product.sku || '-'}</TableCell>
-                        <TableCell>{product.category || '-'}</TableCell>
+                        <TableCell className="font-medium">
+                          {product.name}
+                        </TableCell>
+                        <TableCell>{product.sku || "-"}</TableCell>
+                        <TableCell>{product.category || "-"}</TableCell>
                         <TableCell>{formatCurrency(product.price)}</TableCell>
                         <TableCell>
                           <Badge variant="destructive">Out of Stock</Badge>
@@ -284,7 +302,9 @@ export default function StockManagementPage() {
                             </DialogTrigger>
                             <DialogContent>
                               <DialogHeader>
-                                <DialogTitle>Adjust Stock - {product.name}</DialogTitle>
+                                <DialogTitle>
+                                  Adjust Stock - {product.name}
+                                </DialogTitle>
                                 <DialogDescription>
                                   Add or remove stock for this product
                                 </DialogDescription>
@@ -296,20 +316,30 @@ export default function StockManagementPage() {
                                     <Button
                                       type="button"
                                       variant="outline"
-                                      onClick={() => setAdjustment(Math.max(0, adjustment - 1))}
+                                      onClick={() =>
+                                        setAdjustment(
+                                          Math.max(0, adjustment - 1),
+                                        )
+                                      }
                                     >
                                       <Minus className="h-4 w-4" />
                                     </Button>
                                     <Input
                                       type="number"
                                       value={adjustment}
-                                      onChange={(e) => setAdjustment(parseInt(e.target.value) || 0)}
+                                      onChange={(e) =>
+                                        setAdjustment(
+                                          parseInt(e.target.value) || 0,
+                                        )
+                                      }
                                       className="text-center"
                                     />
                                     <Button
                                       type="button"
                                       variant="outline"
-                                      onClick={() => setAdjustment(adjustment + 1)}
+                                      onClick={() =>
+                                        setAdjustment(adjustment + 1)
+                                      }
                                     >
                                       <Plus className="h-4 w-4" />
                                     </Button>
@@ -319,7 +349,9 @@ export default function StockManagementPage() {
                                   </p>
                                 </div>
                                 <div className="space-y-2">
-                                  <Label htmlFor="reason">Reason (optional)</Label>
+                                  <Label htmlFor="reason">
+                                    Reason (optional)
+                                  </Label>
                                   <Input
                                     id="reason"
                                     value={reason}
@@ -333,7 +365,7 @@ export default function StockManagementPage() {
                                   onClick={handleStockAdjustment}
                                   disabled={submitting || adjustment === 0}
                                 >
-                                  {submitting ? 'Updating...' : 'Update Stock'}
+                                  {submitting ? "Updating..." : "Update Stock"}
                                 </Button>
                               </DialogFooter>
                             </DialogContent>
@@ -353,8 +385,8 @@ export default function StockManagementPage() {
             <CardHeader>
               <CardTitle>Low Stock Products</CardTitle>
               <CardDescription>
-                Products below the low stock threshold ({stockData.summary.lowStockThreshold}{' '}
-                units)
+                Products below the low stock threshold (
+                {stockData.summary.lowStockThreshold} units)
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -382,9 +414,11 @@ export default function StockManagementPage() {
                   <TableBody>
                     {stockData.products.lowStock.map((product) => (
                       <TableRow key={product.id}>
-                        <TableCell className="font-medium">{product.name}</TableCell>
-                        <TableCell>{product.sku || '-'}</TableCell>
-                        <TableCell>{product.category || '-'}</TableCell>
+                        <TableCell className="font-medium">
+                          {product.name}
+                        </TableCell>
+                        <TableCell>{product.sku || "-"}</TableCell>
+                        <TableCell>{product.category || "-"}</TableCell>
                         <TableCell>
                           <Badge variant="outline" className="text-yellow-600">
                             {product.stock} units
@@ -414,12 +448,16 @@ export default function StockManagementPage() {
           <Card>
             <CardHeader>
               <CardTitle>Stock Change History</CardTitle>
-              <CardDescription>Recent stock adjustments (last 7 days)</CardDescription>
+              <CardDescription>
+                Recent stock adjustments (last 7 days)
+              </CardDescription>
             </CardHeader>
             <CardContent>
               {stockData.recentChanges.length === 0 ? (
                 <div className="flex h-32 items-center justify-center">
-                  <p className="text-sm text-muted-foreground">No recent stock changes</p>
+                  <p className="text-sm text-muted-foreground">
+                    No recent stock changes
+                  </p>
                 </div>
               ) : (
                 <Table>
@@ -435,7 +473,10 @@ export default function StockManagementPage() {
                     {stockData.recentChanges.map((change) => (
                       <TableRow key={change.id}>
                         <TableCell>
-                          {format(new Date(change.createdAt), 'MMM d, yyyy HH:mm')}
+                          {format(
+                            new Date(change.createdAt),
+                            "MMM d, yyyy HH:mm",
+                          )}
                         </TableCell>
                         <TableCell>
                           <Badge variant="outline">{change.action}</Badge>
@@ -449,7 +490,8 @@ export default function StockManagementPage() {
                                 <TrendingDown className="h-4 w-4 text-red-500" />
                               )}
                               <span>
-                                {change.metadata.previousStock} → {change.metadata.newStock}
+                                {change.metadata.previousStock} →{" "}
+                                {change.metadata.newStock}
                               </span>
                             </div>
                           )}
@@ -472,5 +514,5 @@ export default function StockManagementPage() {
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }

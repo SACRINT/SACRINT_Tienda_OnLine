@@ -2,16 +2,19 @@
 // GET /api/categories - Get all categories for current user's tenant (with tree structure)
 // POST /api/categories - Create new category (STORE_OWNER only)
 
-import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/lib/auth/auth'
+import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth/auth";
 import {
   getCategoriesByTenant,
   getCategoryTree,
   createCategory,
-  isCategorySlugAvailable
-} from '@/lib/db/categories'
-import { CreateCategorySchema } from '@/lib/security/schemas/product-schemas'
-import { USER_ROLES } from '@/lib/types/user-role'
+  isCategorySlugAvailable,
+} from "@/lib/db/categories";
+import { CreateCategorySchema } from "@/lib/security/schemas/product-schemas";
+import { USER_ROLES } from "@/lib/types/user-role";
+
+// Force dynamic rendering for this API route
+export const dynamic = "force-dynamic";
 
 /**
  * GET /api/categories
@@ -20,59 +23,57 @@ import { USER_ROLES } from '@/lib/types/user-role'
  */
 export async function GET(req: NextRequest) {
   try {
-    const session = await auth()
+    const session = await auth();
 
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { tenantId } = session.user
+    const { tenantId } = session.user;
 
     if (!tenantId) {
       return NextResponse.json(
-        { error: 'User has no tenant assigned' },
-        { status: 404 }
-      )
+        { error: "User has no tenant assigned" },
+        { status: 404 },
+      );
     }
 
     // Get query parameters
-    const { searchParams } = new URL(req.url)
-    const format = searchParams.get('format') || 'flat' // 'flat' or 'tree'
-    const parentId = searchParams.get('parentId')
-    const includeSubcategories = searchParams.get('includeSubcategories') === 'true'
+    const { searchParams } = new URL(req.url);
+    const format = searchParams.get("format") || "flat"; // 'flat' or 'tree'
+    const parentId = searchParams.get("parentId");
+    const includeSubcategories =
+      searchParams.get("includeSubcategories") === "true";
 
-    let categories
+    let categories;
 
-    if (format === 'tree') {
+    if (format === "tree") {
       // Return hierarchical tree structure
-      categories = await getCategoryTree(tenantId)
+      categories = await getCategoryTree(tenantId);
 
       return NextResponse.json({
         categories,
-        format: 'tree',
-      })
+        format: "tree",
+      });
     } else {
       // Return flat list with optional filtering
       categories = await getCategoriesByTenant(tenantId, {
-        parentId: parentId === 'null' ? null : parentId || undefined,
+        parentId: parentId === "null" ? null : parentId || undefined,
         includeSubcategories,
-      })
+      });
 
       return NextResponse.json({
         categories,
-        format: 'flat',
+        format: "flat",
         total: categories.length,
-      })
+      });
     }
   } catch (error) {
-    console.error('[CATEGORIES] GET error:', error)
+    console.error("[CATEGORIES] GET error:", error);
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }
 
@@ -83,55 +84,58 @@ export async function GET(req: NextRequest) {
  */
 export async function POST(req: NextRequest) {
   try {
-    const session = await auth()
+    const session = await auth();
 
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { role, tenantId } = session.user
+    const { role, tenantId } = session.user;
 
     if (!tenantId) {
       return NextResponse.json(
-        { error: 'User has no tenant assigned' },
-        { status: 404 }
-      )
+        { error: "User has no tenant assigned" },
+        { status: 404 },
+      );
     }
 
     // Check if user has permission to create categories
     if (role !== USER_ROLES.STORE_OWNER && role !== USER_ROLES.SUPER_ADMIN) {
       return NextResponse.json(
-        { error: 'Forbidden - Only STORE_OWNER or SUPER_ADMIN can create categories' },
-        { status: 403 }
-      )
+        {
+          error:
+            "Forbidden - Only STORE_OWNER or SUPER_ADMIN can create categories",
+        },
+        { status: 403 },
+      );
     }
 
-    const body = await req.json()
-    const validation = CreateCategorySchema.safeParse(body)
+    const body = await req.json();
+    const validation = CreateCategorySchema.safeParse(body);
 
     if (!validation.success) {
       return NextResponse.json(
         {
-          error: 'Invalid data',
+          error: "Invalid data",
           issues: validation.error.issues,
         },
-        { status: 400 }
-      )
+        { status: 400 },
+      );
     }
 
-    const { name, slug, description, image, parentId } = validation.data
+    const { name, slug, description, image, parentId } = validation.data;
 
     // Check if slug is already taken within this tenant
-    const slugAvailable = await isCategorySlugAvailable(tenantId, slug)
+    const slugAvailable = await isCategorySlugAvailable(tenantId, slug);
 
     if (!slugAvailable) {
       return NextResponse.json(
-        { error: 'Slug already taken within your store. Please choose a different slug.' },
-        { status: 409 }
-      )
+        {
+          error:
+            "Slug already taken within your store. Please choose a different slug.",
+        },
+        { status: 409 },
+      );
     }
 
     // Create category
@@ -142,13 +146,18 @@ export async function POST(req: NextRequest) {
       description,
       image,
       parentId: parentId || null,
-    })
+    });
 
-    console.log('[CATEGORIES] Created new category:', category.id, 'by user:', session.user.id)
+    console.log(
+      "[CATEGORIES] Created new category:",
+      category.id,
+      "by user:",
+      session.user.id,
+    );
 
     return NextResponse.json(
       {
-        message: 'Category created successfully',
+        message: "Category created successfully",
         category: {
           id: category.id,
           name: category.name,
@@ -159,30 +168,24 @@ export async function POST(req: NextRequest) {
           createdAt: category.createdAt,
         },
       },
-      { status: 201 }
-    )
+      { status: 201 },
+    );
   } catch (error) {
-    console.error('[CATEGORIES] POST error:', error)
+    console.error("[CATEGORIES] POST error:", error);
 
     // Handle specific errors
     if (error instanceof Error) {
-      if (error.message.includes('Parent category not found')) {
-        return NextResponse.json(
-          { error: error.message },
-          { status: 404 }
-        )
+      if (error.message.includes("Parent category not found")) {
+        return NextResponse.json({ error: error.message }, { status: 404 });
       }
-      if (error.message.includes('Forbidden')) {
-        return NextResponse.json(
-          { error: error.message },
-          { status: 403 }
-        )
+      if (error.message.includes("Forbidden")) {
+        return NextResponse.json({ error: error.message }, { status: 403 });
       }
     }
 
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }

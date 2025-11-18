@@ -1,48 +1,52 @@
-'use client'
+"use client";
 
 // ProductCard - Tarjeta de producto para grid de listado
 // Muestra imagen, precio, stock, y permite agregar al carrito
 
-import Link from 'next/link'
-import Image from 'next/image'
-import { useCart } from '@/lib/store/useCart'
-import { useState } from 'react'
+import Link from "next/link";
+import Image from "next/image";
+import { useCart } from "@/lib/store/useCart";
+import { useState } from "react";
 
 export interface ProductCardData {
-  id: string
-  slug: string
-  name: string
-  description?: string
-  basePrice: number
-  salePrice?: number | null
-  image: string
-  sku: string
-  stock: number
-  reserved?: number
-  featured?: boolean
+  id: string;
+  slug: string;
+  name: string;
+  description?: string;
+  basePrice: number;
+  salePrice?: number | null;
+  image: string;
+  sku: string;
+  stock: number;
+  reserved?: number;
+  featured?: boolean;
   _count?: {
-    reviews: number
-  }
+    reviews: number;
+  };
 }
 
 interface ProductCardProps {
-  product: ProductCardData
+  product: ProductCardData;
 }
 
 export function ProductCard({ product }: ProductCardProps) {
-  const addItem = useCart((state) => state.addItem)
-  const [showNotification, setShowNotification] = useState(false)
+  const addItem = useCart((state) => state.addItem);
+  const [showNotification, setShowNotification] = useState(false);
 
-  const isInStock = product.stock > (product.reserved || 0)
-  const currentPrice = product.salePrice || product.basePrice
-  const hasDiscount = product.salePrice && product.salePrice < product.basePrice
+  const isInStock = product.stock > (product.reserved || 0);
+  const currentPrice = product.salePrice || product.basePrice;
+  const hasDiscount =
+    product.salePrice && product.salePrice < product.basePrice;
 
   const discountPercentage = hasDiscount
-    ? Math.round(((product.basePrice - (product.salePrice || 0)) / product.basePrice) * 100)
-    : 0
+    ? Math.round(
+        ((product.basePrice - (product.salePrice || 0)) / product.basePrice) *
+          100,
+      )
+    : 0;
 
   const handleAddToCart = () => {
-    if (!isInStock) return
+    if (!isInStock) return;
 
     addItem({
       productId: product.id,
@@ -50,14 +54,14 @@ export function ProductCard({ product }: ProductCardProps) {
       quantity: 1,
       price: currentPrice,
       name: product.name,
-      image: product.image || '/placeholder.jpg',
+      image: product.image || "/placeholder.jpg",
       sku: product.sku,
-    })
+    });
 
     // Mostrar notificación
-    setShowNotification(true)
-    setTimeout(() => setShowNotification(false), 2000)
-  }
+    setShowNotification(true);
+    setTimeout(() => setShowNotification(false), 2000);
+  };
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300 relative">
@@ -83,9 +87,12 @@ export function ProductCard({ product }: ProductCardProps) {
       )}
 
       {/* Imagen */}
-      <Link href={`/shop/products/${product.id}`} className="block relative aspect-square overflow-hidden group">
+      <Link
+        href={`/shop/products/${product.id}`}
+        className="block relative aspect-square overflow-hidden group"
+      >
         <Image
-          src={product.image || '/placeholder.jpg'}
+          src={product.image || "/placeholder.jpg"}
           alt={product.name}
           fill
           className="object-cover group-hover:scale-105 transition-transform duration-300"
@@ -106,8 +113,11 @@ export function ProductCard({ product }: ProductCardProps) {
         {/* Rating (placeholder - se puede implementar después con reviews reales) */}
         <div className="flex items-center gap-2 mb-3">
           <div className="flex text-yellow-400">
-            {'★★★★★'.split('').map((star, i) => (
-              <span key={i} className={i < 4 ? 'text-yellow-400' : 'text-gray-300'}>
+            {"★★★★★".split("").map((star, i) => (
+              <span
+                key={i}
+                className={i < 4 ? "text-yellow-400" : "text-gray-300"}
+              >
                 {star}
               </span>
             ))}
@@ -152,13 +162,13 @@ export function ProductCard({ product }: ProductCardProps) {
           disabled={!isInStock}
           className={`w-full py-2 px-4 rounded-md font-semibold transition-colors ${
             isInStock
-              ? 'bg-primary text-white hover:bg-primary-dark'
-              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              ? "bg-primary text-white hover:bg-primary-dark"
+              : "bg-gray-300 text-gray-500 cursor-not-allowed"
           }`}
         >
-          {isInStock ? '🛒 Agregar al carrito' : 'Sin stock'}
+          {isInStock ? "🛒 Agregar al carrito" : "Sin stock"}
         </button>
       </div>
     </div>
-  )
+  );
 }

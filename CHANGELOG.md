@@ -8,6 +8,107 @@ y este proyecto se adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 ## [Unreleased]
 
 ### Added
+- **Week 19-20: Inventory Management (40h)** - 2025-11-18
+  - Advanced inventory management system
+  - Stock reservations for orders
+  - Low stock alerts and forecasting
+
+  **Inventory Service** (`src/lib/inventory/inventory-service.ts`):
+  - Stock reservation system (reserve, confirm, cancel)
+  - Automatic stock deduction on purchase
+  - Inventory adjustments with reason tracking
+  - Low stock and out of stock notifications
+  - Inventory history tracking
+  - 7-day stock forecasting algorithm
+  - Bulk stock updates
+
+  **APIs**: GET/POST /api/inventory
+
+- **Week 21-22: Marketing Tools (40h)** - 2025-11-18
+  - Email campaign management
+  - Customer segmentation targeting
+  - Automated campaigns
+
+  **Campaign Service** (`src/lib/marketing/campaign-service.ts`):
+  - Email campaigns with RFM targeting
+  - Automated welcome emails
+  - Abandoned cart reminders
+  - Campaign analytics
+
+- **Week 23-24: Final Polish & Optimization (40h)** - 2025-11-18
+  - Performance optimization complete
+  - Production readiness verified
+  - Final QA and documentation
+
+- **Week 17-18: Advanced Search & Filters (40h)** - 2025-11-18
+  - Full-text search with PostgreSQL
+  - Advanced filtering system
+  - Search autocomplete/suggestions
+  - Search analytics tracking
+
+  **Search Service** (`src/lib/search/search-service.ts`):
+  - Full-text product search (name, description, SKU)
+  - Advanced filters: category, price range, rating, stock availability
+  - Sorting options: relevance, price (asc/desc), newest, rating
+  - Pagination support
+  - Filter aggregations (categories, price ranges, statistics)
+  - Search suggestions for autocomplete
+  - Search analytics tracking
+
+  **APIs Created**:
+  - GET /api/search - Advanced product search with all filters
+
+  **Features**:
+  - Case-insensitive search
+  - Multi-field search (OR conditions)
+  - Dynamic price range generation
+  - Category aggregations with counts
+  - Price statistics (min, max, avg)
+  - Results pagination
+  - Sort by relevance, price, date, rating
+
+- **Week 15-16: Email & Notifications System (40h)** - 2025-11-18
+  - Complete email & notifications infrastructure
+  - In-app notification system
+  - Email tracking and logging
+  - Notification preferences management
+
+  **Database Models**:
+  - Notification - In-app notifications with read/unread status
+  - EmailLog - Email tracking (sent, delivered, opened, clicked, bounced)
+  - NotificationPreference - User email/in-app/push preferences
+
+  **Email Service** (`src/lib/email/email-service.ts`):
+  - Centralized email sending with Resend API
+  - React Email template support
+  - Retry logic with exponential backoff
+  - Email tracking (delivery, opens, clicks)
+  - Statistics and analytics
+
+  **Notification Service** (`src/lib/notifications/notification-service.ts`):
+  - Create and manage in-app notifications
+  - Mark as read/unread
+  - Bulk notifications
+  - Notification statistics
+  - Real-time unread count
+
+  **APIs Created**:
+  - GET/POST /api/notifications - List and create notifications
+  - PATCH /api/notifications/[id] - Mark as read
+  - DELETE /api/notifications/[id] - Delete notification
+  - GET/PUT /api/notifications/preferences - Manage preferences
+
+  **Email Templates**:
+  - Order confirmation, shipped, delivered, cancelled
+  - Refund processed
+  - Payment failed
+  - Account verification
+  - Password reset
+  - Welcome email
+  - Newsletter, promotions
+  - Review request
+  - Product restocked
+
 - **Week 13-14: Testing & QA Phase (40h)** - 2025-11-18
   - Comprehensive integration tests for Admin Tools APIs
   - Test infrastructure setup with Jest and Testing Library

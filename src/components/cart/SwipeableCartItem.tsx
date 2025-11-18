@@ -1,23 +1,23 @@
-'use client'
+"use client";
 
-import { useState, useRef, useEffect } from 'react'
-import Image from 'next/image'
-import { Trash2, Plus, Minus } from 'lucide-react'
+import { useState, useRef, useEffect } from "react";
+import Image from "next/image";
+import { Trash2, Plus, Minus } from "lucide-react";
 
 export interface CartItem {
-  id: string
-  name: string
-  image: string
-  price: number
-  quantity: number
-  stock: number
-  variant?: string
+  id: string;
+  name: string;
+  image: string;
+  price: number;
+  quantity: number;
+  stock: number;
+  variant?: string;
 }
 
 interface SwipeableCartItemProps {
-  item: CartItem
-  onQuantityChange: (itemId: string, newQuantity: number) => void
-  onRemove: (itemId: string) => void
+  item: CartItem;
+  onQuantityChange: (itemId: string, newQuantity: number) => void;
+  onRemove: (itemId: string) => void;
 }
 
 export function SwipeableCartItem({
@@ -25,61 +25,61 @@ export function SwipeableCartItem({
   onQuantityChange,
   onRemove,
 }: SwipeableCartItemProps) {
-  const [translateX, setTranslateX] = useState(0)
-  const [isSwiping, setIsSwiping] = useState(false)
-  const startX = useRef(0)
-  const currentX = useRef(0)
-  const itemRef = useRef<HTMLDivElement>(null)
+  const [translateX, setTranslateX] = useState(0);
+  const [isSwiping, setIsSwiping] = useState(false);
+  const startX = useRef(0);
+  const currentX = useRef(0);
+  const itemRef = useRef<HTMLDivElement>(null);
 
-  const MAX_SWIPE = 80 // Maximum swipe distance to reveal delete button
+  const MAX_SWIPE = 80; // Maximum swipe distance to reveal delete button
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    startX.current = e.touches[0].clientX
-    setIsSwiping(true)
-  }
+    startX.current = e.touches[0].clientX;
+    setIsSwiping(true);
+  };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isSwiping) return
+    if (!isSwiping) return;
 
-    currentX.current = e.touches[0].clientX
-    const diff = startX.current - currentX.current
+    currentX.current = e.touches[0].clientX;
+    const diff = startX.current - currentX.current;
 
     // Only allow left swipe
     if (diff > 0 && diff <= MAX_SWIPE) {
-      setTranslateX(-diff)
+      setTranslateX(-diff);
     }
-  }
+  };
 
   const handleTouchEnd = () => {
-    setIsSwiping(false)
+    setIsSwiping(false);
 
     // If swiped more than half, snap to MAX_SWIPE, otherwise snap back
     if (Math.abs(translateX) > MAX_SWIPE / 2) {
-      setTranslateX(-MAX_SWIPE)
+      setTranslateX(-MAX_SWIPE);
     } else {
-      setTranslateX(0)
+      setTranslateX(0);
     }
-  }
+  };
 
   const handleDelete = () => {
     // Animate out before deleting
-    setTranslateX(-400)
+    setTranslateX(-400);
     setTimeout(() => {
-      onRemove(item.id)
-    }, 300)
-  }
+      onRemove(item.id);
+    }, 300);
+  };
 
   const incrementQuantity = () => {
     if (item.quantity < item.stock) {
-      onQuantityChange(item.id, item.quantity + 1)
+      onQuantityChange(item.id, item.quantity + 1);
     }
-  }
+  };
 
   const decrementQuantity = () => {
     if (item.quantity > 1) {
-      onQuantityChange(item.id, item.quantity - 1)
+      onQuantityChange(item.id, item.quantity - 1);
     }
-  }
+  };
 
   return (
     <div className="relative overflow-hidden bg-white">
@@ -209,5 +209,5 @@ export function SwipeableCartItem({
         </div>
       )}
     </div>
-  )
+  );
 }

@@ -1,15 +1,15 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -17,9 +17,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Clock,
   Package,
@@ -28,49 +28,54 @@ import {
   XCircle,
   ArrowRight,
   Loader2,
-} from 'lucide-react'
+} from "lucide-react";
 
-export type OrderStatus = 'PENDING' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED'
+export type OrderStatus =
+  | "PENDING"
+  | "PROCESSING"
+  | "SHIPPED"
+  | "DELIVERED"
+  | "CANCELLED";
 
 interface OrderStatusWorkflowProps {
-  orderId: string
-  currentStatus: OrderStatus
-  tenantId: string
-  onStatusChange?: () => void
+  orderId: string;
+  currentStatus: OrderStatus;
+  tenantId: string;
+  onStatusChange?: () => void;
 }
 
 const STATUS_CONFIG = {
   PENDING: {
-    label: 'Pending',
+    label: "Pending",
     icon: Clock,
-    color: 'bg-yellow-100 text-yellow-800',
-    nextStates: ['PROCESSING', 'CANCELLED'],
+    color: "bg-yellow-100 text-yellow-800",
+    nextStates: ["PROCESSING", "CANCELLED"],
   },
   PROCESSING: {
-    label: 'Processing',
+    label: "Processing",
     icon: Package,
-    color: 'bg-blue-100 text-blue-800',
-    nextStates: ['SHIPPED', 'CANCELLED'],
+    color: "bg-blue-100 text-blue-800",
+    nextStates: ["SHIPPED", "CANCELLED"],
   },
   SHIPPED: {
-    label: 'Shipped',
+    label: "Shipped",
     icon: Truck,
-    color: 'bg-purple-100 text-purple-800',
-    nextStates: ['DELIVERED', 'CANCELLED'],
+    color: "bg-purple-100 text-purple-800",
+    nextStates: ["DELIVERED", "CANCELLED"],
   },
   DELIVERED: {
-    label: 'Delivered',
+    label: "Delivered",
     icon: CheckCircle,
-    color: 'bg-green-100 text-green-800',
+    color: "bg-green-100 text-green-800",
     nextStates: [],
   },
   CANCELLED: {
-    label: 'Cancelled',
+    label: "Cancelled",
     icon: XCircle,
-    color: 'bg-red-100 text-red-800',
+    color: "bg-red-100 text-red-800",
     nextStates: [],
   },
-}
+};
 
 export function OrderStatusWorkflow({
   orderId,
@@ -78,44 +83,46 @@ export function OrderStatusWorkflow({
   tenantId,
   onStatusChange,
 }: OrderStatusWorkflowProps) {
-  const [isChanging, setIsChanging] = useState(false)
-  const [selectedStatus, setSelectedStatus] = useState<OrderStatus | null>(null)
-  const [note, setNote] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [isChanging, setIsChanging] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState<OrderStatus | null>(
+    null,
+  );
+  const [note, setNote] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const config = STATUS_CONFIG[currentStatus]
-  const StatusIcon = config.icon
+  const config = STATUS_CONFIG[currentStatus];
+  const StatusIcon = config.icon;
 
   const handleStatusChange = async () => {
-    if (!selectedStatus) return
+    if (!selectedStatus) return;
 
-    setLoading(true)
+    setLoading(true);
     try {
       const res = await fetch(`/api/orders/${orderId}/status`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           tenantId,
           status: selectedStatus,
           note,
         }),
-      })
+      });
 
       if (res.ok) {
-        setIsChanging(false)
-        setSelectedStatus(null)
-        setNote('')
-        onStatusChange?.()
+        setIsChanging(false);
+        setSelectedStatus(null);
+        setNote("");
+        onStatusChange?.();
       } else {
-        alert('Error updating status')
+        alert("Error updating status");
       }
     } catch (error) {
-      console.error('Error:', error)
-      alert('Error updating status')
+      console.error("Error:", error);
+      alert("Error updating status");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="space-y-4">
@@ -134,23 +141,23 @@ export function OrderStatusWorkflow({
           <p className="text-sm font-medium text-gray-700">Quick Actions</p>
           <div className="flex flex-wrap gap-2">
             {config.nextStates.map((status) => {
-              const nextConfig = STATUS_CONFIG[status as OrderStatus]
-              const NextIcon = nextConfig.icon
+              const nextConfig = STATUS_CONFIG[status as OrderStatus];
+              const NextIcon = nextConfig.icon;
               return (
                 <Button
                   key={status}
                   variant="outline"
                   size="sm"
                   onClick={() => {
-                    setSelectedStatus(status as OrderStatus)
-                    setIsChanging(true)
+                    setSelectedStatus(status as OrderStatus);
+                    setIsChanging(true);
                   }}
                 >
                   <NextIcon className="h-4 w-4 mr-2" />
                   Move to {nextConfig.label}
                   <ArrowRight className="h-4 w-4 ml-2" />
                 </Button>
-              )
+              );
             })}
           </div>
         </div>
@@ -170,20 +177,22 @@ export function OrderStatusWorkflow({
             <div className="space-y-2">
               <Label>New Status</Label>
               <Select
-                value={selectedStatus || ''}
-                onValueChange={(value) => setSelectedStatus(value as OrderStatus)}
+                value={selectedStatus || ""}
+                onValueChange={(value) =>
+                  setSelectedStatus(value as OrderStatus)
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select status" />
                 </SelectTrigger>
                 <SelectContent>
                   {config.nextStates.map((status) => {
-                    const statusConfig = STATUS_CONFIG[status as OrderStatus]
+                    const statusConfig = STATUS_CONFIG[status as OrderStatus];
                     return (
                       <SelectItem key={status} value={status}>
                         {statusConfig.label}
                       </SelectItem>
-                    )
+                    );
                   })}
                 </SelectContent>
               </Select>
@@ -205,42 +214,45 @@ export function OrderStatusWorkflow({
             <Button
               variant="outline"
               onClick={() => {
-                setIsChanging(false)
-                setSelectedStatus(null)
-                setNote('')
+                setIsChanging(false);
+                setSelectedStatus(null);
+                setNote("");
               }}
             >
               Cancel
             </Button>
-            <Button onClick={handleStatusChange} disabled={!selectedStatus || loading}>
+            <Button
+              onClick={handleStatusChange}
+              disabled={!selectedStatus || loading}
+            >
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Updating...
                 </>
               ) : (
-                'Update Status'
+                "Update Status"
               )}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }
 
 // Status Timeline Component
 interface StatusTimelineProps {
   history: Array<{
-    id: string
-    status: OrderStatus
-    note?: string
-    createdAt: string
+    id: string;
+    status: OrderStatus;
+    note?: string;
+    createdAt: string;
     user?: {
-      name: string | null
-      email: string
-    }
-  }>
+      name: string | null;
+      email: string;
+    };
+  }>;
 }
 
 export function StatusTimeline({ history }: StatusTimelineProps) {
@@ -250,9 +262,9 @@ export function StatusTimeline({ history }: StatusTimelineProps) {
       <div className="flow-root">
         <ul className="-mb-8">
           {history.map((item, index) => {
-            const config = STATUS_CONFIG[item.status]
-            const StatusIcon = config.icon
-            const isLast = index === history.length - 1
+            const config = STATUS_CONFIG[item.status];
+            const StatusIcon = config.icon;
+            const isLast = index === history.length - 1;
 
             return (
               <li key={item.id}>
@@ -267,7 +279,7 @@ export function StatusTimeline({ history }: StatusTimelineProps) {
                     <div>
                       <span
                         className={`h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white ${
-                          config.color.split(' ')[0]
+                          config.color.split(" ")[0]
                         }`}
                       >
                         <StatusIcon className="h-5 w-5" aria-hidden="true" />
@@ -279,7 +291,9 @@ export function StatusTimeline({ history }: StatusTimelineProps) {
                           Status changed to <strong>{config.label}</strong>
                         </p>
                         {item.note && (
-                          <p className="mt-1 text-sm text-gray-500">{item.note}</p>
+                          <p className="mt-1 text-sm text-gray-500">
+                            {item.note}
+                          </p>
                         )}
                         {item.user && (
                           <p className="mt-1 text-xs text-gray-400">
@@ -288,21 +302,21 @@ export function StatusTimeline({ history }: StatusTimelineProps) {
                         )}
                       </div>
                       <div className="whitespace-nowrap text-right text-sm text-gray-500">
-                        {new Date(item.createdAt).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit',
+                        {new Date(item.createdAt).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
                         })}
                       </div>
                     </div>
                   </div>
                 </div>
               </li>
-            )
+            );
           })}
         </ul>
       </div>
     </div>
-  )
+  );
 }

@@ -1,8 +1,8 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
-import { useSession } from 'next-auth/react'
-import { subDays } from 'date-fns'
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import { subDays } from "date-fns";
 import {
   Download,
   TrendingUp,
@@ -10,40 +10,40 @@ import {
   ShoppingCart,
   Package,
   Filter,
-} from 'lucide-react'
+} from "lucide-react";
 
-import { LineChart } from '@/components/analytics/charts/LineChart'
-import { BarChart } from '@/components/analytics/charts/BarChart'
-import { PieChart } from '@/components/analytics/charts/PieChart'
-import { DateRangePicker } from '@/components/analytics/filters/DateRangePicker'
+import { LineChart } from "@/components/analytics/charts/LineChart";
+import { BarChart } from "@/components/analytics/charts/BarChart";
+import { PieChart } from "@/components/analytics/charts/PieChart";
+import { DateRangePicker } from "@/components/analytics/filters/DateRangePicker";
 import {
   SalesMetrics,
   AnalyticsResponse,
   formatCurrency,
   formatNumber,
-} from '@/lib/analytics/types'
+} from "@/lib/analytics/types";
 
 export default function SalesReportsPage() {
-  const { data: session } = useSession()
-  const [loading, setLoading] = useState(true)
-  const [salesMetrics, setSalesMetrics] = useState<SalesMetrics | null>(null)
+  const { data: session } = useSession();
+  const [loading, setLoading] = useState(true);
+  const [salesMetrics, setSalesMetrics] = useState<SalesMetrics | null>(null);
   const [dateRange, setDateRange] = useState({
     startDate: subDays(new Date(), 29),
     endDate: new Date(),
-  })
-  const [selectedCategory, setSelectedCategory] = useState<string>('all')
-  const [exportingCSV, setExportingCSV] = useState(false)
+  });
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [exportingCSV, setExportingCSV] = useState(false);
 
   useEffect(() => {
     if (session?.user?.tenantId) {
-      fetchSalesData()
+      fetchSalesData();
     }
-  }, [session, dateRange])
+  }, [session, dateRange]);
 
   const fetchSalesData = async () => {
-    if (!session?.user?.tenantId) return
+    if (!session?.user?.tenantId) return;
 
-    setLoading(true)
+    setLoading(true);
     try {
       const res = await fetch(
         `/api/analytics/sales?` +
@@ -51,66 +51,71 @@ export default function SalesReportsPage() {
             tenantId: session.user.tenantId,
             startDate: dateRange.startDate.toISOString(),
             endDate: dateRange.endDate.toISOString(),
-          })
-      )
+          }),
+      );
 
       if (res.ok) {
-        const data: AnalyticsResponse<SalesMetrics> = await res.json()
-        setSalesMetrics(data.data)
+        const data: AnalyticsResponse<SalesMetrics> = await res.json();
+        setSalesMetrics(data.data);
       }
     } catch (error) {
-      console.error('Failed to fetch sales data:', error)
+      console.error("Failed to fetch sales data:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleExportCSV = async () => {
-    if (!salesMetrics) return
+    if (!salesMetrics) return;
 
-    setExportingCSV(true)
+    setExportingCSV(true);
     try {
       // Preparar datos para CSV
-      const Papa = (await import('papaparse')).default
+      const Papa = (await import("papaparse")).default;
 
       // Revenue by day CSV
       const revenueData = salesMetrics.revenueByDay.map((day) => ({
         Date: day.date,
         Revenue: day.revenue.toFixed(2),
         Orders: day.orders,
-        'Avg Order Value': day.avgOrderValue.toFixed(2),
-      }))
+        "Avg Order Value": day.avgOrderValue.toFixed(2),
+      }));
 
-      const csv = Papa.unparse(revenueData)
+      const csv = Papa.unparse(revenueData);
 
       // Download CSV
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-      const link = document.createElement('a')
-      const url = URL.createObjectURL(blob)
-      link.setAttribute('href', url)
-      link.setAttribute('download', `sales-report-${dateRange.startDate.toISOString().split('T')[0]}-to-${dateRange.endDate.toISOString().split('T')[0]}.csv`)
-      link.style.visibility = 'hidden'
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute(
+        "download",
+        `sales-report-${dateRange.startDate.toISOString().split("T")[0]}-to-${dateRange.endDate.toISOString().split("T")[0]}.csv`,
+      );
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     } catch (error) {
-      console.error('Failed to export CSV:', error)
+      console.error("Failed to export CSV:", error);
     } finally {
-      setExportingCSV(false)
+      setExportingCSV(false);
     }
-  }
+  };
 
   const filteredCategoryData =
-    selectedCategory === 'all'
+    selectedCategory === "all"
       ? salesMetrics?.revenueByCategory || []
-      : salesMetrics?.revenueByCategory.filter((c) => c.categoryId === selectedCategory) || []
+      : salesMetrics?.revenueByCategory.filter(
+          (c) => c.categoryId === selectedCategory,
+        ) || [];
 
   if (!session?.user) {
     return (
       <div className="flex h-64 items-center justify-center">
         <p className="text-gray-600">Please sign in to view sales reports</p>
       </div>
-    )
+    );
   }
 
   return (
@@ -132,7 +137,7 @@ export default function SalesReportsPage() {
             className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Download className="h-4 w-4" />
-            {exportingCSV ? 'Exporting...' : 'Export CSV'}
+            {exportingCSV ? "Exporting..." : "Export CSV"}
           </button>
         </div>
       </div>
@@ -142,14 +147,19 @@ export default function SalesReportsPage() {
         {loading ? (
           <>
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-32 animate-pulse rounded-lg bg-gray-200" />
+              <div
+                key={i}
+                className="h-32 animate-pulse rounded-lg bg-gray-200"
+              />
             ))}
           </>
         ) : salesMetrics ? (
           <>
             <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
               <div className="flex items-center justify-between mb-2">
-                <p className="text-sm font-medium text-gray-600">Total Revenue</p>
+                <p className="text-sm font-medium text-gray-600">
+                  Total Revenue
+                </p>
                 <DollarSign className="h-5 w-5 text-green-600" />
               </div>
               <p className="text-3xl font-bold text-gray-900">
@@ -159,7 +169,9 @@ export default function SalesReportsPage() {
 
             <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
               <div className="flex items-center justify-between mb-2">
-                <p className="text-sm font-medium text-gray-600">Total Orders</p>
+                <p className="text-sm font-medium text-gray-600">
+                  Total Orders
+                </p>
                 <ShoppingCart className="h-5 w-5 text-blue-600" />
               </div>
               <p className="text-3xl font-bold text-gray-900">
@@ -169,7 +181,9 @@ export default function SalesReportsPage() {
 
             <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
               <div className="flex items-center justify-between mb-2">
-                <p className="text-sm font-medium text-gray-600">Avg Order Value</p>
+                <p className="text-sm font-medium text-gray-600">
+                  Avg Order Value
+                </p>
                 <TrendingUp className="h-5 w-5 text-purple-600" />
               </div>
               <p className="text-3xl font-bold text-gray-900">
@@ -179,12 +193,17 @@ export default function SalesReportsPage() {
 
             <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
               <div className="flex items-center justify-between mb-2">
-                <p className="text-sm font-medium text-gray-600">Products Sold</p>
+                <p className="text-sm font-medium text-gray-600">
+                  Products Sold
+                </p>
                 <Package className="h-5 w-5 text-orange-600" />
               </div>
               <p className="text-3xl font-bold text-gray-900">
                 {formatNumber(
-                  salesMetrics.topProducts.reduce((sum, p) => sum + p.quantitySold, 0)
+                  salesMetrics.topProducts.reduce(
+                    (sum, p) => sum + p.quantitySold,
+                    0,
+                  ),
                 )}
               </p>
             </div>
@@ -213,7 +232,9 @@ export default function SalesReportsPage() {
           />
         ) : (
           <div className="flex h-80 items-center justify-center">
-            <p className="text-gray-500">No revenue data available for this period</p>
+            <p className="text-gray-500">
+              No revenue data available for this period
+            </p>
           </div>
         )}
       </div>
@@ -313,12 +334,12 @@ export default function SalesReportsPage() {
                         <span
                           className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold ${
                             index === 0
-                              ? 'bg-yellow-100 text-yellow-700'
+                              ? "bg-yellow-100 text-yellow-700"
                               : index === 1
-                                ? 'bg-gray-100 text-gray-700'
+                                ? "bg-gray-100 text-gray-700"
                                 : index === 2
-                                  ? 'bg-orange-100 text-orange-700'
-                                  : 'bg-blue-50 text-blue-600'
+                                  ? "bg-orange-100 text-orange-700"
+                                  : "bg-blue-50 text-blue-600"
                           }`}
                         >
                           #{index + 1}
@@ -395,7 +416,9 @@ export default function SalesReportsPage() {
                         <div className="h-2 w-24 bg-gray-200 rounded-full overflow-hidden">
                           <div
                             className="h-full bg-blue-600 rounded-full"
-                            style={{ width: `${Math.min(category.percentage, 100)}%` }}
+                            style={{
+                              width: `${Math.min(category.percentage, 100)}%`,
+                            }}
                           />
                         </div>
                         <span className="text-sm text-gray-600">
@@ -411,5 +434,5 @@ export default function SalesReportsPage() {
         </div>
       )}
     </div>
-  )
+  );
 }

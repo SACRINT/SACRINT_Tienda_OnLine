@@ -1,8 +1,8 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
-import { useSession } from 'next-auth/react'
-import { subDays } from 'date-fns'
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import { subDays } from "date-fns";
 import {
   DollarSign,
   ShoppingCart,
@@ -10,40 +10,44 @@ import {
   TrendingUp,
   ArrowUpRight,
   ArrowDownRight,
-} from 'lucide-react'
+} from "lucide-react";
 
-import { StatCard, StatCardSkeleton } from '@/components/analytics/widgets/StatCard'
-import { LineChart } from '@/components/analytics/charts/LineChart'
-import { BarChart } from '@/components/analytics/charts/BarChart'
-import { DateRangePicker } from '@/components/analytics/filters/DateRangePicker'
+import {
+  StatCard,
+  StatCardSkeleton,
+} from "@/components/analytics/widgets/StatCard";
+import { LineChart } from "@/components/analytics/charts/LineChart";
+import { BarChart } from "@/components/analytics/charts/BarChart";
+import { DateRangePicker } from "@/components/analytics/filters/DateRangePicker";
 import {
   OverviewMetrics,
   SalesMetrics,
   AnalyticsResponse,
   formatCurrency,
   formatNumber,
-} from '@/lib/analytics/types'
+} from "@/lib/analytics/types";
 
 export default function AnalyticsPage() {
-  const { data: session } = useSession()
-  const [loading, setLoading] = useState(true)
-  const [overviewMetrics, setOverviewMetrics] = useState<OverviewMetrics | null>(null)
-  const [salesMetrics, setSalesMetrics] = useState<SalesMetrics | null>(null)
+  const { data: session } = useSession();
+  const [loading, setLoading] = useState(true);
+  const [overviewMetrics, setOverviewMetrics] =
+    useState<OverviewMetrics | null>(null);
+  const [salesMetrics, setSalesMetrics] = useState<SalesMetrics | null>(null);
   const [dateRange, setDateRange] = useState({
     startDate: subDays(new Date(), 29),
     endDate: new Date(),
-  })
+  });
 
   useEffect(() => {
     if (session?.user?.tenantId) {
-      fetchAnalytics()
+      fetchAnalytics();
     }
-  }, [session, dateRange])
+  }, [session, dateRange]);
 
   const fetchAnalytics = async () => {
-    if (!session?.user?.tenantId) return
+    if (!session?.user?.tenantId) return;
 
-    setLoading(true)
+    setLoading(true);
     try {
       // Fetch overview metrics
       const overviewRes = await fetch(
@@ -52,13 +56,13 @@ export default function AnalyticsPage() {
             tenantId: session.user.tenantId,
             startDate: dateRange.startDate.toISOString(),
             endDate: dateRange.endDate.toISOString(),
-          })
-      )
+          }),
+      );
 
       if (overviewRes.ok) {
         const overviewData: AnalyticsResponse<OverviewMetrics> =
-          await overviewRes.json()
-        setOverviewMetrics(overviewData.data)
+          await overviewRes.json();
+        setOverviewMetrics(overviewData.data);
       }
 
       // Fetch sales metrics (if API exists)
@@ -68,26 +72,27 @@ export default function AnalyticsPage() {
             tenantId: session.user.tenantId,
             startDate: dateRange.startDate.toISOString(),
             endDate: dateRange.endDate.toISOString(),
-          })
-      )
+          }),
+      );
 
       if (salesRes.ok) {
-        const salesData: AnalyticsResponse<SalesMetrics> = await salesRes.json()
-        setSalesMetrics(salesData.data)
+        const salesData: AnalyticsResponse<SalesMetrics> =
+          await salesRes.json();
+        setSalesMetrics(salesData.data);
       }
     } catch (error) {
-      console.error('Failed to fetch analytics:', error)
+      console.error("Failed to fetch analytics:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   if (!session?.user) {
     return (
       <div className="flex h-64 items-center justify-center">
         <p className="text-gray-600">Please sign in to view analytics</p>
       </div>
-    )
+    );
   }
 
   return (
@@ -95,7 +100,9 @@ export default function AnalyticsPage() {
       {/* Header */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Analytics Dashboard</h1>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Analytics Dashboard
+          </h1>
           <p className="mt-1 text-gray-600">
             Track your store&apos;s performance and metrics
           </p>
@@ -264,5 +271,5 @@ export default function AnalyticsPage() {
         </div>
       )}
     </div>
-  )
+  );
 }

@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import {
   BarChart as RechartsBarChart,
@@ -11,59 +11,59 @@ import {
   ResponsiveContainer,
   TooltipProps,
   Cell,
-} from 'recharts'
-import { formatCurrency, formatNumber } from '@/lib/analytics/types'
+} from "recharts";
+import { formatCurrency, formatNumber } from "@/lib/analytics/types";
 
 export interface BarChartData {
-  name: string
-  value: number
-  fill?: string
+  name: string;
+  value: number;
+  fill?: string;
 }
 
 interface BarChartProps {
-  data: BarChartData[]
-  dataKey?: string
-  xAxisKey?: string
-  title?: string
-  height?: number
-  showGrid?: boolean
-  showLegend?: boolean
-  formatValue?: 'currency' | 'number' | 'percentage'
-  colors?: string[]
-  horizontal?: boolean
+  data: BarChartData[];
+  dataKey?: string;
+  xAxisKey?: string;
+  title?: string;
+  height?: number;
+  showGrid?: boolean;
+  showLegend?: boolean;
+  formatValue?: "currency" | "number" | "percentage";
+  colors?: string[];
+  horizontal?: boolean;
 }
 
 const DEFAULT_COLORS = [
-  '#3b82f6',
-  '#8b5cf6',
-  '#ec4899',
-  '#f59e0b',
-  '#10b981',
-  '#06b6d4',
-]
+  "#3b82f6",
+  "#8b5cf6",
+  "#ec4899",
+  "#f59e0b",
+  "#10b981",
+  "#06b6d4",
+];
 
 export function BarChart({
   data,
-  dataKey = 'value',
-  xAxisKey = 'name',
+  dataKey = "value",
+  xAxisKey = "name",
   title,
   height = 300,
   showGrid = true,
   showLegend = false,
-  formatValue = 'number',
+  formatValue = "number",
   colors = DEFAULT_COLORS,
   horizontal = false,
 }: BarChartProps) {
   const formatValueFn = (value: number) => {
     switch (formatValue) {
-      case 'currency':
-        return formatCurrency(value)
-      case 'percentage':
-        return `${value.toFixed(2)}%`
+      case "currency":
+        return formatCurrency(value);
+      case "percentage":
+        return `${value.toFixed(2)}%`;
       default:
-        return formatNumber(value)
+        return formatNumber(value);
     }
-  }
+  };
 
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
@@ -73,14 +73,14 @@ export function BarChart({
             {payload[0].payload[xAxisKey]}
           </p>
           <p className="mt-1 text-sm text-gray-600">
-            <span className="font-medium">Value:</span>{' '}
+            <span className="font-medium">Value:</span>{" "}
             {formatValueFn(payload[0].value as number)}
           </p>
         </div>
-      )
+      );
     }
-    return null
-  }
+    return null;
+  };
 
   if (horizontal) {
     return (
@@ -126,7 +126,7 @@ export function BarChart({
           </RechartsBarChart>
         </ResponsiveContainer>
       </div>
-    )
+    );
   }
 
   return (
@@ -167,5 +167,5 @@ export function BarChart({
         </RechartsBarChart>
       </ResponsiveContainer>
     </div>
-  )
+  );
 }

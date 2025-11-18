@@ -1,15 +1,15 @@
 // Order Success Page
 // Confirmation page after successful order placement
 
-import Link from 'next/link'
-import { CheckCircle, Package, Mail, ArrowRight } from 'lucide-react'
+import Link from "next/link";
+import { CheckCircle, Package, Mail, ArrowRight } from "lucide-react";
 
 export default function OrderSuccessPage({
   searchParams,
 }: {
-  searchParams: { orderId?: string }
+  searchParams: { orderId?: string };
 }) {
-  const orderId = searchParams.orderId || 'ORD-2024-0001'
+  const orderId = searchParams.orderId || "ORD-2024-0001";
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">
@@ -45,10 +45,10 @@ export default function OrderSuccessPage({
             <div className="flex justify-between">
               <span className="text-gray-600">Order Date</span>
               <span className="font-medium text-gray-900">
-                {new Date().toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
+                {new Date().toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
                 })}
               </span>
             </div>
@@ -66,15 +66,13 @@ export default function OrderSuccessPage({
             <li className="flex items-start gap-3">
               <Mail className="mt-0.5 h-5 w-5 flex-shrink-0" />
               <span>
-                A confirmation email has been sent to your email address with your
-                order details
+                A confirmation email has been sent to your email address with
+                your order details
               </span>
             </li>
             <li className="flex items-start gap-3">
               <Package className="mt-0.5 h-5 w-5 flex-shrink-0" />
-              <span>
-                Your order will be processed within 1-2 business days
-              </span>
+              <span>Your order will be processed within 1-2 business days</span>
             </li>
             <li className="flex items-start gap-3">
               <CheckCircle className="mt-0.5 h-5 w-5 flex-shrink-0" />
@@ -105,13 +103,16 @@ export default function OrderSuccessPage({
         {/* Support */}
         <div className="mt-8 text-center text-sm text-gray-600">
           <p>
-            Need help?{' '}
-            <Link href="/support" className="font-medium text-blue-600 hover:text-blue-700">
+            Need help?{" "}
+            <Link
+              href="/support"
+              className="font-medium text-blue-600 hover:text-blue-700"
+            >
               Contact Support
             </Link>
           </p>
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -1,26 +1,26 @@
 // Review Form Component
 // Submit product review with rating, title, and comment
 
-'use client'
-import Image from 'next/image'
+"use client";
+import Image from "next/image";
 
-import { useState } from 'react'
-import { Star, X, Send, AlertCircle } from 'lucide-react'
+import { useState } from "react";
+import { Star, X, Send, AlertCircle } from "lucide-react";
 
 export interface ReviewFormProps {
-  productId: string
-  productName?: string
-  productImage?: string
-  onSubmit?: (data: ReviewFormData) => Promise<void>
-  onCancel?: () => void
-  isModal?: boolean
+  productId: string;
+  productName?: string;
+  productImage?: string;
+  onSubmit?: (data: ReviewFormData) => Promise<void>;
+  onCancel?: () => void;
+  isModal?: boolean;
 }
 
 export interface ReviewFormData {
-  productId: string
-  rating: number
-  title: string
-  comment: string
+  productId: string;
+  rating: number;
+  title: string;
+  comment: string;
 }
 
 export function ReviewForm({
@@ -31,52 +31,52 @@ export function ReviewForm({
   onCancel,
   isModal = false,
 }: ReviewFormProps) {
-  const [rating, setRating] = useState(0)
-  const [hoverRating, setHoverRating] = useState(0)
-  const [title, setTitle] = useState('')
-  const [comment, setComment] = useState('')
+  const [rating, setRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [title, setTitle] = useState("");
+  const [comment, setComment] = useState("");
   const [errors, setErrors] = useState<{
-    rating?: string
-    title?: string
-    comment?: string
-  }>({})
-  const [isSubmitting, setIsSubmitting] = useState(false)
+    rating?: string;
+    title?: string;
+    comment?: string;
+  }>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const validateForm = (): boolean => {
-    const newErrors: typeof errors = {}
+    const newErrors: typeof errors = {};
 
     if (rating === 0) {
-      newErrors.rating = 'Please select a rating'
+      newErrors.rating = "Please select a rating";
     }
 
     if (!title.trim()) {
-      newErrors.title = 'Title is required'
+      newErrors.title = "Title is required";
     } else if (title.trim().length < 3) {
-      newErrors.title = 'Title must be at least 3 characters'
+      newErrors.title = "Title must be at least 3 characters";
     } else if (title.trim().length > 100) {
-      newErrors.title = 'Title must not exceed 100 characters'
+      newErrors.title = "Title must not exceed 100 characters";
     }
 
     if (!comment.trim()) {
-      newErrors.comment = 'Review is required'
+      newErrors.comment = "Review is required";
     } else if (comment.trim().length < 10) {
-      newErrors.comment = 'Review must be at least 10 characters'
+      newErrors.comment = "Review must be at least 10 characters";
     } else if (comment.trim().length > 500) {
-      newErrors.comment = 'Review must not exceed 500 characters'
+      newErrors.comment = "Review must not exceed 500 characters";
     }
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!validateForm()) {
-      return
+      return;
     }
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
 
     try {
       await onSubmit?.({
@@ -84,29 +84,29 @@ export function ReviewForm({
         rating,
         title: title.trim(),
         comment: comment.trim(),
-      })
+      });
 
       // Reset form on success
-      setRating(0)
-      setTitle('')
-      setComment('')
-      setErrors({})
+      setRating(0);
+      setTitle("");
+      setComment("");
+      setErrors({});
     } catch (error) {
-      console.error('Failed to submit review:', error)
+      console.error("Failed to submit review:", error);
       setErrors({
-        comment: 'Failed to submit review. Please try again.',
-      })
+        comment: "Failed to submit review. Please try again.",
+      });
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const handleRatingClick = (value: number) => {
-    setRating(value)
+    setRating(value);
     if (errors.rating) {
-      setErrors({ ...errors, rating: undefined })
+      setErrors({ ...errors, rating: undefined });
     }
-  }
+  };
 
   const FormContent = (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -116,7 +116,7 @@ export function ReviewForm({
           {productImage && (
             <Image
               src={productImage}
-              alt={productName || 'Product image'}
+              alt={productName || "Product image"}
               width={64}
               height={64}
               className="h-16 w-16 rounded-lg object-cover"
@@ -151,8 +151,8 @@ export function ReviewForm({
                 <Star
                   className={`h-8 w-8 ${
                     value <= (hoverRating || rating)
-                      ? 'fill-yellow-400 text-yellow-400'
-                      : 'text-gray-300'
+                      ? "fill-yellow-400 text-yellow-400"
+                      : "text-gray-300"
                   }`}
                 />
               </button>
@@ -185,13 +185,13 @@ export function ReviewForm({
           type="text"
           value={title}
           onChange={(e) => {
-            setTitle(e.target.value)
+            setTitle(e.target.value);
             if (errors.title) {
-              setErrors({ ...errors, title: undefined })
+              setErrors({ ...errors, title: undefined });
             }
           }}
           className={`mt-1 w-full rounded-lg border ${
-            errors.title ? 'border-red-300' : 'border-gray-300'
+            errors.title ? "border-red-300" : "border-gray-300"
           } bg-white px-4 py-2 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500`}
           placeholder="Summarize your experience"
           maxLength={100}
@@ -223,13 +223,13 @@ export function ReviewForm({
           rows={6}
           value={comment}
           onChange={(e) => {
-            setComment(e.target.value)
+            setComment(e.target.value);
             if (errors.comment) {
-              setErrors({ ...errors, comment: undefined })
+              setErrors({ ...errors, comment: undefined });
             }
           }}
           className={`mt-1 w-full rounded-lg border ${
-            errors.comment ? 'border-red-300' : 'border-gray-300'
+            errors.comment ? "border-red-300" : "border-gray-300"
           } bg-white px-4 py-2 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500`}
           placeholder="Share your thoughts about this product..."
           maxLength={500}
@@ -277,11 +277,11 @@ export function ReviewForm({
           className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-2 font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
         >
           <Send className="h-4 w-4" />
-          <span>{isSubmitting ? 'Submitting...' : 'Submit Review'}</span>
+          <span>{isSubmitting ? "Submitting..." : "Submit Review"}</span>
         </button>
       </div>
     </form>
-  )
+  );
 
   if (isModal) {
     return (
@@ -304,7 +304,7 @@ export function ReviewForm({
           <div className="p-6">{FormContent}</div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -314,5 +314,5 @@ export function ReviewForm({
       </h3>
       {FormContent}
     </div>
-  )
+  );
 }

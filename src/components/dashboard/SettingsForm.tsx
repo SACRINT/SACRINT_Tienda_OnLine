@@ -1,55 +1,55 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface SettingsFormProps {
   tenant: {
-    id: string
-    name: string
-    domain: string | null
-  }
+    id: string;
+    name: string;
+    domain: string | null;
+  };
 }
 
 export function SettingsForm({ tenant }: SettingsFormProps) {
-  const router = useRouter()
-  const [loading, setLoading] = useState(false)
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: tenant.name,
-    domain: tenant.domain || '',
-  })
+    domain: tenant.domain || "",
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
+    e.preventDefault();
+    setLoading(true);
 
     try {
       const res = await fetch(`/api/tenants/${tenant.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
-      })
+      });
 
       if (res.ok) {
-        router.refresh()
-        alert('Configuración actualizada correctamente')
+        router.refresh();
+        alert("Configuración actualizada correctamente");
       } else {
-        alert('Error al actualizar la configuración')
+        alert("Error al actualizar la configuración");
       }
     } catch (error) {
-      alert('Error al actualizar la configuración')
+      alert("Error al actualizar la configuración");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -84,8 +84,8 @@ export function SettingsForm({ tenant }: SettingsFormProps) {
         disabled={loading}
         className="bg-blue-600 hover:bg-blue-700"
       >
-        {loading ? 'Guardando...' : 'Guardar Cambios'}
+        {loading ? "Guardando..." : "Guardar Cambios"}
       </Button>
     </form>
-  )
+  );
 }

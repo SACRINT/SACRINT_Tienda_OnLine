@@ -1,26 +1,26 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { Filter, X, Search } from 'lucide-react'
+import { useState } from "react";
+import { Filter, X, Search } from "lucide-react";
 
 export interface FilterOption {
-  id: string
-  label: string
-  type: 'select' | 'range' | 'search' | 'date'
-  options?: { value: string; label: string }[]
-  min?: number
-  max?: number
+  id: string;
+  label: string;
+  type: "select" | "range" | "search" | "date";
+  options?: { value: string; label: string }[];
+  min?: number;
+  max?: number;
 }
 
 export interface FilterValues {
-  [key: string]: any
+  [key: string]: any;
 }
 
 interface AdvancedFiltersProps {
-  filters: FilterOption[]
-  values: FilterValues
-  onChange: (values: FilterValues) => void
-  onClear: () => void
+  filters: FilterOption[];
+  values: FilterValues;
+  onChange: (values: FilterValues) => void;
+  onClear: () => void;
 }
 
 export function AdvancedFilters({
@@ -29,22 +29,22 @@ export function AdvancedFilters({
   onChange,
   onClear,
 }: AdvancedFiltersProps) {
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false);
 
   const handleFilterChange = (filterId: string, value: any) => {
     onChange({
       ...values,
       [filterId]: value,
-    })
-  }
+    });
+  };
 
   const handleClearFilter = (filterId: string) => {
-    const newValues = { ...values }
-    delete newValues[filterId]
-    onChange(newValues)
-  }
+    const newValues = { ...values };
+    delete newValues[filterId];
+    onChange(newValues);
+  };
 
-  const activeFiltersCount = Object.keys(values).length
+  const activeFiltersCount = Object.keys(values).length;
 
   return (
     <div className="space-y-4">
@@ -54,8 +54,8 @@ export function AdvancedFilters({
           onClick={() => setIsOpen(!isOpen)}
           className={`inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
             isOpen
-              ? 'border-blue-600 bg-blue-50 text-blue-700'
-              : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+              ? "border-blue-600 bg-blue-50 text-blue-700"
+              : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
           }`}
         >
           <Filter className="h-4 w-4" />
@@ -97,9 +97,9 @@ export function AdvancedFilters({
                   )}
                 </div>
 
-                {filter.type === 'select' && (
+                {filter.type === "select" && (
                   <select
-                    value={values[filter.id] || ''}
+                    value={values[filter.id] || ""}
                     onChange={(e) =>
                       handleFilterChange(filter.id, e.target.value)
                     }
@@ -114,12 +114,12 @@ export function AdvancedFilters({
                   </select>
                 )}
 
-                {filter.type === 'search' && (
+                {filter.type === "search" && (
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                     <input
                       type="text"
-                      value={values[filter.id] || ''}
+                      value={values[filter.id] || ""}
                       onChange={(e) =>
                         handleFilterChange(filter.id, e.target.value)
                       }
@@ -129,12 +129,12 @@ export function AdvancedFilters({
                   </div>
                 )}
 
-                {filter.type === 'range' && (
+                {filter.type === "range" && (
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <input
                         type="number"
-                        value={values[filter.id]?.min || ''}
+                        value={values[filter.id]?.min || ""}
                         onChange={(e) =>
                           handleFilterChange(filter.id, {
                             ...values[filter.id],
@@ -147,7 +147,7 @@ export function AdvancedFilters({
                       <span className="text-gray-500">-</span>
                       <input
                         type="number"
-                        value={values[filter.id]?.max || ''}
+                        value={values[filter.id]?.max || ""}
                         onChange={(e) =>
                           handleFilterChange(filter.id, {
                             ...values[filter.id],
@@ -161,10 +161,10 @@ export function AdvancedFilters({
                   </div>
                 )}
 
-                {filter.type === 'date' && (
+                {filter.type === "date" && (
                   <input
                     type="date"
-                    value={values[filter.id] || ''}
+                    value={values[filter.id] || ""}
                     onChange={(e) =>
                       handleFilterChange(filter.id, e.target.value)
                     }
@@ -181,15 +181,15 @@ export function AdvancedFilters({
       {activeFiltersCount > 0 && (
         <div className="flex flex-wrap gap-2">
           {Object.entries(values).map(([key, value]) => {
-            const filter = filters.find((f) => f.id === key)
-            if (!filter) return null
+            const filter = filters.find((f) => f.id === key);
+            if (!filter) return null;
 
-            let displayValue = value
-            if (filter.type === 'range' && value) {
-              displayValue = `${value.min || '0'} - ${value.max || '∞'}`
-            } else if (filter.type === 'select' && value) {
-              const option = filter.options?.find((o) => o.value === value)
-              displayValue = option?.label || value
+            let displayValue = value;
+            if (filter.type === "range" && value) {
+              displayValue = `${value.min || "0"} - ${value.max || "∞"}`;
+            } else if (filter.type === "select" && value) {
+              const option = filter.options?.find((o) => o.value === value);
+              displayValue = option?.label || value;
             }
 
             return (
@@ -207,114 +207,114 @@ export function AdvancedFilters({
                   <X className="h-3 w-3" />
                 </button>
               </div>
-            )
+            );
           })}
         </div>
       )}
     </div>
-  )
+  );
 }
 
 // Predefined filters for products
 export const PRODUCT_FILTERS: FilterOption[] = [
   {
-    id: 'search',
-    label: 'Search',
-    type: 'search',
+    id: "search",
+    label: "Search",
+    type: "search",
   },
   {
-    id: 'category',
-    label: 'Category',
-    type: 'select',
+    id: "category",
+    label: "Category",
+    type: "select",
     options: [
-      { value: 'electronics', label: 'Electronics' },
-      { value: 'clothing', label: 'Clothing' },
-      { value: 'books', label: 'Books' },
+      { value: "electronics", label: "Electronics" },
+      { value: "clothing", label: "Clothing" },
+      { value: "books", label: "Books" },
       // Add more categories dynamically
     ],
   },
   {
-    id: 'status',
-    label: 'Status',
-    type: 'select',
+    id: "status",
+    label: "Status",
+    type: "select",
     options: [
-      { value: 'ACTIVE', label: 'Active' },
-      { value: 'DRAFT', label: 'Draft' },
-      { value: 'ARCHIVED', label: 'Archived' },
+      { value: "ACTIVE", label: "Active" },
+      { value: "DRAFT", label: "Draft" },
+      { value: "ARCHIVED", label: "Archived" },
     ],
   },
   {
-    id: 'price',
-    label: 'Price',
-    type: 'range',
+    id: "price",
+    label: "Price",
+    type: "range",
   },
   {
-    id: 'stock',
-    label: 'Stock',
-    type: 'range',
+    id: "stock",
+    label: "Stock",
+    type: "range",
   },
-]
+];
 
 // Predefined filters for orders
 export const ORDER_FILTERS: FilterOption[] = [
   {
-    id: 'search',
-    label: 'Order ID / Customer',
-    type: 'search',
+    id: "search",
+    label: "Order ID / Customer",
+    type: "search",
   },
   {
-    id: 'status',
-    label: 'Status',
-    type: 'select',
+    id: "status",
+    label: "Status",
+    type: "select",
     options: [
-      { value: 'PENDING', label: 'Pending' },
-      { value: 'PROCESSING', label: 'Processing' },
-      { value: 'SHIPPED', label: 'Shipped' },
-      { value: 'DELIVERED', label: 'Delivered' },
-      { value: 'CANCELLED', label: 'Cancelled' },
+      { value: "PENDING", label: "Pending" },
+      { value: "PROCESSING", label: "Processing" },
+      { value: "SHIPPED", label: "Shipped" },
+      { value: "DELIVERED", label: "Delivered" },
+      { value: "CANCELLED", label: "Cancelled" },
     ],
   },
   {
-    id: 'paymentMethod',
-    label: 'Payment Method',
-    type: 'select',
+    id: "paymentMethod",
+    label: "Payment Method",
+    type: "select",
     options: [
-      { value: 'CARD', label: 'Card' },
-      { value: 'PAYPAL', label: 'PayPal' },
+      { value: "CARD", label: "Card" },
+      { value: "PAYPAL", label: "PayPal" },
     ],
   },
   {
-    id: 'total',
-    label: 'Total',
-    type: 'range',
+    id: "total",
+    label: "Total",
+    type: "range",
   },
   {
-    id: 'date',
-    label: 'Date',
-    type: 'date',
+    id: "date",
+    label: "Date",
+    type: "date",
   },
-]
+];
 
 // Predefined filters for customers
 export const CUSTOMER_FILTERS: FilterOption[] = [
   {
-    id: 'search',
-    label: 'Name / Email',
-    type: 'search',
+    id: "search",
+    label: "Name / Email",
+    type: "search",
   },
   {
-    id: 'totalSpent',
-    label: 'Total Spent',
-    type: 'range',
+    id: "totalSpent",
+    label: "Total Spent",
+    type: "range",
   },
   {
-    id: 'orders',
-    label: 'Order Count',
-    type: 'range',
+    id: "orders",
+    label: "Order Count",
+    type: "range",
   },
   {
-    id: 'registeredDate',
-    label: 'Registered Date',
-    type: 'date',
+    id: "registeredDate",
+    label: "Registered Date",
+    type: "date",
   },
-]
+];
