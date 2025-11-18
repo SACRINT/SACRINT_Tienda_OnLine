@@ -17,7 +17,7 @@ const createNotificationSchema = z.object({
   title: z.string().min(1).max(200),
   message: z.string().min(1),
   actionUrl: z.string().url().optional(),
-  metadata: z.record(z.any()).optional(),
+  metadata: z.record(z.string(), z.any()).optional(),
 })
 
 export async function GET(req: NextRequest) {
