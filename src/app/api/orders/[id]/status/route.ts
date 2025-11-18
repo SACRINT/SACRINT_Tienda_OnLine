@@ -129,7 +129,7 @@ export async function GET(
     }
 
     // TODO: Implement status history tracking - currently returning empty for future implementation
-    const formattedHistory = []
+    const formattedHistory: any[] = []
 
     return NextResponse.json({
       history: formattedHistory,

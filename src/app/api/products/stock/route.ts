@@ -59,7 +59,7 @@ export async function GET(req: NextRequest) {
     const totalValue = products.reduce((sum: number, p: any) => sum + p.price * p.stock, 0)
 
     // TODO: Implement activity log model for tracking recent stock changes
-    const recentChanges = []
+    const recentChanges: any[] = []
 
     return NextResponse.json({
       summary: {
