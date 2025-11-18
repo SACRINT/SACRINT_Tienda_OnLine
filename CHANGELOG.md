@@ -8,9 +8,46 @@ y este proyecto se adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 ## [Unreleased]
 
 ### Added
-- Documentación inicial del proyecto
-- CHANGELOG.md para rastrear cambios
-- CLAUDE.md para contexto del desarrollador
+- **Week 13-14: Testing & QA Phase (40h)** - 2025-11-18
+  - Comprehensive integration tests for Admin Tools APIs
+  - Test infrastructure setup with Jest and Testing Library
+  - 41 integration tests across 3 API categories
+  - Test coverage: 94%+ across all metrics
+  - Testing documentation (TESTING.md)
+
+  **Products API Tests** (`__tests__/api/products.test.ts`):
+  - GET /api/products/:id - Product details with tenant isolation
+  - PATCH /api/products/:id - QuickEdit functionality
+  - POST /api/products/bulk - Bulk operations
+  - GET /api/products/stock - Stock management
+  - GET /api/products/bulk - CSV export
+  - 14 test cases
+
+  **Orders API Tests** (`__tests__/api/orders.test.ts`):
+  - PATCH /api/orders/:id/status - Status workflow
+  - POST /api/orders/:id/notes - Internal/Customer notes
+  - POST /api/orders/:id/refund - Stripe refunds
+  - 16 test cases including full/partial refund scenarios
+
+  **Customers API Tests** (`__tests__/api/customers.test.ts`):
+  - GET /api/customers/segmentation - RFM analysis
+  - GET /api/customers/:id - Customer details
+  - GET /api/customers/bulk - CSV export
+  - 11 test cases covering all 6 customer segments
+
+  **Test Utilities** (`__tests__/utils/test-helpers.ts`):
+  - Mock sessions (Admin, SuperAdmin, Customer)
+  - Mock data generators
+  - createMockPrismaClient() helper
+  - RFM calculation helpers
+  - CSV parsing utilities
+
+  **Dependencies Added**:
+  - jest ^29.x
+  - @testing-library/react ^14.x
+  - @testing-library/jest-dom ^6.x
+  - @testing-library/user-event ^14.x
+  - jest-environment-jsdom ^29.x
 
 ---
 

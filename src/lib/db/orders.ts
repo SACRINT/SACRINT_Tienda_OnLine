@@ -139,7 +139,7 @@ export async function createOrder(data: {
       discount = calculateDiscount(
         {
           type: validatedCoupon.type,
-          discount: validatedCoupon.discount,
+          value: validatedCoupon.value,
           maxDiscount: validatedCoupon.maxDiscount,
         },
         subtotal + shippingCost + tax

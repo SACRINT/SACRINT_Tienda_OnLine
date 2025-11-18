@@ -1,225 +1,268 @@
-import Image from 'next/image'
-import { auth } from '@/lib/auth/auth'
-import { getDashboardMetrics, getSalesData, getTopProducts } from '@/lib/db/dashboard'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+'use client'
 
-export default async function AnalyticsPage({
-  searchParams,
-}: {
-  searchParams: { days?: string }
-}) {
-  const session = await auth()
+import { useEffect, useState } from 'react'
+import { useSession } from 'next-auth/react'
+import { subDays } from 'date-fns'
+import {
+  DollarSign,
+  ShoppingCart,
+  Users,
+  TrendingUp,
+  ArrowUpRight,
+  ArrowDownRight,
+} from 'lucide-react'
 
-  if (!session?.user?.tenantId) {
-    return <div>No tenant found</div>
+import { StatCard, StatCardSkeleton } from '@/components/analytics/widgets/StatCard'
+import { LineChart } from '@/components/analytics/charts/LineChart'
+import { BarChart } from '@/components/analytics/charts/BarChart'
+import { DateRangePicker } from '@/components/analytics/filters/DateRangePicker'
+import {
+  OverviewMetrics,
+  SalesMetrics,
+  AnalyticsResponse,
+  formatCurrency,
+  formatNumber,
+} from '@/lib/analytics/types'
+
+export default function AnalyticsPage() {
+  const { data: session } = useSession()
+  const [loading, setLoading] = useState(true)
+  const [overviewMetrics, setOverviewMetrics] = useState<OverviewMetrics | null>(null)
+  const [salesMetrics, setSalesMetrics] = useState<SalesMetrics | null>(null)
+  const [dateRange, setDateRange] = useState({
+    startDate: subDays(new Date(), 29),
+    endDate: new Date(),
+  })
+
+  useEffect(() => {
+    if (session?.user?.tenantId) {
+      fetchAnalytics()
+    }
+  }, [session, dateRange])
+
+  const fetchAnalytics = async () => {
+    if (!session?.user?.tenantId) return
+
+    setLoading(true)
+    try {
+      // Fetch overview metrics
+      const overviewRes = await fetch(
+        `/api/analytics/overview?` +
+          new URLSearchParams({
+            tenantId: session.user.tenantId,
+            startDate: dateRange.startDate.toISOString(),
+            endDate: dateRange.endDate.toISOString(),
+          })
+      )
+
+      if (overviewRes.ok) {
+        const overviewData: AnalyticsResponse<OverviewMetrics> =
+          await overviewRes.json()
+        setOverviewMetrics(overviewData.data)
+      }
+
+      // Fetch sales metrics (if API exists)
+      const salesRes = await fetch(
+        `/api/analytics/sales?` +
+          new URLSearchParams({
+            tenantId: session.user.tenantId,
+            startDate: dateRange.startDate.toISOString(),
+            endDate: dateRange.endDate.toISOString(),
+          })
+      )
+
+      if (salesRes.ok) {
+        const salesData: AnalyticsResponse<SalesMetrics> = await salesRes.json()
+        setSalesMetrics(salesData.data)
+      }
+    } catch (error) {
+      console.error('Failed to fetch analytics:', error)
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const days = parseInt(searchParams.days || '30')
-  const metrics = await getDashboardMetrics(session.user.tenantId)
-  const salesData = await getSalesData(session.user.tenantId, days)
-  const topProducts = await getTopProducts(session.user.tenantId, 5)
-
-  const avgOrderValue = metrics.totalOrders > 0 ? metrics.totalRevenue / metrics.totalOrders : 0
+  if (!session?.user) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <p className="text-gray-600">Please sign in to view analytics</p>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-3xl font-bold text-gray-900">Análisis</h2>
-        <p className="text-gray-600 mt-1">
-          Métricas y estadísticas de tu tienda
-        </p>
+      {/* Header */}
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Analytics Dashboard</h1>
+          <p className="mt-1 text-gray-600">
+            Track your store&apos;s performance and metrics
+          </p>
+        </div>
+
+        {/* Date Range Picker */}
+        <DateRangePicker value={dateRange} onChange={setDateRange} />
       </div>
 
-      {/* KPIs */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Ingresos Totales
-            </CardTitle>
-            <svg
-              className="h-4 w-4 text-gray-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              ${metrics.totalRevenue.toFixed(2)}
-            </div>
-            <p className="text-xs text-gray-500">
-              De {metrics.totalOrders} órdenes
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Órdenes
-            </CardTitle>
-            <svg
-              className="h-4 w-4 text-gray-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-              />
-            </svg>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{metrics.totalOrders}</div>
-            <p className="text-xs text-gray-500">
-              Desde el inicio
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Productos
-            </CardTitle>
-            <svg
-              className="h-4 w-4 text-gray-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-              />
-            </svg>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{metrics.totalProducts}</div>
-            <p className="text-xs text-gray-500">
-              En tu catálogo
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Valor Promedio
-            </CardTitle>
-            <svg
-              className="h-4 w-4 text-gray-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
-              />
-            </svg>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              ${avgOrderValue.toFixed(2)}
-            </div>
-            <p className="text-xs text-gray-500">
-              Por orden
-            </p>
-          </CardContent>
-        </Card>
+      {/* Overview Stats */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {loading ? (
+          <>
+            <StatCardSkeleton />
+            <StatCardSkeleton />
+            <StatCardSkeleton />
+            <StatCardSkeleton />
+          </>
+        ) : overviewMetrics ? (
+          <>
+            <StatCard
+              title="Total Revenue"
+              metric={overviewMetrics.revenue}
+              icon={DollarSign}
+              formatType="currency"
+              description="Total revenue in selected period"
+            />
+            <StatCard
+              title="Total Orders"
+              metric={overviewMetrics.orders}
+              icon={ShoppingCart}
+              formatType="number"
+              description="Number of orders placed"
+            />
+            <StatCard
+              title="Customers"
+              metric={overviewMetrics.customers}
+              icon={Users}
+              formatType="number"
+              description="Unique customers"
+            />
+            <StatCard
+              title="Avg Order Value"
+              metric={overviewMetrics.avgOrderValue}
+              icon={TrendingUp}
+              formatType="currency"
+              description="Average value per order"
+            />
+          </>
+        ) : (
+          <div className="col-span-4 flex h-32 items-center justify-center">
+            <p className="text-gray-600">No data available</p>
+          </div>
+        )}
       </div>
 
-      {/* Sales Chart */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Ventas - Últimos {days} días</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {salesData.length === 0 ? (
-              <p className="text-center text-gray-500 py-8">
-                No hay datos de ventas para mostrar
-              </p>
-            ) : (
-              <div className="space-y-2">
-                {salesData.map((day: any) => (
-                  <div key={day.date} className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">
-                      {new Date(day.date).toLocaleDateString('es-ES')}
-                    </span>
-                    <div className="flex items-center gap-4">
-                      <span className="text-sm font-medium">
-                        {day.orders} órdenes
-                      </span>
-                      <span className="text-sm font-bold">
-                        ${day.revenue.toFixed(2)}
-                      </span>
-                    </div>
-                  </div>
+      {/* Charts Section */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        {/* Revenue Trend */}
+        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+          <h3 className="mb-4 text-lg font-semibold text-gray-900">
+            Revenue Trend
+          </h3>
+          {loading ? (
+            <div className="flex h-72 items-center justify-center">
+              <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-blue-600"></div>
+            </div>
+          ) : salesMetrics && salesMetrics.revenueByDay.length > 0 ? (
+            <LineChart
+              data={salesMetrics.revenueByDay.map((d) => ({
+                date: d.date,
+                value: d.revenue,
+              }))}
+              formatValue="currency"
+              height={300}
+            />
+          ) : (
+            <div className="flex h-72 items-center justify-center">
+              <p className="text-gray-500">No revenue data available</p>
+            </div>
+          )}
+        </div>
+
+        {/* Revenue by Category */}
+        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+          <h3 className="mb-4 text-lg font-semibold text-gray-900">
+            Revenue by Category
+          </h3>
+          {loading ? (
+            <div className="flex h-72 items-center justify-center">
+              <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-blue-600"></div>
+            </div>
+          ) : salesMetrics && salesMetrics.revenueByCategory.length > 0 ? (
+            <BarChart
+              data={salesMetrics.revenueByCategory.map((c) => ({
+                name: c.categoryName,
+                value: c.revenue,
+              }))}
+              formatValue="currency"
+              height={300}
+            />
+          ) : (
+            <div className="flex h-72 items-center justify-center">
+              <p className="text-gray-500">No category data available</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Top Products Table */}
+      {salesMetrics && salesMetrics.topProducts.length > 0 && (
+        <div className="rounded-lg border border-gray-200 bg-white shadow-sm">
+          <div className="border-b border-gray-200 p-6">
+            <h3 className="text-lg font-semibold text-gray-900">
+              Top Selling Products
+            </h3>
+            <p className="mt-1 text-sm text-gray-600">
+              Best performing products by revenue
+            </p>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                    Product
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                    Quantity Sold
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                    Revenue
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                    Avg Price
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200 bg-white">
+                {salesMetrics.topProducts.map((product, index) => (
+                  <tr key={product.productId} className="hover:bg-gray-50">
+                    <td className="whitespace-nowrap px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm font-medium text-gray-500">
+                          #{index + 1}
+                        </span>
+                        <span className="font-medium text-gray-900">
+                          {product.productName}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-600">
+                      {formatNumber(product.quantitySold)} units
+                    </td>
+                    <td className="whitespace-nowrap px-6 py-4 text-sm font-semibold text-gray-900">
+                      {formatCurrency(product.revenue)}
+                    </td>
+                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-600">
+                      {formatCurrency(product.avgPrice)}
+                    </td>
+                  </tr>
                 ))}
-              </div>
-            )}
+              </tbody>
+            </table>
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Top Products */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Productos Más Vendidos</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {topProducts && topProducts.length > 0 ? (
-              topProducts.map((product: any) => (
-                <div
-                  key={product.id}
-                  className="flex items-center justify-between border-b pb-3 last:border-0"
-                >
-                  <div className="flex items-center space-x-4">
-                    {product.images[0] && (
-                      <Image
-                        src={product.images[0].url}
-                        alt={product.name}
-                        width={48}
-                        height={48}
-                        className="h-12 w-12 rounded object-cover"
-                      />
-                    )}
-                    <div>
-                      <p className="font-medium">{product.name}</p>
-                      <p className="text-sm text-gray-500">${product.price.toFixed(2)}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-medium">{product.soldCount || 0} vendidos</p>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="text-center text-gray-500 py-4">
-                No hay datos de productos
-              </p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+        </div>
+      )}
     </div>
   )
 }

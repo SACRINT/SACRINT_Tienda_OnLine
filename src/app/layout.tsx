@@ -1,10 +1,33 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import './globals.css'
+import { ServiceWorkerRegistration } from '@/components/shared/ServiceWorkerRegistration'
+import { PWAInstallPrompt } from '@/components/shared/PWAInstallPrompt'
+import { MobileBottomNav, MobileHamburgerMenu } from '@/components/shared/MobileNav'
 
 export const metadata: Metadata = {
   title: 'Tienda Online 2025 - E-commerce SaaS',
   description: 'Plataforma multi-tenant de e-commerce con seguridad de nivel bancario',
   keywords: 'ecommerce, tienda online, shopping, productos, multi-tenant, SaaS',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Tienda Online',
+  },
+  formatDetection: {
+    telephone: false,
+  },
+}
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#000000' },
+  ],
 }
 
 export default function RootLayout({
@@ -23,11 +46,17 @@ export default function RootLayout({
         />
       </head>
       <body>
+        <ServiceWorkerRegistration />
+        <PWAInstallPrompt />
+
         <div className="min-h-screen flex flex-col bg-white">
           {/* Header */}
-          <header className="bg-primary text-white py-4 px-6 shadow-md">
+          <header className="bg-primary text-white py-4 px-4 md:px-6 shadow-md">
             <div className="max-w-7xl mx-auto flex items-center justify-between">
-              <h1 className="text-2xl font-bold">Tienda Online 2025</h1>
+              <div className="flex items-center gap-3">
+                <MobileHamburgerMenu />
+                <h1 className="text-xl md:text-2xl font-bold">Tienda Online 2025</h1>
+              </div>
               <nav className="hidden md:flex gap-6">
                 <a href="/" className="text-white hover:text-accent transition-colors">
                   Inicio
@@ -43,12 +72,12 @@ export default function RootLayout({
           </header>
 
           {/* Main Content */}
-          <main className="flex-grow">
+          <main className="flex-grow pb-16 md:pb-0">
             {children}
           </main>
 
           {/* Footer */}
-          <footer className="bg-primary text-white py-8 px-6 mt-12">
+          <footer className="bg-primary text-white py-8 px-6 mt-12 mb-16 md:mb-0">
             <div className="max-w-7xl mx-auto">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-6">
                 <div>
@@ -79,6 +108,9 @@ export default function RootLayout({
               </div>
             </div>
           </footer>
+
+          {/* Mobile Bottom Navigation */}
+          <MobileBottomNav />
         </div>
       </body>
     </html>
