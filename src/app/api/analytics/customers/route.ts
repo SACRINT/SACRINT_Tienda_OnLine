@@ -7,6 +7,9 @@ import { getCustomerMetrics } from "@/lib/analytics/queries";
 import { AnalyticsResponse, CustomerMetrics } from "@/lib/analytics/types";
 import { subDays } from "date-fns";
 
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: NextRequest) {
   try {
     const session = await auth();

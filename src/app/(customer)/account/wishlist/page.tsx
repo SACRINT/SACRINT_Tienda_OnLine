@@ -1,7 +1,7 @@
+"use client";
+
 // Wishlist Page
 // Display and manage saved products
-
-"use client";
 
 import { useState } from "react";
 import { AccountLayout, WishlistItem } from "@/components/account";

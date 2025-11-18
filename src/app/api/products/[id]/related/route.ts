@@ -6,6 +6,9 @@ import { auth } from "@/lib/auth/auth";
 import { getRelatedProducts } from "@/lib/db/products";
 import { z } from "zod";
 
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/products/[id]/related
  * Returns related products for a given product

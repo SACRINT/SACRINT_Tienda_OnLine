@@ -6,6 +6,9 @@ import { auth } from "@/lib/auth/auth";
 import { db } from "@/lib/db";
 import { z } from "zod";
 
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic';
+
 const CreateNoteSchema = z.object({
   tenantId: z.string().cuid(),
   content: z.string().min(1),

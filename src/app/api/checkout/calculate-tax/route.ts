@@ -110,6 +110,9 @@ const LOCAL_TAX_RATES: Record<string, Record<string, number>> = {
   },
 };
 
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic';
+
 export async function POST(req: NextRequest) {
   try {
     // Authenticate user

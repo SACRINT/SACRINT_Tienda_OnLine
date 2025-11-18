@@ -5,6 +5,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/auth";
 import { z } from "zod";
 
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic';
+
 // Validation schema for return request
 const ReturnRequestSchema = z.object({
   itemIds: z

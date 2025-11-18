@@ -1,3 +1,5 @@
+"use client";
+
 // Shop Page
 // Main shop page with products, filters, and search
 

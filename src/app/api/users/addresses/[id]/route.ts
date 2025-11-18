@@ -7,6 +7,9 @@ import { auth } from "@/lib/auth/auth";
 import { db } from "@/lib/db/client";
 import { z } from "zod";
 
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic';
+
 // Validation schema for updating addresses
 const UpdateAddressSchema = z.object({
   fullName: z

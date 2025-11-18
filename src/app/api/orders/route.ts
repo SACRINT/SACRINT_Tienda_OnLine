@@ -6,6 +6,9 @@ import { auth } from "@/lib/auth/auth";
 import { getOrdersByUser } from "@/lib/db/orders";
 import { OrderFilterSchema } from "@/lib/security/schemas/order-schemas";
 
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/orders
  * Returns all orders for the current user

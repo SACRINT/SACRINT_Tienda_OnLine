@@ -7,6 +7,9 @@ import { auth } from "@/lib/auth/auth";
 import { db } from "@/lib/db";
 import { z } from "zod";
 
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic';
+
 // GET single product
 export async function GET(
   req: NextRequest,

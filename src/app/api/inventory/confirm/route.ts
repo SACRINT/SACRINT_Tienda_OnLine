@@ -6,6 +6,9 @@ import { confirmInventoryReservation } from "@/lib/db/inventory";
 import { ConfirmReservationSchema } from "@/lib/security/schemas/review-schemas";
 import { db } from "@/lib/db/client";
 
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic';
+
 /**
  * POST /api/inventory/confirm
  * Confirms an inventory reservation and deducts stock

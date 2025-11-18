@@ -1,7 +1,7 @@
+"use client";
+
 // Orders Page
 // Display all orders with filtering and pagination
-
-"use client";
 
 import { useState } from "react";
 import { AccountLayout, LazyOrderCard } from "@/components/account";

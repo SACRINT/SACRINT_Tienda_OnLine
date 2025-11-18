@@ -11,6 +11,9 @@ import {
 } from "@/lib/security/schemas/coupon-schemas";
 import { USER_ROLES } from "@/lib/types/user-role";
 
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/coupons
  * Returns all coupons for the tenant

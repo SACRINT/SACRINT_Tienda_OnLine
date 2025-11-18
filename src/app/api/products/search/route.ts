@@ -6,6 +6,9 @@ import { auth } from "@/lib/auth/auth";
 import { searchProducts } from "@/lib/db/products";
 import { ProductSearchSchema } from "@/lib/security/schemas/product-schemas";
 
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/products/search
  * Advanced product search endpoint

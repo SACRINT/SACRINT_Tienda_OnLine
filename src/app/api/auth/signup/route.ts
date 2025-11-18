@@ -25,6 +25,9 @@ const SignupSchema = z.object({
     .optional(),
 });
 
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic';
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();

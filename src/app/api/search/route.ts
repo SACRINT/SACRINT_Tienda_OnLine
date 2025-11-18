@@ -22,6 +22,9 @@ const searchSchema = z.object({
   limit: z.coerce.number().positive().max(100).optional(),
 });
 
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);

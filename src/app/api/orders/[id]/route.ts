@@ -8,6 +8,9 @@ import { getOrderById, updateOrderStatus } from "@/lib/db/orders";
 import { OrderStatusUpdateSchema } from "@/lib/security/schemas/order-schemas";
 import { USER_ROLES } from "@/lib/types/user-role";
 
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/orders/[id]
  * Returns order details with items and addresses

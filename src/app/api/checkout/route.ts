@@ -18,6 +18,9 @@ import {
   confirmInventoryReservation,
 } from "@/lib/db/inventory";
 
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic';
+
 /**
  * POST /api/checkout
  * Processes checkout flow:

@@ -6,6 +6,9 @@ import { auth } from "@/lib/auth/auth";
 import { uploadImage, validateImageFile } from "@/lib/upload/image";
 import { USER_ROLES } from "@/lib/types/user-role";
 
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic';
+
 /**
  * POST /api/upload/images
  * Uploads multiple image files to Vercel Blob Storage

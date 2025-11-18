@@ -1,3 +1,5 @@
+"use client";
+
 // Account Dashboard Page
 // Overview of recent orders, wishlist preview, and account quick actions
 

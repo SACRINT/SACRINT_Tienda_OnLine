@@ -22,6 +22,9 @@ const UpdateProfileSchema = z.object({
   image: z.string().url("Invalid image URL").optional().nullable(),
 });
 
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/users/profile
  * Returns the current user's profile information

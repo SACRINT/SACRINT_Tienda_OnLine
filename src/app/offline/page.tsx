@@ -1,11 +1,8 @@
+"use client";
+
 import { WifiOff, RefreshCw, Home } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-
-export const metadata = {
-  title: "Offline - Tienda Online",
-  description: "You are currently offline",
-};
 
 export default function OfflinePage() {
   return (

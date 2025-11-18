@@ -30,6 +30,9 @@ const CreateTenantSchema = z.object({
     .optional(),
 });
 
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/tenants
  * Returns the current user's tenant information

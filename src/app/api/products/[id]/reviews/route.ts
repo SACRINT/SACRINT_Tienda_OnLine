@@ -13,6 +13,9 @@ import {
 import { ReviewFilterSchema } from "@/lib/security/schemas/review-schemas";
 import { z } from "zod";
 
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/products/[id]/reviews
  * Returns reviews for a product with pagination

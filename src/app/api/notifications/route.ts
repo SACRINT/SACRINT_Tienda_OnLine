@@ -23,6 +23,9 @@ const createNotificationSchema = z.object({
   metadata: z.record(z.string(), z.any()).optional(),
 });
 
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: NextRequest) {
   try {
     const session = await auth();

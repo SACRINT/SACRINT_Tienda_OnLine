@@ -5,6 +5,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/auth";
 import { z } from "zod";
 
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic';
+
 /**
  * DELETE /api/users/wishlist/[id]
  * Removes a specific item from the user's wishlist

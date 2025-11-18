@@ -6,6 +6,9 @@ import { auth } from "@/lib/auth/auth";
 
 import { db } from "@/lib/db";
 
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: NextRequest) {
   try {
     const session = await auth();

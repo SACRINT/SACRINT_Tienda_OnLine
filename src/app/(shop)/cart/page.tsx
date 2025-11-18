@@ -1,7 +1,7 @@
+"use client";
+
 // Shopping Cart Page
 // Display cart items with quantity control and checkout button
-
-"use client";
 
 import { useState } from "react";
 import Link from "next/link";

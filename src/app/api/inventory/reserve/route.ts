@@ -7,6 +7,9 @@ import { reserveInventory } from "@/lib/db/inventory";
 import { getOrderById } from "@/lib/db/orders";
 import { ReserveInventorySchema } from "@/lib/security/schemas/review-schemas";
 
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic';
+
 /**
  * POST /api/inventory/reserve
  * Reserves inventory for an order without deducting stock

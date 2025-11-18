@@ -132,6 +132,9 @@ const DELIVERY_ESTIMATES = {
 // Dimensional weight divisor (industry standard)
 const DIM_WEIGHT_DIVISOR = 139; // For domestic shipping
 
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic';
+
 export async function POST(req: NextRequest) {
   try {
     // Authenticate user

@@ -14,6 +14,9 @@ const CouponValidationSchema = z.object({
   userId: z.string().uuid().optional(),
 });
 
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic';
+
 export async function POST(req: NextRequest) {
   try {
     // Parse and validate request body

@@ -11,6 +11,9 @@ const AddToWishlistSchema = z.object({
   productId: z.string().uuid("Invalid product ID"),
 });
 
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/users/wishlist
  * Returns all wishlist items for the current user

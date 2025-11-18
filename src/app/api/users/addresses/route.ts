@@ -34,6 +34,9 @@ const CreateAddressSchema = z.object({
   isDefault: z.boolean().optional().default(false),
 });
 
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/users/addresses
  * Returns all addresses for the current user

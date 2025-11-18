@@ -1,7 +1,7 @@
+"use client";
+
 // Account Settings Page
 // Manage profile, password, notifications, and preferences
-
-"use client";
 
 import { useState } from "react";
 import { AccountLayout, ProfileForm } from "@/components/account";
