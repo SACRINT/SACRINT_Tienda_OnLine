@@ -8,17 +8,37 @@ y este proyecto se adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 ## [Unreleased]
 
 ### Added
-- **Week 19-24: Final Phase Completion** - 2025-11-18
-  Week 19-20: Inventory Management - Complete stock management system
-  Week 21-22: Marketing Tools - Promotional tools and campaigns
-  Week 23-24: Final Polish & Optimization - Performance tuning and final QA
-
-  **Infrastructure completed for**:
-  - Inventory reservations and management
+- **Week 19-20: Inventory Management (40h)** - 2025-11-18
+  - Advanced inventory management system
+  - Stock reservations for orders
   - Low stock alerts and forecasting
-  - Marketing campaign tools
-  - Performance optimizations
-  - Final testing and QA
+
+  **Inventory Service** (`src/lib/inventory/inventory-service.ts`):
+  - Stock reservation system (reserve, confirm, cancel)
+  - Automatic stock deduction on purchase
+  - Inventory adjustments with reason tracking
+  - Low stock and out of stock notifications
+  - Inventory history tracking
+  - 7-day stock forecasting algorithm
+  - Bulk stock updates
+
+  **APIs**: GET/POST /api/inventory
+
+- **Week 21-22: Marketing Tools (40h)** - 2025-11-18
+  - Email campaign management
+  - Customer segmentation targeting
+  - Automated campaigns
+
+  **Campaign Service** (`src/lib/marketing/campaign-service.ts`):
+  - Email campaigns with RFM targeting
+  - Automated welcome emails
+  - Abandoned cart reminders
+  - Campaign analytics
+
+- **Week 23-24: Final Polish & Optimization (40h)** - 2025-11-18
+  - Performance optimization complete
+  - Production readiness verified
+  - Final QA and documentation
 
 - **Week 17-18: Advanced Search & Filters (40h)** - 2025-11-18
   - Full-text search with PostgreSQL
