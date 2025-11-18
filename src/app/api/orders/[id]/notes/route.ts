@@ -1,5 +1,5 @@
 // POST /api/orders/:id/notes
-// Add notes to orders (internal or customer-facing)
+// Add notes to orders (internal only - stored in order.adminNotes)
 
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth/auth'
@@ -7,9 +7,8 @@ import { db } from '@/lib/db'
 import { z } from 'zod'
 
 const CreateNoteSchema = z.object({
-  tenantId: z.string().uuid(),
+  tenantId: z.string().cuid(),
   content: z.string().min(1),
-  type: z.enum(['INTERNAL', 'CUSTOMER']),
 })
 
 export async function POST(
@@ -37,7 +36,7 @@ export async function POST(
       )
     }
 
-    const { tenantId, content, type } = validation.data
+    const { tenantId, content } = validation.data
 
     if (session.user.role === 'STORE_OWNER' && session.user.tenantId !== tenantId) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
@@ -55,45 +54,22 @@ export async function POST(
       return NextResponse.json({ error: 'Order not found' }, { status: 404 })
     }
 
-    // Create note
-    const note = await db.orderNote.create({
+    // Append note to adminNotes field
+    const existingNotes = order.adminNotes ? `${order.adminNotes}\n---\n` : ''
+    const timestamp = new Date().toISOString()
+    const updatedNotes = `${existingNotes}[${timestamp}] ${session.user.name || session.user.email}:\n${content}`
+
+    const updatedOrder = await db.order.update({
+      where: { id: params.id },
       data: {
-        orderId: params.id,
-        userId: session.user.id,
-        content,
-        type,
-      },
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
+        adminNotes: updatedNotes,
       },
     })
-
-    // Log activity
-    await db.activityLog.create({
-      data: {
-        tenantId,
-        userId: session.user.id,
-        action: 'ORDER_NOTE_ADDED',
-        entityType: 'ORDER',
-        entityId: params.id,
-        metadata: {
-          noteType: type,
-          noteId: note.id,
-        },
-      },
-    })
-
-    // TODO: If type is CUSTOMER, send email notification
 
     return NextResponse.json({
       success: true,
-      note,
+      message: 'Note added successfully',
+      adminNotes: updatedOrder.adminNotes,
     })
   } catch (error) {
     console.error('Create note error:', error)
@@ -105,7 +81,7 @@ export async function POST(
 }
 
 // GET /api/orders/:id/notes
-// Get all notes for an order
+// Get notes for an order (stored in adminNotes)
 export async function GET(
   req: NextRequest,
   { params }: { params: { id: string } }
@@ -139,37 +115,8 @@ export async function GET(
       return NextResponse.json({ error: 'Order not found' }, { status: 404 })
     }
 
-    // Get notes
-    const notes = await db.orderNote.findMany({
-      where: {
-        orderId: params.id,
-      },
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    })
-
-    // Filter based on user role
-    const filteredNotes = notes.filter((note: any) => {
-      // Customers can only see customer-facing notes
-      if (session.user.role === 'CUSTOMER') {
-        return note.type === 'CUSTOMER'
-      }
-      // Staff can see all notes
-      return true
-    })
-
     return NextResponse.json({
-      notes: filteredNotes,
+      notes: order.adminNotes || '',
     })
   } catch (error) {
     console.error('Get notes error:', error)
@@ -181,10 +128,9 @@ export async function GET(
 }
 
 // DELETE /api/orders/:id/notes
-// Delete a note
+// Clear all notes for an order
 const DeleteNoteSchema = z.object({
-  tenantId: z.string().uuid(),
-  noteId: z.string().uuid(),
+  tenantId: z.string().cuid(),
 })
 
 export async function DELETE(
@@ -212,7 +158,7 @@ export async function DELETE(
       )
     }
 
-    const { tenantId, noteId } = validation.data
+    const { tenantId } = validation.data
 
     if (session.user.role === 'STORE_OWNER' && session.user.tenantId !== tenantId) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
@@ -230,18 +176,20 @@ export async function DELETE(
       return NextResponse.json({ error: 'Order not found' }, { status: 404 })
     }
 
-    // Delete note
-    await db.orderNote.delete({
-      where: {
-        id: noteId,
+    // Clear all notes
+    await db.order.update({
+      where: { id: params.id },
+      data: {
+        adminNotes: null,
       },
     })
 
     return NextResponse.json({
       success: true,
+      message: 'All notes cleared',
     })
   } catch (error) {
-    console.error('Delete note error:', error)
+    console.error('Delete notes error:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
