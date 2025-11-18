@@ -70,6 +70,8 @@ model User {
   carts                 Cart[]
   orders                Order[]
   reviews               Review[]
+  notifications         Notification[]
+  notificationPreference NotificationPreference?
 
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
@@ -564,4 +566,141 @@ enum InventoryReason {
   DAMAGE
   PURCHASE
   OTHER
+}
+
+// ============ NOTIFICATIONS & EMAILS ============
+
+model Notification {
+  id                    String   @id @default(cuid())
+  userId                String
+  tenantId              String?
+
+  // Notification content
+  type                  NotificationType
+  title                 String
+  message               String   @db.Text
+  actionUrl             String?
+  metadata              Json?    @db.Json
+
+  // Status
+  read                  Boolean  @default(false)
+  readAt                DateTime?
+
+  // Relations
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([userId, read])
+  @@index([tenantId])
+  @@index([createdAt])
+}
+
+model EmailLog {
+  id                    String   @id @default(cuid())
+  tenantId              String?
+  userId                String?
+
+  // Email details
+  to                    String
+  from                  String
+  subject               String
+  template              EmailTemplate
+
+  // Tracking
+  status                EmailStatus @default(PENDING)
+  sentAt                DateTime?
+  deliveredAt           DateTime?
+  openedAt              DateTime?
+  clickedAt             DateTime?
+  bouncedAt             DateTime?
+
+  // Provider info
+  providerMessageId     String?  // Resend message ID
+  error                 String?  @db.Text
+  metadata              Json?    @db.Json
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([userId])
+  @@index([tenantId])
+  @@index([status])
+  @@index([template])
+  @@index([createdAt])
+}
+
+model NotificationPreference {
+  id                    String   @id @default(cuid())
+  userId                String   @unique
+
+  // Email preferences
+  emailOrderConfirmation        Boolean @default(true)
+  emailOrderShipped             Boolean @default(true)
+  emailOrderDelivered           Boolean @default(true)
+  emailOrderCancelled           Boolean @default(true)
+  emailRefundProcessed          Boolean @default(true)
+  emailNewReview                Boolean @default(true)
+  emailProductRestocked         Boolean @default(false)
+  emailPromotions               Boolean @default(true)
+  emailNewsletters              Boolean @default(true)
+
+  // In-app preferences
+  inAppOrderUpdates             Boolean @default(true)
+  inAppNewReviews               Boolean @default(true)
+  inAppPromotions               Boolean @default(true)
+  inAppProductRestocked         Boolean @default(true)
+
+  // Push preferences (future)
+  pushOrderUpdates              Boolean @default(false)
+  pushPromotions                Boolean @default(false)
+
+  // Relations
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([userId])
+}
+
+enum NotificationType {
+  ORDER_CONFIRMED
+  ORDER_SHIPPED
+  ORDER_DELIVERED
+  ORDER_CANCELLED
+  REFUND_PROCESSED
+  NEW_REVIEW
+  PRODUCT_RESTOCKED
+  PROMOTION
+  SYSTEM
+  CUSTOM
+}
+
+enum EmailTemplate {
+  ORDER_CONFIRMATION
+  ORDER_SHIPPED
+  ORDER_DELIVERED
+  ORDER_CANCELLED
+  REFUND_PROCESSED
+  PAYMENT_FAILED
+  ACCOUNT_VERIFICATION
+  PASSWORD_RESET
+  WELCOME
+  NEWSLETTER
+  PROMOTION
+  REVIEW_REQUEST
+  PRODUCT_RESTOCKED
+  CUSTOM
+}
+
+enum EmailStatus {
+  PENDING
+  SENT
+  DELIVERED
+  OPENED
+  CLICKED
+  BOUNCED
+  FAILED
 }

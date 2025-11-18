@@ -8,6 +8,48 @@ y este proyecto se adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 ## [Unreleased]
 
 ### Added
+- **Week 15-16: Email & Notifications System (40h)** - 2025-11-18
+  - Complete email & notifications infrastructure
+  - In-app notification system
+  - Email tracking and logging
+  - Notification preferences management
+
+  **Database Models**:
+  - Notification - In-app notifications with read/unread status
+  - EmailLog - Email tracking (sent, delivered, opened, clicked, bounced)
+  - NotificationPreference - User email/in-app/push preferences
+
+  **Email Service** (`src/lib/email/email-service.ts`):
+  - Centralized email sending with Resend API
+  - React Email template support
+  - Retry logic with exponential backoff
+  - Email tracking (delivery, opens, clicks)
+  - Statistics and analytics
+
+  **Notification Service** (`src/lib/notifications/notification-service.ts`):
+  - Create and manage in-app notifications
+  - Mark as read/unread
+  - Bulk notifications
+  - Notification statistics
+  - Real-time unread count
+
+  **APIs Created**:
+  - GET/POST /api/notifications - List and create notifications
+  - PATCH /api/notifications/[id] - Mark as read
+  - DELETE /api/notifications/[id] - Delete notification
+  - GET/PUT /api/notifications/preferences - Manage preferences
+
+  **Email Templates**:
+  - Order confirmation, shipped, delivered, cancelled
+  - Refund processed
+  - Payment failed
+  - Account verification
+  - Password reset
+  - Welcome email
+  - Newsletter, promotions
+  - Review request
+  - Product restocked
+
 - **Week 13-14: Testing & QA Phase (40h)** - 2025-11-18
   - Comprehensive integration tests for Admin Tools APIs
   - Test infrastructure setup with Jest and Testing Library
