@@ -12,7 +12,7 @@
 
 import { db } from '@/lib/db'
 import { sendEmail } from '@/lib/email/email-service'
-import { EmailTemplate } from '@prisma/client'
+import { EmailTemplate } from '@/lib/db/enums'
 
 export interface CreateCampaignOptions {
   tenantId: string
@@ -62,7 +62,7 @@ export async function createCampaign(options: CreateCampaignOptions): Promise<Ca
     // For now, just send emails
 
     // Send emails to all customers
-    const emailPromises = customers.map((customer) =>
+    const emailPromises = customers.map((customer: any) =>
       sendEmail({
         to: customer.email,
         subject: emailSubject,
@@ -118,9 +118,9 @@ async function getCustomersInSegments(tenantId: string, segments: string[]) {
   })
 
   // Apply segment filtering (simplified)
-  return customers.filter((customer) => {
+  return customers.filter((customer: any) => {
     const orderCount = customer.orders.length
-    const totalSpent = customer.orders.reduce((sum, o) => sum + o.total, 0)
+    const totalSpent = customer.orders.reduce((sum: number, o: any) => sum + o.total, 0)
 
     // Simple segmentation logic
     if (segments.includes('champions')) {
@@ -210,7 +210,7 @@ export async function sendAbandonedCartReminder(tenantId: string) {
   })
 
   const results = await Promise.all(
-    abandonedCarts.map((cart) =>
+    abandonedCarts.map((cart: any) =>
       sendEmail({
         to: cart.user.email,
         subject: 'You left items in your cart',
@@ -227,6 +227,6 @@ export async function sendAbandonedCartReminder(tenantId: string) {
 
   return {
     success: true,
-    sentCount: results.filter((r) => r.success).length,
+    sentCount: results.filter((r: any) => r.success).length,
   }
 }

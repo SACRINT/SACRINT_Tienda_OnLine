@@ -11,7 +11,7 @@
 
 import { Resend } from 'resend'
 import { db } from '@/lib/db'
-import { EmailTemplate, EmailStatus } from '@prisma/client'
+import { EmailTemplate, EmailStatus } from '@/lib/db/enums'
 
 // Initialize Resend
 const resend = new Resend(process.env.RESEND_API_KEY!)
@@ -158,60 +158,37 @@ export async function sendEmailWithRetry(
  * Get React Email component for a template
  */
 async function getEmailTemplate(template: EmailTemplate, data: Record<string, any>) {
-  // Dynamic import of email templates
+  // Import all templates from index
+  const templates = await import('./templates')
+
+  // Dynamic template selection
   switch (template) {
     case EmailTemplate.ORDER_CONFIRMATION:
-      const { OrderConfirmationEmail } = await import('./templates/order-confirmation')
-      return OrderConfirmationEmail(data)
-
+      return templates.OrderConfirmationEmail(data as any)
     case EmailTemplate.ORDER_SHIPPED:
-      const { OrderShippedEmail } = await import('./templates/order-shipped')
-      return OrderShippedEmail(data)
-
+      return templates.OrderShippedEmail(data as any)
     case EmailTemplate.ORDER_DELIVERED:
-      const { OrderDeliveredEmail } = await import('./templates/order-delivered')
-      return OrderDeliveredEmail(data)
-
+      return templates.OrderDeliveredEmail(data as any)
     case EmailTemplate.ORDER_CANCELLED:
-      const { OrderCancelledEmail } = await import('./templates/order-cancelled')
-      return OrderCancelledEmail(data)
-
+      return templates.OrderCancelledEmail(data as any)
     case EmailTemplate.REFUND_PROCESSED:
-      const { RefundProcessedEmail } = await import('./templates/refund-processed')
-      return RefundProcessedEmail(data)
-
+      return templates.RefundProcessedEmail(data as any)
     case EmailTemplate.PAYMENT_FAILED:
-      const { PaymentFailedEmail } = await import('./templates/payment-failed')
-      return PaymentFailedEmail(data)
-
+      return templates.PaymentFailedEmail(data as any)
     case EmailTemplate.ACCOUNT_VERIFICATION:
-      const { AccountVerificationEmail } = await import('./templates/account-verification')
-      return AccountVerificationEmail(data)
-
+      return templates.AccountVerificationEmail(data as any)
     case EmailTemplate.PASSWORD_RESET:
-      const { PasswordResetEmail } = await import('./templates/password-reset')
-      return PasswordResetEmail(data)
-
+      return templates.PasswordResetEmail(data as any)
     case EmailTemplate.WELCOME:
-      const { WelcomeEmail } = await import('./templates/welcome')
-      return WelcomeEmail(data)
-
+      return templates.WelcomeEmail(data as any)
     case EmailTemplate.NEWSLETTER:
-      const { NewsletterEmail } = await import('./templates/newsletter')
-      return NewsletterEmail(data)
-
+      return templates.NewsletterEmail(data as any)
     case EmailTemplate.PROMOTION:
-      const { PromotionEmail } = await import('./templates/promotion')
-      return PromotionEmail(data)
-
+      return templates.PromotionEmail(data as any)
     case EmailTemplate.REVIEW_REQUEST:
-      const { ReviewRequestEmail } = await import('./templates/review-request')
-      return ReviewRequestEmail(data)
-
+      return templates.ReviewRequestEmail(data as any)
     case EmailTemplate.PRODUCT_RESTOCKED:
-      const { ProductRestockedEmail } = await import('./templates/product-restocked')
-      return ProductRestockedEmail(data)
-
+      return templates.ProductRestockedEmail(data as any)
     default:
       throw new Error(`Unknown email template: ${template}`)
   }

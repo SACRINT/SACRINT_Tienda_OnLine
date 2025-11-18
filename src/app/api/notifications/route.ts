@@ -8,7 +8,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth/auth'
 import { getUserNotifications, createNotification } from '@/lib/notifications/notification-service'
 import { z } from 'zod'
-import { NotificationType } from '@prisma/client'
+import { NotificationType } from '@/lib/db/enums'
 
 const createNotificationSchema = z.object({
   userId: z.string().cuid(),
@@ -17,7 +17,7 @@ const createNotificationSchema = z.object({
   title: z.string().min(1).max(200),
   message: z.string().min(1),
   actionUrl: z.string().url().optional(),
-  metadata: z.record(z.any()).optional(),
+  metadata: z.record(z.string(), z.any()).optional(),
 })
 
 export async function GET(req: NextRequest) {
@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true, notificationId: result.notificationId })
   } catch (error: any) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: 'Invalid request', details: error.errors }, { status: 400 })
+      return NextResponse.json({ error: 'Invalid request', details: error.issues }, { status: 400 })
     }
     console.error('[Notifications API] POST error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

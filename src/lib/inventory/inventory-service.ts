@@ -12,9 +12,8 @@
  */
 
 import { db } from '@/lib/db'
-import { InventoryReason, ReservationStatus } from '@prisma/client'
+import { InventoryReason, ReservationStatus, NotificationType } from '@/lib/db/enums'
 import { createNotification } from '@/lib/notifications/notification-service'
-import { NotificationType } from '@prisma/client'
 
 export interface InventoryAdjustment {
   productId: string
@@ -312,8 +311,8 @@ export async function getOutOfStockProducts(tenantId: string) {
 export async function forecastStock(productId: string) {
   const history = await getInventoryHistory(productId, 7)
 
-  const purchases = history.filter((h) => h.reason === InventoryReason.PURCHASE)
-  const totalSold = purchases.reduce((sum, h) => sum + Math.abs(h.adjustment), 0)
+  const purchases = history.filter((h: any) => h.reason === InventoryReason.PURCHASE)
+  const totalSold = purchases.reduce((sum: number, h: any) => sum + Math.abs(h.adjustment), 0)
   const averagePerDay = totalSold / 7
 
   const currentProduct = await db.product.findUnique({

@@ -60,7 +60,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(result)
   } catch (error: any) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: 'Invalid request', details: error.errors }, { status: 400 })
+      return NextResponse.json({ error: 'Invalid request', details: error.issues }, { status: 400 })
     }
     console.error('[Search API] GET error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

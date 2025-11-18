@@ -10,7 +10,7 @@
  */
 
 import { db } from '@/lib/db'
-import { NotificationType } from '@prisma/client'
+import { NotificationType } from '@/lib/db/enums'
 
 export interface CreateNotificationOptions {
   userId: string
@@ -273,7 +273,7 @@ export async function getNotificationStats(tenantId: string, days = 30) {
     sent,
     read,
     readRate: sent > 0 ? (read / sent) * 100 : 0,
-    byType: byType.map((item) => ({
+    byType: byType.map((item: any) => ({
       type: item.type,
       count: item._count,
     })),

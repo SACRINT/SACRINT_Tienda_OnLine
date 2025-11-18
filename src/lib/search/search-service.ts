@@ -60,7 +60,7 @@ export async function searchProducts(options: SearchOptions): Promise<SearchResu
   } = options
 
   // Build where clause
-  const where: Prisma.ProductWhereInput = {
+  const where: any = {
     tenantId,
     status: 'PUBLISHED',
     deletedAt: null,
@@ -130,13 +130,13 @@ export async function searchProducts(options: SearchOptions): Promise<SearchResu
   ])
 
   // Get category names
-  const categoryIds = categories.map((c) => c.categoryId).filter(Boolean) as string[]
+  const categoryIds = categories.map((c: any) => c.categoryId).filter(Boolean) as string[]
   const categoryDetails = await db.category.findMany({
     where: { id: { in: categoryIds } },
     select: { id: true, name: true },
   })
 
-  const categoryMap = new Map(categoryDetails.map((c) => [c.id, c.name]))
+  const categoryMap = new Map(categoryDetails.map((c: any) => [c.id, c.name]))
 
   return {
     products,
@@ -145,7 +145,7 @@ export async function searchProducts(options: SearchOptions): Promise<SearchResu
     totalPages: Math.ceil(total / limit),
     hasMore: page * limit < total,
     filters: {
-      categories: categories.map((c) => ({
+      categories: categories.map((c: any) => ({
         id: c.categoryId!,
         name: categoryMap.get(c.categoryId!) || 'Unknown',
         count: c._count,
@@ -214,7 +214,7 @@ export async function getPopularSearches(tenantId: string, limit = 10) {
 
 // Helper functions
 
-function getOrderByClause(sortBy: string): Prisma.ProductOrderByWithRelationInput {
+function getOrderByClause(sortBy: string): any {
   switch (sortBy) {
     case 'price_asc':
       return { price: 'asc' }

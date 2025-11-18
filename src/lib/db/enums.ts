@@ -1,0 +1,62 @@
+/**
+ * Prisma Enum Definitions
+ *
+ * Local definitions of Prisma enums to avoid import issues
+ * when the Prisma client hasn't been regenerated yet.
+ *
+ * These definitions MUST match the enums in prisma/schema.prisma exactly.
+ */
+
+export enum NotificationType {
+  ORDER_CONFIRMED = 'ORDER_CONFIRMED',
+  ORDER_SHIPPED = 'ORDER_SHIPPED',
+  ORDER_DELIVERED = 'ORDER_DELIVERED',
+  ORDER_CANCELLED = 'ORDER_CANCELLED',
+  REFUND_PROCESSED = 'REFUND_PROCESSED',
+  NEW_REVIEW = 'NEW_REVIEW',
+  PRODUCT_RESTOCKED = 'PRODUCT_RESTOCKED',
+  PROMOTION = 'PROMOTION',
+  SYSTEM = 'SYSTEM',
+  CUSTOM = 'CUSTOM',
+}
+
+export enum EmailTemplate {
+  ORDER_CONFIRMATION = 'ORDER_CONFIRMATION',
+  ORDER_SHIPPED = 'ORDER_SHIPPED',
+  ORDER_DELIVERED = 'ORDER_DELIVERED',
+  ORDER_CANCELLED = 'ORDER_CANCELLED',
+  REFUND_PROCESSED = 'REFUND_PROCESSED',
+  PAYMENT_FAILED = 'PAYMENT_FAILED',
+  ACCOUNT_VERIFICATION = 'ACCOUNT_VERIFICATION',
+  PASSWORD_RESET = 'PASSWORD_RESET',
+  WELCOME = 'WELCOME',
+  NEWSLETTER = 'NEWSLETTER',
+  PROMOTION = 'PROMOTION',
+  REVIEW_REQUEST = 'REVIEW_REQUEST',
+  PRODUCT_RESTOCKED = 'PRODUCT_RESTOCKED',
+  CUSTOM = 'CUSTOM',
+}
+
+export enum EmailStatus {
+  PENDING = 'PENDING',
+  SENT = 'SENT',
+  DELIVERED = 'DELIVERED',
+  OPENED = 'OPENED',
+  CLICKED = 'CLICKED',
+  BOUNCED = 'BOUNCED',
+  FAILED = 'FAILED',
+}
+
+export enum ReservationStatus {
+  RESERVED = 'RESERVED',
+  CONFIRMED = 'CONFIRMED',
+  CANCELLED = 'CANCELLED',
+}
+
+export enum InventoryReason {
+  RECOUNT = 'RECOUNT',
+  RETURN = 'RETURN',
+  DAMAGE = 'DAMAGE',
+  PURCHASE = 'PURCHASE',
+  OTHER = 'OTHER',
+}
