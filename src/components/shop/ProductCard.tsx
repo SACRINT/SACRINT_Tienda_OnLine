@@ -6,7 +6,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Heart, ShoppingCart, Star } from "lucide-react";
+import { Heart, ShoppingCart, Star, Eye } from "lucide-react";
 
 export interface ProductCardProps {
   id: string;
@@ -21,6 +21,7 @@ export interface ProductCardProps {
   category?: string;
   onAddToCart?: (productId: string) => void;
   onToggleWishlist?: (productId: string) => void;
+  onQuickView?: (productId: string) => void;
 }
 
 export function ProductCard({
@@ -36,6 +37,7 @@ export function ProductCard({
   category,
   onAddToCart,
   onToggleWishlist,
+  onQuickView,
 }: ProductCardProps) {
   const [isHovering, setIsHovering] = useState(false);
   const [isInWishlist, setIsInWishlist] = useState(false);
@@ -59,6 +61,13 @@ export function ProductCard({
     setIsInWishlist(!isInWishlist);
     if (onToggleWishlist) {
       onToggleWishlist(id);
+    }
+  };
+
+  const handleQuickView = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (onQuickView) {
+      onQuickView(id);
     }
   };
 
@@ -103,18 +112,32 @@ export function ProductCard({
             </div>
           )}
 
-          {/* Wishlist Button */}
-          <button
-            onClick={handleToggleWishlist}
-            className="absolute left-2 top-2 rounded-full bg-white/90 p-2 shadow-md backdrop-blur-sm transition-all hover:bg-white hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            aria-label="Add to wishlist"
-          >
-            <Heart
-              className={`h-5 w-5 transition-colors ${
-                isInWishlist ? "fill-red-500 text-red-500" : "text-gray-600"
-              }`}
-            />
-          </button>
+          {/* Action Buttons */}
+          <div className="absolute left-2 top-2 flex flex-col gap-2">
+            {/* Wishlist Button */}
+            <button
+              onClick={handleToggleWishlist}
+              className="rounded-full bg-white/90 p-2 shadow-md backdrop-blur-sm transition-all hover:bg-white hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              aria-label="Add to wishlist"
+            >
+              <Heart
+                className={`h-5 w-5 transition-colors ${
+                  isInWishlist ? "fill-red-500 text-red-500" : "text-gray-600"
+                }`}
+              />
+            </button>
+
+            {/* Quick View Button */}
+            {onQuickView && (
+              <button
+                onClick={handleQuickView}
+                className="rounded-full bg-white/90 p-2 shadow-md backdrop-blur-sm transition-all hover:bg-white hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                aria-label="Vista rápida"
+              >
+                <Eye className="h-5 w-5 text-gray-600" />
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Product Info */}

@@ -21,3 +21,4 @@ export type {
   SearchSuggestion,
   SearchAutocompleteProps,
 } from "./SearchAutocomplete";
+export { AddToCartButton } from "./AddToCartButton";

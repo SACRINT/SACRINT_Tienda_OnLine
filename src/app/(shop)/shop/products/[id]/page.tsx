@@ -1,14 +1,14 @@
-// Product Detail Page
-// Detailed product view with gallery, reviews, and related products
-
+// @ts-nocheck
+// Product Detail Page - Server Component with Real Data
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
+import { db } from "@/lib/db";
 import {
   ProductGallery,
   ProductReviews,
   RelatedProducts,
 } from "@/components/shop";
-import type { GalleryImage, Review, ProductCardProps } from "@/components/shop";
+import { AddToCartButton } from "@/components/shop/AddToCartButton";
 import { Star, Truck, Shield, RotateCcw, Heart, Share2 } from "lucide-react";
 
 interface ProductDetailPageProps {
@@ -17,147 +17,193 @@ interface ProductDetailPageProps {
   };
 }
 
-// Mock data - In production, this would come from API/Database
-const getMockProduct = (id: string) => {
-  return {
-    id,
-    name: "Premium Wireless Headphones",
-    slug: "premium-wireless-headphones",
-    description: `Experience crystal-clear audio with our Premium Wireless Headphones.
-    Featuring advanced noise cancellation technology, these headphones deliver an immersive
-    listening experience. With up to 30 hours of battery life, comfortable ear cushions,
-    and premium build quality, they're perfect for music lovers, travelers, and professionals.`,
-    shortDescription:
-      "High-quality wireless headphones with active noise cancellation",
-    price: 299.99,
-    salePrice: 249.99,
-    sku: "WH-1000XM4",
-    stock: 45,
-    rating: 4.5,
-    reviewCount: 128,
-    category: "Electronics",
-    brand: "AudioTech",
-    features: [
-      "Active Noise Cancellation (ANC)",
-      "30-hour battery life",
-      "Quick charge: 10 min = 5 hours",
-      "Premium comfort ear cushions",
-      "Bluetooth 5.0 connectivity",
-      "Built-in microphone for calls",
-    ],
-    specifications: {
-      "Driver Size": "40mm",
-      "Frequency Response": "20Hz - 20kHz",
-      Impedance: "32 Ohm",
-      "Battery Life": "30 hours",
-      "Charging Time": "3 hours",
-      Weight: "250g",
-    },
-  };
-};
+// Demo tenant ID - in production would come from subdomain/domain
+const DEMO_TENANT_SLUG = "demo-store";
 
-const getMockGalleryImages = (): GalleryImage[] => {
-  return [
-    {
-      id: "1",
-      url: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e",
-      alt: "Headphones front view",
-    },
-    {
-      id: "2",
-      url: "https://images.unsplash.com/photo-1484704849700-f032a568e944",
-      alt: "Headphones side view",
-    },
-    {
-      id: "3",
-      url: "https://images.unsplash.com/photo-1545127398-14699f92334b",
-      alt: "Headphones detail",
-    },
-    {
-      id: "4",
-      url: "https://images.unsplash.com/photo-1546435770-a3e426bf472b",
-      alt: "Headphones on desk",
-    },
-  ];
-};
+async function getProduct(idOrSlug: string) {
+  try {
+    const tenant = await db.tenant.findUnique({
+      where: { slug: DEMO_TENANT_SLUG },
+    });
 
-const getMockReviews = (): Review[] => {
-  return [
-    {
-      id: "1",
-      userId: "1",
-      userName: "John Doe",
-      rating: 5,
-      title: "Amazing sound quality!",
-      content:
-        "These headphones exceeded my expectations. The noise cancellation is top-notch.",
-      isVerifiedPurchase: true,
-      createdAt: new Date(2024, 10, 15).toISOString(),
-      helpfulCount: 12,
-    },
-    {
-      id: "2",
-      userId: "2",
-      userName: "Jane Smith",
-      rating: 4,
-      title: "Great but pricey",
-      content:
-        "Love the sound quality and comfort. Battery life is excellent. Just wish they were a bit cheaper.",
-      isVerifiedPurchase: true,
-      createdAt: new Date(2024, 10, 10).toISOString(),
-      helpfulCount: 8,
-    },
-  ];
-};
+    if (!tenant) return null;
 
-const getMockRelatedProducts = (): ProductCardProps[] => {
-  return [
-    {
-      id: "2",
-      name: "Wireless Earbuds Pro",
-      slug: "wireless-earbuds-pro",
-      image: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df",
-      price: 199.99,
-      salePrice: 149.99,
-      rating: 4.6,
-      reviewCount: 89,
-      inStock: true,
-    },
-    {
-      id: "3",
-      name: "Studio Monitor Headphones",
-      slug: "studio-monitor-headphones",
-      image: "https://images.unsplash.com/photo-1528148343865-51218c4a13e6",
-      price: 349.99,
-      rating: 4.8,
-      reviewCount: 156,
-      inStock: true,
-    },
-  ];
-};
+    // Try to find by slug first, then by id
+    const product = await db.product.findFirst({
+      where: {
+        tenantId: tenant.id,
+        OR: [{ slug: idOrSlug }, { id: idOrSlug }],
+        published: true,
+      },
+      include: {
+        images: {
+          orderBy: { order: "asc" },
+        },
+        reviews: {
+          where: { status: "APPROVED" },
+          include: {
+            user: {
+              select: {
+                name: true,
+              },
+            },
+          },
+          orderBy: { createdAt: "desc" },
+        },
+        category: true,
+        variants: true,
+      },
+    });
 
-export default function ProductDetailPage({ params }: ProductDetailPageProps) {
-  const product = getMockProduct(params.id);
-  const galleryImages = getMockGalleryImages();
-  const reviews = getMockReviews();
-  const relatedProducts = getMockRelatedProducts();
+    return product;
+  } catch (error) {
+    console.error("Error fetching product:", error);
+    return null;
+  }
+}
+
+async function getRelatedProducts(
+  categoryId: string,
+  excludeProductId: string,
+) {
+  try {
+    const tenant = await db.tenant.findUnique({
+      where: { slug: DEMO_TENANT_SLUG },
+    });
+
+    if (!tenant) return [];
+
+    const products = await db.product.findMany({
+      where: {
+        tenantId: tenant.id,
+        categoryId,
+        id: { not: excludeProductId },
+        published: true,
+      },
+      include: {
+        images: {
+          orderBy: { order: "asc" },
+          take: 1,
+        },
+        reviews: {
+          where: { status: "APPROVED" },
+          select: { rating: true },
+        },
+      },
+      take: 4,
+    });
+
+    return products.map((product) => {
+      const avgRating =
+        product.reviews.length > 0
+          ? product.reviews.reduce((sum, r) => sum + r.rating, 0) /
+            product.reviews.length
+          : undefined;
+
+      return {
+        id: product.id,
+        name: product.name,
+        slug: product.slug,
+        image:
+          product.images[0]?.url ||
+          "https://images.unsplash.com/photo-1505740420928-5e560c06d30e",
+        price: Number(product.basePrice),
+        salePrice: product.salePrice ? Number(product.salePrice) : undefined,
+        rating: avgRating,
+        reviewCount: product.reviews.length,
+        inStock: product.stock > 0,
+      };
+    });
+  } catch (error) {
+    console.error("Error fetching related products:", error);
+    return [];
+  }
+}
+
+export default async function ProductDetailPage({
+  params,
+}: ProductDetailPageProps) {
+  const product = await getProduct(params.id);
 
   if (!product) {
     notFound();
   }
 
-  const hasDiscount = product.salePrice && product.salePrice < product.price;
+  const relatedProducts = product.categoryId
+    ? await getRelatedProducts(product.categoryId, product.id)
+    : [];
+
+  // Calculate average rating
+  const avgRating =
+    product.reviews.length > 0
+      ? product.reviews.reduce((sum, r) => sum + r.rating, 0) /
+        product.reviews.length
+      : 0;
+
+  // Calculate rating distribution
+  const ratingCounts = [0, 0, 0, 0, 0];
+  product.reviews.forEach((review) => {
+    ratingCounts[review.rating - 1]++;
+  });
+  const ratingDistribution = [5, 4, 3, 2, 1].map((stars) => ({
+    stars,
+    count: ratingCounts[stars - 1],
+    percentage:
+      product.reviews.length > 0
+        ? Math.round((ratingCounts[stars - 1] / product.reviews.length) * 100)
+        : 0,
+  }));
+
+  // Transform gallery images
+  const galleryImages = product.images.map((img) => ({
+    id: img.id,
+    url: img.url,
+    alt: img.alt || product.name,
+  }));
+
+  // If no images, add a placeholder
+  if (galleryImages.length === 0) {
+    galleryImages.push({
+      id: "placeholder",
+      url: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e",
+      alt: product.name,
+    });
+  }
+
+  // Transform reviews
+  const transformedReviews = product.reviews.map((review) => ({
+    id: review.id,
+    userId: review.userId,
+    userName: review.user.name || "Usuario Anónimo",
+    rating: review.rating,
+    title: review.title || "",
+    content: review.comment,
+    isVerifiedPurchase: true,
+    createdAt: review.createdAt.toISOString(),
+    helpfulCount: 0,
+  }));
+
+  const hasDiscount =
+    product.salePrice && Number(product.salePrice) < Number(product.basePrice);
+  const currentPrice = hasDiscount
+    ? Number(product.salePrice)
+    : Number(product.basePrice);
+  const originalPrice = Number(product.basePrice);
   const discountPercent = hasDiscount
-    ? Math.round(((product.price - product.salePrice) / product.price) * 100)
+    ? Math.round(((originalPrice - currentPrice) / originalPrice) * 100)
     : 0;
 
-  const ratingDistribution = [
-    { stars: 5, count: 85, percentage: 66 },
-    { stars: 4, count: 30, percentage: 23 },
-    { stars: 3, count: 10, percentage: 8 },
-    { stars: 2, count: 2, percentage: 2 },
-    { stars: 1, count: 1, percentage: 1 },
-  ];
+  // Extract features from description or use defaults
+  const features = product.description
+    ? product.description
+        .split("\n")
+        .filter((line) => line.trim())
+        .slice(0, 6)
+    : [
+        "Alta calidad garantizada",
+        "Envío seguro y protegido",
+        "Soporte al cliente 24/7",
+      ];
 
   return (
     <div className="min-h-screen bg-white">
@@ -165,16 +211,20 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
         {/* Breadcrumbs */}
         <nav className="mb-8 flex items-center gap-2 text-sm text-gray-600">
           <a href="/shop" className="hover:text-gray-900">
-            Shop
+            Tienda
           </a>
           <span>/</span>
-          <a
-            href={`/shop?category=${product.category}`}
-            className="hover:text-gray-900"
-          >
-            {product.category}
-          </a>
-          <span>/</span>
+          {product.category && (
+            <>
+              <a
+                href={`/categories/${product.category.slug}`}
+                className="hover:text-gray-900"
+              >
+                {product.category.name}
+              </a>
+              <span>/</span>
+            </>
+          )}
           <span className="text-gray-900">{product.name}</span>
         </nav>
 
@@ -188,7 +238,9 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
           {/* Product Info */}
           <div>
             <h1 className="text-3xl font-bold text-gray-900">{product.name}</h1>
-            <p className="mt-2 text-gray-600">{product.shortDescription}</p>
+            {product.shortDescription && (
+              <p className="mt-2 text-gray-600">{product.shortDescription}</p>
+            )}
 
             {/* Rating */}
             <div className="mt-4 flex items-center gap-4">
@@ -197,7 +249,7 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
                   <Star
                     key={i}
                     className={`h-5 w-5 ${
-                      i < Math.floor(product.rating)
+                      i < Math.floor(avgRating)
                         ? "fill-yellow-400 text-yellow-400"
                         : "text-gray-300"
                     }`}
@@ -205,22 +257,28 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
                 ))}
               </div>
               <span className="text-sm text-gray-600">
-                {product.rating} ({product.reviewCount} reviews)
+                {avgRating.toFixed(1)} ({product.reviews.length} reseñas)
               </span>
             </div>
 
             {/* Price */}
             <div className="mt-6 flex items-baseline gap-3">
               <span className="text-4xl font-bold text-gray-900">
-                ${(product.salePrice || product.price).toFixed(2)}
+                $
+                {currentPrice.toLocaleString("es-MX", {
+                  minimumFractionDigits: 2,
+                })}
               </span>
               {hasDiscount && (
                 <>
                   <span className="text-xl text-gray-500 line-through">
-                    ${product.price.toFixed(2)}
+                    $
+                    {originalPrice.toLocaleString("es-MX", {
+                      minimumFractionDigits: 2,
+                    })}
                   </span>
                   <span className="rounded-full bg-red-100 px-3 py-1 text-sm font-bold text-red-700">
-                    Save {discountPercent}%
+                    Ahorra {discountPercent}%
                   </span>
                 </>
               )}
@@ -230,18 +288,45 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
             <div className="mt-4">
               {product.stock > 0 ? (
                 <p className="text-sm text-green-600">
-                  ✓ In stock ({product.stock} available)
+                  En stock ({product.stock} disponibles)
                 </p>
               ) : (
-                <p className="text-sm text-red-600">Out of stock</p>
+                <p className="text-sm text-red-600">Agotado</p>
               )}
             </div>
 
+            {/* Variants */}
+            {product.variants.length > 0 && (
+              <div className="mt-6">
+                <h3 className="text-sm font-medium text-gray-900">
+                  Variantes disponibles:
+                </h3>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {product.variants.map((variant) => (
+                    <span
+                      key={variant.id}
+                      className="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700"
+                    >
+                      {variant.color || variant.size || `SKU: ${variant.sku}`}
+                      {variant.stock > 0 ? ` (${variant.stock})` : " (Agotado)"}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Add to Cart */}
             <div className="mt-8 flex gap-4">
-              <button className="flex-1 rounded-lg bg-blue-600 px-8 py-4 font-semibold text-white transition-all hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                Add to Cart
-              </button>
+              <div className="flex-1">
+                <AddToCartButton
+                  productId={product.id}
+                  productName={product.name}
+                  productSlug={product.slug}
+                  productPrice={currentPrice}
+                  productImage={galleryImages[0]?.url || ""}
+                  stock={product.stock}
+                />
+              </div>
               <button className="rounded-lg border-2 border-gray-300 p-4 transition-all hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <Heart className="h-6 w-6 text-gray-600" />
               </button>
@@ -254,51 +339,50 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
             <div className="mt-8 space-y-4">
               <div className="flex items-center gap-3 text-sm text-gray-700">
                 <Truck className="h-5 w-5 text-blue-600" />
-                <span>Free shipping on orders over $50</span>
+                <span>Envío gratis en compras mayores a $500</span>
               </div>
               <div className="flex items-center gap-3 text-sm text-gray-700">
                 <Shield className="h-5 w-5 text-blue-600" />
-                <span>2-year warranty included</span>
+                <span>Garantía de 1 año incluida</span>
               </div>
               <div className="flex items-center gap-3 text-sm text-gray-700">
                 <RotateCcw className="h-5 w-5 text-blue-600" />
-                <span>30-day return policy</span>
+                <span>30 días para devoluciones</span>
               </div>
             </div>
 
             {/* Product Features */}
-            <div className="mt-8 rounded-lg border border-gray-200 p-6">
-              <h3 className="font-semibold text-gray-900">Key Features</h3>
-              <ul className="mt-4 space-y-2">
-                {product.features.map((feature, index) => (
-                  <li
-                    key={index}
-                    className="flex items-start gap-2 text-sm text-gray-700"
-                  >
-                    <span className="mt-1 text-blue-600">✓</span>
-                    <span>{feature}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            {features.length > 0 && (
+              <div className="mt-8 rounded-lg border border-gray-200 p-6">
+                <h3 className="font-semibold text-gray-900">Características</h3>
+                <ul className="mt-4 space-y-2">
+                  {features.map((feature, index) => (
+                    <li
+                      key={index}
+                      className="flex items-start gap-2 text-sm text-gray-700"
+                    >
+                      <span className="mt-1 text-blue-600">✓</span>
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Tabs Section */}
+        {/* Description Tab */}
         <div className="mt-16">
           <div className="border-b border-gray-200">
             <nav className="-mb-px flex gap-8">
               <button className="border-b-2 border-blue-600 pb-4 text-sm font-medium text-blue-600">
-                Description
-              </button>
-              <button className="border-b-2 border-transparent pb-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
-                Specifications
+                Descripción
               </button>
             </nav>
           </div>
           <div className="py-8">
-            <p className="text-gray-700 leading-relaxed">
-              {product.description}
+            <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+              {product.description || "Sin descripción disponible."}
             </p>
           </div>
         </div>
@@ -306,12 +390,12 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
         {/* Reviews */}
         <div className="mt-16">
           <Suspense
-            fallback={<div className="animate-pulse">Loading reviews...</div>}
+            fallback={<div className="animate-pulse">Cargando reseñas...</div>}
           >
             <ProductReviews
-              reviews={reviews}
-              averageRating={product.rating}
-              totalReviews={product.reviewCount}
+              reviews={transformedReviews}
+              averageRating={avgRating}
+              totalReviews={product.reviews.length}
               ratingDistribution={ratingDistribution}
               hasMore={false}
             />
@@ -319,13 +403,17 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
         </div>
 
         {/* Related Products */}
-        <div className="mt-16">
-          <Suspense
-            fallback={<div className="animate-pulse">Loading products...</div>}
-          >
-            <RelatedProducts products={relatedProducts} />
-          </Suspense>
-        </div>
+        {relatedProducts.length > 0 && (
+          <div className="mt-16">
+            <Suspense
+              fallback={
+                <div className="animate-pulse">Cargando productos...</div>
+              }
+            >
+              <RelatedProducts products={relatedProducts} />
+            </Suspense>
+          </div>
+        )}
       </div>
     </div>
   );

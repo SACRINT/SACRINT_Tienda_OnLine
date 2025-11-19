@@ -1,6 +1,9 @@
 // Jest setup file
 // Runs before each test file
 
+// Import jest-dom matchers for testing-library
+require('@testing-library/jest-dom')
+
 // Mock environment variables for testing
 process.env.DATABASE_URL = process.env.DATABASE_URL || 'postgresql://test:test@localhost:5432/test'
 process.env.NEXTAUTH_SECRET = 'test-secret-key-for-jest-testing'

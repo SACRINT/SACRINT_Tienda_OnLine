@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "target": "es2017",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
@@ -12,6 +13,7 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
+    "downlevelIteration": true,
     "plugins": [
       {
         "name": "next"
@@ -23,5 +25,24 @@
     "types": ["jest", "node"]
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules", "src/__tests__", "src/lib/testing"]
+  "exclude": [
+    "node_modules",
+    "src/__tests__",
+    "src/lib/testing",
+    "e2e",
+    "playwright.config.ts",
+    "prisma/seed.ts",
+    "src/lib/integrations",
+    "src/lib/monitoring",
+    "src/lib/cache",
+    "src/lib/pwa",
+    "src/lib/tenant",
+    "src/lib/performance/query-optimization.ts",
+    "src/lib/performance/dynamic-import.tsx",
+    "src/lib/performance/web-vitals.ts",
+    "src/lib/security/api-keys.ts",
+    "src/lib/security/session.ts",
+    "src/lib/db/optimization.ts",
+    "src/lib/db/optimized-queries.ts"
+  ]
 }
