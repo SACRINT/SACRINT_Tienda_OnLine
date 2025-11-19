@@ -1,9 +1,20 @@
+import { Metadata } from "next";
 import { HeroSection } from "@/components/home/HeroSection";
 import { CategoriesSection } from "@/components/home/CategoriesSection";
 import { FeaturedProducts } from "@/components/home/FeaturedProducts";
 import { ValueProposition } from "@/components/home/ValueProposition";
 import { Newsletter } from "@/components/home/Newsletter";
 import { db } from "@/lib/db";
+
+export const metadata: Metadata = {
+  title: "SACRINT Demo Store - Tu Tienda Online",
+  description: "Descubre productos de calidad en electrónica, ropa, hogar y deportes. Envío gratis en compras mayores a $1,000 MXN. Ofertas exclusivas disponibles.",
+  openGraph: {
+    title: "SACRINT Demo Store",
+    description: "Tu tienda en línea de confianza",
+    type: "website",
+  },
+};
 
 // Demo tenant ID - in production would come from subdomain/domain
 const DEMO_TENANT_SLUG = "demo-store";
