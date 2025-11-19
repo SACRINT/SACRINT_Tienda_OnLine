@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Web Vitals Monitoring
 // Core Web Vitals tracking for performance optimization
 

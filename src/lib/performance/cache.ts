@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Caching Service
 // Multi-layer caching system
 

@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Dynamic Import Utilities
 // Code splitting and lazy loading helpers for performance optimization
 

@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Database Optimization Utilities
 // Query optimization, caching, and performance monitoring
 

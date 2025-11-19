@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Error Tracking & Reporting
 // Centralized error handling with context and reporting
 

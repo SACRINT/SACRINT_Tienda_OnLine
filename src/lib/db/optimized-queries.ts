@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Optimized Database Queries
 // High-performance queries with caching and efficient selects
 

@@ -67,7 +67,7 @@ export function SearchResults({
         <h1 className="text-2xl font-bold">
           {query ? (
             <>
-              Search results for "{query}"
+              Search results for &quot;{query}&quot;
             </>
           ) : (
             "All Products"

@@ -18,7 +18,8 @@ export const CheckboxField = React.forwardRef<
   HTMLInputElement,
   CheckboxFieldProps
 >(({ className, label, description, error, id, ...props }, ref) => {
-  const inputId = id || React.useId();
+  const generatedId = React.useId();
+  const inputId = id || generatedId;
 
   return (
     <div className="flex items-start space-x-3">

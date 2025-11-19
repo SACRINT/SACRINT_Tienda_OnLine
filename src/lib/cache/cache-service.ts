@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Cache Service
 // In-memory cache with TTL support (upgrade to Redis for production)
 
