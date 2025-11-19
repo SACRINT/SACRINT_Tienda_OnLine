@@ -272,5 +272,4 @@ export function generateTrackingNumber(carrier: string): string {
   return `${prefix}${timestamp}${random}`
 }
 
-// Export types for components
-export type { ShippingZone, PackageInfo, ShippingRequest }
+// Types are already exported above with export interface

@@ -68,9 +68,7 @@ export default async function OrderDetailPage({
             status: order.status,
             timestamp: order.updatedAt || order.createdAt,
             description:
-              order.status === "PAID"
-                ? "Pago confirmado"
-                : order.status === "PROCESSING"
+              order.status === "PROCESSING"
                 ? "Pedido en preparación"
                 : order.status === "SHIPPED"
                 ? "Pedido enviado"

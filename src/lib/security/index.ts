@@ -9,4 +9,13 @@ export * from "./audit"
 export * from "./validation"
 
 // Common validators from validators.ts
-export { validateUUID, validateEmail, validateURL, validatePrice } from "./validators"
+export {
+  sanitizeHTML,
+  validateFileUpload,
+  validateSafeURL,
+  validateCreditCard,
+  validateEmailSecurity,
+  generateSecureToken,
+  PhoneNumberSchema,
+  StrongPasswordSchema,
+} from "./validators"
