@@ -6,6 +6,7 @@ import {
   ProductCard,
   FilterSidebar,
 } from "@/components/shop";
+import { QuickViewModal, QuickViewProduct } from "@/components/shop/QuickViewModal";
 import { useCart } from "@/lib/store/useCart";
 
 interface Product {
@@ -43,6 +44,7 @@ export function ShopPageClient({ products, categories }: ShopPageClientProps) {
   const [inStockOnly, setInStockOnly] = useState(false);
   const [onSaleOnly, setOnSaleOnly] = useState(false);
   const [addedToCart, setAddedToCart] = useState<string | null>(null);
+  const [quickViewProduct, setQuickViewProduct] = useState<QuickViewProduct | null>(null);
 
   // Hydrate cart on mount
   useEffect(() => {
@@ -63,6 +65,24 @@ export function ShopPageClient({ products, categories }: ShopPageClientProps) {
       });
       setAddedToCart(productId);
       setTimeout(() => setAddedToCart(null), 2000);
+    }
+  };
+
+  const handleQuickView = (productId: string) => {
+    const product = products.find((p) => p.id === productId);
+    if (product) {
+      setQuickViewProduct({
+        id: product.id,
+        name: product.name,
+        slug: product.slug,
+        image: product.image,
+        price: product.originalPrice,
+        salePrice: product.salePrice,
+        rating: product.rating || 0,
+        reviewCount: product.reviewCount,
+        inStock: product.inStock,
+        category: product.category,
+      });
     }
   };
 
@@ -221,6 +241,7 @@ export function ShopPageClient({ products, categories }: ShopPageClientProps) {
                       onToggleWishlist={(productId) => {
                         console.log("Toggle wishlist:", productId);
                       }}
+                      onQuickView={handleQuickView}
                     />
                   ))}
                 </div>
@@ -270,6 +291,13 @@ export function ShopPageClient({ products, categories }: ShopPageClientProps) {
           </main>
         </div>
       </div>
+
+      {/* Quick View Modal */}
+      <QuickViewModal
+        product={quickViewProduct}
+        isOpen={!!quickViewProduct}
+        onClose={() => setQuickViewProduct(null)}
+      />
     </div>
   );
 }
