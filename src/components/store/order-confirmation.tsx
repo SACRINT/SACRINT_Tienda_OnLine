@@ -74,7 +74,7 @@ export function OrderConfirmation({
       <div className="flex items-center gap-3 p-4 bg-muted rounded-lg">
         <Mail className="h-5 w-5 text-muted-foreground" />
         <p className="text-sm">
-          We've sent a confirmation email to{" "}
+          We&apos;ve sent a confirmation email to{" "}
           <span className="font-medium">{order.email}</span>
         </p>
       </div>

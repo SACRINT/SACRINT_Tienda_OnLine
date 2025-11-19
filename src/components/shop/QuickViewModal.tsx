@@ -72,8 +72,9 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
 
     addItem({
       productId: product.id,
+      variantId: null,
       name: product.name,
-      slug: product.slug,
+      sku: product.slug,
       price: displayPrice,
       image: product.image,
       quantity,
