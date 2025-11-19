@@ -1,24 +1,24 @@
-'use client'
+"use client";
 
 // ProductGallery - Galería de imágenes con thumbnails
 // Muestra imagen principal y permite navegar con thumbnails
 
-import { useState } from 'react'
-import Image from 'next/image'
+import { useState } from "react";
+import Image from "next/image";
 
 interface ProductImage {
-  url: string
-  alt?: string | null
-  order?: number
+  url: string;
+  alt?: string | null;
+  order?: number;
 }
 
 interface ProductGalleryProps {
-  images: ProductImage[]
-  productName: string
+  images: ProductImage[];
+  productName: string;
 }
 
 export function ProductGallery({ images, productName }: ProductGalleryProps) {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   // Si no hay imágenes, mostrar placeholder
   if (!images || images.length === 0) {
@@ -26,25 +26,25 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
       <div className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center">
         <span className="text-6xl">📦</span>
       </div>
-    )
+    );
   }
 
-  const currentImage = images[currentImageIndex]
+  const currentImage = images[currentImageIndex];
 
   const handleNext = () => {
-    setCurrentImageIndex((prev) => (prev + 1) % images.length)
-  }
+    setCurrentImageIndex((prev) => (prev + 1) % images.length);
+  };
 
   const handlePrev = () => {
-    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length)
-  }
+    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
 
   return (
     <div className="space-y-4">
       {/* Imagen principal */}
       <div className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden group">
         <Image
-          src={currentImage.url || '/placeholder.jpg'}
+          src={currentImage.url || "/placeholder.jpg"}
           alt={currentImage.alt || productName}
           fill
           className="object-cover"
@@ -85,12 +85,12 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
               onClick={() => setCurrentImageIndex(index)}
               className={`relative aspect-square rounded-md overflow-hidden border-2 transition-all ${
                 index === currentImageIndex
-                  ? 'border-primary ring-2 ring-primary ring-offset-2'
-                  : 'border-gray-200 hover:border-primary'
+                  ? "border-primary ring-2 ring-primary ring-offset-2"
+                  : "border-gray-200 hover:border-primary"
               }`}
             >
               <Image
-                src={image.url || '/placeholder.jpg'}
+                src={image.url || "/placeholder.jpg"}
                 alt={image.alt || `${productName} - imagen ${index + 1}`}
                 fill
                 className="object-cover"
@@ -101,5 +101,5 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
         </div>
       )}
     </div>
-  )
+  );
 }

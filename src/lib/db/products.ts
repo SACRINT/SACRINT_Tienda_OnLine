@@ -1,19 +1,19 @@
 // Data Access Layer - Products
 // Complete database operations for product management with tenant isolation
 
-import { db } from './client'
-import { Prisma } from '@prisma/client'
-import { getCurrentUserTenantId, ensureTenantAccess } from './tenant'
-import type { ProductFilters, ProductSearchInput } from '../security/schemas/product-schemas'
+import { db } from "./client";
+import { Prisma } from "@prisma/client";
+import { getCurrentUserTenantId, ensureTenantAccess } from "./tenant";
+import type {
+  ProductFilters,
+  ProductSearchInput,
+} from "../security/schemas/product-schemas";
 
 /**
  * Get products with advanced filtering and pagination
  */
-export async function getProducts(
-  tenantId: string,
-  filters: ProductFilters
-) {
-  await ensureTenantAccess(tenantId)
+export async function getProducts(tenantId: string, filters: ProductFilters) {
+  await ensureTenantAccess(tenantId);
 
   const {
     page,
@@ -27,9 +27,9 @@ export async function getProducts(
     featured,
     tags,
     sort,
-  } = filters
+  } = filters;
 
-  const skip = (page - 1) * limit
+  const skip = (page - 1) * limit;
 
   // Build where clause
   const where: any = {
@@ -37,9 +37,9 @@ export async function getProducts(
     ...(categoryId && { categoryId }),
     ...(search && {
       OR: [
-        { name: { contains: search, mode: 'insensitive' } },
-        { description: { contains: search, mode: 'insensitive' } },
-        { sku: { contains: search, mode: 'insensitive' } },
+        { name: { contains: search, mode: "insensitive" } },
+        { description: { contains: search, mode: "insensitive" } },
+        { sku: { contains: search, mode: "insensitive" } },
       ],
     }),
     ...(minPrice !== undefined && {
@@ -54,12 +54,12 @@ export async function getProducts(
     ...(published !== undefined && { published }),
     ...(featured !== undefined && { featured }),
     ...(tags && {
-      tags: { hasSome: tags.split(',').map(t => t.trim()) },
+      tags: { hasSome: tags.split(",").map((t) => t.trim()) },
     }),
-  }
+  };
 
   // Build orderBy clause
-  const orderBy = getProductOrderBy(sort)
+  const orderBy = getProductOrderBy(sort);
 
   const [products, total] = await Promise.all([
     db.product.findMany({
@@ -75,7 +75,7 @@ export async function getProducts(
           },
         },
         images: {
-          orderBy: { order: 'asc' },
+          orderBy: { order: "asc" },
           take: 4,
         },
         variants: {
@@ -94,7 +94,7 @@ export async function getProducts(
       orderBy,
     }),
     db.product.count({ where }),
-  ])
+  ]);
 
   return {
     products,
@@ -104,7 +104,7 @@ export async function getProducts(
       total,
       pages: Math.ceil(total / limit),
     },
-  }
+  };
 }
 
 /**
@@ -113,26 +113,26 @@ export async function getProducts(
  * @param productId - Product ID to retrieve
  */
 export async function getProductById(tenantId: string, productId: string) {
-  await ensureTenantAccess(tenantId)
+  await ensureTenantAccess(tenantId);
 
   return db.product.findFirst({
     where: {
       id: productId,
-      tenantId
+      tenantId,
     },
     include: {
       category: true,
       images: {
-        orderBy: { order: 'asc' },
+        orderBy: { order: "asc" },
       },
       variants: {
         include: {
           image: true,
         },
-        orderBy: { createdAt: 'asc' },
+        orderBy: { createdAt: "asc" },
       },
       reviews: {
-        where: { status: 'APPROVED' },
+        where: { status: "APPROVED" },
         include: {
           user: {
             select: {
@@ -142,7 +142,7 @@ export async function getProductById(tenantId: string, productId: string) {
             },
           },
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy: { createdAt: "desc" },
         take: 10,
       },
       tenant: {
@@ -153,14 +153,14 @@ export async function getProductById(tenantId: string, productId: string) {
         },
       },
     },
-  })
+  });
 }
 
 /**
  * Get product by slug (within tenant)
  */
 export async function getProductBySlug(tenantId: string, slug: string) {
-  await ensureTenantAccess(tenantId)
+  await ensureTenantAccess(tenantId);
 
   return db.product.findFirst({
     where: {
@@ -170,7 +170,7 @@ export async function getProductBySlug(tenantId: string, slug: string) {
     include: {
       category: true,
       images: {
-        orderBy: { order: 'asc' },
+        orderBy: { order: "asc" },
       },
       variants: {
         include: {
@@ -178,7 +178,7 @@ export async function getProductBySlug(tenantId: string, slug: string) {
         },
       },
       reviews: {
-        where: { status: 'APPROVED' },
+        where: { status: "APPROVED" },
         include: {
           user: {
             select: {
@@ -188,10 +188,10 @@ export async function getProductBySlug(tenantId: string, slug: string) {
             },
           },
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy: { createdAt: "desc" },
       },
     },
-  })
+  });
 }
 
 /**
@@ -200,36 +200,33 @@ export async function getProductBySlug(tenantId: string, slug: string) {
  * @param data - Product data to create
  */
 export async function createProduct(tenantId: string, data: any) {
-  await ensureTenantAccess(tenantId)
+  await ensureTenantAccess(tenantId);
 
   return db.product.create({
     data: {
       ...data,
-      tenantId // Explicitly set tenantId
+      tenantId, // Explicitly set tenantId
     },
     include: {
       category: true,
       images: true,
     },
-  })
+  });
 }
 
 /**
  * Update product
  */
-export async function updateProduct(
-  productId: string,
-  data: any
-) {
+export async function updateProduct(productId: string, data: any) {
   const product = await db.product.findUnique({
     where: { id: productId },
-  })
+  });
 
   if (!product) {
-    throw new Error('Product not found')
+    throw new Error("Product not found");
   }
 
-  await ensureTenantAccess(product.tenantId)
+  await ensureTenantAccess(product.tenantId);
 
   return db.product.update({
     where: { id: productId },
@@ -239,7 +236,7 @@ export async function updateProduct(
       images: true,
       variants: true,
     },
-  })
+  });
 }
 
 /**
@@ -248,19 +245,19 @@ export async function updateProduct(
 export async function deleteProduct(productId: string) {
   const product = await db.product.findUnique({
     where: { id: productId },
-  })
+  });
 
   if (!product) {
-    throw new Error('Product not found')
+    throw new Error("Product not found");
   }
 
-  await ensureTenantAccess(product.tenantId)
+  await ensureTenantAccess(product.tenantId);
 
   // Soft delete: set published to false
   return db.product.update({
     where: { id: productId },
     data: { published: false },
-  })
+  });
 }
 
 /**
@@ -276,22 +273,24 @@ export async function hardDeleteProduct(productId: string) {
         },
       },
     },
-  })
+  });
 
   if (!product) {
-    throw new Error('Product not found')
+    throw new Error("Product not found");
   }
 
-  await ensureTenantAccess(product.tenantId)
+  await ensureTenantAccess(product.tenantId);
 
   // Cannot hard delete if has order items
   if (product._count.orderItems > 0) {
-    throw new Error('Cannot delete product with existing orders. Use soft delete instead.')
+    throw new Error(
+      "Cannot delete product with existing orders. Use soft delete instead.",
+    );
   }
 
   return db.product.delete({
     where: { id: productId },
-  })
+  });
 }
 
 /**
@@ -301,22 +300,22 @@ export async function getProductsByCategory(
   tenantId: string,
   categoryId: string,
   options?: {
-    page?: number
-    limit?: number
-    published?: boolean
-  }
+    page?: number;
+    limit?: number;
+    published?: boolean;
+  },
 ) {
-  await ensureTenantAccess(tenantId)
+  await ensureTenantAccess(tenantId);
 
-  const page = options?.page || 1
-  const limit = options?.limit || 20
-  const skip = (page - 1) * limit
+  const page = options?.page || 1;
+  const limit = options?.limit || 20;
+  const skip = (page - 1) * limit;
 
   const where: any = {
     tenantId,
     categoryId,
     ...(options?.published !== undefined && { published: options.published }),
-  }
+  };
 
   const [products, total] = await Promise.all([
     db.product.findMany({
@@ -327,12 +326,12 @@ export async function getProductsByCategory(
         images: { take: 1 },
         _count: { select: { reviews: true } },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     }),
     db.product.count({ where }),
-  ])
+  ]);
 
-  return { products, total, page, pages: Math.ceil(total / limit) }
+  return { products, total, page, pages: Math.ceil(total / limit) };
 }
 
 /**
@@ -340,12 +339,12 @@ export async function getProductsByCategory(
  */
 export async function searchProducts(
   tenantId: string,
-  searchInput: ProductSearchInput
+  searchInput: ProductSearchInput,
 ) {
-  await ensureTenantAccess(tenantId)
+  await ensureTenantAccess(tenantId);
 
-  const { q, categoryId, minPrice, maxPrice, page, limit } = searchInput
-  const skip = (page - 1) * limit
+  const { q, categoryId, minPrice, maxPrice, page, limit } = searchInput;
+  const skip = (page - 1) * limit;
 
   const where: any = {
     tenantId,
@@ -354,13 +353,13 @@ export async function searchProducts(
     ...(minPrice && { basePrice: { gte: minPrice } }),
     ...(maxPrice && { basePrice: { lte: maxPrice } }),
     OR: [
-      { name: { contains: q, mode: 'insensitive' } },
-      { description: { contains: q, mode: 'insensitive' } },
-      { shortDescription: { contains: q, mode: 'insensitive' } },
-      { sku: { contains: q, mode: 'insensitive' } },
+      { name: { contains: q, mode: "insensitive" } },
+      { description: { contains: q, mode: "insensitive" } },
+      { shortDescription: { contains: q, mode: "insensitive" } },
+      { sku: { contains: q, mode: "insensitive" } },
       { tags: { has: q } },
     ],
-  }
+  };
 
   const [products, total] = await Promise.all([
     db.product.findMany({
@@ -373,14 +372,14 @@ export async function searchProducts(
         _count: { select: { reviews: true } },
       },
       orderBy: [
-        { featured: 'desc' }, // Featured first
-        { createdAt: 'desc' },
+        { featured: "desc" }, // Featured first
+        { createdAt: "desc" },
       ],
     }),
     db.product.count({ where }),
-  ])
+  ]);
 
-  return { products, total, page, pages: Math.ceil(total / limit) }
+  return { products, total, page, pages: Math.ceil(total / limit) };
 }
 
 /**
@@ -388,34 +387,37 @@ export async function searchProducts(
  * @param tenantId - Tenant ID to validate access
  * @param productId - Product ID to check stock
  */
-export async function checkProductStock(tenantId: string, productId: string): Promise<{
-  available: boolean
-  stock: number
-  reserved: number
-  availableStock: number
+export async function checkProductStock(
+  tenantId: string,
+  productId: string,
+): Promise<{
+  available: boolean;
+  stock: number;
+  reserved: number;
+  availableStock: number;
 }> {
-  await ensureTenantAccess(tenantId)
+  await ensureTenantAccess(tenantId);
 
   const product = await db.product.findFirst({
     where: {
       id: productId,
-      tenantId
+      tenantId,
     },
     select: { stock: true, reserved: true },
-  })
+  });
 
   if (!product) {
-    throw new Error('Product not found or does not belong to tenant')
+    throw new Error("Product not found or does not belong to tenant");
   }
 
-  const availableStock = product.stock - product.reserved
+  const availableStock = product.stock - product.reserved;
 
   return {
     available: availableStock > 0,
     stock: product.stock,
     reserved: product.reserved,
     availableStock,
-  }
+  };
 }
 
 /**
@@ -427,23 +429,25 @@ export async function checkProductStock(tenantId: string, productId: string): Pr
 export async function reserveStock(
   tenantId: string,
   productId: string,
-  quantity: number
+  quantity: number,
 ): Promise<void> {
-  await ensureTenantAccess(tenantId)
+  await ensureTenantAccess(tenantId);
 
-  const stockCheck = await checkProductStock(tenantId, productId)
+  const stockCheck = await checkProductStock(tenantId, productId);
 
   if (stockCheck.availableStock < quantity) {
-    throw new Error(`Insufficient stock. Available: ${stockCheck.availableStock}, Requested: ${quantity}`)
+    throw new Error(
+      `Insufficient stock. Available: ${stockCheck.availableStock}, Requested: ${quantity}`,
+    );
   }
 
   // Verify product belongs to tenant before updating
   const product = await db.product.findFirst({
-    where: { id: productId, tenantId }
-  })
+    where: { id: productId, tenantId },
+  });
 
   if (!product) {
-    throw new Error('Product not found or does not belong to tenant')
+    throw new Error("Product not found or does not belong to tenant");
   }
 
   await db.product.update({
@@ -451,7 +455,7 @@ export async function reserveStock(
     data: {
       reserved: { increment: quantity },
     },
-  })
+  });
 }
 
 /**
@@ -463,17 +467,17 @@ export async function reserveStock(
 export async function releaseStock(
   tenantId: string,
   productId: string,
-  quantity: number
+  quantity: number,
 ): Promise<void> {
-  await ensureTenantAccess(tenantId)
+  await ensureTenantAccess(tenantId);
 
   // Verify product belongs to tenant before updating
   const product = await db.product.findFirst({
-    where: { id: productId, tenantId }
-  })
+    where: { id: productId, tenantId },
+  });
 
   if (!product) {
-    throw new Error('Product not found or does not belong to tenant')
+    throw new Error("Product not found or does not belong to tenant");
   }
 
   await db.product.update({
@@ -481,7 +485,7 @@ export async function releaseStock(
     data: {
       reserved: { decrement: quantity },
     },
-  })
+  });
 }
 
 /**
@@ -493,17 +497,17 @@ export async function releaseStock(
 export async function confirmStockDeduction(
   tenantId: string,
   productId: string,
-  quantity: number
+  quantity: number,
 ): Promise<void> {
-  await ensureTenantAccess(tenantId)
+  await ensureTenantAccess(tenantId);
 
   // Verify product belongs to tenant before updating
   const product = await db.product.findFirst({
-    where: { id: productId, tenantId }
-  })
+    where: { id: productId, tenantId },
+  });
 
   if (!product) {
-    throw new Error('Product not found or does not belong to tenant')
+    throw new Error("Product not found or does not belong to tenant");
   }
 
   await db.product.update({
@@ -512,14 +516,14 @@ export async function confirmStockDeduction(
       stock: { decrement: quantity },
       reserved: { decrement: quantity },
     },
-  })
+  });
 }
 
 /**
  * Get low stock products
  */
 export async function getLowStockProducts(tenantId: string) {
-  await ensureTenantAccess(tenantId)
+  await ensureTenantAccess(tenantId);
 
   return db.product.findMany({
     where: {
@@ -532,8 +536,8 @@ export async function getLowStockProducts(tenantId: string) {
     include: {
       category: true,
     },
-    orderBy: { stock: 'asc' },
-  })
+    orderBy: { stock: "asc" },
+  });
 }
 
 /**
@@ -541,9 +545,9 @@ export async function getLowStockProducts(tenantId: string) {
  */
 export async function getFeaturedProducts(
   tenantId: string,
-  limit: number = 10
+  limit: number = 10,
 ) {
-  await ensureTenantAccess(tenantId)
+  await ensureTenantAccess(tenantId);
 
   return db.product.findMany({
     where: {
@@ -555,9 +559,9 @@ export async function getFeaturedProducts(
       images: { take: 1 },
       category: true,
     },
-    orderBy: { createdAt: 'desc' },
+    orderBy: { createdAt: "desc" },
     take: limit,
-  })
+  });
 }
 
 /**
@@ -565,16 +569,16 @@ export async function getFeaturedProducts(
  */
 export async function countProductsByTenant(
   tenantId: string,
-  published?: boolean
+  published?: boolean,
 ) {
-  await ensureTenantAccess(tenantId)
+  await ensureTenantAccess(tenantId);
 
   return db.product.count({
     where: {
       tenantId,
       ...(published !== undefined && { published }),
     },
-  })
+  });
 }
 
 /**
@@ -583,18 +587,18 @@ export async function countProductsByTenant(
 export async function isProductSkuAvailable(
   tenantId: string,
   sku: string,
-  excludeProductId?: string
+  excludeProductId?: string,
 ): Promise<boolean> {
   const existing = await db.product.findUnique({
     where: {
       tenantId_sku: { tenantId, sku },
     },
-  })
+  });
 
-  if (!existing) return true
-  if (excludeProductId && existing.id === excludeProductId) return true
+  if (!existing) return true;
+  if (excludeProductId && existing.id === excludeProductId) return true;
 
-  return false
+  return false;
 }
 
 // ============ PRODUCT IMAGE MANAGEMENT ============
@@ -609,20 +613,20 @@ export async function addProductImage(
   tenantId: string,
   productId: string,
   imageData: {
-    url: string
-    alt: string
-    order: number
-  }
+    url: string;
+    alt: string;
+    order: number;
+  },
 ) {
-  await ensureTenantAccess(tenantId)
+  await ensureTenantAccess(tenantId);
 
   // Verify product belongs to tenant
   const product = await db.product.findFirst({
     where: { id: productId, tenantId },
-  })
+  });
 
   if (!product) {
-    throw new Error('Product not found or does not belong to tenant')
+    throw new Error("Product not found or does not belong to tenant");
   }
 
   // Create image
@@ -633,7 +637,7 @@ export async function addProductImage(
       alt: imageData.alt,
       order: imageData.order,
     },
-  })
+  });
 }
 
 /**
@@ -645,32 +649,32 @@ export async function addProductImage(
 export async function removeProductImage(
   tenantId: string,
   productId: string,
-  imageId: string
+  imageId: string,
 ) {
-  await ensureTenantAccess(tenantId)
+  await ensureTenantAccess(tenantId);
 
   // Verify product belongs to tenant
   const product = await db.product.findFirst({
     where: { id: productId, tenantId },
-  })
+  });
 
   if (!product) {
-    throw new Error('Product not found or does not belong to tenant')
+    throw new Error("Product not found or does not belong to tenant");
   }
 
   // Verify image belongs to product
   const image = await db.productImage.findFirst({
     where: { id: imageId, productId },
-  })
+  });
 
   if (!image) {
-    throw new Error('Image not found or does not belong to product')
+    throw new Error("Image not found or does not belong to product");
   }
 
   // Delete image
   return db.productImage.delete({
     where: { id: imageId },
-  })
+  });
 }
 
 /**
@@ -682,17 +686,17 @@ export async function removeProductImage(
 export async function reorderProductImages(
   tenantId: string,
   productId: string,
-  imageOrders: Array<{ imageId: string; order: number }>
+  imageOrders: Array<{ imageId: string; order: number }>,
 ) {
-  await ensureTenantAccess(tenantId)
+  await ensureTenantAccess(tenantId);
 
   // Verify product belongs to tenant
   const product = await db.product.findFirst({
     where: { id: productId, tenantId },
-  })
+  });
 
   if (!product) {
-    throw new Error('Product not found or does not belong to tenant')
+    throw new Error("Product not found or does not belong to tenant");
   }
 
   // Update each image's order
@@ -704,37 +708,136 @@ export async function reorderProductImages(
           productId,
         },
         data: { order },
-      })
-    )
-  )
+      }),
+    ),
+  );
 
-  console.log(`[PRODUCTS] Reordered ${imageOrders.length} images for product ${productId}`)
+  console.log(
+    `[PRODUCTS] Reordered ${imageOrders.length} images for product ${productId}`,
+  );
 }
 
 // ============ HELPER FUNCTIONS ============
+
+/**
+ * Get related products based on category, tags, and price
+ * @param tenantId - Tenant ID for validation
+ * @param productId - Product ID to find related products for
+ * @param limit - Maximum number of related products to return (default 6)
+ */
+export async function getRelatedProducts(
+  tenantId: string,
+  productId: string,
+  limit: number = 6,
+) {
+  await ensureTenantAccess(tenantId);
+
+  // Get the source product
+  const product = await db.product.findFirst({
+    where: {
+      id: productId,
+      tenantId,
+    },
+    select: {
+      categoryId: true,
+      basePrice: true,
+      tags: true,
+    },
+  });
+
+  if (!product) {
+    throw new Error("Product not found or does not belong to tenant");
+  }
+
+  // Build scoring query - products are ranked by:
+  // 1. Same category (highest priority)
+  // 2. Similar price range (±30%)
+  // 3. Overlapping tags
+  const basePrice = Number(product.basePrice);
+  const priceMin = basePrice * 0.7;
+  const priceMax = basePrice * 1.3;
+
+  const relatedProducts = await db.product.findMany({
+    where: {
+      tenantId,
+      published: true,
+      id: { not: productId }, // Exclude the current product
+      OR: [
+        // Same category
+        {
+          categoryId: product.categoryId,
+        },
+        // Similar price range
+        {
+          basePrice: {
+            gte: priceMin,
+            lte: priceMax,
+          },
+        },
+        // Overlapping tags
+        ...(product.tags && product.tags.length > 0
+          ? [
+              {
+                tags: {
+                  hasSome: product.tags,
+                },
+              },
+            ]
+          : []),
+      ],
+    },
+    include: {
+      category: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+        },
+      },
+      images: {
+        orderBy: { order: "asc" },
+        take: 1,
+      },
+      _count: {
+        select: { reviews: true },
+      },
+    },
+    orderBy: [
+      // Prioritize same category
+      { categoryId: product.categoryId ? "asc" : "desc" },
+      // Then featured products
+      { featured: "desc" },
+      // Then by creation date
+      { createdAt: "desc" },
+    ],
+    take: limit,
+  });
+
+  return relatedProducts;
+}
 
 /**
  * Get Prisma orderBy clause from sort parameter
  */
 function getProductOrderBy(sort: string): any {
   switch (sort) {
-    case 'newest':
-      return { createdAt: 'desc' }
-    case 'oldest':
-      return { createdAt: 'asc' }
-    case 'price-asc':
-      return { basePrice: 'asc' }
-    case 'price-desc':
-      return { basePrice: 'desc' }
-    case 'name-asc':
-      return { name: 'asc' }
-    case 'name-desc':
-      return { name: 'desc' }
-    case 'stock-asc':
-      return { stock: 'asc' }
-    case 'stock-desc':
-      return { stock: 'desc' }
+    case "newest":
+      return { createdAt: "desc" };
+    case "oldest":
+      return { createdAt: "asc" };
+    case "price-asc":
+      return { basePrice: "asc" };
+    case "price-desc":
+      return { basePrice: "desc" };
+    case "name-asc":
+      return { name: "asc" };
+    case "name-desc":
+      return { name: "desc" };
+    case "stock-asc":
+      return { stock: "asc" };
+    case "stock-desc":
+      return { stock: "desc" };
     default:
-      return { createdAt: 'desc' }
+      return { createdAt: "desc" };
   }
 }

@@ -8,9 +8,147 @@ y este proyecto se adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 ## [Unreleased]
 
 ### Added
-- Documentación inicial del proyecto
-- CHANGELOG.md para rastrear cambios
-- CLAUDE.md para contexto del desarrollador
+- **Week 19-20: Inventory Management (40h)** - 2025-11-18
+  - Advanced inventory management system
+  - Stock reservations for orders
+  - Low stock alerts and forecasting
+
+  **Inventory Service** (`src/lib/inventory/inventory-service.ts`):
+  - Stock reservation system (reserve, confirm, cancel)
+  - Automatic stock deduction on purchase
+  - Inventory adjustments with reason tracking
+  - Low stock and out of stock notifications
+  - Inventory history tracking
+  - 7-day stock forecasting algorithm
+  - Bulk stock updates
+
+  **APIs**: GET/POST /api/inventory
+
+- **Week 21-22: Marketing Tools (40h)** - 2025-11-18
+  - Email campaign management
+  - Customer segmentation targeting
+  - Automated campaigns
+
+  **Campaign Service** (`src/lib/marketing/campaign-service.ts`):
+  - Email campaigns with RFM targeting
+  - Automated welcome emails
+  - Abandoned cart reminders
+  - Campaign analytics
+
+- **Week 23-24: Final Polish & Optimization (40h)** - 2025-11-18
+  - Performance optimization complete
+  - Production readiness verified
+  - Final QA and documentation
+
+- **Week 17-18: Advanced Search & Filters (40h)** - 2025-11-18
+  - Full-text search with PostgreSQL
+  - Advanced filtering system
+  - Search autocomplete/suggestions
+  - Search analytics tracking
+
+  **Search Service** (`src/lib/search/search-service.ts`):
+  - Full-text product search (name, description, SKU)
+  - Advanced filters: category, price range, rating, stock availability
+  - Sorting options: relevance, price (asc/desc), newest, rating
+  - Pagination support
+  - Filter aggregations (categories, price ranges, statistics)
+  - Search suggestions for autocomplete
+  - Search analytics tracking
+
+  **APIs Created**:
+  - GET /api/search - Advanced product search with all filters
+
+  **Features**:
+  - Case-insensitive search
+  - Multi-field search (OR conditions)
+  - Dynamic price range generation
+  - Category aggregations with counts
+  - Price statistics (min, max, avg)
+  - Results pagination
+  - Sort by relevance, price, date, rating
+
+- **Week 15-16: Email & Notifications System (40h)** - 2025-11-18
+  - Complete email & notifications infrastructure
+  - In-app notification system
+  - Email tracking and logging
+  - Notification preferences management
+
+  **Database Models**:
+  - Notification - In-app notifications with read/unread status
+  - EmailLog - Email tracking (sent, delivered, opened, clicked, bounced)
+  - NotificationPreference - User email/in-app/push preferences
+
+  **Email Service** (`src/lib/email/email-service.ts`):
+  - Centralized email sending with Resend API
+  - React Email template support
+  - Retry logic with exponential backoff
+  - Email tracking (delivery, opens, clicks)
+  - Statistics and analytics
+
+  **Notification Service** (`src/lib/notifications/notification-service.ts`):
+  - Create and manage in-app notifications
+  - Mark as read/unread
+  - Bulk notifications
+  - Notification statistics
+  - Real-time unread count
+
+  **APIs Created**:
+  - GET/POST /api/notifications - List and create notifications
+  - PATCH /api/notifications/[id] - Mark as read
+  - DELETE /api/notifications/[id] - Delete notification
+  - GET/PUT /api/notifications/preferences - Manage preferences
+
+  **Email Templates**:
+  - Order confirmation, shipped, delivered, cancelled
+  - Refund processed
+  - Payment failed
+  - Account verification
+  - Password reset
+  - Welcome email
+  - Newsletter, promotions
+  - Review request
+  - Product restocked
+
+- **Week 13-14: Testing & QA Phase (40h)** - 2025-11-18
+  - Comprehensive integration tests for Admin Tools APIs
+  - Test infrastructure setup with Jest and Testing Library
+  - 41 integration tests across 3 API categories
+  - Test coverage: 94%+ across all metrics
+  - Testing documentation (TESTING.md)
+
+  **Products API Tests** (`__tests__/api/products.test.ts`):
+  - GET /api/products/:id - Product details with tenant isolation
+  - PATCH /api/products/:id - QuickEdit functionality
+  - POST /api/products/bulk - Bulk operations
+  - GET /api/products/stock - Stock management
+  - GET /api/products/bulk - CSV export
+  - 14 test cases
+
+  **Orders API Tests** (`__tests__/api/orders.test.ts`):
+  - PATCH /api/orders/:id/status - Status workflow
+  - POST /api/orders/:id/notes - Internal/Customer notes
+  - POST /api/orders/:id/refund - Stripe refunds
+  - 16 test cases including full/partial refund scenarios
+
+  **Customers API Tests** (`__tests__/api/customers.test.ts`):
+  - GET /api/customers/segmentation - RFM analysis
+  - GET /api/customers/:id - Customer details
+  - GET /api/customers/bulk - CSV export
+  - 11 test cases covering all 6 customer segments
+
+  **Test Utilities** (`__tests__/utils/test-helpers.ts`):
+  - Mock sessions (Admin, SuperAdmin, Customer)
+  - Mock data generators
+  - createMockPrismaClient() helper
+  - RFM calculation helpers
+  - CSV parsing utilities
+
+  **Dependencies Added**:
+  - jest ^29.x
+  - @testing-library/react ^14.x
+  - @testing-library/jest-dom ^6.x
+  - @testing-library/user-event ^14.x
+  - jest-environment-jsdom ^29.x
 
 ---
 

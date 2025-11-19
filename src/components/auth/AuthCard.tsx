@@ -1,16 +1,16 @@
-import { ReactNode } from 'react'
+import { ReactNode } from "react";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card'
+} from "@/components/ui/card";
 
 interface AuthCardProps {
-  title: string
-  description: string
-  children: ReactNode
+  title: string;
+  description: string;
+  children: ReactNode;
 }
 
 export function AuthCard({ title, description, children }: AuthCardProps) {
@@ -28,5 +28,5 @@ export function AuthCard({ title, description, children }: AuthCardProps) {
         <CardContent>{children}</CardContent>
       </Card>
     </div>
-  )
+  );
 }

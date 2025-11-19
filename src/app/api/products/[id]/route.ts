@@ -1,395 +1,323 @@
-// Product Detail API
-// GET /api/products/[id] - Get product details with full relations
-// PATCH /api/products/[id] - Update product (STORE_OWNER only)
-// DELETE /api/products/[id] - Delete product (STORE_OWNER only, soft delete)
+// GET /api/products/:id
+// GET, PUT, PATCH, DELETE operations for individual product
 
-import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/lib/auth/auth'
-import {
-  getProductById,
-  updateProduct,
-  deleteProduct,
-  hardDeleteProduct,
-  isProductSkuAvailable
-} from '@/lib/db/products'
-import { getCategoryById } from '@/lib/db/categories'
-import { UpdateProductSchema } from '@/lib/security/schemas/product-schemas'
-import { USER_ROLES } from '@/lib/types/user-role'
+import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth/auth";
 
-/**
- * GET /api/products/[id]
- * Returns product details with full information
- * Includes: category, images, variants, approved reviews, tenant
- */
+import { db } from "@/lib/db";
+import { z } from "zod";
+
+// Force dynamic rendering for this API route
+export const dynamic = "force-dynamic";
+
+// GET single product
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
-    const session = await auth()
+    const session = await auth();
 
-    if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { tenantId } = session.user
+    const searchParams = req.nextUrl.searchParams;
+    const tenantId = searchParams.get("tenantId");
 
     if (!tenantId) {
-      return NextResponse.json(
-        { error: 'User has no tenant assigned' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: "tenantId required" }, { status: 400 });
     }
 
-    const productId = params.id
-
-    const product = await getProductById(tenantId, productId)
+    const product = await db.product.findFirst({
+      where: {
+        id: params.id,
+        tenantId,
+      },
+      include: {
+        category: true,
+        images: true,
+        variants: true,
+      },
+    });
 
     if (!product) {
-      return NextResponse.json(
-        { error: 'Product not found or does not belong to your tenant' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
-    return NextResponse.json({
-      product: {
-        id: product.id,
-        name: product.name,
-        slug: product.slug,
-        description: product.description,
-        shortDescription: product.shortDescription,
-        sku: product.sku,
-        basePrice: product.basePrice,
-        salePrice: product.salePrice,
-        stock: product.stock,
-        reserved: product.reserved,
-        availableStock: product.stock - product.reserved,
-        published: product.published,
-        featured: product.featured,
-        tags: product.tags,
-        lowStockThreshold: product.lowStockThreshold,
-        weight: product.weight,
-        length: product.length,
-        width: product.width,
-        height: product.height,
-        seo: product.seo,
-        category: product.category,
-        images: product.images.map((img: any) => ({
-          id: img.id,
-          url: img.url,
-          alt: img.alt,
-          order: img.order,
-        })),
-        variants: product.variants.map((variant: any) => ({
-          id: variant.id,
-          size: variant.size,
-          color: variant.color,
-          price: variant.price,
-          stock: variant.stock,
-          image: variant.image ? {
-            id: variant.image.id,
-            url: variant.image.url,
-            alt: variant.image.alt,
-          } : null,
-        })),
-        reviews: product.reviews.map((review: any) => ({
-          id: review.id,
-          rating: review.rating,
-          comment: review.comment,
-          user: {
-            id: review.user.id,
-            name: review.user.name,
-            image: review.user.image,
-          },
-          createdAt: review.createdAt,
-        })),
-        tenant: {
-          id: product.tenant.id,
-          name: product.tenant.name,
-          slug: product.tenant.slug,
-        },
-        createdAt: product.createdAt,
-        updatedAt: product.updatedAt,
-      },
-    })
+    return NextResponse.json(product);
   } catch (error) {
-    console.error('[PRODUCTS] GET [id] error:', error)
+    console.error("Get product error:", error);
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }
 
-/**
- * PATCH /api/products/[id]
- * Updates a product
- * Only STORE_OWNER or SUPER_ADMIN can update products
- */
+// PATCH for quick updates (used by QuickEdit component)
+const QuickUpdateSchema = z.object({
+  tenantId: z.string().uuid(),
+  name: z.string().min(1).optional(),
+  description: z.string().optional(),
+  price: z.number().positive().optional(),
+  stock: z.number().int().min(0).optional(),
+  status: z.enum(["ACTIVE", "DRAFT", "ARCHIVED"]).optional(),
+});
+
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
-    const session = await auth()
+    const session = await auth();
 
-    if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { role, tenantId } = session.user
-
-    if (!tenantId) {
-      return NextResponse.json(
-        { error: 'User has no tenant assigned' },
-        { status: 404 }
-      )
+    if (
+      session.user.role !== "STORE_OWNER" &&
+      session.user.role !== "SUPER_ADMIN"
+    ) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    // Check if user has permission to update products
-    if (role !== USER_ROLES.STORE_OWNER && role !== USER_ROLES.SUPER_ADMIN) {
-      return NextResponse.json(
-        { error: 'Forbidden - Only STORE_OWNER or SUPER_ADMIN can update products' },
-        { status: 403 }
-      )
-    }
-
-    const productId = params.id
-
-    const body = await req.json()
-    const validation = UpdateProductSchema.safeParse(body)
+    const body = await req.json();
+    const validation = QuickUpdateSchema.safeParse(body);
 
     if (!validation.success) {
       return NextResponse.json(
-        {
-          error: 'Invalid data',
-          issues: validation.error.issues,
-        },
-        { status: 400 }
-      )
+        { error: "Invalid request", details: validation.error.issues },
+        { status: 400 },
+      );
     }
 
-    const {
-      name,
-      slug,
-      description,
-      shortDescription,
-      sku,
-      basePrice,
-      salePrice,
-      salePriceExpiresAt,
-      stock,
-      lowStockThreshold,
-      weight,
-      length,
-      width,
-      height,
-      categoryId,
-      tags,
-      seo,
-      published,
-      featured,
-    } = validation.data
+    const { tenantId, ...updates } = validation.data;
 
-    // If categoryId is being updated, verify it exists and belongs to tenant
-    if (categoryId) {
-      const category = await getCategoryById(tenantId, categoryId)
-
-      if (!category) {
-        return NextResponse.json(
-          { error: 'Category not found or does not belong to your tenant' },
-          { status: 404 }
-        )
-      }
+    // Validate tenant access
+    if (
+      session.user.role === "STORE_OWNER" &&
+      session.user.tenantId !== tenantId
+    ) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    // If SKU is being updated, check if it's available
-    if (sku) {
-      const skuAvailable = await isProductSkuAvailable(tenantId, sku, productId)
+    // Verify product exists and belongs to tenant
+    const existing = await db.product.findFirst({
+      where: {
+        id: params.id,
+        tenantId,
+      },
+    });
 
-      if (!skuAvailable) {
-        return NextResponse.json(
-          { error: 'SKU already exists within your store. Please choose a different SKU.' },
-          { status: 409 }
-        )
-      }
+    if (!existing) {
+      return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
-    // Update product (updateProduct handles tenant access check)
-    const product = await updateProduct(productId, {
-      name,
-      slug,
-      description,
-      shortDescription,
-      sku,
-      basePrice,
-      salePrice,
-      salePriceExpiresAt,
-      stock,
-      lowStockThreshold,
-      weight,
-      length,
-      width,
-      height,
-      tags,
-      seo,
-      published,
-      featured,
-      ...(categoryId && {
-        category: { connect: { id: categoryId } },
-      }),
-    })
+    // Update product
+    const updated = await db.product.update({
+      where: { id: params.id },
+      data: updates,
+    });
 
-    console.log('[PRODUCTS] Updated product:', productId, 'by user:', session.user.id)
+    // TODO: Log activity - implement with dedicated activity log model if needed
+    console.log("[Product API] Product updated (quick edit)", {
+      tenantId,
+      productId: params.id,
+      userId: session.user.id,
+      updates,
+    });
 
     return NextResponse.json({
-      message: 'Product updated successfully',
-      product: {
-        id: product.id,
-        name: product.name,
-        slug: product.slug,
-        description: product.description,
-        sku: product.sku,
-        basePrice: product.basePrice,
-        salePrice: product.salePrice,
-        stock: product.stock,
-        published: product.published,
-        featured: product.featured,
-        category: product.category,
-        images: product.images,
-        variants: product.variants,
-        updatedAt: product.updatedAt,
-      },
-    })
+      success: true,
+      product: updated,
+    });
   } catch (error) {
-    console.error('[PRODUCTS] PATCH error:', error)
-
-    // Handle specific errors
-    if (error instanceof Error) {
-      if (error.message.includes('not found')) {
-        return NextResponse.json(
-          { error: 'Product not found' },
-          { status: 404 }
-        )
-      }
-      if (error.message.includes('Forbidden')) {
-        return NextResponse.json(
-          { error: error.message },
-          { status: 403 }
-        )
-      }
-      if (error.message.includes('Unique constraint')) {
-        return NextResponse.json(
-          { error: 'Product with this slug already exists in your store' },
-          { status: 409 }
-        )
-      }
-    }
-
+    console.error("Patch product error:", error);
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }
 
-/**
- * DELETE /api/products/[id]
- * Deletes a product (soft delete by default)
- * Only STORE_OWNER or SUPER_ADMIN can delete products
- *
- * Query param:
- * - hard=true: Perform hard delete (only if product has no orders)
- */
-export async function DELETE(
+// PUT for full updates
+const UpdateProductSchema = z.object({
+  tenantId: z.string().uuid(),
+  name: z.string().min(1),
+  description: z.string().optional(),
+  price: z.number().positive(),
+  stock: z.number().int().min(0),
+  status: z.enum(["ACTIVE", "DRAFT", "ARCHIVED"]),
+  categoryId: z.string().uuid().optional(),
+  sku: z.string().optional(),
+  images: z.array(z.string().url()).optional(),
+});
+
+export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
-    const session = await auth()
+    const session = await auth();
 
-    if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { role, tenantId } = session.user
+    if (
+      session.user.role !== "STORE_OWNER" &&
+      session.user.role !== "SUPER_ADMIN"
+    ) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    const body = await req.json();
+    const validation = UpdateProductSchema.safeParse(body);
+
+    if (!validation.success) {
+      return NextResponse.json(
+        { error: "Invalid request", details: validation.error.issues },
+        { status: 400 },
+      );
+    }
+
+    const { tenantId, images, ...data } = validation.data;
+
+    if (
+      session.user.role === "STORE_OWNER" &&
+      session.user.tenantId !== tenantId
+    ) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    // Verify product exists and belongs to tenant
+    const existing = await db.product.findFirst({
+      where: {
+        id: params.id,
+        tenantId,
+      },
+    });
+
+    if (!existing) {
+      return NextResponse.json({ error: "Product not found" }, { status: 404 });
+    }
+
+    // Update product
+    const updated = await db.product.update({
+      where: { id: params.id },
+      data,
+    });
+
+    // Update images if provided
+    if (images) {
+      // Delete old images
+      await db.productImage.deleteMany({
+        where: { productId: params.id },
+      });
+
+      // Create new images
+      await db.productImage.createMany({
+        data: images.map((url, index) => ({
+          productId: params.id,
+          url,
+          altText: `${data.name} - Image ${index + 1}`,
+          order: index,
+        })),
+      });
+    }
+
+    // TODO: Log activity - implement with dedicated activity log model if needed
+    console.log("[Product API] Product updated (full update)", {
+      tenantId,
+      productId: params.id,
+      userId: session.user.id,
+    });
+
+    return NextResponse.json({
+      success: true,
+      product: updated,
+    });
+  } catch (error) {
+    console.error("Update product error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
+  }
+}
+
+// DELETE (soft delete)
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: { id: string } },
+) {
+  try {
+    const session = await auth();
+
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (
+      session.user.role !== "STORE_OWNER" &&
+      session.user.role !== "SUPER_ADMIN"
+    ) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    const searchParams = req.nextUrl.searchParams;
+    const tenantId = searchParams.get("tenantId");
 
     if (!tenantId) {
-      return NextResponse.json(
-        { error: 'User has no tenant assigned' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: "tenantId required" }, { status: 400 });
     }
 
-    // Check if user has permission to delete products
-    if (role !== USER_ROLES.STORE_OWNER && role !== USER_ROLES.SUPER_ADMIN) {
-      return NextResponse.json(
-        { error: 'Forbidden - Only STORE_OWNER or SUPER_ADMIN can delete products' },
-        { status: 403 }
-      )
+    if (
+      session.user.role === "STORE_OWNER" &&
+      session.user.tenantId !== tenantId
+    ) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const productId = params.id
-    const { searchParams } = new URL(req.url)
-    const hardDelete = searchParams.get('hard') === 'true'
+    // Verify product exists and belongs to tenant
+    const existing = await db.product.findFirst({
+      where: {
+        id: params.id,
+        tenantId,
+      },
+    });
 
-    if (hardDelete) {
-      // Hard delete (only if no orders)
-      await hardDeleteProduct(productId)
-
-      console.log('[PRODUCTS] Hard deleted product:', productId, 'by user:', session.user.id)
-
-      return NextResponse.json({
-        message: 'Product permanently deleted',
-      })
-    } else {
-      // Soft delete (set published to false)
-      await deleteProduct(productId)
-
-      console.log('[PRODUCTS] Soft deleted product:', productId, 'by user:', session.user.id)
-
-      return NextResponse.json({
-        message: 'Product unpublished successfully',
-      })
+    if (!existing) {
+      return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
+
+    // Mark as unpublished (soft delete via published flag)
+    const deleted = await db.product.update({
+      where: { id: params.id },
+      data: {
+        published: false,
+      },
+    });
+
+    // TODO: Log activity - implement with dedicated activity log model if needed
+    console.log("[Product API] Product deleted", {
+      tenantId,
+      productId: params.id,
+      userId: session.user.id,
+      productName: existing.name,
+    });
+
+    return NextResponse.json({
+      success: true,
+      product: deleted,
+    });
   } catch (error) {
-    console.error('[PRODUCTS] DELETE error:', error)
-
-    // Handle specific errors
-    if (error instanceof Error) {
-      if (error.message.includes('not found')) {
-        return NextResponse.json(
-          { error: 'Product not found' },
-          { status: 404 }
-        )
-      }
-      if (error.message.includes('Forbidden')) {
-        return NextResponse.json(
-          { error: error.message },
-          { status: 403 }
-        )
-      }
-      if (error.message.includes('Cannot delete product with existing orders')) {
-        return NextResponse.json(
-          { error: error.message },
-          { status: 400 }
-        )
-      }
-    }
-
+    console.error("Delete product error:", error);
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }

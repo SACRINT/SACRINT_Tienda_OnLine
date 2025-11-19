@@ -1,9 +1,9 @@
 // Inventory Data Access Layer
 // Functions for inventory management, reservations, and stock tracking
 
-import { db } from './client'
-import { ensureTenantAccess } from './tenant'
-import type { InventoryReason } from '@/lib/types/user-role'
+import { db } from "./client";
+import { ensureTenantAccess } from "./tenant";
+import type { InventoryReason } from "@/lib/types/user-role";
 
 /**
  * Gets current stock for a product or variant with tenant validation
@@ -12,40 +12,44 @@ import type { InventoryReason } from '@/lib/types/user-role'
  * @param variantId - Optional variant ID
  * @returns Stock quantity
  */
-export async function getProductStock(tenantId: string, productId: string, variantId?: string) {
-  await ensureTenantAccess(tenantId)
+export async function getProductStock(
+  tenantId: string,
+  productId: string,
+  variantId?: string,
+) {
+  await ensureTenantAccess(tenantId);
 
   if (variantId) {
     const variant = await db.productVariant.findFirst({
       where: {
         id: variantId,
         product: {
-          tenantId
-        }
+          tenantId,
+        },
       },
       select: { stock: true },
-    })
+    });
 
     if (!variant) {
-      throw new Error('Variant not found or does not belong to tenant')
+      throw new Error("Variant not found or does not belong to tenant");
     }
 
-    return { stock: variant.stock }
+    return { stock: variant.stock };
   }
 
   const product = await db.product.findFirst({
     where: {
       id: productId,
-      tenantId
+      tenantId,
     },
     select: { stock: true },
-  })
+  });
 
   if (!product) {
-    throw new Error('Product not found or does not belong to tenant')
+    throw new Error("Product not found or does not belong to tenant");
   }
 
-  return { stock: product.stock }
+  return { stock: product.stock };
 }
 
 /**
@@ -59,34 +63,38 @@ export async function getProductStock(tenantId: string, productId: string, varia
 export async function reserveInventory(
   tenantId: string,
   orderId: string,
-  items: Array<{ productId: string; variantId?: string; quantity: number }>
+  items: Array<{ productId: string; variantId?: string; quantity: number }>,
 ) {
-  await ensureTenantAccess(tenantId)
+  await ensureTenantAccess(tenantId);
 
   // Verify order belongs to tenant
   const order = await db.order.findFirst({
     where: {
       id: orderId,
-      tenantId
-    }
-  })
+      tenantId,
+    },
+  });
 
   if (!order) {
-    throw new Error('Order not found or does not belong to tenant')
+    throw new Error("Order not found or does not belong to tenant");
   }
 
   // Validate all items have sufficient stock
   for (const item of items) {
     if (item.quantity <= 0) {
-      throw new Error('Quantity must be positive')
+      throw new Error("Quantity must be positive");
     }
 
-    const stockInfo = await getProductStock(tenantId, item.productId, item.variantId)
+    const stockInfo = await getProductStock(
+      tenantId,
+      item.productId,
+      item.variantId,
+    );
 
     if (stockInfo.stock < item.quantity) {
       throw new Error(
-        `Insufficient stock for product ${item.productId}. Available: ${stockInfo.stock}, Requested: ${item.quantity}`
-      )
+        `Insufficient stock for product ${item.productId}. Available: ${stockInfo.stock}, Requested: ${item.quantity}`,
+      );
     }
   }
 
@@ -94,7 +102,7 @@ export async function reserveInventory(
   const reservation = await db.inventoryReservation.create({
     data: {
       orderId,
-      status: 'RESERVED',
+      status: "RESERVED",
       items: {
         create: items.map((item: any) => ({
           productId: item.productId,
@@ -106,9 +114,9 @@ export async function reserveInventory(
     include: {
       items: true,
     },
-  })
+  });
 
-  return reservation.id
+  return reservation.id;
 }
 
 /**
@@ -117,8 +125,11 @@ export async function reserveInventory(
  * @param tenantId - Tenant ID to validate access
  * @param reservationId - Reservation ID
  */
-export async function confirmInventoryReservation(tenantId: string, reservationId: string) {
-  await ensureTenantAccess(tenantId)
+export async function confirmInventoryReservation(
+  tenantId: string,
+  reservationId: string,
+) {
+  await ensureTenantAccess(tenantId);
 
   // Get reservation with items and order
   const reservation = await db.inventoryReservation.findUnique({
@@ -127,23 +138,23 @@ export async function confirmInventoryReservation(tenantId: string, reservationI
       items: true,
       order: {
         select: {
-          tenantId: true
-        }
-      }
+          tenantId: true,
+        },
+      },
     },
-  })
+  });
 
   if (!reservation) {
-    throw new Error('Reservation not found')
+    throw new Error("Reservation not found");
   }
 
   // Verify reservation's order belongs to tenant
   if (reservation.order.tenantId !== tenantId) {
-    throw new Error('Reservation does not belong to tenant')
+    throw new Error("Reservation does not belong to tenant");
   }
 
-  if (reservation.status !== 'RESERVED') {
-    throw new Error(`Reservation already ${reservation.status.toLowerCase()}`)
+  if (reservation.status !== "RESERVED") {
+    throw new Error(`Reservation already ${reservation.status.toLowerCase()}`);
   }
 
   // Use transaction to deduct stock and update reservation
@@ -159,7 +170,7 @@ export async function confirmInventoryReservation(tenantId: string, reservationI
               decrement: item.reservedQuantity,
             },
           },
-        })
+        });
       } else {
         // Deduct from product stock
         await tx.product.update({
@@ -169,7 +180,7 @@ export async function confirmInventoryReservation(tenantId: string, reservationI
               decrement: item.reservedQuantity,
             },
           },
-        })
+        });
       }
     }
 
@@ -177,15 +188,15 @@ export async function confirmInventoryReservation(tenantId: string, reservationI
     await tx.inventoryReservation.update({
       where: { id: reservationId },
       data: {
-        status: 'CONFIRMED',
+        status: "CONFIRMED",
         confirmedAt: new Date(),
       },
-    })
-  })
+    });
+  });
 
   console.log(
-    `[INVENTORY] Confirmed reservation ${reservationId}, deducted stock for ${reservation.items.length} items`
-  )
+    `[INVENTORY] Confirmed reservation ${reservationId}, deducted stock for ${reservation.items.length} items`,
+  );
 }
 
 /**
@@ -194,42 +205,45 @@ export async function confirmInventoryReservation(tenantId: string, reservationI
  * @param tenantId - Tenant ID to validate access
  * @param reservationId - Reservation ID
  */
-export async function cancelInventoryReservation(tenantId: string, reservationId: string) {
-  await ensureTenantAccess(tenantId)
+export async function cancelInventoryReservation(
+  tenantId: string,
+  reservationId: string,
+) {
+  await ensureTenantAccess(tenantId);
 
   const reservation = await db.inventoryReservation.findUnique({
     where: { id: reservationId },
     include: {
       order: {
         select: {
-          tenantId: true
-        }
-      }
-    }
-  })
+          tenantId: true,
+        },
+      },
+    },
+  });
 
   if (!reservation) {
-    throw new Error('Reservation not found')
+    throw new Error("Reservation not found");
   }
 
   // Verify reservation's order belongs to tenant
   if (reservation.order.tenantId !== tenantId) {
-    throw new Error('Reservation does not belong to tenant')
+    throw new Error("Reservation does not belong to tenant");
   }
 
-  if (reservation.status !== 'RESERVED') {
-    throw new Error(`Reservation already ${reservation.status.toLowerCase()}`)
+  if (reservation.status !== "RESERVED") {
+    throw new Error(`Reservation already ${reservation.status.toLowerCase()}`);
   }
 
   // Simply mark as cancelled (no stock changes needed)
   await db.inventoryReservation.update({
     where: { id: reservationId },
     data: {
-      status: 'CANCELLED',
+      status: "CANCELLED",
     },
-  })
+  });
 
-  console.log(`[INVENTORY] Cancelled reservation ${reservationId}`)
+  console.log(`[INVENTORY] Cancelled reservation ${reservationId}`);
 }
 
 /**
@@ -243,26 +257,26 @@ export async function cancelInventoryReservation(tenantId: string, reservationId
 export async function adjustProductStock(
   productId: string,
   adjustment: number,
-  reason: InventoryReason
+  reason: InventoryReason,
 ) {
   // Get current product
   const product = await db.product.findUnique({
     where: { id: productId },
     select: { stock: true, tenantId: true },
-  })
+  });
 
   if (!product) {
-    throw new Error('Product not found')
+    throw new Error("Product not found");
   }
 
-  const previousStock = product.stock
-  const newStock = previousStock + adjustment
+  const previousStock = product.stock;
+  const newStock = previousStock + adjustment;
 
   // Validate stock doesn't go negative
   if (newStock < 0) {
     throw new Error(
-      `Cannot adjust stock. Would result in negative stock: ${newStock}`
-    )
+      `Cannot adjust stock. Would result in negative stock: ${newStock}`,
+    );
   }
 
   // Use transaction to update stock and create log
@@ -288,7 +302,7 @@ export async function adjustProductStock(
           },
         },
       },
-    })
+    });
 
     // Create inventory log
     await tx.inventoryLog.create({
@@ -299,16 +313,16 @@ export async function adjustProductStock(
         previousStock,
         newStock,
       },
-    })
+    });
 
-    return updatedProduct
-  })
+    return updatedProduct;
+  });
 
   console.log(
-    `[INVENTORY] Adjusted stock for product ${productId}: ${previousStock} → ${newStock} (${adjustment >= 0 ? '+' : ''}${adjustment})`
-  )
+    `[INVENTORY] Adjusted stock for product ${productId}: ${previousStock} → ${newStock} (${adjustment >= 0 ? "+" : ""}${adjustment})`,
+  );
 
-  return updated
+  return updated;
 }
 
 /**
@@ -319,9 +333,9 @@ export async function adjustProductStock(
  */
 export async function getLowStockProducts(
   tenantId: string,
-  threshold: number = 10
+  threshold: number = 10,
 ) {
-  await ensureTenantAccess(tenantId)
+  await ensureTenantAccess(tenantId);
 
   // Get products with low stock
   const products = await db.product.findMany({
@@ -353,11 +367,11 @@ export async function getLowStockProducts(
       },
     },
     orderBy: {
-      stock: 'asc', // Lowest stock first
+      stock: "asc", // Lowest stock first
     },
-  })
+  });
 
-  return products
+  return products;
 }
 
 /**
@@ -370,20 +384,20 @@ export async function getLowStockProducts(
 export async function getInventoryHistory(
   tenantId: string,
   productId: string,
-  limit: number = 50
+  limit: number = 50,
 ) {
-  await ensureTenantAccess(tenantId)
+  await ensureTenantAccess(tenantId);
 
   // Verify product belongs to tenant
   const product = await db.product.findFirst({
     where: {
       id: productId,
-      tenantId
-    }
-  })
+      tenantId,
+    },
+  });
 
   if (!product) {
-    throw new Error('Product not found or does not belong to tenant')
+    throw new Error("Product not found or does not belong to tenant");
   }
 
   const logs = await db.inventoryLog.findMany({
@@ -391,12 +405,12 @@ export async function getInventoryHistory(
       productId,
     },
     orderBy: {
-      createdAt: 'desc',
+      createdAt: "desc",
     },
     take: limit,
-  })
+  });
 
-  return logs
+  return logs;
 }
 
 /**
@@ -405,7 +419,7 @@ export async function getInventoryHistory(
  * @returns Summary stats and all products with stock info
  */
 export async function getInventoryReport(tenantId: string) {
-  await ensureTenantAccess(tenantId)
+  await ensureTenantAccess(tenantId);
 
   // Get all products for this tenant
   const products = await db.product.findMany({
@@ -429,27 +443,27 @@ export async function getInventoryReport(tenantId: string) {
         },
       },
     },
-  })
+  });
 
   // Calculate summary statistics
-  const totalProducts = products.length
+  const totalProducts = products.length;
 
-  let totalVariants = 0
-  let totalItemsInStock = 0
-  let lowStockProducts = 0
+  let totalVariants = 0;
+  let totalItemsInStock = 0;
+  let lowStockProducts = 0;
 
   products.forEach((product: any) => {
-    totalItemsInStock += product.stock
-    totalVariants += product.variants.length
+    totalItemsInStock += product.stock;
+    totalVariants += product.variants.length;
 
     if (product.stock < 10) {
-      lowStockProducts++
+      lowStockProducts++;
     }
 
     product.variants.forEach((variant: any) => {
-      totalItemsInStock += variant.stock
-    })
-  })
+      totalItemsInStock += variant.stock;
+    });
+  });
 
   return {
     summary: {
@@ -468,5 +482,5 @@ export async function getInventoryReport(tenantId: string) {
       lowStockThreshold: p.lowStockThreshold,
       variants: p.variants,
     })),
-  }
+  };
 }
