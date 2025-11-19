@@ -1,9 +1,25 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
+import {
+  ArrowLeft,
+  Printer,
+  Mail,
+  Phone,
+  MapPin,
+  Package,
+  CreditCard,
+  Calendar,
+  User,
+} from "lucide-react";
 import { auth } from "@/lib/auth/auth";
 import { getOrderById } from "@/lib/db/orders";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { OrderStatusUpdater } from "@/components/dashboard/OrderStatusUpdater";
+import { OrderStatusProgress, OrderTimeline } from "@/components/dashboard/OrderTimeline";
 
 export default async function OrderDetailPage({
   params,
@@ -22,62 +38,137 @@ export default async function OrderDetailPage({
     notFound();
   }
 
-  const statusLabels = {
-    PENDING: "Pendiente",
-    PROCESSING: "Procesando",
-    PAID: "Pagado",
-    SHIPPED: "Enviado",
-    DELIVERED: "Entregado",
-    CANCELLED: "Cancelado",
-    FAILED: "Fallido",
-  };
+  const formatPrice = (price: any) =>
+    new Intl.NumberFormat("es-MX", {
+      style: "currency",
+      currency: "MXN",
+    }).format(parseFloat(String(price)));
+
+  const formatDate = (date: Date) =>
+    new Date(date).toLocaleDateString("es-MX", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+  // Mock timeline events
+  const timelineEvents = [
+    {
+      id: "1",
+      status: "PENDING",
+      timestamp: order.createdAt,
+      description: "Orden recibida",
+    },
+    ...(order.status !== "PENDING"
+      ? [
+          {
+            id: "2",
+            status: order.status,
+            timestamp: order.updatedAt || order.createdAt,
+            description:
+              order.status === "PAID"
+                ? "Pago confirmado"
+                : order.status === "PROCESSING"
+                ? "Pedido en preparación"
+                : order.status === "SHIPPED"
+                ? "Pedido enviado"
+                : order.status === "DELIVERED"
+                ? "Pedido entregado"
+                : "Estado actualizado",
+          },
+        ]
+      : []),
+  ];
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-3xl font-bold text-gray-900">
-          Orden #{order.orderNumber}
-        </h2>
-        <p className="text-gray-600 mt-1">
-          Creada el {new Date(order.createdAt).toLocaleDateString("es-ES")}
-        </p>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <Link href="/dashboard/orders">
+            <Button variant="ghost" size="icon">
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          </Link>
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="text-2xl font-bold text-primary">
+                Orden #{order.orderNumber}
+              </h2>
+              <Badge variant="outline" className="text-sm">
+                {order.status}
+              </Badge>
+            </div>
+            <p className="text-muted-foreground mt-1 flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              {formatDate(order.createdAt)}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm">
+            <Printer className="h-4 w-4 mr-2" />
+            Imprimir
+          </Button>
+          <Button variant="outline" size="sm">
+            <Mail className="h-4 w-4 mr-2" />
+            Reenviar
+          </Button>
+        </div>
       </div>
 
+      {/* Status Progress */}
+      <Card>
+        <CardContent className="pt-6">
+          <OrderStatusProgress currentStatus={order.status} />
+        </CardContent>
+      </Card>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Order Info */}
+        {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
+          {/* Products */}
           <Card>
             <CardHeader>
-              <CardTitle>Productos</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Package className="h-5 w-5" />
+                Productos
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {order.items.map((item: any) => (
+                {order.items?.map((item: any) => (
                   <div
                     key={item.id}
-                    className="flex items-center justify-between border-b pb-4 last:border-0"
+                    className="flex items-center justify-between py-4 border-b last:border-0"
                   >
                     <div className="flex items-center space-x-4">
-                      {item.product.images[0] && (
-                        <Image
-                          src={item.product.images[0].url}
-                          alt={item.product.name}
-                          width={64}
-                          height={64}
-                          className="h-16 w-16 rounded object-cover"
-                        />
-                      )}
+                      <div className="w-16 h-16 bg-muted rounded-md flex items-center justify-center overflow-hidden">
+                        {item.product?.images?.[0] ? (
+                          <Image
+                            src={item.product.images[0].url}
+                            alt={item.product.name}
+                            width={64}
+                            height={64}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <Package className="h-6 w-6 text-muted-foreground" />
+                        )}
+                      </div>
                       <div>
-                        <p className="font-medium">{item.product.name}</p>
-                        <p className="text-sm text-gray-500">
+                        <p className="font-medium">{item.product?.name || "Producto"}</p>
+                        <p className="text-sm text-muted-foreground">
                           Cantidad: {item.quantity}
                         </p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-medium">${item.price.toFixed(2)}</p>
-                      <p className="text-sm text-gray-500">
-                        Subtotal: ${(item.price * item.quantity).toFixed(2)}
+                      <p className="font-medium">{formatPrice(item.price)}</p>
+                      <p className="text-sm text-muted-foreground">
+                        Subtotal: {formatPrice(item.price * item.quantity)}
                       </p>
                     </div>
                   </div>
@@ -86,78 +177,109 @@ export default async function OrderDetailPage({
             </CardContent>
           </Card>
 
+          {/* Shipping Address */}
           <Card>
             <CardHeader>
-              <CardTitle>Dirección de Envío</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <MapPin className="h-5 w-5" />
+                Dirección de Envío
+              </CardTitle>
             </CardHeader>
             <CardContent>
               {order.shippingAddress ? (
-                <div className="text-sm space-y-1">
+                <div className="space-y-2">
                   <p className="font-medium">{order.shippingAddress.name}</p>
-                  <p>{order.shippingAddress.street}</p>
-                  <p>
+                  <p className="text-muted-foreground">
+                    {order.shippingAddress.street}
+                  </p>
+                  <p className="text-muted-foreground">
                     {order.shippingAddress.city}, {order.shippingAddress.state}{" "}
                     {order.shippingAddress.postalCode}
                   </p>
-                  <p>{order.shippingAddress.country}</p>
+                  <p className="text-muted-foreground">
+                    {order.shippingAddress.country}
+                  </p>
                   {order.shippingAddress.phone && (
-                    <p className="mt-2">Tel: {order.shippingAddress.phone}</p>
+                    <p className="flex items-center gap-2 mt-4">
+                      <Phone className="h-4 w-4" />
+                      {order.shippingAddress.phone}
+                    </p>
                   )}
                 </div>
               ) : (
-                <p className="text-gray-500">No hay dirección de envío</p>
+                <p className="text-muted-foreground">
+                  No hay dirección de envío
+                </p>
               )}
+            </CardContent>
+          </Card>
+
+          {/* Timeline */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Historial</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <OrderTimeline
+                events={timelineEvents}
+                currentStatus={order.status}
+              />
             </CardContent>
           </Card>
         </div>
 
         {/* Sidebar */}
         <div className="space-y-6">
+          {/* Summary */}
           <Card>
             <CardHeader>
-              <CardTitle>Resumen</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <CreditCard className="h-5 w-5" />
+                Resumen
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2">
+            <CardContent className="space-y-3">
               <div className="flex justify-between">
-                <span className="text-gray-600">Subtotal:</span>
-                <span className="font-medium">
-                  ${parseFloat(String(order.subtotal)).toFixed(2)}
-                </span>
+                <span className="text-muted-foreground">Subtotal</span>
+                <span>{formatPrice(order.subtotal)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Envío:</span>
-                <span className="font-medium">
-                  ${parseFloat(String(order.shippingCost)).toFixed(2)}
-                </span>
+                <span className="text-muted-foreground">Envío</span>
+                <span>{formatPrice(order.shippingCost)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Impuestos:</span>
-                <span className="font-medium">
-                  ${parseFloat(String(order.tax)).toFixed(2)}
-                </span>
+                <span className="text-muted-foreground">IVA</span>
+                <span>{formatPrice(order.tax)}</span>
               </div>
-              <div className="flex justify-between pt-2 border-t">
-                <span className="font-bold">Total:</span>
-                <span className="font-bold text-lg">
-                  ${parseFloat(String(order.total)).toFixed(2)}
-                </span>
+              <Separator />
+              <div className="flex justify-between font-bold text-lg">
+                <span>Total</span>
+                <span className="text-primary">{formatPrice(order.total)}</span>
               </div>
             </CardContent>
           </Card>
 
+          {/* Customer */}
           <Card>
             <CardHeader>
-              <CardTitle>Cliente</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <User className="h-5 w-5" />
+                Cliente
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2">
-              <p className="font-medium">{order.user.name || "Sin nombre"}</p>
-              <p className="text-sm text-gray-600">{order.user.email}</p>
+            <CardContent className="space-y-3">
+              <p className="font-medium">{order.user?.name || "Sin nombre"}</p>
+              <p className="text-sm text-muted-foreground flex items-center gap-2">
+                <Mail className="h-4 w-4" />
+                {order.user?.email}
+              </p>
             </CardContent>
           </Card>
 
+          {/* Status Updater */}
           <Card>
             <CardHeader>
-              <CardTitle>Estado de la Orden</CardTitle>
+              <CardTitle>Actualizar Estado</CardTitle>
             </CardHeader>
             <CardContent>
               <OrderStatusUpdater
