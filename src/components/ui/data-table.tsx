@@ -69,7 +69,9 @@ export function DataTable<T>({
   const handleSelectAll = () => {
     if (!onSelectionChange) return;
     const allKeys = new Set(data.map(keyExtractor));
-    const allSelected = data.every((item) => selectedKeys.has(keyExtractor(item)));
+    const allSelected = data.every((item) =>
+      selectedKeys.has(keyExtractor(item)),
+    );
     onSelectionChange(allSelected ? new Set() : allKeys);
   };
 
@@ -85,7 +87,8 @@ export function DataTable<T>({
   };
 
   const allSelected =
-    data.length > 0 && data.every((item) => selectedKeys.has(keyExtractor(item)));
+    data.length > 0 &&
+    data.every((item) => selectedKeys.has(keyExtractor(item)));
   const someSelected =
     data.some((item) => selectedKeys.has(keyExtractor(item))) && !allSelected;
 
@@ -119,7 +122,7 @@ export function DataTable<T>({
                   className={cn(
                     "h-12 px-4 text-left align-middle font-medium text-muted-foreground",
                     column.sortable && "cursor-pointer select-none",
-                    column.className
+                    column.className,
                   )}
                   style={{ width: column.width }}
                   onClick={() =>
@@ -176,7 +179,7 @@ export function DataTable<T>({
                     key={key}
                     className={cn(
                       "border-b transition-colors hover:bg-muted/50",
-                      isSelected && "bg-muted"
+                      isSelected && "bg-muted",
                     )}
                   >
                     {selectable && (

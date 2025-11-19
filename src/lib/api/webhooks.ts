@@ -49,7 +49,7 @@ export interface WebhookDelivery {
 export async function createWebhook(
   tenantId: string,
   url: string,
-  events: WebhookEvent[]
+  events: WebhookEvent[],
 ): Promise<Webhook> {
   const secret = generateWebhookSecret();
 
@@ -100,7 +100,7 @@ export async function listWebhooks(tenantId: string): Promise<Webhook[]> {
 // Update webhook
 export async function updateWebhook(
   webhookId: string,
-  updates: { url?: string; events?: WebhookEvent[]; isActive?: boolean }
+  updates: { url?: string; events?: WebhookEvent[]; isActive?: boolean },
 ): Promise<void> {
   await db.webhook.update({
     where: { id: webhookId },
@@ -119,7 +119,7 @@ export async function deleteWebhook(webhookId: string): Promise<void> {
 export async function sendWebhook(
   tenantId: string,
   event: WebhookEvent,
-  payload: unknown
+  payload: unknown,
 ): Promise<void> {
   // Get active webhooks for this event
   const webhooks = await db.webhook.findMany({
@@ -141,7 +141,7 @@ async function deliverWebhook(
   webhook: { id: string; url: string; secret: string },
   event: WebhookEvent,
   payload: unknown,
-  attempt: number = 1
+  attempt: number = 1,
 ): Promise<void> {
   const body = JSON.stringify({
     event,
@@ -236,7 +236,7 @@ function signWebhookPayload(payload: string, secret: string): string {
 export function verifyWebhookSignature(
   payload: string,
   signature: string,
-  secret: string
+  secret: string,
 ): boolean {
   const expected = signWebhookPayload(payload, secret);
   return signature === expected;

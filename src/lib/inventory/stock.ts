@@ -59,7 +59,7 @@ export async function updateStock(
     reason?: string;
     reference?: string;
     createdBy?: string;
-  }
+  },
 ): Promise<{ success: boolean; newStock: number; movement?: StockMovement }> {
   return await db.$transaction(async (tx) => {
     // Get current stock
@@ -139,7 +139,7 @@ export async function updateStock(
 export async function reserveStock(
   productId: string,
   quantity: number,
-  orderId: string
+  orderId: string,
 ): Promise<boolean> {
   const result = await updateStock(productId, -quantity, "sale", {
     reference: orderId,
@@ -152,7 +152,7 @@ export async function reserveStock(
 export async function releaseStock(
   productId: string,
   quantity: number,
-  orderId: string
+  orderId: string,
 ): Promise<boolean> {
   const result = await updateStock(productId, quantity, "return", {
     reference: orderId,
@@ -169,7 +169,7 @@ export async function bulkUpdateStock(
     type: StockMovementType;
     reason?: string;
   }>,
-  createdBy: string
+  createdBy: string,
 ): Promise<{ success: number; failed: number }> {
   let success = 0;
   let failed = 0;
@@ -179,7 +179,7 @@ export async function bulkUpdateStock(
       update.productId,
       update.quantity,
       update.type,
-      { reason: update.reason, createdBy }
+      { reason: update.reason, createdBy },
     );
 
     if (result.success) {
@@ -199,7 +199,7 @@ export async function getStockLevels(
     status?: "in_stock" | "low_stock" | "out_of_stock";
     categoryId?: string;
     search?: string;
-  }
+  },
 ): Promise<StockLevel[]> {
   const where: Record<string, unknown> = { tenantId };
 
@@ -267,7 +267,7 @@ export async function getStockMovements(
     endDate?: Date;
     type?: StockMovementType;
     limit?: number;
-  }
+  },
 ): Promise<StockMovement[]> {
   const where: Record<string, unknown> = { productId };
 

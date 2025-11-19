@@ -70,10 +70,7 @@ export function SortDropdown({
           {label}: {selectedOption?.label || "Select"}
         </span>
         <ChevronDown
-          className={cn(
-            "h-4 w-4 transition-transform",
-            isOpen && "rotate-180"
-          )}
+          className={cn("h-4 w-4 transition-transform", isOpen && "rotate-180")}
         />
       </button>
 
@@ -89,7 +86,7 @@ export function SortDropdown({
                   }}
                   className={cn(
                     "w-full text-left px-3 py-2 text-sm hover:bg-muted",
-                    option.value === value && "bg-muted font-medium"
+                    option.value === value && "bg-muted font-medium",
                   )}
                   role="option"
                   aria-selected={option.value === value}
@@ -163,7 +160,7 @@ export function ProductToolbar({
     <div
       className={cn(
         "flex flex-col sm:flex-row sm:items-center justify-between gap-4",
-        className
+        className,
       )}
     >
       <p className="text-sm text-muted-foreground">

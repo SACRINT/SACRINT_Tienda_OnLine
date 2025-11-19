@@ -42,7 +42,7 @@ export function Timeline({
                 <div
                   className={cn(
                     "h-0.5 flex-1",
-                    index === 0 ? "bg-transparent" : "bg-border"
+                    index === 0 ? "bg-transparent" : "bg-border",
                   )}
                 />
                 <div
@@ -50,24 +50,23 @@ export function Timeline({
                     "flex h-8 w-8 items-center justify-center rounded-full border-2",
                     item.status === "completed" &&
                       "bg-primary border-primary text-primary-foreground",
-                    item.status === "current" &&
-                      "bg-background border-primary",
+                    item.status === "current" && "bg-background border-primary",
                     item.status === "upcoming" &&
-                      "bg-muted border-muted-foreground/30"
+                      "bg-muted border-muted-foreground/30",
                   )}
                 >
                   <Icon
                     className={cn(
                       "h-4 w-4",
                       item.iconColor,
-                      item.status === "upcoming" && "text-muted-foreground"
+                      item.status === "upcoming" && "text-muted-foreground",
                     )}
                   />
                 </div>
                 <div
                   className={cn(
                     "h-0.5 flex-1",
-                    isLast ? "bg-transparent" : "bg-border"
+                    isLast ? "bg-transparent" : "bg-border",
                   )}
                 />
               </div>
@@ -100,17 +99,15 @@ export function Timeline({
                   "absolute left-0 flex h-8 w-8 items-center justify-center rounded-full border-2 bg-background",
                   item.status === "completed" &&
                     "bg-primary border-primary text-primary-foreground",
-                  item.status === "current" &&
-                    "border-primary",
-                  item.status === "upcoming" &&
-                    "border-muted-foreground/30"
+                  item.status === "current" && "border-primary",
+                  item.status === "upcoming" && "border-muted-foreground/30",
                 )}
               >
                 <Icon
                   className={cn(
                     "h-4 w-4",
                     item.iconColor,
-                    item.status === "upcoming" && "text-muted-foreground"
+                    item.status === "upcoming" && "text-muted-foreground",
                   )}
                 />
               </div>

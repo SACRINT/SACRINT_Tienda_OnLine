@@ -27,7 +27,9 @@ export interface CacheService {
   has(key: string): Promise<boolean>;
   clear(): Promise<void>;
   getMany<T>(keys: string[]): Promise<(T | null)[]>;
-  setMany<T>(entries: Array<{ key: string; value: T; ttl?: number }>): Promise<void>;
+  setMany<T>(
+    entries: Array<{ key: string; value: T; ttl?: number }>,
+  ): Promise<void>;
 }
 
 // In-memory cache
@@ -104,7 +106,9 @@ export class InMemoryCache implements CacheService {
     return Promise.all(keys.map((key) => this.get<T>(key)));
   }
 
-  async setMany<T>(entries: Array<{ key: string; value: T; ttl?: number }>): Promise<void> {
+  async setMany<T>(
+    entries: Array<{ key: string; value: T; ttl?: number }>,
+  ): Promise<void> {
     await Promise.all(entries.map((e) => this.set(e.key, e.value, e.ttl)));
   }
 
@@ -170,7 +174,11 @@ export class RedisCache implements CacheService {
   private prefix: string;
   private config: CacheConfig;
 
-  constructor(redis: any, prefix: string = "cache:", config: Partial<CacheConfig> = {}) {
+  constructor(
+    redis: any,
+    prefix: string = "cache:",
+    config: Partial<CacheConfig> = {},
+  ) {
     this.redis = redis;
     this.prefix = prefix;
     this.config = {
@@ -193,7 +201,8 @@ export class RedisCache implements CacheService {
   }
 
   async set<T>(key: string, value: T, ttl?: number): Promise<void> {
-    const serialized = typeof value === "string" ? value : JSON.stringify(value);
+    const serialized =
+      typeof value === "string" ? value : JSON.stringify(value);
     const expiry = ttl || this.config.defaultTtl;
 
     await this.redis.setex(this.prefix + key, expiry, serialized);
@@ -228,17 +237,20 @@ export class RedisCache implements CacheService {
     });
   }
 
-  async setMany<T>(entries: Array<{ key: string; value: T; ttl?: number }>): Promise<void> {
+  async setMany<T>(
+    entries: Array<{ key: string; value: T; ttl?: number }>,
+  ): Promise<void> {
     const pipeline = this.redis.pipeline();
 
     for (const entry of entries) {
-      const serialized = typeof entry.value === "string"
-        ? entry.value
-        : JSON.stringify(entry.value);
+      const serialized =
+        typeof entry.value === "string"
+          ? entry.value
+          : JSON.stringify(entry.value);
       pipeline.setex(
         this.prefix + entry.key,
         entry.ttl || this.config.defaultTtl,
-        serialized
+        serialized,
       );
     }
 
@@ -260,7 +272,7 @@ export const cache = createCache();
 // Cache decorators
 export function cached<T extends (...args: any[]) => Promise<any>>(
   keyGenerator: (...args: Parameters<T>) => string,
-  ttl?: number
+  ttl?: number,
 ) {
   return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
     const original = descriptor.value;

@@ -67,7 +67,13 @@ interface KPIData {
 interface DashboardData {
   kpiData: KPIData;
   topProductsData: Array<{ name: string; sales: number; revenue: number }>;
-  recentOrders: Array<{ id: string; customer: string; total: number; status: string; date: string }>;
+  recentOrders: Array<{
+    id: string;
+    customer: string;
+    total: number;
+    status: string;
+    date: string;
+  }>;
   orderStatusData: Array<{ name: string; value: number; color: string }>;
 }
 
@@ -102,7 +108,8 @@ const statusLabels: Record<string, string> = {
 
 export default function DashboardPage() {
   const [dateRange, setDateRange] = React.useState("30d");
-  const [dashboardData, setDashboardData] = React.useState<DashboardData | null>(null);
+  const [dashboardData, setDashboardData] =
+    React.useState<DashboardData | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
 
   // Fetch dashboard data

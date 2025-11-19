@@ -30,7 +30,7 @@ describe("Button", () => {
     render(
       <Button disabled onClick={onClick}>
         Disabled
-      </Button>
+      </Button>,
     );
 
     fireEvent.click(screen.getByText("Disabled"));
@@ -67,7 +67,7 @@ describe("Button", () => {
     render(
       <Button asChild>
         <a href="/link">Link</a>
-      </Button>
+      </Button>,
     );
 
     const link = screen.getByRole("link");

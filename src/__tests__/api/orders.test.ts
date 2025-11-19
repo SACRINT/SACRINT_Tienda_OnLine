@@ -101,7 +101,7 @@ describe("Orders API", () => {
       (db.order.count as jest.Mock).mockResolvedValue(0);
 
       const request = new NextRequest(
-        "http://localhost:3000/api/orders?status=SHIPPED"
+        "http://localhost:3000/api/orders?status=SHIPPED",
       );
       await GET(request);
 
@@ -110,7 +110,7 @@ describe("Orders API", () => {
           where: expect.objectContaining({
             status: "SHIPPED",
           }),
-        })
+        }),
       );
     });
 
@@ -120,7 +120,7 @@ describe("Orders API", () => {
       (db.order.count as jest.Mock).mockResolvedValue(100);
 
       const request = new NextRequest(
-        "http://localhost:3000/api/orders?page=2&limit=10"
+        "http://localhost:3000/api/orders?page=2&limit=10",
       );
       await GET(request);
 
@@ -128,7 +128,7 @@ describe("Orders API", () => {
         expect.objectContaining({
           skip: 10,
           take: 10,
-        })
+        }),
       );
     });
 

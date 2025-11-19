@@ -91,7 +91,7 @@ export function QuickActions({
                 "flex items-center gap-3 p-4 rounded-lg border text-left transition-colors",
                 action.variant === "primary"
                   ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                  : "bg-card hover:bg-muted"
+                  : "bg-card hover:bg-muted",
               )}
             >
               <div
@@ -99,7 +99,7 @@ export function QuickActions({
                   "flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center",
                   action.variant === "primary"
                     ? "bg-primary-foreground/20"
-                    : "bg-muted"
+                    : "bg-muted",
                 )}
               >
                 <Icon className="h-5 w-5" />
@@ -112,7 +112,7 @@ export function QuickActions({
                       "text-sm truncate",
                       action.variant === "primary"
                         ? "text-primary-foreground/80"
-                        : "text-muted-foreground"
+                        : "text-muted-foreground",
                     )}
                   >
                     {action.description}

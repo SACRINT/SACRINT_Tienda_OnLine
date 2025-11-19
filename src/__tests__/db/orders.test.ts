@@ -17,17 +17,19 @@ jest.mock("@/lib/db/client", () => ({
       update: jest.fn(),
       count: jest.fn(),
     },
-    $transaction: jest.fn((fn) => fn({
-      order: {
-        findMany: jest.fn(),
-        findUnique: jest.fn(),
-        create: jest.fn(),
-        update: jest.fn(),
-      },
-      product: {
-        update: jest.fn(),
-      },
-    })),
+    $transaction: jest.fn((fn) =>
+      fn({
+        order: {
+          findMany: jest.fn(),
+          findUnique: jest.fn(),
+          create: jest.fn(),
+          update: jest.fn(),
+        },
+        product: {
+          update: jest.fn(),
+        },
+      }),
+    ),
   },
 }));
 
@@ -82,7 +84,7 @@ describe("Orders Database Layer", () => {
             tenantId,
             customerId: userId,
           }),
-        })
+        }),
       );
     });
 
@@ -99,7 +101,7 @@ describe("Orders Database Layer", () => {
             customerId: userId,
             status: "SHIPPED",
           }),
-        })
+        }),
       );
     });
 
@@ -116,7 +118,7 @@ describe("Orders Database Layer", () => {
         expect.objectContaining({
           skip: 10,
           take: 10,
-        })
+        }),
       );
       expect(result.pagination.page).toBe(2);
     });
@@ -130,7 +132,7 @@ describe("Orders Database Layer", () => {
       expect(db.order.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           orderBy: { createdAt: "desc" },
-        })
+        }),
       );
     });
   });
@@ -145,7 +147,7 @@ describe("Orders Database Layer", () => {
       expect(db.order.findUnique).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { id: "order_123", tenantId },
-        })
+        }),
       );
     });
 
@@ -169,7 +171,7 @@ describe("Orders Database Layer", () => {
             customer: expect.any(Object),
             shippingAddress: true,
           }),
-        })
+        }),
       );
     });
   });
@@ -177,9 +179,7 @@ describe("Orders Database Layer", () => {
   describe("createOrder", () => {
     const orderData = {
       customerId: userId,
-      items: [
-        { productId: "prod_1", quantity: 2, price: 50 },
-      ],
+      items: [{ productId: "prod_1", quantity: 2, price: 50 }],
       subtotal: 100,
       tax: 16,
       shippingCost: 0,
@@ -212,7 +212,7 @@ describe("Orders Database Layer", () => {
         expect.objectContaining({
           where: { id: "order_123", tenantId },
           data: expect.objectContaining({ status: "SHIPPED" }),
-        })
+        }),
       );
     });
 
@@ -225,7 +225,7 @@ describe("Orders Database Layer", () => {
 
       // Attempting to change from DELIVERED to PENDING should fail
       await expect(
-        updateOrderStatus(tenantId, "order_123", "PENDING")
+        updateOrderStatus(tenantId, "order_123", "PENDING"),
       ).rejects.toThrow();
     });
   });

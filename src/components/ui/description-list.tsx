@@ -42,7 +42,7 @@ export function DescriptionList({
             className={cn(
               "space-y-1",
               striped && index % 2 === 0 && "bg-muted/50 p-3 rounded-lg",
-              item.className
+              item.className,
             )}
           >
             <dt className="text-sm font-medium text-muted-foreground">
@@ -64,7 +64,7 @@ export function DescriptionList({
             className={cn(
               "space-y-1",
               striped && index % 2 === 0 && "bg-muted/50 p-3 rounded-lg",
-              item.className
+              item.className,
             )}
           >
             <dt className="text-sm font-medium text-muted-foreground">
@@ -86,7 +86,7 @@ export function DescriptionList({
           className={cn(
             "py-3 sm:grid sm:grid-cols-3 sm:gap-4",
             striped && index % 2 === 0 && "bg-muted/50 px-3 rounded-lg",
-            item.className
+            item.className,
           )}
         >
           <dt className="text-sm font-medium text-muted-foreground">

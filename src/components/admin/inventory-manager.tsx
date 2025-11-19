@@ -52,7 +52,7 @@ export function InventoryManager({
   const handleAdjustmentChange = (
     itemId: string,
     field: "quantity" | "type",
-    value: any
+    value: any,
   ) => {
     setAdjustments((prev) => ({
       ...prev,
@@ -86,16 +86,28 @@ export function InventoryManager({
 
   const getStockStatus = (item: InventoryItem) => {
     if (item.availableStock === 0) {
-      return <BadgeCustom variant="error" size="sm">Out of stock</BadgeCustom>;
+      return (
+        <BadgeCustom variant="error" size="sm">
+          Out of stock
+        </BadgeCustom>
+      );
     }
     if (item.availableStock <= item.reorderPoint) {
-      return <BadgeCustom variant="warning" size="sm">Low stock</BadgeCustom>;
+      return (
+        <BadgeCustom variant="warning" size="sm">
+          Low stock
+        </BadgeCustom>
+      );
     }
-    return <BadgeCustom variant="success" size="sm">In stock</BadgeCustom>;
+    return (
+      <BadgeCustom variant="success" size="sm">
+        In stock
+      </BadgeCustom>
+    );
   };
 
   const lowStockItems = items.filter(
-    (item) => item.availableStock <= item.reorderPoint
+    (item) => item.availableStock <= item.reorderPoint,
   );
 
   return (
@@ -138,7 +150,10 @@ export function InventoryManager({
               </tr>
             ) : items.length === 0 ? (
               <tr>
-                <td colSpan={7} className="p-8 text-center text-muted-foreground">
+                <td
+                  colSpan={7}
+                  className="p-8 text-center text-muted-foreground"
+                >
                   No inventory items
                 </td>
               </tr>
@@ -172,7 +187,7 @@ export function InventoryManager({
                             handleAdjustmentChange(
                               item.id,
                               "type",
-                              e.target.value
+                              e.target.value,
                             )
                           }
                           className="px-2 py-1 border rounded text-xs"
@@ -188,7 +203,7 @@ export function InventoryManager({
                             handleAdjustmentChange(
                               item.id,
                               "quantity",
-                              Number(e.target.value)
+                              Number(e.target.value),
                             )
                           }
                           className="w-16 px-2 py-1 border rounded text-sm"

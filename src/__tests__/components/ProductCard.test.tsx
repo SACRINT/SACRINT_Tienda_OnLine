@@ -100,7 +100,10 @@ describe("ProductCard", () => {
     render(<ProductCard product={mockProduct} />);
 
     const link = screen.getByRole("link");
-    expect(link).toHaveAttribute("href", expect.stringContaining("test-product"));
+    expect(link).toHaveAttribute(
+      "href",
+      expect.stringContaining("test-product"),
+    );
   });
 
   it("should show discount percentage for sale", () => {

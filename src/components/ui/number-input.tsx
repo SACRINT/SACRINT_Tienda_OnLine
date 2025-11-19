@@ -9,7 +9,10 @@ import { Minus, Plus } from "lucide-react";
 import { Button } from "./button";
 
 export interface NumberInputProps
-  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "type" | "onChange"> {
+  extends Omit<
+    React.InputHTMLAttributes<HTMLInputElement>,
+    "type" | "onChange"
+  > {
   value?: number;
   onChange?: (value: number) => void;
   min?: number;
@@ -33,7 +36,7 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
       disabled,
       ...props
     },
-    ref
+    ref,
   ) => {
     const clampValue = (val: number): number => {
       if (min !== undefined && val < min) return min;
@@ -90,7 +93,7 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
             "[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
             showButtons && "border-x-0 rounded-none",
             !showButtons && "rounded-md",
-            error && "border-destructive focus-visible:ring-destructive"
+            error && "border-destructive focus-visible:ring-destructive",
           )}
           {...props}
         />
@@ -109,7 +112,7 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
         )}
       </div>
     );
-  }
+  },
 );
 
 NumberInput.displayName = "NumberInput";

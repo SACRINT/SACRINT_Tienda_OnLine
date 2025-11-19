@@ -77,11 +77,7 @@ export const CACHE_CONFIG = {
 };
 
 // Routes to precache
-export const PRECACHE_ROUTES = [
-  "/",
-  "/offline",
-  "/manifest.json",
-];
+export const PRECACHE_ROUTES = ["/", "/offline", "/manifest.json"];
 
 // Routes to cache on first visit
 export const RUNTIME_CACHE_ROUTES = [

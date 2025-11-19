@@ -61,15 +61,15 @@ export interface NotificationService {
   // Push notifications
   send(
     target: NotificationTarget,
-    notification: Notification
+    notification: Notification,
   ): Promise<NotificationResult>;
   sendToMany(
     targets: NotificationTarget[],
-    notification: Notification
+    notification: Notification,
   ): Promise<NotificationResult[]>;
   sendToTopic(
     topic: string,
-    notification: Notification
+    notification: Notification,
   ): Promise<NotificationResult>;
 
   // Subscriptions
@@ -77,7 +77,7 @@ export interface NotificationService {
     userId: string,
     tenantId: string,
     token: string,
-    platform: PushSubscription["platform"]
+    platform: PushSubscription["platform"],
   ): Promise<PushSubscription>;
   unsubscribe(token: string): Promise<void>;
   getSubscriptions(userId: string): Promise<PushSubscription[]>;
@@ -86,9 +86,16 @@ export interface NotificationService {
   createInApp(
     userId: string,
     tenantId: string,
-    notification: Omit<InAppNotification, "id" | "userId" | "tenantId" | "read" | "createdAt">
+    notification: Omit<
+      InAppNotification,
+      "id" | "userId" | "tenantId" | "read" | "createdAt"
+    >,
   ): Promise<InAppNotification>;
-  getInApp(userId: string, tenantId: string, unreadOnly?: boolean): Promise<InAppNotification[]>;
+  getInApp(
+    userId: string,
+    tenantId: string,
+    unreadOnly?: boolean,
+  ): Promise<InAppNotification[]>;
   markAsRead(notificationId: string): Promise<void>;
   markAllAsRead(userId: string, tenantId: string): Promise<void>;
   deleteInApp(notificationId: string): Promise<void>;
@@ -109,7 +116,7 @@ export class FCMNotificationService implements NotificationService {
 
   async send(
     target: NotificationTarget,
-    notification: Notification
+    notification: Notification,
   ): Promise<NotificationResult> {
     const validated = NotificationSchema.parse(notification);
 
@@ -173,13 +180,11 @@ export class FCMNotificationService implements NotificationService {
 
   async sendToMany(
     targets: NotificationTarget[],
-    notification: Notification
+    notification: Notification,
   ): Promise<NotificationResult[]> {
     const validated = NotificationSchema.parse(notification);
 
-    const tokens = targets
-      .filter((t) => t.token)
-      .map((t) => t.token as string);
+    const tokens = targets.filter((t) => t.token).map((t) => t.token as string);
 
     if (tokens.length === 0) {
       return [];
@@ -226,7 +231,7 @@ export class FCMNotificationService implements NotificationService {
 
   async sendToTopic(
     topic: string,
-    notification: Notification
+    notification: Notification,
   ): Promise<NotificationResult> {
     return this.send({ topic }, notification);
   }
@@ -235,7 +240,7 @@ export class FCMNotificationService implements NotificationService {
     userId: string,
     tenantId: string,
     token: string,
-    platform: PushSubscription["platform"]
+    platform: PushSubscription["platform"],
   ): Promise<PushSubscription> {
     const subscription: PushSubscription = {
       id: `sub_${Date.now()}`,
@@ -256,14 +261,17 @@ export class FCMNotificationService implements NotificationService {
 
   async getSubscriptions(userId: string): Promise<PushSubscription[]> {
     return Array.from(this.subscriptions.values()).filter(
-      (s) => s.userId === userId
+      (s) => s.userId === userId,
     );
   }
 
   async createInApp(
     userId: string,
     tenantId: string,
-    notification: Omit<InAppNotification, "id" | "userId" | "tenantId" | "read" | "createdAt">
+    notification: Omit<
+      InAppNotification,
+      "id" | "userId" | "tenantId" | "read" | "createdAt"
+    >,
   ): Promise<InAppNotification> {
     const inApp: InAppNotification = {
       id: `inapp_${Date.now()}`,
@@ -281,14 +289,14 @@ export class FCMNotificationService implements NotificationService {
   async getInApp(
     userId: string,
     tenantId: string,
-    unreadOnly: boolean = false
+    unreadOnly: boolean = false,
   ): Promise<InAppNotification[]> {
     return Array.from(this.inAppNotifications.values())
       .filter(
         (n) =>
           n.userId === userId &&
           n.tenantId === tenantId &&
-          (!unreadOnly || !n.read)
+          (!unreadOnly || !n.read),
       )
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   }
@@ -302,7 +310,10 @@ export class FCMNotificationService implements NotificationService {
 
   async markAllAsRead(userId: string, tenantId: string): Promise<void> {
     for (const notification of this.inAppNotifications.values()) {
-      if (notification.userId === userId && notification.tenantId === tenantId) {
+      if (
+        notification.userId === userId &&
+        notification.tenantId === tenantId
+      ) {
         notification.read = true;
       }
     }
@@ -320,7 +331,7 @@ class MockNotificationService implements NotificationService {
 
   async send(
     target: NotificationTarget,
-    notification: Notification
+    notification: Notification,
   ): Promise<NotificationResult> {
     console.log("Mock notification sent:", { target, notification });
     return {
@@ -331,9 +342,12 @@ class MockNotificationService implements NotificationService {
 
   async sendToMany(
     targets: NotificationTarget[],
-    notification: Notification
+    notification: Notification,
   ): Promise<NotificationResult[]> {
-    console.log("Mock notifications sent:", { count: targets.length, notification });
+    console.log("Mock notifications sent:", {
+      count: targets.length,
+      notification,
+    });
     return targets.map(() => ({
       id: `mock_${Date.now()}`,
       success: true,
@@ -342,7 +356,7 @@ class MockNotificationService implements NotificationService {
 
   async sendToTopic(
     topic: string,
-    notification: Notification
+    notification: Notification,
   ): Promise<NotificationResult> {
     console.log("Mock topic notification:", { topic, notification });
     return {
@@ -355,7 +369,7 @@ class MockNotificationService implements NotificationService {
     userId: string,
     tenantId: string,
     token: string,
-    platform: PushSubscription["platform"]
+    platform: PushSubscription["platform"],
   ): Promise<PushSubscription> {
     const subscription: PushSubscription = {
       id: `sub_${Date.now()}`,
@@ -378,14 +392,17 @@ class MockNotificationService implements NotificationService {
 
   async getSubscriptions(userId: string): Promise<PushSubscription[]> {
     return Array.from(this.subscriptions.values()).filter(
-      (s) => s.userId === userId
+      (s) => s.userId === userId,
     );
   }
 
   async createInApp(
     userId: string,
     tenantId: string,
-    notification: Omit<InAppNotification, "id" | "userId" | "tenantId" | "read" | "createdAt">
+    notification: Omit<
+      InAppNotification,
+      "id" | "userId" | "tenantId" | "read" | "createdAt"
+    >,
   ): Promise<InAppNotification> {
     const inApp: InAppNotification = {
       id: `inapp_${Date.now()}`,
@@ -404,14 +421,14 @@ class MockNotificationService implements NotificationService {
   async getInApp(
     userId: string,
     tenantId: string,
-    unreadOnly: boolean = false
+    unreadOnly: boolean = false,
   ): Promise<InAppNotification[]> {
     return Array.from(this.inAppNotifications.values())
       .filter(
         (n) =>
           n.userId === userId &&
           n.tenantId === tenantId &&
-          (!unreadOnly || !n.read)
+          (!unreadOnly || !n.read),
       )
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   }
@@ -425,7 +442,10 @@ class MockNotificationService implements NotificationService {
 
   async markAllAsRead(userId: string, tenantId: string): Promise<void> {
     for (const notification of this.inAppNotifications.values()) {
-      if (notification.userId === userId && notification.tenantId === tenantId) {
+      if (
+        notification.userId === userId &&
+        notification.tenantId === tenantId
+      ) {
         notification.read = true;
       }
     }

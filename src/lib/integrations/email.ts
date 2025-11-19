@@ -16,10 +16,14 @@ export const EmailSchema = z.object({
   text: z.string().optional(),
   from: z.string().optional(),
   replyTo: z.string().email().optional(),
-  attachments: z.array(z.object({
-    filename: z.string(),
-    content: z.string(), // base64
-  })).optional(),
+  attachments: z
+    .array(
+      z.object({
+        filename: z.string(),
+        content: z.string(), // base64
+      }),
+    )
+    .optional(),
 });
 
 export type EmailRecipient = z.infer<typeof EmailRecipientSchema>;
@@ -39,7 +43,7 @@ export interface EmailService {
   sendTemplate(
     templateId: string,
     to: EmailRecipient | EmailRecipient[],
-    variables: Record<string, string>
+    variables: Record<string, string>,
   ): Promise<{ id: string }>;
 }
 
@@ -88,7 +92,7 @@ export class ResendEmailService implements EmailService {
   async sendTemplate(
     templateId: string,
     to: EmailRecipient | EmailRecipient[],
-    variables: Record<string, string>
+    variables: Record<string, string>,
   ): Promise<{ id: string }> {
     // Get template
     const template = await this.getTemplate(templateId);
@@ -209,7 +213,7 @@ class MockEmailService implements EmailService {
   async sendTemplate(
     templateId: string,
     to: EmailRecipient | EmailRecipient[],
-    variables: Record<string, string>
+    variables: Record<string, string>,
   ): Promise<{ id: string }> {
     console.log("Mock template email sent:", {
       templateId,

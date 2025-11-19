@@ -37,14 +37,20 @@ const RESERVED_SUBDOMAINS = [
 ];
 
 // Check if subdomain is available
-export async function isSubdomainAvailable(subdomain: string): Promise<boolean> {
+export async function isSubdomainAvailable(
+  subdomain: string,
+): Promise<boolean> {
   // Check reserved
   if (RESERVED_SUBDOMAINS.includes(subdomain.toLowerCase())) {
     return false;
   }
 
   // Check format
-  if (!/^[a-z0-9-]+$/.test(subdomain) || subdomain.length < 3 || subdomain.length > 63) {
+  if (
+    !/^[a-z0-9-]+$/.test(subdomain) ||
+    subdomain.length < 3 ||
+    subdomain.length > 63
+  ) {
     return false;
   }
 
@@ -89,7 +95,7 @@ export function parseDomain(host: string): {
 // Add custom domain to tenant
 export async function addCustomDomain(
   tenantId: string,
-  domain: string
+  domain: string,
 ): Promise<DomainConfig> {
   // Generate verification token
   const verificationToken = generateVerificationToken();
@@ -131,7 +137,7 @@ export async function verifyCustomDomain(tenantId: string): Promise<boolean> {
   // Check DNS TXT record
   const verified = await checkDnsVerification(
     tenant.customDomain,
-    tenant.domainVerificationToken
+    tenant.domainVerificationToken,
   );
 
   if (verified) {
@@ -164,7 +170,7 @@ export async function removeCustomDomain(tenantId: string): Promise<void> {
 // Get domain verification instructions
 export function getVerificationInstructions(
   domain: string,
-  token: string
+  token: string,
 ): {
   type: string;
   name: string;
@@ -189,19 +195,21 @@ export function getVerificationInstructions(
 // Check DNS verification (simplified)
 async function checkDnsVerification(
   domain: string,
-  token: string
+  token: string,
 ): Promise<boolean> {
   try {
     // In production, use DNS lookup
     // For now, return false (requires manual verification)
     const response = await fetch(
-      "https://dns.google/resolve?name=_sacrint-verification." + domain + "&type=TXT"
+      "https://dns.google/resolve?name=_sacrint-verification." +
+        domain +
+        "&type=TXT",
     );
     const data = await response.json();
 
     if (data.Answer) {
       return data.Answer.some((record: { data: string }) =>
-        record.data.includes(token)
+        record.data.includes(token),
       );
     }
 
@@ -214,5 +222,9 @@ async function checkDnsVerification(
 
 // Generate verification token
 function generateVerificationToken(): string {
-  return "sacrint-verify-" + Date.now().toString(36) + Math.random().toString(36).substring(2);
+  return (
+    "sacrint-verify-" +
+    Date.now().toString(36) +
+    Math.random().toString(36).substring(2)
+  );
 }

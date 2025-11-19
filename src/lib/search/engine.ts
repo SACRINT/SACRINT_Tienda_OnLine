@@ -34,7 +34,10 @@ function tokenize(text: string): string[] {
 }
 
 // Calculate relevance score
-function calculateScore(product: SearchableProduct, queryTokens: string[]): number {
+function calculateScore(
+  product: SearchableProduct,
+  queryTokens: string[],
+): number {
   let score = 0;
 
   const nameTokens = tokenize(product.name);
@@ -97,7 +100,7 @@ function calculateScore(product: SearchableProduct, queryTokens: string[]): numb
 // Generate highlights
 function generateHighlights(
   text: string,
-  queryTokens: string[]
+  queryTokens: string[],
 ): string | undefined {
   if (!text) return undefined;
 
@@ -274,20 +277,23 @@ export async function search(searchQuery: SearchQuery): Promise<SearchResult> {
   // Sort results
   if (sort.field === "relevance") {
     scoredProducts.sort((a, b) =>
-      sort.direction === "desc" ? b.score - a.score : a.score - b.score
+      sort.direction === "desc" ? b.score - a.score : a.score - b.score,
     );
   } else {
     scoredProducts.sort((a, b) => {
       let comparison = 0;
       switch (sort.field) {
         case "price":
-          comparison = (a.product.salePrice || a.product.price) - (b.product.salePrice || b.product.price);
+          comparison =
+            (a.product.salePrice || a.product.price) -
+            (b.product.salePrice || b.product.price);
           break;
         case "name":
           comparison = a.product.name.localeCompare(b.product.name);
           break;
         case "createdAt":
-          comparison = a.product.createdAt.getTime() - b.product.createdAt.getTime();
+          comparison =
+            a.product.createdAt.getTime() - b.product.createdAt.getTime();
           break;
         case "rating":
           comparison = (a.product.rating || 0) - (b.product.rating || 0);
@@ -330,10 +336,10 @@ export async function search(searchQuery: SearchQuery): Promise<SearchResult> {
         name: generateHighlights(product.name, queryTokens),
         description: generateHighlights(
           product.description.substring(0, 200),
-          queryTokens
+          queryTokens,
         ),
       },
-    })
+    }),
   );
 
   return {
@@ -350,7 +356,7 @@ export async function search(searchQuery: SearchQuery): Promise<SearchResult> {
 // Quick count for a search
 export async function searchCount(
   query: string,
-  tenantId: string
+  tenantId: string,
 ): Promise<number> {
   const result = await search({
     query,

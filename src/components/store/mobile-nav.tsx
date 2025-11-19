@@ -76,7 +76,7 @@ export function MobileNav({
         className={cn(
           "fixed top-0 left-0 h-full w-80 max-w-full bg-background shadow-xl z-50 transform transition-transform duration-300 lg:hidden",
           isOpen ? "translate-x-0" : "-translate-x-full",
-          className
+          className,
         )}
       >
         {/* Header */}
@@ -224,7 +224,7 @@ export function MobileHeader({
     <header
       className={cn(
         "sticky top-0 z-30 bg-background border-b lg:hidden",
-        className
+        className,
       )}
     >
       <div className="flex items-center justify-between h-14 px-4">

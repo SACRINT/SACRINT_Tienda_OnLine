@@ -89,7 +89,7 @@ describe("Search Engine", () => {
           where: expect.objectContaining({
             categoryId: "cat1",
           }),
-        })
+        }),
       );
     });
 
@@ -107,7 +107,7 @@ describe("Search Engine", () => {
           where: expect.objectContaining({
             basePrice: { gte: 50, lte: 100 },
           }),
-        })
+        }),
       );
     });
 
@@ -125,7 +125,7 @@ describe("Search Engine", () => {
           where: expect.objectContaining({
             stock: { gt: 0 },
           }),
-        })
+        }),
       );
     });
 
@@ -166,7 +166,7 @@ describe("Search Engine", () => {
       // First product should have higher score (contains "running" in name)
       if (result.products.length >= 2) {
         expect(result.products[0].score).toBeGreaterThanOrEqual(
-          result.products[1].score
+          result.products[1].score,
         );
       }
     });
@@ -196,7 +196,7 @@ describe("Search Engine", () => {
       });
 
       const runningProduct = result.products.find((p) =>
-        p.name.toLowerCase().includes("running")
+        p.name.toLowerCase().includes("running"),
       );
       if (runningProduct) {
         expect(runningProduct.highlights?.name).toContain("<mark>");

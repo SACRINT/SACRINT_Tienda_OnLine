@@ -11,7 +11,10 @@ interface RecentlyViewedProps {
   excludeProductId?: string;
 }
 
-export function RecentlyViewed({ limit = 6, excludeProductId }: RecentlyViewedProps) {
+export function RecentlyViewed({
+  limit = 6,
+  excludeProductId,
+}: RecentlyViewedProps) {
   const { items, clear } = useRecentlyViewed();
   const [mounted, setMounted] = React.useState(false);
 
@@ -40,7 +43,9 @@ export function RecentlyViewed({ limit = 6, excludeProductId }: RecentlyViewedPr
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
           <Clock className="h-5 w-5 text-muted-foreground" />
-          <h2 className="text-xl font-bold text-primary">Vistos Recientemente</h2>
+          <h2 className="text-xl font-bold text-primary">
+            Vistos Recientemente
+          </h2>
         </div>
         <Button variant="ghost" size="sm" onClick={clear}>
           <X className="h-4 w-4 mr-1" />

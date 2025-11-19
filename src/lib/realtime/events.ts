@@ -71,7 +71,10 @@ class EventEmitter {
 
   // Get handler count
   listenerCount(event: string): number {
-    return (this.handlers.get(event)?.size || 0) + (this.onceHandlers.get(event)?.size || 0);
+    return (
+      (this.handlers.get(event)?.size || 0) +
+      (this.onceHandlers.get(event)?.size || 0)
+    );
   }
 }
 

@@ -44,7 +44,7 @@ export const LOCALE_DATE_FORMAT: Record<Locale, string> = {
 // Detect locale from request
 export function detectLocale(
   acceptLanguage?: string | null,
-  cookieLocale?: string | null
+  cookieLocale?: string | null,
 ): Locale {
   // Priority: cookie > accept-language > default
   if (cookieLocale && isValidLocale(cookieLocale)) {
@@ -73,11 +73,11 @@ export function isValidLocale(locale: string): boolean {
 export function getLocaleFromPath(path: string): Locale | null {
   const segments = path.split("/").filter(Boolean);
   const firstSegment = segments[0];
-  
+
   if (firstSegment && isValidLocale(firstSegment)) {
     return firstSegment as Locale;
   }
-  
+
   return null;
 }
 

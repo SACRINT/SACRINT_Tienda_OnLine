@@ -64,9 +64,7 @@ export interface KeyValueGroupProps {
 }
 
 export function KeyValueGroup({ children, className }: KeyValueGroupProps) {
-  return (
-    <dl className={cn("space-y-2", className)}>{children}</dl>
-  );
+  return <dl className={cn("space-y-2", className)}>{children}</dl>;
 }
 
 export default KeyValue;

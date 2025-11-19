@@ -60,49 +60,95 @@ export type Permission =
 const rolePermissions: Record<Role, Permission[]> = {
   SUPER_ADMIN: [
     // All permissions
-    "tenant:read", "tenant:create", "tenant:update", "tenant:delete",
-    "user:read", "user:create", "user:update", "user:delete", "user:manage_roles",
-    "product:read", "product:create", "product:update", "product:delete", "product:publish",
-    "category:read", "category:create", "category:update", "category:delete",
-    "order:read", "order:create", "order:update", "order:cancel", "order:refund",
-    "customer:read", "customer:update", "customer:delete",
-    "analytics:read", "analytics:export",
-    "settings:read", "settings:update",
-    "billing:read", "billing:update",
-    "api_key:read", "api_key:create", "api_key:revoke",
+    "tenant:read",
+    "tenant:create",
+    "tenant:update",
+    "tenant:delete",
+    "user:read",
+    "user:create",
+    "user:update",
+    "user:delete",
+    "user:manage_roles",
+    "product:read",
+    "product:create",
+    "product:update",
+    "product:delete",
+    "product:publish",
+    "category:read",
+    "category:create",
+    "category:update",
+    "category:delete",
+    "order:read",
+    "order:create",
+    "order:update",
+    "order:cancel",
+    "order:refund",
+    "customer:read",
+    "customer:update",
+    "customer:delete",
+    "analytics:read",
+    "analytics:export",
+    "settings:read",
+    "settings:update",
+    "billing:read",
+    "billing:update",
+    "api_key:read",
+    "api_key:create",
+    "api_key:revoke",
     "audit:read",
   ],
   STORE_OWNER: [
     // Tenant (own)
-    "tenant:read", "tenant:update",
+    "tenant:read",
+    "tenant:update",
     // Users (own store)
-    "user:read", "user:create", "user:update",
+    "user:read",
+    "user:create",
+    "user:update",
     // Products
-    "product:read", "product:create", "product:update", "product:delete", "product:publish",
+    "product:read",
+    "product:create",
+    "product:update",
+    "product:delete",
+    "product:publish",
     // Categories
-    "category:read", "category:create", "category:update", "category:delete",
+    "category:read",
+    "category:create",
+    "category:update",
+    "category:delete",
     // Orders
-    "order:read", "order:update", "order:cancel", "order:refund",
+    "order:read",
+    "order:update",
+    "order:cancel",
+    "order:refund",
     // Customers
     "customer:read",
     // Analytics
-    "analytics:read", "analytics:export",
+    "analytics:read",
+    "analytics:export",
     // Settings
-    "settings:read", "settings:update",
+    "settings:read",
+    "settings:update",
     // Billing
-    "billing:read", "billing:update",
+    "billing:read",
+    "billing:update",
     // API keys
-    "api_key:read", "api_key:create", "api_key:revoke",
+    "api_key:read",
+    "api_key:create",
+    "api_key:revoke",
   ],
   CUSTOMER: [
     // Own profile
-    "user:read", "user:update",
+    "user:read",
+    "user:update",
     // Products (public)
     "product:read",
     // Categories (public)
     "category:read",
     // Own orders
-    "order:read", "order:create", "order:cancel",
+    "order:read",
+    "order:create",
+    "order:cancel",
   ],
 };
 
@@ -154,7 +200,7 @@ export class AuthorizationError extends Error {
   constructor(
     message: string,
     public permission?: Permission,
-    public role?: Role
+    public role?: Role,
   ) {
     super(message);
     this.name = "AuthorizationError";
@@ -167,39 +213,39 @@ export const rbac = new RBACService();
 // Authorization helpers
 export function requirePermission(
   context: AuthContext,
-  permission: Permission
+  permission: Permission,
 ): void {
   if (!rbac.hasPermission(context.role, permission)) {
     throw new AuthorizationError(
       `Permission denied: ${permission}`,
       permission,
-      context.role
+      context.role,
     );
   }
 }
 
 export function requireAnyPermission(
   context: AuthContext,
-  permissions: Permission[]
+  permissions: Permission[],
 ): void {
   if (!rbac.hasAnyPermission(context.role, permissions)) {
     throw new AuthorizationError(
       `Permission denied: requires one of ${permissions.join(", ")}`,
       undefined,
-      context.role
+      context.role,
     );
   }
 }
 
 export function requireAllPermissions(
   context: AuthContext,
-  permissions: Permission[]
+  permissions: Permission[],
 ): void {
   if (!rbac.hasAllPermissions(context.role, permissions)) {
     throw new AuthorizationError(
       `Permission denied: requires all of ${permissions.join(", ")}`,
       undefined,
-      context.role
+      context.role,
     );
   }
 }
@@ -209,7 +255,7 @@ export function requireRole(context: AuthContext, role: Role): void {
     throw new AuthorizationError(
       `Role denied: requires ${role} or higher`,
       undefined,
-      context.role
+      context.role,
     );
   }
 }
@@ -217,7 +263,7 @@ export function requireRole(context: AuthContext, role: Role): void {
 // Tenant isolation check
 export function requireTenantAccess(
   context: AuthContext,
-  targetTenantId: string
+  targetTenantId: string,
 ): void {
   // Super admin can access any tenant
   if (context.role === "SUPER_ADMIN") {
@@ -226,16 +272,14 @@ export function requireTenantAccess(
 
   // Others can only access their own tenant
   if (context.tenantId !== targetTenantId) {
-    throw new AuthorizationError(
-      "Access denied: tenant isolation violation"
-    );
+    throw new AuthorizationError("Access denied: tenant isolation violation");
   }
 }
 
 // Resource ownership check
 export function requireOwnership(
   context: AuthContext,
-  resourceOwnerId: string
+  resourceOwnerId: string,
 ): void {
   // Super admin can access any resource
   if (context.role === "SUPER_ADMIN") {
@@ -244,9 +288,7 @@ export function requireOwnership(
 
   // Others can only access their own resources
   if (context.userId !== resourceOwnerId) {
-    throw new AuthorizationError(
-      "Access denied: resource ownership required"
-    );
+    throw new AuthorizationError("Access denied: resource ownership required");
   }
 }
 
@@ -254,7 +296,7 @@ export function requireOwnership(
 export function withPermission<T extends (...args: any[]) => any>(
   permission: Permission,
   fn: T,
-  getContext: (...args: Parameters<T>) => AuthContext
+  getContext: (...args: Parameters<T>) => AuthContext,
 ): T {
   return ((...args: Parameters<T>) => {
     const context = getContext(...args);
@@ -265,7 +307,7 @@ export function withPermission<T extends (...args: any[]) => any>(
 
 // API route authorization wrapper
 export function authorize(
-  permission: Permission
+  permission: Permission,
 ): (handler: Function) => Function {
   return (handler: Function) => {
     return async (request: Request, context: any) => {
@@ -273,10 +315,10 @@ export function authorize(
       const authContext = (request as any).authContext as AuthContext;
 
       if (!authContext) {
-        return new Response(
-          JSON.stringify({ error: "Unauthorized" }),
-          { status: 401, headers: { "Content-Type": "application/json" } }
-        );
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        });
       }
 
       try {
@@ -284,10 +326,10 @@ export function authorize(
         return handler(request, context);
       } catch (error) {
         if (error instanceof AuthorizationError) {
-          return new Response(
-            JSON.stringify({ error: error.message }),
-            { status: 403, headers: { "Content-Type": "application/json" } }
-          );
+          return new Response(JSON.stringify({ error: error.message }), {
+            status: 403,
+            headers: { "Content-Type": "application/json" },
+          });
         }
         throw error;
       }

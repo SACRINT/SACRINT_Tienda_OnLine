@@ -90,12 +90,16 @@ describe("SearchBar", () => {
     const input = screen.getByPlaceholderText(/buscar|search/i);
 
     // Clear button should be hidden initially
-    expect(screen.queryByRole("button", { name: /clear|limpiar/i })).not.toBeVisible();
+    expect(
+      screen.queryByRole("button", { name: /clear|limpiar/i }),
+    ).not.toBeVisible();
 
     fireEvent.change(input, { target: { value: "test" } });
 
     // Clear button should appear
-    expect(screen.getByRole("button", { name: /clear|limpiar/i })).toBeVisible();
+    expect(
+      screen.getByRole("button", { name: /clear|limpiar/i }),
+    ).toBeVisible();
   });
 
   it("should show suggestions when typing", async () => {

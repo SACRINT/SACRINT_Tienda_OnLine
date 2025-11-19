@@ -8,7 +8,12 @@ import { cn } from "@/lib/utils";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProductGrid, Product } from "./product-grid";
-import { FilterSidebar, FilterGroup, FilterValues, ActiveFilters } from "./filter-sidebar";
+import {
+  FilterSidebar,
+  FilterGroup,
+  FilterValues,
+  ActiveFilters,
+} from "./filter-sidebar";
 import { ProductToolbar } from "./sort-dropdown";
 
 export interface SearchResultsProps {
@@ -65,13 +70,7 @@ export function SearchResults({
       {/* Header */}
       <div className="space-y-4">
         <h1 className="text-2xl font-bold">
-          {query ? (
-            <>
-              Search results for &quot;{query}&quot;
-            </>
-          ) : (
-            "All Products"
-          )}
+          {query ? <>Search results for &quot;{query}&quot;</> : "All Products"}
         </h1>
 
         {/* Active filters */}

@@ -56,7 +56,7 @@ describe("Web Vitals", () => {
     const classifyMetric = (
       value: number,
       good: number,
-      needsImprovement: number
+      needsImprovement: number,
     ): "good" | "needs-improvement" | "poor" => {
       if (value <= good) return "good";
       if (value <= needsImprovement) return "needs-improvement";

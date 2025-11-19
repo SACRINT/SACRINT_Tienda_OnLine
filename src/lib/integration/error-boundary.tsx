@@ -16,7 +16,10 @@ interface ErrorBoundaryState {
   error: Error | null;
 }
 
-export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+export class ErrorBoundary extends Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false, error: null };
@@ -81,7 +84,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 // HOC for wrapping components
 export function withErrorBoundary<P extends object>(
   WrappedComponent: React.ComponentType<P>,
-  errorBoundaryProps?: Omit<ErrorBoundaryProps, "children">
+  errorBoundaryProps?: Omit<ErrorBoundaryProps, "children">,
 ): React.FC<P> {
   const WithErrorBoundary: React.FC<P> = (props) => (
     <ErrorBoundary {...errorBoundaryProps}>
@@ -89,7 +92,10 @@ export function withErrorBoundary<P extends object>(
     </ErrorBoundary>
   );
 
-  WithErrorBoundary.displayName = "WithErrorBoundary(" + (WrappedComponent.displayName || WrappedComponent.name || "Component") + ")";
+  WithErrorBoundary.displayName =
+    "WithErrorBoundary(" +
+    (WrappedComponent.displayName || WrappedComponent.name || "Component") +
+    ")";
 
   return WithErrorBoundary;
 }

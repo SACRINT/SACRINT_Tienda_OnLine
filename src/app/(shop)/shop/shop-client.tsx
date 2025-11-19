@@ -1,12 +1,11 @@
 "use client";
 
 import { Suspense, useState, useEffect } from "react";
+import { ShopHero, ProductCard, FilterSidebar } from "@/components/shop";
 import {
-  ShopHero,
-  ProductCard,
-  FilterSidebar,
-} from "@/components/shop";
-import { QuickViewModal, QuickViewProduct } from "@/components/shop/QuickViewModal";
+  QuickViewModal,
+  QuickViewProduct,
+} from "@/components/shop/QuickViewModal";
 import { useCart } from "@/lib/store/useCart";
 
 interface Product {
@@ -44,7 +43,8 @@ export function ShopPageClient({ products, categories }: ShopPageClientProps) {
   const [inStockOnly, setInStockOnly] = useState(false);
   const [onSaleOnly, setOnSaleOnly] = useState(false);
   const [addedToCart, setAddedToCart] = useState<string | null>(null);
-  const [quickViewProduct, setQuickViewProduct] = useState<QuickViewProduct | null>(null);
+  const [quickViewProduct, setQuickViewProduct] =
+    useState<QuickViewProduct | null>(null);
 
   // Hydrate cart on mount
   useEffect(() => {
@@ -88,11 +88,15 @@ export function ShopPageClient({ products, categories }: ShopPageClientProps) {
 
   // Filter products
   const filteredProducts = products.filter((product) => {
-    const matchesCategory = selectedCategories.length === 0 ||
+    const matchesCategory =
+      selectedCategories.length === 0 ||
       selectedCategories.includes(product.category);
-    const matchesPrice = product.price >= priceRange[0] && product.price <= priceRange[1];
+    const matchesPrice =
+      product.price >= priceRange[0] && product.price <= priceRange[1];
     const matchesStock = !inStockOnly || product.inStock;
-    const matchesSale = !onSaleOnly || (product.salePrice && product.salePrice < product.originalPrice);
+    const matchesSale =
+      !onSaleOnly ||
+      (product.salePrice && product.salePrice < product.originalPrice);
 
     return matchesCategory && matchesPrice && matchesStock && matchesSale;
   });
@@ -175,7 +179,8 @@ export function ShopPageClient({ products, categories }: ShopPageClientProps) {
                   Todos los Productos
                 </h1>
                 <p className="mt-1 text-sm text-gray-600">
-                  Mostrando {sortedProducts.length} de {products.length} productos
+                  Mostrando {sortedProducts.length} de {products.length}{" "}
+                  productos
                 </p>
               </div>
 
@@ -272,7 +277,8 @@ export function ShopPageClient({ products, categories }: ShopPageClientProps) {
                 Obtén 10% de Descuento en tu Primera Compra
               </h2>
               <p className="mt-2 text-blue-100">
-                Suscríbete a nuestro boletín para ofertas exclusivas y actualizaciones
+                Suscríbete a nuestro boletín para ofertas exclusivas y
+                actualizaciones
               </p>
               <form className="mx-auto mt-6 flex max-w-md gap-2">
                 <input

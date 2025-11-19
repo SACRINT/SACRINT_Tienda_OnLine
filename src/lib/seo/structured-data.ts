@@ -98,11 +98,17 @@ export function generateMetaTags(meta: PageMetadata): Record<string, string> {
   return tags;
 }
 
-export function formatPageTitle(title: string, siteName: string = "SACRINT Tienda"): string {
+export function formatPageTitle(
+  title: string,
+  siteName: string = "SACRINT Tienda",
+): string {
   return title + " | " + siteName;
 }
 
-export function truncateDescription(description: string, maxLength: number = 160): string {
+export function truncateDescription(
+  description: string,
+  maxLength: number = 160,
+): string {
   if (description.length <= maxLength) return description;
   const truncated = description.substring(0, maxLength - 3);
   const lastSpace = truncated.lastIndexOf(" ");

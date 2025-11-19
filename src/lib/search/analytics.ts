@@ -20,7 +20,7 @@ export async function trackSearch(
     userId?: string;
     sessionId: string;
     filters?: SearchFilters;
-  }
+  },
 ): Promise<string> {
   if (!ANALYTICS_CONFIG.trackSearches) {
     return "";
@@ -63,7 +63,7 @@ export async function trackSearch(
 export async function trackClick(
   queryId: string,
   productId: string,
-  position: number
+  position: number,
 ): Promise<void> {
   if (!ANALYTICS_CONFIG.trackClicks) {
     return;
@@ -88,7 +88,7 @@ export async function trackClick(
 // Track a conversion from search
 export async function trackConversion(
   queryId: string,
-  productId: string
+  productId: string,
 ): Promise<void> {
   if (!ANALYTICS_CONFIG.trackConversions) {
     return;
@@ -112,7 +112,7 @@ export async function trackConversion(
 // Increment search count for popularity
 async function incrementSearchCount(
   tenantId: string,
-  query: string
+  query: string,
 ): Promise<void> {
   const normalizedQuery = query.toLowerCase().trim();
   const cacheKey = "search_counts:" + tenantId;
@@ -130,7 +130,7 @@ async function incrementSearchCount(
 // Get popular searches
 export async function getPopularSearches(
   tenantId: string,
-  limit: number = 10
+  limit: number = 10,
 ): Promise<Array<{ query: string; count: number }>> {
   const cacheKey = "search_counts:" + tenantId;
   const counts = await cache.get<Record<string, number>>(cacheKey);
@@ -148,7 +148,7 @@ export async function getPopularSearches(
 // Get zero-result searches
 export async function getZeroResultSearches(
   tenantId: string,
-  limit: number = 20
+  limit: number = 20,
 ): Promise<string[]> {
   const cacheKey = "zero_result_searches:" + tenantId;
   const searches = await cache.get<string[]>(cacheKey);
@@ -158,7 +158,7 @@ export async function getZeroResultSearches(
 // Track zero-result search
 export async function trackZeroResults(
   tenantId: string,
-  query: string
+  query: string,
 ): Promise<void> {
   const cacheKey = "zero_result_searches:" + tenantId;
   let searches = await cache.get<string[]>(cacheKey);
@@ -177,9 +177,7 @@ export async function trackZeroResults(
 }
 
 // Get search metrics for dashboard
-export async function getSearchMetrics(
-  tenantId: string
-): Promise<{
+export async function getSearchMetrics(tenantId: string): Promise<{
   totalSearches: number;
   uniqueQueries: number;
   avgResultsPerSearch: number;
@@ -223,7 +221,7 @@ function hashQuery(query: string): string {
 // Export session search history
 export async function getSessionSearches(
   sessionId: string,
-  limit: number = 50
+  limit: number = 50,
 ): Promise<SearchAnalytics[]> {
   // In production, this would query from persistent storage
   // For now, return empty array

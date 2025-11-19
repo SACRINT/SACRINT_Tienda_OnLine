@@ -19,12 +19,14 @@ export interface Recommendation {
 export function getViewBasedRecommendations(
   viewedProducts: string[],
   allProducts: Array<{ id: string; categoryId: string; tags: string[] }>,
-  limit: number = 8
+  limit: number = 8,
 ): Recommendation[] {
   if (viewedProducts.length === 0) return [];
 
   // Get categories and tags from viewed products
-  const viewedProductData = allProducts.filter((p) => viewedProducts.includes(p.id));
+  const viewedProductData = allProducts.filter((p) =>
+    viewedProducts.includes(p.id),
+  );
   const viewedCategories = new Set(viewedProductData.map((p) => p.categoryId));
   const viewedTags = new Set(viewedProductData.flatMap((p) => p.tags));
 
@@ -68,7 +70,7 @@ export function getViewBasedRecommendations(
 export function getFrequentlyBoughtTogether(
   productId: string,
   orderHistory: Array<{ items: string[] }>,
-  limit: number = 4
+  limit: number = 4,
 ): Recommendation[] {
   const coOccurrences: Map<string, number> = new Map();
 
@@ -95,7 +97,7 @@ export function getFrequentlyBoughtTogether(
 // Get trending products
 export function getTrendingProducts(
   recentOrders: Array<{ items: string[]; createdAt: Date }>,
-  limit: number = 8
+  limit: number = 8,
 ): Recommendation[] {
   const productCounts: Map<string, number> = new Map();
   const now = Date.now();
@@ -123,7 +125,7 @@ export function getTrendingProducts(
 // Combine multiple recommendation sources
 export function combineRecommendations(
   sources: Recommendation[][],
-  limit: number = 12
+  limit: number = 12,
 ): Recommendation[] {
   const combined: Map<string, Recommendation> = new Map();
 

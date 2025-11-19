@@ -96,5 +96,6 @@ export const integrations = {
   storage: () => import("./storage").then((m) => m.storage),
   payments: () => import("./payments").then((m) => m.paymentService),
   search: () => import("./search").then((m) => m.searchService),
-  notifications: () => import("./notifications").then((m) => m.notificationService),
+  notifications: () =>
+    import("./notifications").then((m) => m.notificationService),
 };

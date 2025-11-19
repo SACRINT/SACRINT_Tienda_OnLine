@@ -62,7 +62,7 @@ export function ProgressCustom({
       <div
         className={cn(
           "w-full overflow-hidden rounded-full bg-secondary",
-          sizeStyles[size]
+          sizeStyles[size],
         )}
         role="progressbar"
         aria-valuenow={value}
@@ -73,9 +73,8 @@ export function ProgressCustom({
           className={cn(
             "h-full rounded-full transition-all duration-300",
             variantStyles[variant],
-            striped &&
-              "bg-stripes bg-[length:1rem_1rem]",
-            animated && striped && "animate-stripes"
+            striped && "bg-stripes bg-[length:1rem_1rem]",
+            animated && striped && "animate-stripes",
           )}
           style={{ width: `${percentage}%` }}
         />
@@ -137,10 +136,7 @@ export function CircularProgress({
           strokeDasharray={circumference}
           strokeDashoffset={offset}
           strokeLinecap="round"
-          className={cn(
-            "transition-all duration-300",
-            strokeColors[variant]
-          )}
+          className={cn("transition-all duration-300", strokeColors[variant])}
         />
       </svg>
       {showLabel && (

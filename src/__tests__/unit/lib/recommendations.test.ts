@@ -9,9 +9,21 @@ import {
 
 describe("Recommendation Engine", () => {
   const mockProducts = [
-    { id: "prod_1", categoryId: "cat_electronics", tags: ["smartphone", "mobile"] },
-    { id: "prod_2", categoryId: "cat_electronics", tags: ["laptop", "computer"] },
-    { id: "prod_3", categoryId: "cat_electronics", tags: ["smartphone", "accessory"] },
+    {
+      id: "prod_1",
+      categoryId: "cat_electronics",
+      tags: ["smartphone", "mobile"],
+    },
+    {
+      id: "prod_2",
+      categoryId: "cat_electronics",
+      tags: ["laptop", "computer"],
+    },
+    {
+      id: "prod_3",
+      categoryId: "cat_electronics",
+      tags: ["smartphone", "accessory"],
+    },
     { id: "prod_4", categoryId: "cat_clothing", tags: ["shirt", "casual"] },
     { id: "prod_5", categoryId: "cat_clothing", tags: ["pants", "casual"] },
     { id: "prod_6", categoryId: "cat_home", tags: ["furniture", "modern"] },
@@ -152,7 +164,10 @@ describe("Recommendation Engine", () => {
     it("should respect limit parameter", () => {
       const now = new Date();
       const recentOrders = [
-        { items: ["prod_1", "prod_2", "prod_3", "prod_4", "prod_5"], createdAt: now },
+        {
+          items: ["prod_1", "prod_2", "prod_3", "prod_4", "prod_5"],
+          createdAt: now,
+        },
       ];
 
       const result = getTrendingProducts(recentOrders, 3);

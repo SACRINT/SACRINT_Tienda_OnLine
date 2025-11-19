@@ -21,13 +21,13 @@ const MAX_METRICS = 1000;
 
 export async function POST(request: NextRequest) {
   try {
-    const metric = await request.json() as VitalsMetric;
+    const metric = (await request.json()) as VitalsMetric;
 
     // Validate metric
     if (!metric.name || typeof metric.value !== "number") {
       return NextResponse.json(
         { error: "Invalid metric data" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -41,7 +41,9 @@ export async function POST(request: NextRequest) {
 
     // Log in development
     if (process.env.NODE_ENV === "development") {
-      console.log(`[Vitals] ${metric.name}: ${metric.value.toFixed(2)} (${metric.rating})`);
+      console.log(
+        `[Vitals] ${metric.name}: ${metric.value.toFixed(2)} (${metric.rating})`,
+      );
     }
 
     // In production, send to analytics service
@@ -52,7 +54,7 @@ export async function POST(request: NextRequest) {
     console.error("[Vitals] Error processing metric:", error);
     return NextResponse.json(
       { error: "Failed to process metric" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -71,7 +73,10 @@ export async function GET(request: NextRequest) {
   }
 
   // Calculate aggregates
-  const aggregates: Record<string, { count: number; sum: number; ratings: Record<string, number> }> = {};
+  const aggregates: Record<
+    string,
+    { count: number; sum: number; ratings: Record<string, number> }
+  > = {};
 
   for (const metric of filtered) {
     if (!aggregates[metric.name]) {

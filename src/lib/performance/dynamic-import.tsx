@@ -7,9 +7,7 @@ import { ComponentType, ReactNode } from "react";
 
 // Loading skeleton component
 export function DefaultSkeleton() {
-  return (
-    <div className="animate-pulse bg-muted rounded-md h-32 w-full" />
-  );
+  return <div className="animate-pulse bg-muted rounded-md h-32 w-full" />;
 }
 
 // Create a dynamically imported component with default loading
@@ -18,7 +16,7 @@ export function createDynamicComponent<P extends object>(
   options?: {
     loading?: () => ReactNode;
     ssr?: boolean;
-  }
+  },
 ) {
   return dynamic(importFn, {
     loading: options?.loading || DefaultSkeleton,
@@ -28,7 +26,7 @@ export function createDynamicComponent<P extends object>(
 
 // Create a client-only component (no SSR)
 export function createClientComponent<P extends object>(
-  importFn: () => Promise<{ default: ComponentType<P> }>
+  importFn: () => Promise<{ default: ComponentType<P> }>,
 ) {
   return dynamic(importFn, {
     ssr: false,
@@ -39,22 +37,32 @@ export function createClientComponent<P extends object>(
 // Heavy component wrappers for common patterns
 export const DynamicComponents = {
   // Charts - heavy, client-only
-  Chart: createClientComponent(() => import("@/components/analytics/RevenueChart")),
+  Chart: createClientComponent(
+    () => import("@/components/analytics/RevenueChart"),
+  ),
 
   // Rich text editor - heavy, client-only
   RichTextEditor: createClientComponent(() =>
-    import("@/components/ui/rich-text-editor").then(mod => ({ default: mod.RichTextEditor || mod.default }))
+    import("@/components/ui/rich-text-editor").then((mod) => ({
+      default: mod.RichTextEditor || mod.default,
+    })),
   ),
 
   // Image gallery with zoom - heavy, client-only
-  ImageGallery: createClientComponent(() => import("@/components/image/ImageGallery")),
+  ImageGallery: createClientComponent(
+    () => import("@/components/image/ImageGallery"),
+  ),
 
   // Product gallery - moderate, SSR ok
-  ProductGallery: createDynamicComponent(() => import("@/components/product/ProductGallery")),
+  ProductGallery: createDynamicComponent(
+    () => import("@/components/product/ProductGallery"),
+  ),
 
   // Data tables - moderate
   DataTable: createDynamicComponent(() =>
-    import("@/components/ui/data-table").then(mod => ({ default: mod.DataTable || mod.default }))
+    import("@/components/ui/data-table").then((mod) => ({
+      default: mod.DataTable || mod.default,
+    })),
   ),
 };
 
@@ -75,7 +83,7 @@ export function preloadCriticalComponents() {
 // Intersection Observer based lazy loading
 export function createLazyComponent<P extends object>(
   importFn: () => Promise<{ default: ComponentType<P> }>,
-  placeholder?: ReactNode
+  placeholder?: ReactNode,
 ) {
   return dynamic(
     () =>
@@ -93,7 +101,7 @@ export function createLazyComponent<P extends object>(
               importFn().then(resolve);
             }
           },
-          { rootMargin: "200px" }
+          { rootMargin: "200px" },
         );
 
         // Create a temporary element to observe
@@ -109,7 +117,7 @@ export function createLazyComponent<P extends object>(
     {
       loading: () => placeholder || <DefaultSkeleton />,
       ssr: false,
-    }
+    },
   );
 }
 
@@ -144,7 +152,10 @@ export function prefetchRoute(route: string) {
 }
 
 // Bundle size tracking
-export function trackBundleSize(componentName: string, importFn: () => Promise<unknown>) {
+export function trackBundleSize(
+  componentName: string,
+  importFn: () => Promise<unknown>,
+) {
   if (process.env.NODE_ENV !== "development") return importFn;
 
   return async () => {

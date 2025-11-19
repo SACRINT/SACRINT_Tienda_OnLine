@@ -60,7 +60,7 @@ export function CartPage({
 
   const subtotal = items.reduce(
     (sum, item) => sum + item.price * item.quantity,
-    0
+    0,
   );
 
   const effectiveShipping =
@@ -193,11 +193,7 @@ export function CartPage({
                   placeholder="Coupon code"
                   className="flex-1 px-3 py-2 text-sm border rounded-md"
                 />
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleApplyCoupon}
-                >
+                <Button variant="outline" size="sm" onClick={handleApplyCoupon}>
                   Apply
                 </Button>
               </div>

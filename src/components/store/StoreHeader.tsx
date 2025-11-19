@@ -85,7 +85,10 @@ export function StoreHeader() {
           <div className="flex items-center space-x-4">
             {/* Search */}
             {isSearchOpen ? (
-              <form onSubmit={handleSearch} className="hidden sm:flex items-center">
+              <form
+                onSubmit={handleSearch}
+                className="hidden sm:flex items-center"
+              >
                 <Input
                   type="search"
                   placeholder="Buscar productos..."

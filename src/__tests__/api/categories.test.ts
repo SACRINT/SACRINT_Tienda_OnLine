@@ -83,7 +83,7 @@ describe("Categories API", () => {
       (getCategoryTree as jest.Mock).mockResolvedValue(mockCategoryTree);
 
       const request = new NextRequest(
-        "http://localhost:3000/api/categories?format=tree"
+        "http://localhost:3000/api/categories?format=tree",
       );
       const response = await GET(request);
       const data = await response.json();
@@ -115,31 +115,35 @@ describe("Categories API", () => {
 
     it("should filter by parent ID", async () => {
       (auth as jest.Mock).mockResolvedValue(mockSession);
-      (getCategoriesByTenant as jest.Mock).mockResolvedValue([mockCategories[1]]);
+      (getCategoriesByTenant as jest.Mock).mockResolvedValue([
+        mockCategories[1],
+      ]);
 
       const request = new NextRequest(
-        "http://localhost:3000/api/categories?parentId=cat_1"
+        "http://localhost:3000/api/categories?parentId=cat_1",
       );
       await GET(request);
 
       expect(getCategoriesByTenant).toHaveBeenCalledWith(
         "tenant_123",
-        expect.objectContaining({ parentId: "cat_1" })
+        expect.objectContaining({ parentId: "cat_1" }),
       );
     });
 
     it("should filter root categories", async () => {
       (auth as jest.Mock).mockResolvedValue(mockSession);
-      (getCategoriesByTenant as jest.Mock).mockResolvedValue([mockCategories[0]]);
+      (getCategoriesByTenant as jest.Mock).mockResolvedValue([
+        mockCategories[0],
+      ]);
 
       const request = new NextRequest(
-        "http://localhost:3000/api/categories?parentId=null"
+        "http://localhost:3000/api/categories?parentId=null",
       );
       await GET(request);
 
       expect(getCategoriesByTenant).toHaveBeenCalledWith(
         "tenant_123",
-        expect.objectContaining({ parentId: null })
+        expect.objectContaining({ parentId: null }),
       );
     });
 
@@ -148,20 +152,20 @@ describe("Categories API", () => {
       (getCategoriesByTenant as jest.Mock).mockResolvedValue(mockCategories);
 
       const request = new NextRequest(
-        "http://localhost:3000/api/categories?includeSubcategories=true"
+        "http://localhost:3000/api/categories?includeSubcategories=true",
       );
       await GET(request);
 
       expect(getCategoriesByTenant).toHaveBeenCalledWith(
         "tenant_123",
-        expect.objectContaining({ includeSubcategories: true })
+        expect.objectContaining({ includeSubcategories: true }),
       );
     });
 
     it("should handle database errors", async () => {
       (auth as jest.Mock).mockResolvedValue(mockSession);
       (getCategoriesByTenant as jest.Mock).mockRejectedValue(
-        new Error("DB error")
+        new Error("DB error"),
       );
 
       const request = new NextRequest("http://localhost:3000/api/categories");
@@ -284,7 +288,7 @@ describe("Categories API", () => {
       (auth as jest.Mock).mockResolvedValue(mockSession);
       (isCategorySlugAvailable as jest.Mock).mockResolvedValue(true);
       (createCategory as jest.Mock).mockRejectedValue(
-        new Error("Parent category not found")
+        new Error("Parent category not found"),
       );
 
       const request = new NextRequest("http://localhost:3000/api/categories", {

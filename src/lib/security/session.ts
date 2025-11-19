@@ -105,7 +105,7 @@ export class InMemorySessionStore implements SessionStore {
 
   async listByUserId(userId: string): Promise<Session[]> {
     return Array.from(this.sessions.values()).filter(
-      (s) => s.userId === userId
+      (s) => s.userId === userId,
     );
   }
 }
@@ -233,7 +233,7 @@ export class SessionManager {
 
     const cookies = cookieHeader.split(";").map((c) => c.trim());
     const sessionCookie = cookies.find((c) =>
-      c.startsWith(`${this.config.cookieName}=`)
+      c.startsWith(`${this.config.cookieName}=`),
     );
 
     if (!sessionCookie) return null;
@@ -251,9 +251,7 @@ export class SessionManager {
 export const sessionManager = new SessionManager();
 
 // Middleware helper
-export async function getSession(
-  request: Request
-): Promise<Session | null> {
+export async function getSession(request: Request): Promise<Session | null> {
   const cookieHeader = request.headers.get("cookie");
   const sessionId = sessionManager.parseSessionId(cookieHeader);
 
@@ -263,9 +261,7 @@ export async function getSession(
 }
 
 // Require session middleware
-export async function requireSession(
-  request: Request
-): Promise<Session> {
+export async function requireSession(request: Request): Promise<Session> {
   const session = await getSession(request);
 
   if (!session) {

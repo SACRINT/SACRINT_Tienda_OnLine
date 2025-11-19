@@ -37,8 +37,7 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 export const prisma =
-  globalForPrisma.prisma ??
-  new PrismaClient(prismaClientOptions);
+  globalForPrisma.prisma ?? new PrismaClient(prismaClientOptions);
 
 // Prevent multiple instances in development (hot reload)
 if (process.env.NODE_ENV !== "production") {
@@ -57,7 +56,7 @@ if (process.env.NODE_ENV === "development") {
     // Log slow queries
     if (duration > 100) {
       console.warn(
-        `[Prisma] Slow query: ${params.model}.${params.action} took ${duration}ms`
+        `[Prisma] Slow query: ${params.model}.${params.action} took ${duration}ms`,
       );
     }
 
@@ -109,9 +108,18 @@ export function getDatabaseUrlWithPooling(baseUrl: string): string {
   const url = new URL(baseUrl);
 
   // Add connection pool parameters
-  url.searchParams.set("connection_limit", String(CONNECTION_CONFIG.connectionLimit));
-  url.searchParams.set("connect_timeout", String(CONNECTION_CONFIG.connectTimeout / 1000));
-  url.searchParams.set("pool_timeout", String(CONNECTION_CONFIG.queryTimeout / 1000));
+  url.searchParams.set(
+    "connection_limit",
+    String(CONNECTION_CONFIG.connectionLimit),
+  );
+  url.searchParams.set(
+    "connect_timeout",
+    String(CONNECTION_CONFIG.connectTimeout / 1000),
+  );
+  url.searchParams.set(
+    "pool_timeout",
+    String(CONNECTION_CONFIG.queryTimeout / 1000),
+  );
 
   return url.toString();
 }
@@ -119,7 +127,7 @@ export function getDatabaseUrlWithPooling(baseUrl: string): string {
 // Retry wrapper for transient errors
 export async function withDatabaseRetry<T>(
   operation: () => Promise<T>,
-  retries: number = 3
+  retries: number = 3,
 ): Promise<T> {
   let lastError: Error | undefined;
 
@@ -145,7 +153,7 @@ export async function withDatabaseRetry<T>(
       await new Promise((resolve) => setTimeout(resolve, delay));
 
       console.warn(
-        `[Database] Retry attempt ${attempt}/${retries} after ${delay}ms`
+        `[Database] Retry attempt ${attempt}/${retries} after ${delay}ms`,
       );
     }
   }
@@ -155,8 +163,13 @@ export async function withDatabaseRetry<T>(
 
 // Transaction helper with timeout
 export async function withTransaction<T>(
-  operation: (tx: Omit<PrismaClient, "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends">) => Promise<T>,
-  timeout: number = CONNECTION_CONFIG.queryTimeout
+  operation: (
+    tx: Omit<
+      PrismaClient,
+      "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends"
+    >,
+  ) => Promise<T>,
+  timeout: number = CONNECTION_CONFIG.queryTimeout,
 ): Promise<T> {
   return prisma.$transaction(operation, {
     timeout,
@@ -168,7 +181,7 @@ export async function withTransaction<T>(
 export async function batchOperation<T, R>(
   items: T[],
   operation: (item: T) => Promise<R>,
-  batchSize: number = 100
+  batchSize: number = 100,
 ): Promise<R[]> {
   const results: R[] = [];
 

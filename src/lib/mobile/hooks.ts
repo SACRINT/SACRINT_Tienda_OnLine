@@ -2,9 +2,25 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { getPlatform, getDeviceType, getOrientation, isPWA, Platform, DeviceType } from "./platform";
-import { getCurrentBreakpoint, Breakpoint, isAboveBreakpoint, getViewportDimensions } from "./responsive";
-import { isOnline, subscribeToNetworkChanges, ConnectionStatus } from "../pwa/offline";
+import {
+  getPlatform,
+  getDeviceType,
+  getOrientation,
+  isPWA,
+  Platform,
+  DeviceType,
+} from "./platform";
+import {
+  getCurrentBreakpoint,
+  Breakpoint,
+  isAboveBreakpoint,
+  getViewportDimensions,
+} from "./responsive";
+import {
+  isOnline,
+  subscribeToNetworkChanges,
+  ConnectionStatus,
+} from "../pwa/offline";
 
 // Platform detection hook
 export function usePlatform(): Platform {
@@ -34,7 +50,9 @@ export function useDeviceType(): DeviceType {
 
 // Orientation hook
 export function useOrientation(): "portrait" | "landscape" {
-  const [orientation, setOrientation] = useState<"portrait" | "landscape">("portrait");
+  const [orientation, setOrientation] = useState<"portrait" | "landscape">(
+    "portrait",
+  );
 
   useEffect(() => {
     const updateOrientation = () => setOrientation(getOrientation());
@@ -214,10 +232,7 @@ export function useIsTouchDevice(): boolean {
   const [isTouch, setIsTouch] = useState(false);
 
   useEffect(() => {
-    setIsTouch(
-      "ontouchstart" in window ||
-        navigator.maxTouchPoints > 0
-    );
+    setIsTouch("ontouchstart" in window || navigator.maxTouchPoints > 0);
   }, []);
 
   return isTouch;
@@ -238,9 +253,16 @@ export function useKeyboardVisible(): boolean {
         setVisible(navigator.virtualKeyboard.boundingRect.height > 0);
       };
       // @ts-ignore
-      navigator.virtualKeyboard.addEventListener("geometrychange", handleGeometryChange);
+      navigator.virtualKeyboard.addEventListener(
+        "geometrychange",
+        handleGeometryChange,
+      );
       // @ts-ignore
-      return () => navigator.virtualKeyboard.removeEventListener("geometrychange", handleGeometryChange);
+      return () =>
+        navigator.virtualKeyboard.removeEventListener(
+          "geometrychange",
+          handleGeometryChange,
+        );
     }
 
     // Fallback: detect by viewport height change

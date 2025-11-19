@@ -101,7 +101,7 @@ export function SearchBar({
             className={cn(
               "w-full h-10 pl-10 pr-10 rounded-full border bg-background text-sm",
               "focus:outline-none focus:ring-2 focus:ring-ring",
-              "placeholder:text-muted-foreground"
+              "placeholder:text-muted-foreground",
             )}
           />
           {value && (

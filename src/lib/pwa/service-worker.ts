@@ -29,9 +29,12 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
     console.log("Service Worker registered:", registration.scope);
 
     // Check for updates periodically
-    setInterval(() => {
-      registration.update();
-    }, 60 * 60 * 1000); // Every hour
+    setInterval(
+      () => {
+        registration.update();
+      },
+      60 * 60 * 1000,
+    ); // Every hour
 
     return registration;
   } catch (error) {
@@ -57,7 +60,7 @@ export async function unregisterServiceWorker(): Promise<boolean> {
 
 // Listen for SW updates
 export function onServiceWorkerUpdate(
-  callback: (registration: ServiceWorkerRegistration) => void
+  callback: (registration: ServiceWorkerRegistration) => void,
 ): void {
   if (!isServiceWorkerSupported()) {
     return;
@@ -68,7 +71,10 @@ export function onServiceWorkerUpdate(
       const newWorker = registration.installing;
       if (newWorker) {
         newWorker.addEventListener("statechange", () => {
-          if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
+          if (
+            newWorker.state === "installed" &&
+            navigator.serviceWorker.controller
+          ) {
             callback(registration);
           }
         });

@@ -64,6 +64,6 @@ export const useWishlist = create<WishlistState>()(
     {
       name: "wishlist-storage",
       skipHydration: true,
-    }
-  )
+    },
+  ),
 );

@@ -23,7 +23,11 @@ describe("CartItem", () => {
 
   it("should render item name", () => {
     render(
-      <CartItem item={mockItem} onUpdate={mockOnUpdate} onRemove={mockOnRemove} />
+      <CartItem
+        item={mockItem}
+        onUpdate={mockOnUpdate}
+        onRemove={mockOnRemove}
+      />,
     );
 
     expect(screen.getByText("Test Product")).toBeInTheDocument();
@@ -31,7 +35,11 @@ describe("CartItem", () => {
 
   it("should render item price", () => {
     render(
-      <CartItem item={mockItem} onUpdate={mockOnUpdate} onRemove={mockOnRemove} />
+      <CartItem
+        item={mockItem}
+        onUpdate={mockOnUpdate}
+        onRemove={mockOnRemove}
+      />,
     );
 
     expect(screen.getByText(/49\.99/)).toBeInTheDocument();
@@ -39,7 +47,11 @@ describe("CartItem", () => {
 
   it("should render item quantity", () => {
     render(
-      <CartItem item={mockItem} onUpdate={mockOnUpdate} onRemove={mockOnRemove} />
+      <CartItem
+        item={mockItem}
+        onUpdate={mockOnUpdate}
+        onRemove={mockOnRemove}
+      />,
     );
 
     const quantityInput = screen.getByDisplayValue("2");
@@ -48,7 +60,11 @@ describe("CartItem", () => {
 
   it("should render subtotal", () => {
     render(
-      <CartItem item={mockItem} onUpdate={mockOnUpdate} onRemove={mockOnRemove} />
+      <CartItem
+        item={mockItem}
+        onUpdate={mockOnUpdate}
+        onRemove={mockOnRemove}
+      />,
     );
 
     // 49.99 * 2 = 99.98
@@ -57,7 +73,11 @@ describe("CartItem", () => {
 
   it("should render product image", () => {
     render(
-      <CartItem item={mockItem} onUpdate={mockOnUpdate} onRemove={mockOnRemove} />
+      <CartItem
+        item={mockItem}
+        onUpdate={mockOnUpdate}
+        onRemove={mockOnRemove}
+      />,
     );
 
     const image = screen.getByAltText("Test Product");
@@ -66,7 +86,11 @@ describe("CartItem", () => {
 
   it("should call onUpdate when quantity changes", () => {
     render(
-      <CartItem item={mockItem} onUpdate={mockOnUpdate} onRemove={mockOnRemove} />
+      <CartItem
+        item={mockItem}
+        onUpdate={mockOnUpdate}
+        onRemove={mockOnRemove}
+      />,
     );
 
     const quantityInput = screen.getByDisplayValue("2");
@@ -77,10 +101,16 @@ describe("CartItem", () => {
 
   it("should call onRemove when remove button clicked", () => {
     render(
-      <CartItem item={mockItem} onUpdate={mockOnUpdate} onRemove={mockOnRemove} />
+      <CartItem
+        item={mockItem}
+        onUpdate={mockOnUpdate}
+        onRemove={mockOnRemove}
+      />,
     );
 
-    const removeButton = screen.getByRole("button", { name: /eliminar|remove/i });
+    const removeButton = screen.getByRole("button", {
+      name: /eliminar|remove/i,
+    });
     fireEvent.click(removeButton);
 
     expect(mockOnRemove).toHaveBeenCalledWith("prod_123", null);
@@ -88,10 +118,16 @@ describe("CartItem", () => {
 
   it("should increment quantity", () => {
     render(
-      <CartItem item={mockItem} onUpdate={mockOnUpdate} onRemove={mockOnRemove} />
+      <CartItem
+        item={mockItem}
+        onUpdate={mockOnUpdate}
+        onRemove={mockOnRemove}
+      />,
     );
 
-    const incrementButton = screen.getByRole("button", { name: /\+|increment/i });
+    const incrementButton = screen.getByRole("button", {
+      name: /\+|increment/i,
+    });
     fireEvent.click(incrementButton);
 
     expect(mockOnUpdate).toHaveBeenCalledWith("prod_123", 3, null);
@@ -99,10 +135,16 @@ describe("CartItem", () => {
 
   it("should decrement quantity", () => {
     render(
-      <CartItem item={mockItem} onUpdate={mockOnUpdate} onRemove={mockOnRemove} />
+      <CartItem
+        item={mockItem}
+        onUpdate={mockOnUpdate}
+        onRemove={mockOnRemove}
+      />,
     );
 
-    const decrementButton = screen.getByRole("button", { name: /-|decrement/i });
+    const decrementButton = screen.getByRole("button", {
+      name: /-|decrement/i,
+    });
     fireEvent.click(decrementButton);
 
     expect(mockOnUpdate).toHaveBeenCalledWith("prod_123", 1, null);
@@ -111,16 +153,26 @@ describe("CartItem", () => {
   it("should not decrement below 1", () => {
     const singleItem = { ...mockItem, quantity: 1 };
     render(
-      <CartItem item={singleItem} onUpdate={mockOnUpdate} onRemove={mockOnRemove} />
+      <CartItem
+        item={singleItem}
+        onUpdate={mockOnUpdate}
+        onRemove={mockOnRemove}
+      />,
     );
 
-    const decrementButton = screen.getByRole("button", { name: /-|decrement/i });
+    const decrementButton = screen.getByRole("button", {
+      name: /-|decrement/i,
+    });
     expect(decrementButton).toBeDisabled();
   });
 
   it("should display SKU", () => {
     render(
-      <CartItem item={mockItem} onUpdate={mockOnUpdate} onRemove={mockOnRemove} />
+      <CartItem
+        item={mockItem}
+        onUpdate={mockOnUpdate}
+        onRemove={mockOnRemove}
+      />,
     );
 
     expect(screen.getByText(/SKU001/)).toBeInTheDocument();
@@ -133,7 +185,11 @@ describe("CartItem", () => {
       variantName: "Size: Large, Color: Blue",
     };
     render(
-      <CartItem item={variantItem} onUpdate={mockOnUpdate} onRemove={mockOnRemove} />
+      <CartItem
+        item={variantItem}
+        onUpdate={mockOnUpdate}
+        onRemove={mockOnRemove}
+      />,
     );
 
     expect(screen.getByText(/Large/)).toBeInTheDocument();
@@ -143,7 +199,11 @@ describe("CartItem", () => {
   it("should handle missing image", () => {
     const noImageItem = { ...mockItem, image: null };
     render(
-      <CartItem item={noImageItem} onUpdate={mockOnUpdate} onRemove={mockOnRemove} />
+      <CartItem
+        item={noImageItem}
+        onUpdate={mockOnUpdate}
+        onRemove={mockOnRemove}
+      />,
     );
 
     const placeholder = screen.getByTestId("image-placeholder");

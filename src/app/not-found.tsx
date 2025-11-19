@@ -13,7 +13,8 @@ export default function NotFound() {
               P&aacute;gina no encontrada
             </h2>
             <p className="text-gray-600">
-              Lo sentimos, la p&aacute;gina que buscas no existe o ha sido movida.
+              Lo sentimos, la p&aacute;gina que buscas no existe o ha sido
+              movida.
             </p>
           </div>
         </div>

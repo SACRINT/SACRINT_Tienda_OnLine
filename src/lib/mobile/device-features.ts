@@ -16,15 +16,12 @@ export interface PhotoResult {
 
 // Check camera availability
 export function isCameraAvailable(): boolean {
-  return !!(
-    navigator.mediaDevices &&
-    navigator.mediaDevices.getUserMedia
-  );
+  return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
 }
 
 // Request camera access
 export async function requestCameraAccess(
-  options: CameraOptions = {}
+  options: CameraOptions = {},
 ): Promise<MediaStream | null> {
   if (!isCameraAvailable()) {
     console.log("Camera not available");
@@ -50,7 +47,7 @@ export async function requestCameraAccess(
 // Capture photo from video stream
 export function capturePhoto(
   video: HTMLVideoElement,
-  quality: number = 0.9
+  quality: number = 0.9,
 ): PhotoResult {
   const canvas = document.createElement("canvas");
   canvas.width = video.videoWidth;
@@ -99,7 +96,7 @@ export function isGeolocationAvailable(): boolean {
 
 // Get current location
 export async function getCurrentLocation(
-  highAccuracy: boolean = false
+  highAccuracy: boolean = false,
 ): Promise<LocationResult | null> {
   if (!isGeolocationAvailable()) {
     console.log("Geolocation not available");
@@ -124,7 +121,7 @@ export async function getCurrentLocation(
         enableHighAccuracy: highAccuracy,
         timeout: 10000,
         maximumAge: 300000, // 5 minutes
-      }
+      },
     );
   });
 }
@@ -132,7 +129,7 @@ export async function getCurrentLocation(
 // Watch location changes
 export function watchLocation(
   callback: (location: LocationResult | null) => void,
-  highAccuracy: boolean = false
+  highAccuracy: boolean = false,
 ): () => void {
   if (!isGeolocationAvailable()) {
     return () => {};
@@ -155,7 +152,7 @@ export function watchLocation(
       enableHighAccuracy: highAccuracy,
       timeout: 10000,
       maximumAge: 60000, // 1 minute
-    }
+    },
   );
 
   return () => navigator.geolocation.clearWatch(watchId);
@@ -234,21 +231,23 @@ export function isFullscreenAvailable(): boolean {
   );
 }
 
-export async function requestFullscreen(element?: HTMLElement): Promise<boolean> {
+export async function requestFullscreen(
+  element?: HTMLElement,
+): Promise<boolean> {
   const el = element || document.documentElement;
 
   try {
     if (el.requestFullscreen) {
       await el.requestFullscreen();
-    // @ts-ignore
+      // @ts-ignore
     } else if (el.webkitRequestFullscreen) {
       // @ts-ignore
       await el.webkitRequestFullscreen();
-    // @ts-ignore
+      // @ts-ignore
     } else if (el.mozRequestFullScreen) {
       // @ts-ignore
       await el.mozRequestFullScreen();
-    // @ts-ignore
+      // @ts-ignore
     } else if (el.msRequestFullscreen) {
       // @ts-ignore
       await el.msRequestFullscreen();
@@ -264,15 +263,15 @@ export async function exitFullscreen(): Promise<boolean> {
   try {
     if (document.exitFullscreen) {
       await document.exitFullscreen();
-    // @ts-ignore
+      // @ts-ignore
     } else if (document.webkitExitFullscreen) {
       // @ts-ignore
       await document.webkitExitFullscreen();
-    // @ts-ignore
+      // @ts-ignore
     } else if (document.mozCancelFullScreen) {
       // @ts-ignore
       await document.mozCancelFullScreen();
-    // @ts-ignore
+      // @ts-ignore
     } else if (document.msExitFullscreen) {
       // @ts-ignore
       await document.msExitFullscreen();

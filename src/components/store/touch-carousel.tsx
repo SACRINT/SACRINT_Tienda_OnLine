@@ -137,7 +137,7 @@ export function TouchCarousel({
                 "w-2 h-2 rounded-full transition-colors",
                 index === currentIndex
                   ? "bg-primary"
-                  : "bg-primary/30 hover:bg-primary/50"
+                  : "bg-primary/30 hover:bg-primary/50",
               )}
               aria-label={`Go to slide ${index + 1}`}
               aria-current={index === currentIndex ? "true" : undefined}
@@ -166,7 +166,7 @@ export function HorizontalScroll({
       className={cn(
         "overflow-x-auto",
         !showScrollbar && "scrollbar-hide",
-        className
+        className,
       )}
     >
       <div className="flex gap-4 px-4 -mx-4">{children}</div>

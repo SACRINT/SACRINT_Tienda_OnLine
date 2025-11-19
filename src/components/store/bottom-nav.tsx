@@ -58,7 +58,7 @@ export function BottomNav({
     <nav
       className={cn(
         "fixed bottom-0 left-0 right-0 bg-background border-t z-30 lg:hidden safe-area-pb",
-        className
+        className,
       )}
     >
       <div className="flex items-center justify-around h-16">
@@ -73,7 +73,7 @@ export function BottomNav({
               onClick={() => onNavigate?.(item.href)}
               className={cn(
                 "flex flex-col items-center justify-center flex-1 h-full relative",
-                isActive ? "text-primary" : "text-muted-foreground"
+                isActive ? "text-primary" : "text-muted-foreground",
               )}
               aria-current={isActive ? "page" : undefined}
             >
@@ -111,7 +111,7 @@ export function FloatingCartButton({
       onClick={onClick}
       className={cn(
         "fixed bottom-20 right-4 w-14 h-14 bg-primary text-primary-foreground rounded-full shadow-lg flex items-center justify-center z-20 lg:hidden",
-        className
+        className,
       )}
       aria-label={`Cart (${count} items)`}
     >

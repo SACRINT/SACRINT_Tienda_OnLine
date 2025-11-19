@@ -102,7 +102,7 @@ export function FormActions({
       className={cn(
         "flex items-center gap-4 pt-4",
         alignClasses[align],
-        className
+        className,
       )}
     >
       {children}

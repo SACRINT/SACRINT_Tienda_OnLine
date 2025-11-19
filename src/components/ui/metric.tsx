@@ -73,8 +73,8 @@ export function Metric({
     trend === "up"
       ? "text-green-600 dark:text-green-400"
       : trend === "down"
-      ? "text-red-600 dark:text-red-400"
-      : "text-muted-foreground";
+        ? "text-red-600 dark:text-red-400"
+        : "text-muted-foreground";
 
   return (
     <div className={cn("space-y-1", className)}>
@@ -114,12 +114,7 @@ export interface MetricRowProps {
 
 export function MetricRow({ children, className }: MetricRowProps) {
   return (
-    <div
-      className={cn(
-        "flex items-start gap-8 flex-wrap",
-        className
-      )}
-    >
+    <div className={cn("flex items-start gap-8 flex-wrap", className)}>
       {children}
     </div>
   );

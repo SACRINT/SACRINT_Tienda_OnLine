@@ -30,7 +30,7 @@ const MAX_ERRORS = 1000;
 // Error severity classification
 function classifySeverity(error: Error): TrackedError["severity"] {
   const message = error.message.toLowerCase();
-  
+
   if (message.includes("database") || message.includes("prisma")) {
     return "critical";
   }
@@ -43,15 +43,12 @@ function classifySeverity(error: Error): TrackedError["severity"] {
   if (message.includes("timeout") || message.includes("connection")) {
     return "medium";
   }
-  
+
   return "low";
 }
 
 // Track an error
-export function trackError(
-  error: Error,
-  context?: ErrorContext
-): TrackedError {
+export function trackError(error: Error, context?: ErrorContext): TrackedError {
   const tracked: TrackedError = {
     id: crypto.randomUUID(),
     name: error.name,
@@ -112,10 +109,7 @@ export function getErrorStats(): {
 }
 
 // Error boundary helper for React
-export function captureException(
-  error: Error,
-  componentStack?: string
-): void {
+export function captureException(error: Error, componentStack?: string): void {
   trackError(error, {
     metadata: { componentStack, type: "react-error-boundary" },
   });
@@ -124,7 +118,7 @@ export function captureException(
 // API error handler
 export function handleApiError(
   error: Error,
-  context?: ErrorContext
+  context?: ErrorContext,
 ): { status: number; message: string } {
   trackError(error, context);
 
@@ -132,13 +126,22 @@ export function handleApiError(
   if (error.message.includes("not found")) {
     return { status: 404, message: "Recurso no encontrado" };
   }
-  if (error.message.includes("unauthorized") || error.message.includes("auth")) {
+  if (
+    error.message.includes("unauthorized") ||
+    error.message.includes("auth")
+  ) {
     return { status: 401, message: "No autorizado" };
   }
-  if (error.message.includes("forbidden") || error.message.includes("permission")) {
+  if (
+    error.message.includes("forbidden") ||
+    error.message.includes("permission")
+  ) {
     return { status: 403, message: "Acceso denegado" };
   }
-  if (error.message.includes("validation") || error.message.includes("invalid")) {
+  if (
+    error.message.includes("validation") ||
+    error.message.includes("invalid")
+  ) {
     return { status: 400, message: "Datos inválidos" };
   }
 

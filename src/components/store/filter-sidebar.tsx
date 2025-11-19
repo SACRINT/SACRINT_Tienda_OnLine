@@ -46,7 +46,7 @@ export function FilterSidebar({
   className,
 }: FilterSidebarProps) {
   const [expandedGroups, setExpandedGroups] = React.useState<Set<string>>(
-    new Set(filters.map((f) => f.id))
+    new Set(filters.map((f) => f.id)),
   );
 
   const toggleGroup = (id: string) => {
@@ -60,7 +60,11 @@ export function FilterSidebar({
     setExpandedGroups(newExpanded);
   };
 
-  const handleCheckboxChange = (groupId: string, value: string, checked: boolean) => {
+  const handleCheckboxChange = (
+    groupId: string,
+    value: string,
+    checked: boolean,
+  ) => {
     const currentValues = (values[groupId] as string[]) || [];
     const newValues = checked
       ? [...currentValues, value]
@@ -77,7 +81,7 @@ export function FilterSidebar({
   };
 
   const hasActiveFilters = Object.values(values).some((v) =>
-    Array.isArray(v) ? v.length > 0 : false
+    Array.isArray(v) ? v.length > 0 : false,
   );
 
   return (
@@ -109,7 +113,7 @@ export function FilterSidebar({
                 <ChevronDown
                   className={cn(
                     "h-4 w-4 transition-transform",
-                    isExpanded && "rotate-180"
+                    isExpanded && "rotate-180",
                   )}
                 />
               )}
@@ -127,13 +131,13 @@ export function FilterSidebar({
                       <input
                         type="checkbox"
                         checked={(values[group.id] as string[])?.includes(
-                          option.value
+                          option.value,
                         )}
                         onChange={(e) =>
                           handleCheckboxChange(
                             group.id,
                             option.value,
-                            e.target.checked
+                            e.target.checked,
                           )
                         }
                         className="rounded border-gray-300"
@@ -156,7 +160,9 @@ export function FilterSidebar({
                       <input
                         type="radio"
                         name={group.id}
-                        checked={(values[group.id] as string[])?.[0] === option.value}
+                        checked={
+                          (values[group.id] as string[])?.[0] === option.value
+                        }
                         onChange={() =>
                           handleRadioChange(group.id, option.value)
                         }
@@ -171,14 +177,21 @@ export function FilterSidebar({
                     </label>
                   ))}
 
-                {group.type === "range" && group.min !== undefined && group.max !== undefined && (
-                  <PriceRangeFilter
-                    min={group.min}
-                    max={group.max}
-                    value={(values[group.id] as [number, number]) || [group.min, group.max]}
-                    onChange={(range) => handleRangeChange(group.id, range)}
-                  />
-                )}
+                {group.type === "range" &&
+                  group.min !== undefined &&
+                  group.max !== undefined && (
+                    <PriceRangeFilter
+                      min={group.min}
+                      max={group.max}
+                      value={
+                        (values[group.id] as [number, number]) || [
+                          group.min,
+                          group.max,
+                        ]
+                      }
+                      onChange={(range) => handleRangeChange(group.id, range)}
+                    />
+                  )}
               </div>
             )}
           </div>
@@ -245,7 +258,12 @@ function PriceRangeFilter({
           placeholder="Max"
         />
       </div>
-      <Button size="sm" variant="outline" className="w-full" onClick={handleApply}>
+      <Button
+        size="sm"
+        variant="outline"
+        className="w-full"
+        onClick={handleApply}
+      >
         Apply
       </Button>
     </div>

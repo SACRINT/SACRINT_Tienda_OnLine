@@ -41,7 +41,7 @@ export function getDeviceType(): DeviceType {
   // Check for mobile
   if (
     /iphone|ipod|android.*mobile|windows phone|blackberry|bb10|opera mini|opera mobi|iemobile/.test(
-      userAgent
+      userAgent,
     )
   ) {
     return "mobile";

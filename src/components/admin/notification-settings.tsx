@@ -88,17 +88,16 @@ export function NotificationSettings({
   loading,
   className,
 }: NotificationSettingsProps) {
-  const preferences = settings.preferences.length > 0
-    ? settings.preferences
-    : defaultPreferences;
+  const preferences =
+    settings.preferences.length > 0 ? settings.preferences : defaultPreferences;
 
   const handleToggle = (
     prefId: string,
     channel: "email" | "push" | "sms",
-    value: boolean
+    value: boolean,
   ) => {
     const newPreferences = preferences.map((pref) =>
-      pref.id === prefId ? { ...pref, [channel]: value } : pref
+      pref.id === prefId ? { ...pref, [channel]: value } : pref,
     );
     onChange({ ...settings, preferences: newPreferences });
   };
@@ -119,9 +118,21 @@ export function NotificationSettings({
       >
         <div className="space-y-2">
           {[
-            { value: "instant", label: "Instant", description: "Get emails immediately" },
-            { value: "daily", label: "Daily", description: "Daily summary at 9am" },
-            { value: "weekly", label: "Weekly", description: "Weekly summary on Monday" },
+            {
+              value: "instant",
+              label: "Instant",
+              description: "Get emails immediately",
+            },
+            {
+              value: "daily",
+              label: "Daily",
+              description: "Daily summary at 9am",
+            },
+            {
+              value: "weekly",
+              label: "Weekly",
+              description: "Weekly summary on Monday",
+            },
             { value: "none", label: "None", description: "Don't send digests" },
           ].map((option) => (
             <label

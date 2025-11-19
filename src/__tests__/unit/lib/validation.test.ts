@@ -160,10 +160,10 @@ describe("Validation Schemas", () => {
 
       it("should require rating between 1 and 5", () => {
         expect(
-          reviewCreateSchema.safeParse({ ...validReview, rating: 0 }).success
+          reviewCreateSchema.safeParse({ ...validReview, rating: 0 }).success,
         ).toBe(false);
         expect(
-          reviewCreateSchema.safeParse({ ...validReview, rating: 6 }).success
+          reviewCreateSchema.safeParse({ ...validReview, rating: 6 }).success,
         ).toBe(false);
       });
 

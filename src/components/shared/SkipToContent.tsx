@@ -18,7 +18,10 @@ export function useFocusTrap(ref: React.RefObject<HTMLElement>) {
 
 // Announce to screen readers
 export function useAnnounce() {
-  const announce = (message: string, priority: "polite" | "assertive" = "polite") => {
+  const announce = (
+    message: string,
+    priority: "polite" | "assertive" = "polite",
+  ) => {
     const announcement = document.createElement("div");
     announcement.setAttribute("role", "status");
     announcement.setAttribute("aria-live", priority);

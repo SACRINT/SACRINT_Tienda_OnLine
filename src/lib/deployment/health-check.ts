@@ -59,18 +59,20 @@ function checkMemory(): HealthCheck {
   return {
     name: "memory",
     status,
-    message: heapUsedMB + "MB / " + heapTotalMB + "MB (" + percentage.toFixed(1) + "%)",
+    message:
+      heapUsedMB +
+      "MB / " +
+      heapTotalMB +
+      "MB (" +
+      percentage.toFixed(1) +
+      "%)",
     lastChecked: new Date(),
   };
 }
 
 // Check environment variables
 function checkEnvironment(): HealthCheck {
-  const required = [
-    "DATABASE_URL",
-    "NEXTAUTH_SECRET",
-    "NEXTAUTH_URL",
-  ];
+  const required = ["DATABASE_URL", "NEXTAUTH_SECRET", "NEXTAUTH_URL"];
 
   const missing = required.filter((key) => !process.env[key]);
 
@@ -134,7 +136,7 @@ export async function getHealthStatus(): Promise<HealthStatus> {
   // Run all checks
   const [dbCheck, ...externalChecks] = await Promise.all([
     checkDatabase(),
-    ...await checkExternalServices() as unknown as Promise<HealthCheck>[],
+    ...((await checkExternalServices()) as unknown as Promise<HealthCheck>[]),
   ]);
 
   checks.push(dbCheck);
@@ -160,7 +162,10 @@ export async function getHealthStatus(): Promise<HealthStatus> {
 }
 
 // Liveness check (quick)
-export function getLivenessStatus(): { status: "ok" | "error"; timestamp: Date } {
+export function getLivenessStatus(): {
+  status: "ok" | "error";
+  timestamp: Date;
+} {
   return {
     status: "ok",
     timestamp: new Date(),

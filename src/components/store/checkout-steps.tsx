@@ -48,7 +48,7 @@ export function CheckoutSteps({
                 <div
                   className={cn(
                     "flex-1 h-0.5 mx-2",
-                    index <= currentIndex ? "bg-primary" : "bg-muted"
+                    index <= currentIndex ? "bg-primary" : "bg-muted",
                   )}
                 />
               )}
@@ -58,7 +58,7 @@ export function CheckoutSteps({
                 disabled={!isClickable || !onStepClick}
                 className={cn(
                   "flex items-center gap-2 group",
-                  isClickable && onStepClick && "cursor-pointer"
+                  isClickable && onStepClick && "cursor-pointer",
                 )}
               >
                 <span
@@ -67,15 +67,11 @@ export function CheckoutSteps({
                     isCompleted
                       ? "bg-primary text-primary-foreground"
                       : isCurrent
-                      ? "border-2 border-primary text-primary"
-                      : "border-2 border-muted text-muted-foreground"
+                        ? "border-2 border-primary text-primary"
+                        : "border-2 border-muted text-muted-foreground",
                   )}
                 >
-                  {isCompleted ? (
-                    <Check className="h-4 w-4" />
-                  ) : (
-                    index + 1
-                  )}
+                  {isCompleted ? <Check className="h-4 w-4" /> : index + 1}
                 </span>
                 <span
                   className={cn(
@@ -83,8 +79,8 @@ export function CheckoutSteps({
                     isCurrent
                       ? "text-foreground"
                       : isCompleted
-                      ? "text-foreground"
-                      : "text-muted-foreground"
+                        ? "text-foreground"
+                        : "text-muted-foreground",
                   )}
                 >
                   {step.label}

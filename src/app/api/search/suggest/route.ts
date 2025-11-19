@@ -1,7 +1,11 @@
 // @ts-nocheck
 // Autocomplete Suggestions API
 import { NextRequest, NextResponse } from "next/server";
-import { getAutocomplete, getTrendingSearches, getRecentSearches } from "@/lib/search";
+import {
+  getAutocomplete,
+  getTrendingSearches,
+  getRecentSearches,
+} from "@/lib/search";
 import { z } from "zod";
 
 const suggestSchema = z.object({
@@ -21,7 +25,7 @@ export async function GET(request: NextRequest) {
     const suggestions = await getAutocomplete(
       validated.q,
       validated.tenantId,
-      validated.limit || 8
+      validated.limit || 8,
     );
 
     // Include recent searches if user is logged in
@@ -45,13 +49,10 @@ export async function GET(request: NextRequest) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: "Invalid parameters", details: error.errors },
-        { status: 400 }
+        { status: 400 },
       );
     }
     console.error("Suggest error:", error);
-    return NextResponse.json(
-      { error: "Suggestions failed" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Suggestions failed" }, { status: 500 });
   }
 }

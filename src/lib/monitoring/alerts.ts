@@ -74,17 +74,20 @@ export const DEFAULT_THRESHOLDS: AlertThreshold[] = [
 ];
 
 // Check if value triggers threshold
-function checkThreshold(
-  threshold: AlertThreshold,
-  value: number
-): boolean {
+function checkThreshold(threshold: AlertThreshold, value: number): boolean {
   switch (threshold.operator) {
-    case "gt": return value > threshold.value;
-    case "lt": return value < threshold.value;
-    case "eq": return value === threshold.value;
-    case "gte": return value >= threshold.value;
-    case "lte": return value <= threshold.value;
-    default: return false;
+    case "gt":
+      return value > threshold.value;
+    case "lt":
+      return value < threshold.value;
+    case "eq":
+      return value === threshold.value;
+    case "gte":
+      return value >= threshold.value;
+    case "lte":
+      return value <= threshold.value;
+    default:
+      return false;
   }
 }
 
@@ -93,7 +96,7 @@ export function createAlert(
   type: string,
   message: string,
   severity: AlertSeverity,
-  metadata?: Record<string, unknown>
+  metadata?: Record<string, unknown>,
 ): Alert {
   const alert: Alert = {
     id: crypto.randomUUID(),
@@ -127,7 +130,7 @@ export function createAlert(
 // Check metrics against thresholds
 export function checkMetrics(
   metrics: Record<string, number>,
-  thresholds: AlertThreshold[] = DEFAULT_THRESHOLDS
+  thresholds: AlertThreshold[] = DEFAULT_THRESHOLDS,
 ): Alert[] {
   const alerts: Alert[] = [];
 
@@ -135,12 +138,10 @@ export function checkMetrics(
     const value = metrics[threshold.metric];
     if (value !== undefined && checkThreshold(threshold, value)) {
       const message = threshold.message.replace("{value}", String(value));
-      const alert = createAlert(
-        threshold.metric,
-        message,
-        threshold.severity,
-        { value, threshold: threshold.value }
-      );
+      const alert = createAlert(threshold.metric, message, threshold.severity, {
+        value,
+        threshold: threshold.value,
+      });
       alerts.push(alert);
     }
   }

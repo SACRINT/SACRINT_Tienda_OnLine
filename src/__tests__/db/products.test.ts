@@ -66,7 +66,7 @@ describe("Products Database Layer", () => {
       expect(db.product.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({ tenantId }),
-        })
+        }),
       );
     });
 
@@ -82,7 +82,7 @@ describe("Products Database Layer", () => {
             tenantId,
             categoryId: "cat_123",
           }),
-        })
+        }),
       );
     });
 
@@ -98,7 +98,7 @@ describe("Products Database Layer", () => {
             tenantId,
             OR: expect.any(Array),
           }),
-        })
+        }),
       );
     });
 
@@ -114,7 +114,7 @@ describe("Products Database Layer", () => {
             tenantId,
             basePrice: { gte: 10, lte: 100 },
           }),
-        })
+        }),
       );
     });
 
@@ -130,7 +130,7 @@ describe("Products Database Layer", () => {
             tenantId,
             stock: { gt: 0 },
           }),
-        })
+        }),
       );
     });
 
@@ -143,7 +143,7 @@ describe("Products Database Layer", () => {
       expect(db.product.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           orderBy: { basePrice: "asc" },
-        })
+        }),
       );
     });
 
@@ -157,7 +157,7 @@ describe("Products Database Layer", () => {
         expect.objectContaining({
           skip: 20,
           take: 20,
-        })
+        }),
       );
       expect(result.pagination.page).toBe(2);
       expect(result.pagination.totalPages).toBe(5);
@@ -174,7 +174,7 @@ describe("Products Database Layer", () => {
       expect(db.product.findUnique).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { id: "prod_123", tenantId },
-        })
+        }),
       );
     });
 
@@ -197,7 +197,7 @@ describe("Products Database Layer", () => {
       expect(db.product.findFirst).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { slug: "test-product", tenantId },
-        })
+        }),
       );
     });
   });
@@ -229,7 +229,7 @@ describe("Products Database Layer", () => {
             tenantId,
             name: "New Product",
           }),
-        })
+        }),
       );
     });
   });
@@ -250,7 +250,7 @@ describe("Products Database Layer", () => {
         expect.objectContaining({
           where: { id: "prod_123", tenantId },
           data: { name: "Updated Product" },
-        })
+        }),
       );
     });
   });
@@ -264,7 +264,7 @@ describe("Products Database Layer", () => {
       expect(db.product.delete).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { id: "prod_123", tenantId },
-        })
+        }),
       );
     });
   });
@@ -294,7 +294,7 @@ describe("Products Database Layer", () => {
       expect(db.product.findFirst).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { tenantId, sku: "SKU001" },
-        })
+        }),
       );
     });
   });

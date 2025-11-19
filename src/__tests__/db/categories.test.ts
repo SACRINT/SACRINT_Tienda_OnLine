@@ -70,7 +70,7 @@ describe("Categories Database Layer", () => {
       expect(db.category.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({ tenantId }),
-        })
+        }),
       );
     });
 
@@ -85,7 +85,7 @@ describe("Categories Database Layer", () => {
             tenantId,
             parentId: "cat_123",
           }),
-        })
+        }),
       );
     });
 
@@ -100,7 +100,7 @@ describe("Categories Database Layer", () => {
             tenantId,
             parentId: null,
           }),
-        })
+        }),
       );
     });
 
@@ -114,7 +114,7 @@ describe("Categories Database Layer", () => {
           include: expect.objectContaining({
             _count: expect.any(Object),
           }),
-        })
+        }),
       );
     });
   });
@@ -129,7 +129,7 @@ describe("Categories Database Layer", () => {
       expect(db.category.findUnique).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { id: "cat_123", tenantId },
-        })
+        }),
       );
     });
 
@@ -194,7 +194,7 @@ describe("Categories Database Layer", () => {
             name: "New Category",
             slug: "new-category",
           }),
-        })
+        }),
       );
     });
 
@@ -224,7 +224,7 @@ describe("Categories Database Layer", () => {
         createCategory({
           ...categoryData,
           parentId: "nonexistent",
-        })
+        }),
       ).rejects.toThrow("Parent category not found");
     });
   });
@@ -245,7 +245,7 @@ describe("Categories Database Layer", () => {
         expect.objectContaining({
           where: { id: "cat_123", tenantId },
           data: { name: "Updated Category" },
-        })
+        }),
       );
     });
   });
@@ -259,7 +259,7 @@ describe("Categories Database Layer", () => {
       expect(db.category.delete).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { id: "cat_123", tenantId },
-        })
+        }),
       );
     });
 
@@ -267,7 +267,7 @@ describe("Categories Database Layer", () => {
       // When a category is deleted, subcategories should be handled
       (db.category.findMany as jest.Mock).mockResolvedValue([mockSubcategory]);
       (db.category.delete as jest.Mock).mockRejectedValue(
-        new Error("Cannot delete category with subcategories")
+        new Error("Cannot delete category with subcategories"),
       );
 
       await expect(deleteCategory(tenantId, "cat_123")).rejects.toThrow();
@@ -299,7 +299,7 @@ describe("Categories Database Layer", () => {
       expect(db.category.findFirst).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { tenantId, slug: "some-slug" },
-        })
+        }),
       );
     });
   });

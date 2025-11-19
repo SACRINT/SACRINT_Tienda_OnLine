@@ -83,7 +83,7 @@ export async function listBackups(options?: {
 
 // Create backup
 export async function createBackup(
-  type: BackupInfo["type"] = "full"
+  type: BackupInfo["type"] = "full",
 ): Promise<BackupInfo> {
   const id = "backup-" + Date.now().toString(36);
 
@@ -112,7 +112,7 @@ export async function restoreBackup(
     target?: string;
     tables?: string[];
     dryRun?: boolean;
-  }
+  },
 ): Promise<{
   success: boolean;
   restored: string[];
@@ -134,7 +134,7 @@ export async function restoreBackup(
 
 // Get recovery points
 export async function getRecoveryPoints(
-  limit: number = 10
+  limit: number = 10,
 ): Promise<RecoveryPoint[]> {
   // Implementation would list point-in-time recovery options
   return [];
@@ -156,7 +156,7 @@ export async function verifyBackup(backupId: string): Promise<{
 
 // Delete old backups (retention policy)
 export async function applyRetentionPolicy(
-  config: BackupConfig = DEFAULT_BACKUP_CONFIG
+  config: BackupConfig = DEFAULT_BACKUP_CONFIG,
 ): Promise<{ deleted: number; freed: number }> {
   // Implementation would delete backups older than retention period
   return {
@@ -168,7 +168,7 @@ export async function applyRetentionPolicy(
 // Export specific tables
 export async function exportTables(
   tables: string[],
-  format: "sql" | "csv" | "json" = "sql"
+  format: "sql" | "csv" | "json" = "sql",
 ): Promise<{ path: string; size: number }> {
   // Implementation would export specified tables
   return {

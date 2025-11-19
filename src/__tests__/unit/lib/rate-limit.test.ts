@@ -66,8 +66,16 @@ describe("Rate Limiter", () => {
     });
 
     it("should use identifier in composite key", () => {
-      const config1: RateLimitConfig = { max: 2, windowMs: 60000, identifier: "api" };
-      const config2: RateLimitConfig = { max: 2, windowMs: 60000, identifier: "auth" };
+      const config1: RateLimitConfig = {
+        max: 2,
+        windowMs: 60000,
+        identifier: "api",
+      };
+      const config2: RateLimitConfig = {
+        max: 2,
+        windowMs: 60000,
+        identifier: "auth",
+      };
 
       // Use up api limit
       checkRateLimit("user1", config1);
@@ -170,7 +178,11 @@ describe("Rate Limiter", () => {
 
   describe("resetRateLimit", () => {
     it("should reset rate limit for specific key", () => {
-      const config: RateLimitConfig = { max: 2, windowMs: 60000, identifier: "test" };
+      const config: RateLimitConfig = {
+        max: 2,
+        windowMs: 60000,
+        identifier: "test",
+      };
 
       // Use up limit
       checkRateLimit("reset-test", config);
@@ -190,7 +202,11 @@ describe("Rate Limiter", () => {
 
   describe("cleanupRateLimitStore", () => {
     it("should remove expired entries", () => {
-      const config: RateLimitConfig = { max: 10, windowMs: 1, identifier: "cleanup" };
+      const config: RateLimitConfig = {
+        max: 10,
+        windowMs: 1,
+        identifier: "cleanup",
+      };
 
       // Create entry
       checkRateLimit("cleanup-test", config);

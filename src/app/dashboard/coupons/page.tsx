@@ -119,10 +119,16 @@ export default function CouponsPage() {
         code: formData.code.toUpperCase(),
         type: formData.type,
         value: parseFloat(formData.value),
-        maxDiscount: formData.maxDiscount ? parseFloat(formData.maxDiscount) : null,
-        minPurchase: formData.minPurchase ? parseFloat(formData.minPurchase) : 0,
+        maxDiscount: formData.maxDiscount
+          ? parseFloat(formData.maxDiscount)
+          : null,
+        minPurchase: formData.minPurchase
+          ? parseFloat(formData.minPurchase)
+          : 0,
         maxUses: formData.maxUses ? parseInt(formData.maxUses) : null,
-        expiresAt: formData.expiresAt ? new Date(formData.expiresAt).toISOString() : null,
+        expiresAt: formData.expiresAt
+          ? new Date(formData.expiresAt).toISOString()
+          : null,
         description: formData.description || null,
       };
 
@@ -163,7 +169,8 @@ export default function CouponsPage() {
   };
 
   const getCouponStatus = (coupon: Coupon) => {
-    if (!coupon.isActive) return { label: "Inactivo", variant: "secondary" as const };
+    if (!coupon.isActive)
+      return { label: "Inactivo", variant: "secondary" as const };
     if (coupon.expiresAt && new Date(coupon.expiresAt) < new Date()) {
       return { label: "Expirado", variant: "destructive" as const };
     }
@@ -174,7 +181,7 @@ export default function CouponsPage() {
   };
 
   // Summary statistics
-  const activeCoupons = coupons.filter(c => {
+  const activeCoupons = coupons.filter((c) => {
     if (!c.isActive) return false;
     if (c.expiresAt && new Date(c.expiresAt) < new Date()) return false;
     if (c.maxUses && c.usedCount >= c.maxUses) return false;
@@ -221,7 +228,10 @@ export default function CouponsPage() {
                   id="code"
                   value={formData.code}
                   onChange={(e) =>
-                    setFormData({ ...formData, code: e.target.value.toUpperCase() })
+                    setFormData({
+                      ...formData,
+                      code: e.target.value.toUpperCase(),
+                    })
                   }
                   placeholder="DESCUENTO10"
                   required
@@ -248,7 +258,9 @@ export default function CouponsPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="value">
-                    {formData.type === "PERCENTAGE" ? "Porcentaje (%)" : "Monto ($)"}
+                    {formData.type === "PERCENTAGE"
+                      ? "Porcentaje (%)"
+                      : "Monto ($)"}
                   </Label>
                   <Input
                     id="value"
@@ -265,7 +277,9 @@ export default function CouponsPage() {
 
               {formData.type === "PERCENTAGE" && (
                 <div className="space-y-2">
-                  <Label htmlFor="maxDiscount">Descuento Máximo (opcional)</Label>
+                  <Label htmlFor="maxDiscount">
+                    Descuento Máximo (opcional)
+                  </Label>
                   <Input
                     id="maxDiscount"
                     type="number"
@@ -357,7 +371,9 @@ export default function CouponsPage() {
             <CheckCircle className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{activeCoupons}</div>
+            <div className="text-2xl font-bold text-green-600">
+              {activeCoupons}
+            </div>
           </CardContent>
         </Card>
 
@@ -509,7 +525,9 @@ export default function CouponsPage() {
                             {format(new Date(coupon.expiresAt), "dd/MM/yyyy")}
                           </div>
                         ) : (
-                          <span className="text-muted-foreground">Sin límite</span>
+                          <span className="text-muted-foreground">
+                            Sin límite
+                          </span>
                         )}
                       </TableCell>
                       <TableCell>
@@ -517,10 +535,7 @@ export default function CouponsPage() {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <Switch
-                            checked={coupon.isActive}
-                            disabled
-                          />
+                          <Switch checked={coupon.isActive} disabled />
                         </div>
                       </TableCell>
                     </TableRow>

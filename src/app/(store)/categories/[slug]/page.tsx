@@ -54,19 +54,25 @@ async function getCategoryProducts(categoryId: string) {
     });
 
     return products.map((product) => {
-      const avgRating = product.reviews.length > 0
-        ? product.reviews.reduce((sum, r) => sum + r.rating, 0) / product.reviews.length
-        : undefined;
+      const avgRating =
+        product.reviews.length > 0
+          ? product.reviews.reduce((sum, r) => sum + r.rating, 0) /
+            product.reviews.length
+          : undefined;
 
       return {
         id: product.id,
         name: product.name,
         slug: product.slug,
         price: Number(product.salePrice || product.basePrice),
-        originalPrice: product.salePrice ? Number(product.basePrice) : undefined,
+        originalPrice: product.salePrice
+          ? Number(product.basePrice)
+          : undefined,
         rating: avgRating,
         reviewCount: product.reviews.length,
-        isNew: new Date().getTime() - new Date(product.createdAt).getTime() < 7 * 24 * 60 * 60 * 1000,
+        isNew:
+          new Date().getTime() - new Date(product.createdAt).getTime() <
+          7 * 24 * 60 * 60 * 1000,
         isSale: !!product.salePrice,
         image: product.images[0]?.url,
         stock: product.stock,

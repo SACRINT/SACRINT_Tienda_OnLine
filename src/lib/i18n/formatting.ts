@@ -4,12 +4,10 @@
 import { Locale, LOCALE_CURRENCY } from "./config";
 
 // Format currency
-export function formatCurrency(
-  amount: number,
-  locale: Locale = "es"
-): string {
+export function formatCurrency(amount: number, locale: Locale = "es"): string {
   const currency = LOCALE_CURRENCY[locale];
-  const localeCode = locale === "es" ? "es-MX" : locale === "en" ? "en-US" : locale;
+  const localeCode =
+    locale === "es" ? "es-MX" : locale === "en" ? "en-US" : locale;
 
   return new Intl.NumberFormat(localeCode, {
     style: "currency",
@@ -21,9 +19,10 @@ export function formatCurrency(
 export function formatNumber(
   value: number,
   locale: Locale = "es",
-  options?: Intl.NumberFormatOptions
+  options?: Intl.NumberFormatOptions,
 ): string {
-  const localeCode = locale === "es" ? "es-MX" : locale === "en" ? "en-US" : locale;
+  const localeCode =
+    locale === "es" ? "es-MX" : locale === "en" ? "en-US" : locale;
   return new Intl.NumberFormat(localeCode, options).format(value);
 }
 
@@ -31,10 +30,11 @@ export function formatNumber(
 export function formatDate(
   date: Date | string,
   locale: Locale = "es",
-  options?: Intl.DateTimeFormatOptions
+  options?: Intl.DateTimeFormatOptions,
 ): string {
   const d = typeof date === "string" ? new Date(date) : date;
-  const localeCode = locale === "es" ? "es-MX" : locale === "en" ? "en-US" : locale;
+  const localeCode =
+    locale === "es" ? "es-MX" : locale === "en" ? "en-US" : locale;
 
   return new Intl.DateTimeFormat(localeCode, {
     year: "numeric",
@@ -47,12 +47,13 @@ export function formatDate(
 // Format relative time
 export function formatRelativeTime(
   date: Date | string,
-  locale: Locale = "es"
+  locale: Locale = "es",
 ): string {
   const d = typeof date === "string" ? new Date(date) : date;
   const now = new Date();
   const diff = now.getTime() - d.getTime();
-  const localeCode = locale === "es" ? "es-MX" : locale === "en" ? "en-US" : locale;
+  const localeCode =
+    locale === "es" ? "es-MX" : locale === "en" ? "en-US" : locale;
 
   const rtf = new Intl.RelativeTimeFormat(localeCode, { numeric: "auto" });
 
@@ -68,11 +69,9 @@ export function formatRelativeTime(
 }
 
 // Format percentage
-export function formatPercent(
-  value: number,
-  locale: Locale = "es"
-): string {
-  const localeCode = locale === "es" ? "es-MX" : locale === "en" ? "en-US" : locale;
+export function formatPercent(value: number, locale: Locale = "es"): string {
+  const localeCode =
+    locale === "es" ? "es-MX" : locale === "en" ? "en-US" : locale;
   return new Intl.NumberFormat(localeCode, {
     style: "percent",
     minimumFractionDigits: 0,

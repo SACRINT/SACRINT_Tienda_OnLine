@@ -26,7 +26,7 @@ export async function getInventoryAlerts(
     type?: InventoryAlert["type"];
     severity?: InventoryAlert["severity"];
     acknowledged?: boolean;
-  }
+  },
 ): Promise<InventoryAlert[]> {
   // Get products with stock issues
   const products = await db.product.findMany({
@@ -88,22 +88,22 @@ export async function getInventoryAlerts(
   }
 
   if (options?.severity) {
-    filteredAlerts = filteredAlerts.filter((a) => a.severity === options.severity);
+    filteredAlerts = filteredAlerts.filter(
+      (a) => a.severity === options.severity,
+    );
   }
 
   // Sort by severity
   const severityOrder = { critical: 0, warning: 1, info: 2 };
   filteredAlerts.sort(
-    (a, b) => severityOrder[a.severity] - severityOrder[b.severity]
+    (a, b) => severityOrder[a.severity] - severityOrder[b.severity],
   );
 
   return filteredAlerts;
 }
 
 // Get alert summary
-export async function getAlertSummary(
-  tenantId: string
-): Promise<{
+export async function getAlertSummary(tenantId: string): Promise<{
   total: number;
   critical: number;
   warning: number;
@@ -124,9 +124,7 @@ export async function getAlertSummary(
 }
 
 // Generate reorder suggestions
-export async function getReorderSuggestions(
-  tenantId: string
-): Promise<
+export async function getReorderSuggestions(tenantId: string): Promise<
   Array<{
     productId: string;
     productName: string;
@@ -170,7 +168,7 @@ export async function getReorderSuggestions(
 // Calculate days until stockout
 export async function getDaysUntilStockout(
   productId: string,
-  days: number = 30
+  days: number = 30,
 ): Promise<number | null> {
   const endDate = new Date();
   const startDate = new Date();
@@ -207,9 +205,7 @@ export async function getDaysUntilStockout(
 }
 
 // Get inventory health score
-export async function getInventoryHealthScore(
-  tenantId: string
-): Promise<{
+export async function getInventoryHealthScore(tenantId: string): Promise<{
   score: number;
   details: {
     stockCoverage: number;
@@ -221,12 +217,18 @@ export async function getInventoryHealthScore(
   const [totalProducts, outOfStock, lowStock] = await Promise.all([
     db.product.count({ where: { tenantId, isActive: true } }),
     db.product.count({ where: { tenantId, isActive: true, stock: 0 } }),
-    db.product.count({ where: { tenantId, isActive: true, stock: { lte: 5 } } }),
+    db.product.count({
+      where: { tenantId, isActive: true, stock: { lte: 5 } },
+    }),
   ]);
 
   // Calculate metrics
-  const outOfStockRate = totalProducts > 0 ? (outOfStock / totalProducts) * 100 : 0;
-  const stockCoverage = totalProducts > 0 ? ((totalProducts - lowStock) / totalProducts) * 100 : 100;
+  const outOfStockRate =
+    totalProducts > 0 ? (outOfStock / totalProducts) * 100 : 0;
+  const stockCoverage =
+    totalProducts > 0
+      ? ((totalProducts - lowStock) / totalProducts) * 100
+      : 100;
 
   // Simplified turnover and accuracy (would need more data)
   const turnoverRate = 4.5; // Monthly turns

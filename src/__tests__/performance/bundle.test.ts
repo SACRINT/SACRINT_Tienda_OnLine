@@ -18,7 +18,8 @@ describe("Bundle Size", () => {
         return;
       }
 
-      const mainBundle = fs.readdirSync(chunksDir)
+      const mainBundle = fs
+        .readdirSync(chunksDir)
         .filter((f) => f.startsWith("main") && f.endsWith(".js"))
         .map((f) => {
           const stats = fs.statSync(path.join(chunksDir, f));
@@ -37,7 +38,8 @@ describe("Bundle Size", () => {
 
       if (!fs.existsSync(chunksDir)) return;
 
-      const frameworkBundle = fs.readdirSync(chunksDir)
+      const frameworkBundle = fs
+        .readdirSync(chunksDir)
         .filter((f) => f.includes("framework") && f.endsWith(".js"))
         .map((f) => {
           const stats = fs.statSync(path.join(chunksDir, f));
@@ -56,7 +58,8 @@ describe("Bundle Size", () => {
 
       if (!fs.existsSync(chunksDir)) return;
 
-      const totalSize = fs.readdirSync(chunksDir)
+      const totalSize = fs
+        .readdirSync(chunksDir)
         .filter((f) => f.endsWith(".js"))
         .reduce((total, f) => {
           const stats = fs.statSync(path.join(chunksDir, f));
@@ -68,7 +71,9 @@ describe("Bundle Size", () => {
 
       // Total JS should be under 2MB
       expect(totalMB).toBeLessThan(2);
-      console.log(`Total JS: ${totalKB.toFixed(2)}KB (${totalMB.toFixed(2)}MB)`);
+      console.log(
+        `Total JS: ${totalKB.toFixed(2)}KB (${totalMB.toFixed(2)}MB)`,
+      );
     });
   });
 
@@ -78,7 +83,8 @@ describe("Bundle Size", () => {
 
       if (!fs.existsSync(cssDir)) return;
 
-      const totalCss = fs.readdirSync(cssDir)
+      const totalCss = fs
+        .readdirSync(cssDir)
         .filter((f) => f.endsWith(".css"))
         .reduce((total, f) => {
           const stats = fs.statSync(path.join(cssDir, f));

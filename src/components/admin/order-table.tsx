@@ -23,7 +23,13 @@ export interface OrderTableItem {
   };
   items: number;
   total: number;
-  status: "pending" | "confirmed" | "processing" | "shipped" | "delivered" | "cancelled";
+  status:
+    | "pending"
+    | "confirmed"
+    | "processing"
+    | "shipped"
+    | "delivered"
+    | "cancelled";
   paymentStatus: "pending" | "paid" | "failed" | "refunded";
   date: string;
   shippingMethod?: string;
@@ -89,7 +95,9 @@ export function OrderTable({
             <th className="p-3 text-left w-10">
               <input
                 type="checkbox"
-                checked={selectedIds.size === orders.length && orders.length > 0}
+                checked={
+                  selectedIds.size === orders.length && orders.length > 0
+                }
                 onChange={handleSelectAll}
                 className="rounded"
               />
@@ -117,7 +125,10 @@ export function OrderTable({
             </tr>
           ) : (
             orders.map((order) => (
-              <tr key={order.id} className="border-b last:border-0 hover:bg-muted/50">
+              <tr
+                key={order.id}
+                className="border-b last:border-0 hover:bg-muted/50"
+              >
                 <td className="p-3">
                   <input
                     type="checkbox"
@@ -155,7 +166,10 @@ export function OrderTable({
                   <OrderStatusIndicator status={order.status} size="sm" />
                 </td>
                 <td className="p-3 text-center">
-                  <PaymentStatusIndicator status={order.paymentStatus} size="sm" />
+                  <PaymentStatusIndicator
+                    status={order.paymentStatus}
+                    size="sm"
+                  />
                 </td>
                 <td className="p-3 text-right font-medium">
                   {formatPrice(order.total)}

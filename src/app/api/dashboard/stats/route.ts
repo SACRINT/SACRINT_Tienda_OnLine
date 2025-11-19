@@ -19,7 +19,7 @@ export async function GET() {
     if (!tenantId) {
       return NextResponse.json(
         { error: "Demo tenant not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -114,9 +114,8 @@ export async function GET() {
     }));
 
     // Calculate average order value
-    const avgOrderValue = totalOrders > 0
-      ? Number(totalRevenue._sum.total || 0) / totalOrders
-      : 0;
+    const avgOrderValue =
+      totalOrders > 0 ? Number(totalRevenue._sum.total || 0) / totalOrders : 0;
 
     // Format recent orders
     const formattedRecentOrders = recentOrders.map((order) => ({
@@ -131,12 +130,14 @@ export async function GET() {
     const orderStatusData = [
       {
         name: "Completadas",
-        value: ordersByStatus.find((o) => o.status === "DELIVERED")?._count || 0,
+        value:
+          ordersByStatus.find((o) => o.status === "DELIVERED")?._count || 0,
         color: "#22c55e",
       },
       {
         name: "En Proceso",
-        value: ordersByStatus.find((o) => o.status === "PROCESSING")?._count || 0,
+        value:
+          ordersByStatus.find((o) => o.status === "PROCESSING")?._count || 0,
         color: "#3b82f6",
       },
       {
@@ -146,7 +147,8 @@ export async function GET() {
       },
       {
         name: "Canceladas",
-        value: ordersByStatus.find((o) => o.status === "CANCELLED")?._count || 0,
+        value:
+          ordersByStatus.find((o) => o.status === "CANCELLED")?._count || 0,
         color: "#ef4444",
       },
     ];
@@ -202,7 +204,7 @@ export async function GET() {
     console.error("[DASHBOARD] Error fetching stats:", error);
     return NextResponse.json(
       { error: "Failed to fetch dashboard stats" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

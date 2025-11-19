@@ -5,7 +5,7 @@ import { z } from "zod";
 
 // Event schemas
 export const EventPropertiesSchema = z.record(
-  z.union([z.string(), z.number(), z.boolean(), z.null()])
+  z.union([z.string(), z.number(), z.boolean(), z.null()]),
 );
 
 export const TrackEventSchema = z.object({
@@ -75,7 +75,7 @@ export interface EcommerceEvent {
 export interface AnalyticsService {
   track<K extends keyof EcommerceEvent>(
     eventName: K,
-    properties: EcommerceEvent[K]
+    properties: EcommerceEvent[K],
   ): void;
   trackCustom(event: TrackEvent): void;
   page(view: PageView): void;
@@ -93,7 +93,7 @@ export class GoogleAnalyticsService implements AnalyticsService {
 
   track<K extends keyof EcommerceEvent>(
     eventName: K,
-    properties: EcommerceEvent[K]
+    properties: EcommerceEvent[K],
   ): void {
     if (typeof window === "undefined") return;
 
@@ -170,7 +170,7 @@ export class ServerAnalyticsService implements AnalyticsService {
 
   track<K extends keyof EcommerceEvent>(
     eventName: K,
-    properties: EcommerceEvent[K]
+    properties: EcommerceEvent[K],
   ): void {
     this.sendEvent({
       name: eventName,
@@ -238,7 +238,7 @@ export function createAnalyticsService(): AnalyticsService {
 class MockAnalyticsService implements AnalyticsService {
   track<K extends keyof EcommerceEvent>(
     eventName: K,
-    properties: EcommerceEvent[K]
+    properties: EcommerceEvent[K],
   ): void {
     console.log("Mock analytics track:", eventName, properties);
   }

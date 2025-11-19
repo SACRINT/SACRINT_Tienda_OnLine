@@ -2,7 +2,11 @@
 
 import { REALTIME_CONFIG, REALTIME_EVENTS } from "./config";
 
-export type ConnectionStatus = "connecting" | "connected" | "disconnected" | "reconnecting";
+export type ConnectionStatus =
+  | "connecting"
+  | "connected"
+  | "disconnected"
+  | "reconnecting";
 
 export interface WebSocketMessage {
   type: string;
@@ -26,7 +30,10 @@ class WebSocketClient {
 
   // Connect to WebSocket server
   connect(url?: string): void {
-    if (this.ws && (this.status === "connected" || this.status === "connecting")) {
+    if (
+      this.ws &&
+      (this.status === "connected" || this.status === "connecting")
+    ) {
       return;
     }
 
@@ -136,7 +143,10 @@ class WebSocketClient {
     this.ws.onclose = (event) => {
       console.log("[WS] Disconnected:", event.code, event.reason);
       this.clearTimers();
-      this.emit(REALTIME_EVENTS.DISCONNECT, { code: event.code, reason: event.reason });
+      this.emit(REALTIME_EVENTS.DISCONNECT, {
+        code: event.code,
+        reason: event.reason,
+      });
 
       if (event.code !== 1000 && REALTIME_CONFIG.reconnect.enabled) {
         this.handleReconnect();
@@ -211,10 +221,16 @@ class WebSocketClient {
     const delay = Math.min(
       REALTIME_CONFIG.reconnect.initialDelay *
         Math.pow(REALTIME_CONFIG.reconnect.factor, this.reconnectAttempts - 1),
-      REALTIME_CONFIG.reconnect.maxDelay
+      REALTIME_CONFIG.reconnect.maxDelay,
     );
 
-    console.log("[WS] Reconnecting in " + delay + "ms (attempt " + this.reconnectAttempts + ")");
+    console.log(
+      "[WS] Reconnecting in " +
+        delay +
+        "ms (attempt " +
+        this.reconnectAttempts +
+        ")",
+    );
 
     this.reconnectTimeout = setTimeout(() => {
       this.connect();

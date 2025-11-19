@@ -1,7 +1,14 @@
 "use client";
 
 import * as React from "react";
-import { Search, Package, Truck, CheckCircle, MapPin, Clock } from "lucide-react";
+import {
+  Search,
+  Package,
+  Truck,
+  CheckCircle,
+  MapPin,
+  Clock,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,13 +22,16 @@ interface TrackingEvent {
 }
 
 // Demo tracking data
-const demoTrackingData: Record<string, {
-  orderNumber: string;
-  status: string;
-  estimatedDelivery: string;
-  carrier: string;
-  events: TrackingEvent[];
-}> = {
+const demoTrackingData: Record<
+  string,
+  {
+    orderNumber: string;
+    status: string;
+    estimatedDelivery: string;
+    carrier: string;
+    events: TrackingEvent[];
+  }
+> = {
   "ORD-2024-001": {
     orderNumber: "ORD-2024-001",
     status: "delivered",
@@ -112,7 +122,9 @@ const statusLabels: Record<string, string> = {
 
 export default function TrackOrderPage() {
   const [orderNumber, setOrderNumber] = React.useState("");
-  const [trackingData, setTrackingData] = React.useState<typeof demoTrackingData[string] | null>(null);
+  const [trackingData, setTrackingData] = React.useState<
+    (typeof demoTrackingData)[string] | null
+  >(null);
   const [error, setError] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
 
@@ -130,7 +142,9 @@ export default function TrackOrderPage() {
     if (data) {
       setTrackingData(data);
     } else {
-      setError("No se encontró el pedido. Verifica el número e intenta de nuevo.");
+      setError(
+        "No se encontró el pedido. Verifica el número e intenta de nuevo.",
+      );
     }
 
     setIsLoading(false);
@@ -164,9 +178,7 @@ export default function TrackOrderPage() {
                 {isLoading ? "Buscando..." : "Rastrear"}
               </Button>
             </form>
-            {error && (
-              <p className="text-sm text-red-600 mt-2">{error}</p>
-            )}
+            {error && <p className="text-sm text-red-600 mt-2">{error}</p>}
             <p className="text-xs text-muted-foreground mt-3">
               Prueba con: ORD-2024-001 o ORD-2024-002
             </p>
@@ -181,7 +193,9 @@ export default function TrackOrderPage() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle>Pedido {trackingData.orderNumber}</CardTitle>
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusColors[trackingData.status]}`}>
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm font-medium ${statusColors[trackingData.status]}`}
+                  >
                     {statusLabels[trackingData.status]}
                   </span>
                 </div>
@@ -189,45 +203,65 @@ export default function TrackOrderPage() {
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <p className="text-sm text-muted-foreground">Transportista</p>
+                    <p className="text-sm text-muted-foreground">
+                      Transportista
+                    </p>
                     <p className="font-medium">{trackingData.carrier}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Entrega Estimada</p>
-                    <p className="font-medium">{trackingData.estimatedDelivery}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Entrega Estimada
+                    </p>
+                    <p className="font-medium">
+                      {trackingData.estimatedDelivery}
+                    </p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Estado Actual</p>
-                    <p className="font-medium">{statusLabels[trackingData.status]}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Estado Actual
+                    </p>
+                    <p className="font-medium">
+                      {statusLabels[trackingData.status]}
+                    </p>
                   </div>
                 </div>
 
                 {/* Progress Bar */}
                 <div className="mt-6">
                   <div className="flex justify-between mb-2">
-                    {["processing", "shipped", "delivered"].map((step, index) => (
-                      <div
-                        key={step}
-                        className={`flex flex-col items-center ${
-                          ["delivered", "shipped"].includes(trackingData.status) ||
-                          (trackingData.status === "processing" && step === "processing")
-                            ? "text-primary"
-                            : "text-muted-foreground"
-                        }`}
-                      >
+                    {["processing", "shipped", "delivered"].map(
+                      (step, index) => (
                         <div
-                          className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                            ["delivered", "shipped"].includes(trackingData.status) ||
-                            (trackingData.status === "processing" && step === "processing")
-                              ? "bg-primary text-primary-foreground"
-                              : "bg-muted"
+                          key={step}
+                          className={`flex flex-col items-center ${
+                            ["delivered", "shipped"].includes(
+                              trackingData.status,
+                            ) ||
+                            (trackingData.status === "processing" &&
+                              step === "processing")
+                              ? "text-primary"
+                              : "text-muted-foreground"
                           }`}
                         >
-                          {statusIcons[step]}
+                          <div
+                            className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                              ["delivered", "shipped"].includes(
+                                trackingData.status,
+                              ) ||
+                              (trackingData.status === "processing" &&
+                                step === "processing")
+                                ? "bg-primary text-primary-foreground"
+                                : "bg-muted"
+                            }`}
+                          >
+                            {statusIcons[step]}
+                          </div>
+                          <span className="text-xs mt-1">
+                            {statusLabels[step]}
+                          </span>
                         </div>
-                        <span className="text-xs mt-1">{statusLabels[step]}</span>
-                      </div>
-                    ))}
+                      ),
+                    )}
                   </div>
                 </div>
               </CardContent>

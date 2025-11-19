@@ -182,7 +182,10 @@ export const themes: Record<string, Theme> = {
 };
 
 // Generate CSS variables from theme
-export function generateCSSVariables(theme: Theme, mode: "light" | "dark"): string {
+export function generateCSSVariables(
+  theme: Theme,
+  mode: "light" | "dark",
+): string {
   const colors = theme.colors[mode];
   const variables = Object.entries(colors)
     .map(([key, value]) => {
@@ -203,7 +206,7 @@ export function generateCSSVariables(theme: Theme, mode: "light" | "dark"): stri
 // Get tenant theme
 export function getTenantTheme(
   tenantId: string,
-  customColors?: Partial<ThemeColors>
+  customColors?: Partial<ThemeColors>,
 ): Theme {
   const baseTheme = themes.default;
 

@@ -133,15 +133,21 @@ const translations: Record<Locale, TranslationDictionary> = {
 export function t(
   key: string,
   locale: Locale = DEFAULT_LOCALE,
-  params?: Record<string, string | number>
+  params?: Record<string, string | number>,
 ): string {
   const dict = translations[locale] || translations[DEFAULT_LOCALE];
-  let value = (dict[key] as string) || (translations[DEFAULT_LOCALE][key] as string) || key;
+  let value =
+    (dict[key] as string) ||
+    (translations[DEFAULT_LOCALE][key] as string) ||
+    key;
 
   // Interpolate parameters
   if (params) {
     Object.entries(params).forEach(([param, val]) => {
-      value = value.replace(new RegExp("\\{" + param + "\\}", "g"), String(val));
+      value = value.replace(
+        new RegExp("\\{" + param + "\\}", "g"),
+        String(val),
+      );
     });
   }
 
@@ -151,7 +157,7 @@ export function t(
 // Get all translations for a namespace
 export function getNamespace(
   namespace: string,
-  locale: Locale = DEFAULT_LOCALE
+  locale: Locale = DEFAULT_LOCALE,
 ): Record<string, string> {
   const dict = translations[locale] || translations[DEFAULT_LOCALE];
   const prefix = namespace + ".";
@@ -167,7 +173,10 @@ export function getNamespace(
 }
 
 // Check if translation exists
-export function hasTranslation(key: string, locale: Locale = DEFAULT_LOCALE): boolean {
+export function hasTranslation(
+  key: string,
+  locale: Locale = DEFAULT_LOCALE,
+): boolean {
   const dict = translations[locale] || translations[DEFAULT_LOCALE];
   return key in dict;
 }

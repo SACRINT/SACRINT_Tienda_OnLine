@@ -29,7 +29,8 @@ export default function Error({
         </h1>
 
         <p className="text-gray-600 mb-8">
-          Ha ocurrido un error inesperado. Por favor, intenta de nuevo o vuelve al inicio.
+          Ha ocurrido un error inesperado. Por favor, intenta de nuevo o vuelve
+          al inicio.
         </p>
 
         {error.digest && (

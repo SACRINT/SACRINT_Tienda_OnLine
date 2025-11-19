@@ -10,7 +10,8 @@ export interface SearchConfig {
 }
 
 export const SEARCH_CONFIG: SearchConfig = {
-  provider: (process.env.SEARCH_PROVIDER as SearchConfig["provider"]) || "local",
+  provider:
+    (process.env.SEARCH_PROVIDER as SearchConfig["provider"]) || "local",
   indexName: process.env.SEARCH_INDEX_NAME || "products",
   apiKey: process.env.SEARCH_API_KEY,
   appId: process.env.SEARCH_APP_ID,

@@ -55,7 +55,9 @@ describe("Fraud Detection", () => {
         previousOrders: 0,
       });
 
-      expect(result.signals.some((s) => s.type === "new_customer_high_value")).toBe(true);
+      expect(
+        result.signals.some((s) => s.type === "new_customer_high_value"),
+      ).toBe(true);
     });
 
     it("should flag address country mismatch", () => {
@@ -65,7 +67,9 @@ describe("Fraud Detection", () => {
         billingAddress: { country: "MX", postalCode: "12345" },
       });
 
-      expect(result.signals.some((s) => s.type === "address_country_mismatch")).toBe(true);
+      expect(
+        result.signals.some((s) => s.type === "address_country_mismatch"),
+      ).toBe(true);
       expect(result.score).toBeGreaterThanOrEqual(25);
     });
 
@@ -176,7 +180,7 @@ describe("Fraud Detection", () => {
     it("should have reasonable thresholds", () => {
       expect(RISK_FACTORS.HIGH_VALUE_THRESHOLD).toBeGreaterThan(1000);
       expect(RISK_FACTORS.NEW_CUSTOMER_HIGH_VALUE_THRESHOLD).toBeLessThan(
-        RISK_FACTORS.HIGH_VALUE_THRESHOLD
+        RISK_FACTORS.HIGH_VALUE_THRESHOLD,
       );
       expect(RISK_FACTORS.LARGE_CART_THRESHOLD).toBeGreaterThan(10);
     });

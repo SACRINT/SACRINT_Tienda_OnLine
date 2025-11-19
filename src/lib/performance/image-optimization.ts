@@ -35,16 +35,18 @@ export const PLACEHOLDER_BLUR = {
   gray: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2YzZjRmNiIvPjwvc3ZnPg==",
 
   // Primary color placeholder
-  primary: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzBhMTEyOCIvPjwvc3ZnPg==",
+  primary:
+    "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzBhMTEyOCIvPjwvc3ZnPg==",
 
   // Shimmer effect
-  shimmer: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImciIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjAlIj48c3RvcCBvZmZzZXQ9IjAlIiBzdHlsZT0ic3RvcC1jb2xvcjojZjNmNGY2O3N0b3Atb3BhY2l0eToxIi8+PHN0b3Agb2Zmc2V0PSI1MCUiIHN0eWxlPSJzdG9wLWNvbG9yOiNlNWU3ZWI7c3RvcC1vcGFjaXR5OjEiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiNmM2Y0ZjY7c3RvcC1vcGFjaXR5OjEiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0idXJsKCNnKSIvPjwvc3ZnPg==",
+  shimmer:
+    "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImciIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjAlIj48c3RvcCBvZmZzZXQ9IjAlIiBzdHlsZT0ic3RvcC1jb2xvcjojZjNmNGY2O3N0b3Atb3BhY2l0eToxIi8+PHN0b3Agb2Zmc2V0PSI1MCUiIHN0eWxlPSJzdG9wLWNvbG9yOiNlNWU3ZWI7c3RvcC1vcGFjaXR5OjEiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiNmM2Y0ZjY7c3RvcC1vcGFjaXR5OjEiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0idXJsKCNnKSIvPjwvc3ZnPg==",
 } as const;
 
 // Generate srcset for responsive images
 export function generateSrcSet(
   baseUrl: string,
-  widths: number[] = [320, 640, 1024, 1280, 1920]
+  widths: number[] = [320, 640, 1024, 1280, 1920],
 ): string {
   // For external URLs with width parameter support
   if (baseUrl.includes("cloudinary") || baseUrl.includes("imgix")) {
@@ -62,7 +64,7 @@ export function getOptimalDimensions(
   originalWidth: number,
   originalHeight: number,
   maxWidth: number,
-  maxHeight: number
+  maxHeight: number,
 ): { width: number; height: number } {
   const aspectRatio = originalWidth / originalHeight;
 
@@ -106,10 +108,7 @@ export function preloadImages(sources: string[]) {
 }
 
 // Image loading priority helper
-export function getImagePriority(
-  index: number,
-  isAboveFold: boolean
-): boolean {
+export function getImagePriority(index: number, isAboveFold: boolean): boolean {
   // First image above fold should be priority
   if (index === 0 && isAboveFold) return true;
 
@@ -120,10 +119,7 @@ export function getImagePriority(
 }
 
 // Calculate aspect ratio padding for skeleton
-export function getAspectRatioPadding(
-  width: number,
-  height: number
-): string {
+export function getAspectRatioPadding(width: number, height: number): string {
   return `${(height / width) * 100}%`;
 }
 
@@ -139,7 +135,9 @@ export function supportsWebP(): boolean {
 }
 
 // Image error fallback handler
-export function getImageFallback(type: "product" | "avatar" | "category" = "product"): string {
+export function getImageFallback(
+  type: "product" | "avatar" | "category" = "product",
+): string {
   switch (type) {
     case "avatar":
       return "/images/placeholder-avatar.svg";
@@ -171,7 +169,7 @@ export function buildCDNUrl(
     quality?: number;
     format?: "auto" | "webp" | "avif" | "jpg" | "png";
     crop?: "fill" | "fit" | "scale" | "thumb";
-  } = {}
+  } = {},
 ): string {
   const baseUrl = process.env.NEXT_PUBLIC_CLOUDINARY_URL || "";
   if (!baseUrl) return publicId;
@@ -184,7 +182,8 @@ export function buildCDNUrl(
   if (options.format) transforms.push(`f_${options.format}`);
   if (options.crop) transforms.push(`c_${options.crop}`);
 
-  const transformString = transforms.length > 0 ? transforms.join(",") + "/" : "";
+  const transformString =
+    transforms.length > 0 ? transforms.join(",") + "/" : "";
 
   return `${baseUrl}/${transformString}${publicId}`;
 }

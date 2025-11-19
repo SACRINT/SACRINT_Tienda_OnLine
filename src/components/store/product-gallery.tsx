@@ -55,7 +55,7 @@ export function ProductGallery({
       <div
         className={cn(
           "aspect-square bg-muted rounded-lg flex items-center justify-center",
-          className
+          className,
         )}
       >
         <p className="text-muted-foreground">No images available</p>
@@ -72,7 +72,7 @@ export function ProductGallery({
         <div
           className={cn(
             "relative aspect-square overflow-hidden rounded-lg bg-muted cursor-zoom-in",
-            isZoomed && "cursor-zoom-out"
+            isZoomed && "cursor-zoom-out",
           )}
           onClick={() => setIsZoomed(!isZoomed)}
           onMouseMove={handleMouseMove}
@@ -80,10 +80,12 @@ export function ProductGallery({
         >
           <img
             src={currentImage.url}
-            alt={currentImage.alt || `${productName} - Image ${selectedIndex + 1}`}
+            alt={
+              currentImage.alt || `${productName} - Image ${selectedIndex + 1}`
+            }
             className={cn(
               "h-full w-full object-cover transition-transform duration-200",
-              isZoomed && "scale-150"
+              isZoomed && "scale-150",
             )}
             style={
               isZoomed
@@ -139,7 +141,7 @@ export function ProductGallery({
                 "flex-shrink-0 w-16 h-16 rounded-md overflow-hidden border-2 transition-colors",
                 index === selectedIndex
                   ? "border-primary"
-                  : "border-transparent hover:border-muted-foreground/50"
+                  : "border-transparent hover:border-muted-foreground/50",
               )}
               aria-label={`View image ${index + 1}`}
               aria-current={index === selectedIndex ? "true" : undefined}

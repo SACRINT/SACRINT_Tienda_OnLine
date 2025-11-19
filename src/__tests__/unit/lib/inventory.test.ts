@@ -29,15 +29,17 @@ jest.mock("@/lib/db", () => ({
     orderItem: {
       aggregate: jest.fn(),
     },
-    $transaction: jest.fn((fn) => fn({
-      product: {
-        findUnique: jest.fn(),
-        update: jest.fn(),
-      },
-      stockMovement: {
-        create: jest.fn(),
-      },
-    })),
+    $transaction: jest.fn((fn) =>
+      fn({
+        product: {
+          findUnique: jest.fn(),
+          update: jest.fn(),
+        },
+        stockMovement: {
+          create: jest.fn(),
+        },
+      }),
+    ),
   },
 }));
 
@@ -178,8 +180,8 @@ describe("Inventory Alerts", () => {
     it("should calculate health score", async () => {
       (db.product.count as jest.Mock)
         .mockResolvedValueOnce(100) // total
-        .mockResolvedValueOnce(90)  // active
-        .mockResolvedValueOnce(5)   // outOfStock
+        .mockResolvedValueOnce(90) // active
+        .mockResolvedValueOnce(5) // outOfStock
         .mockResolvedValueOnce(10); // lowStock
 
       const health = await getInventoryHealthScore("tenant_123");

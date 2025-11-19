@@ -19,11 +19,7 @@ export interface ProductTabsProps {
   className?: string;
 }
 
-export function ProductTabs({
-  tabs,
-  defaultTab,
-  className,
-}: ProductTabsProps) {
+export function ProductTabs({ tabs, defaultTab, className }: ProductTabsProps) {
   const [activeTab, setActiveTab] = React.useState(defaultTab || tabs[0]?.id);
 
   const activeContent = tabs.find((tab) => tab.id === activeTab)?.content;
@@ -41,7 +37,7 @@ export function ProductTabs({
                 "whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors",
                 activeTab === tab.id
                   ? "border-primary text-primary"
-                  : "border-transparent text-muted-foreground hover:border-muted-foreground/50 hover:text-foreground"
+                  : "border-transparent text-muted-foreground hover:border-muted-foreground/50 hover:text-foreground",
               )}
               aria-current={activeTab === tab.id ? "page" : undefined}
             >
@@ -80,7 +76,7 @@ export function ProductDescription({
     <div className={cn("space-y-6", className)}>
       {/* Description */}
       <div className="prose prose-sm max-w-none dark:prose-invert">
-        <div dangerouslySetInnerHTML={{ __html: description }} />
+        <p className="whitespace-pre-wrap">{description}</p>
       </div>
 
       {/* Features */}

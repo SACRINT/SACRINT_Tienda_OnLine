@@ -138,10 +138,13 @@ export function query<T>(): QueryBuilder<T> {
 
 // Batch loader for N+1 prevention
 export class BatchLoader<K, V> {
-  private batch = new Map<K, {
-    resolve: (value: V | null) => void;
-    reject: (error: Error) => void;
-  }[]>();
+  private batch = new Map<
+    K,
+    {
+      resolve: (value: V | null) => void;
+      reject: (error: Error) => void;
+    }[]
+  >();
   private loader: (keys: K[]) => Promise<Map<K, V>>;
   private maxBatchSize: number;
   private delay: number;
@@ -149,7 +152,7 @@ export class BatchLoader<K, V> {
 
   constructor(
     loader: (keys: K[]) => Promise<Map<K, V>>,
-    options: { maxBatchSize?: number; delay?: number } = {}
+    options: { maxBatchSize?: number; delay?: number } = {},
   ) {
     this.loader = loader;
     this.maxBatchSize = options.maxBatchSize || 100;
@@ -216,7 +219,7 @@ export class BatchLoader<K, V> {
 export function paginate<T>(
   data: T[],
   total: number,
-  options: PaginationOptions
+  options: PaginationOptions,
 ): PaginatedResult<T> {
   const totalPages = Math.ceil(total / options.pageSize);
 
@@ -236,7 +239,7 @@ export function paginate<T>(
 // Cursor-based pagination helper
 export function cursorPaginate<T extends { id: string }>(
   data: T[],
-  pageSize: number
+  pageSize: number,
 ): {
   data: T[];
   nextCursor: string | null;
@@ -256,7 +259,7 @@ export function cursorPaginate<T extends { id: string }>(
 // Query timing wrapper
 export async function withTiming<T>(
   name: string,
-  fn: () => Promise<T>
+  fn: () => Promise<T>,
 ): Promise<T> {
   const start = process.hrtime.bigint();
 
@@ -276,16 +279,23 @@ export async function withTiming<T>(
 export const queryHints = {
   // Products
   productsByTenant: "CREATE INDEX idx_products_tenant ON products(tenant_id)",
-  productsByCategory: "CREATE INDEX idx_products_category ON products(tenant_id, category_id)",
-  productsByPrice: "CREATE INDEX idx_products_price ON products(tenant_id, price)",
-  productsSearch: "CREATE INDEX idx_products_search ON products USING GIN(to_tsvector('english', name || ' ' || description))",
+  productsByCategory:
+    "CREATE INDEX idx_products_category ON products(tenant_id, category_id)",
+  productsByPrice:
+    "CREATE INDEX idx_products_price ON products(tenant_id, price)",
+  productsSearch:
+    "CREATE INDEX idx_products_search ON products USING GIN(to_tsvector('english', name || ' ' || description))",
 
   // Orders
-  ordersByTenant: "CREATE INDEX idx_orders_tenant ON orders(tenant_id, created_at DESC)",
-  ordersByCustomer: "CREATE INDEX idx_orders_customer ON orders(customer_id, created_at DESC)",
+  ordersByTenant:
+    "CREATE INDEX idx_orders_tenant ON orders(tenant_id, created_at DESC)",
+  ordersByCustomer:
+    "CREATE INDEX idx_orders_customer ON orders(customer_id, created_at DESC)",
   ordersByStatus: "CREATE INDEX idx_orders_status ON orders(tenant_id, status)",
 
   // Customers
-  customersByTenant: "CREATE INDEX idx_customers_tenant ON customers(tenant_id)",
-  customersByEmail: "CREATE INDEX idx_customers_email ON customers(tenant_id, email)",
+  customersByTenant:
+    "CREATE INDEX idx_customers_tenant ON customers(tenant_id)",
+  customersByEmail:
+    "CREATE INDEX idx_customers_email ON customers(tenant_id, email)",
 };

@@ -1,5 +1,12 @@
 import Link from "next/link";
-import { Facebook, Instagram, Twitter, Mail, Phone, MapPin } from "lucide-react";
+import {
+  Facebook,
+  Instagram,
+  Twitter,
+  Mail,
+  Phone,
+  MapPin,
+} from "lucide-react";
 
 const footerLinks = {
   shop: [
@@ -45,7 +52,8 @@ export function StoreFooter() {
               SACRINT
             </Link>
             <p className="mt-4 text-sm">
-              Tu tienda en línea de confianza. Productos de calidad con entrega rápida y segura.
+              Tu tienda en línea de confianza. Productos de calidad con entrega
+              rápida y segura.
             </p>
             <div className="mt-6 flex space-x-4">
               {socialLinks.map((social) => (
@@ -141,11 +149,17 @@ export function StoreFooter() {
         <div className="mt-12 pt-8 border-t border-gray-800">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div className="flex flex-wrap items-center gap-6 text-sm">
-              <a href="mailto:soporte@sacrint.com" className="flex items-center hover:text-white">
+              <a
+                href="mailto:soporte@sacrint.com"
+                className="flex items-center hover:text-white"
+              >
                 <Mail className="h-4 w-4 mr-2" />
                 soporte@sacrint.com
               </a>
-              <a href="tel:+525512345678" className="flex items-center hover:text-white">
+              <a
+                href="tel:+525512345678"
+                className="flex items-center hover:text-white"
+              >
                 <Phone className="h-4 w-4 mr-2" />
                 +52 55 1234 5678
               </a>
@@ -161,7 +175,8 @@ export function StoreFooter() {
         <div className="mt-8 pt-8 border-t border-gray-800">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <p className="text-sm">
-              &copy; {new Date().getFullYear()} SACRINT. Todos los derechos reservados.
+              &copy; {new Date().getFullYear()} SACRINT. Todos los derechos
+              reservados.
             </p>
             <div className="flex items-center gap-4 text-sm">
               <Link href="/privacy" className="hover:text-white">

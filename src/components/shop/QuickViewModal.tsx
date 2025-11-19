@@ -38,13 +38,21 @@ interface QuickViewModalProps {
   onClose: () => void;
 }
 
-export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps) {
+export function QuickViewModal({
+  product,
+  isOpen,
+  onClose,
+}: QuickViewModalProps) {
   const [quantity, setQuantity] = React.useState(1);
   const [selectedImage, setSelectedImage] = React.useState(0);
   const [imageError, setImageError] = React.useState(false);
 
   const { addItem } = useCart();
-  const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlist();
+  const {
+    addItem: addToWishlist,
+    removeItem: removeFromWishlist,
+    isInWishlist,
+  } = useWishlist();
 
   React.useEffect(() => {
     if (isOpen) {
@@ -56,9 +64,10 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
 
   if (!product) return null;
 
-  const displayPrice = product.salePrice && product.salePrice < product.price
-    ? product.salePrice
-    : product.price;
+  const displayPrice =
+    product.salePrice && product.salePrice < product.price
+      ? product.salePrice
+      : product.price;
   const hasDiscount = product.salePrice && product.salePrice < product.price;
   const discountPercent = hasDiscount
     ? Math.round(((product.price - product.salePrice!) / product.price) * 100)
@@ -82,7 +91,7 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
 
     toast.success(
       "Producto agregado",
-      `${product.name} x${quantity} agregado al carrito`
+      `${product.name} x${quantity} agregado al carrito`,
     );
     onClose();
   };
@@ -197,9 +206,7 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
 
             {/* SKU */}
             {product.sku && (
-              <p className="text-xs text-gray-500 mb-3">
-                SKU: {product.sku}
-              </p>
+              <p className="text-xs text-gray-500 mb-3">SKU: {product.sku}</p>
             )}
 
             {/* Rating */}
@@ -224,11 +231,17 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
             {/* Price */}
             <div className="flex items-baseline gap-3 mb-4">
               <span className="text-3xl font-bold text-gray-900">
-                ${displayPrice.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
+                $
+                {displayPrice.toLocaleString("es-MX", {
+                  minimumFractionDigits: 2,
+                })}
               </span>
               {hasDiscount && (
                 <span className="text-lg text-gray-500 line-through">
-                  ${product.price.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
+                  $
+                  {product.price.toLocaleString("es-MX", {
+                    minimumFractionDigits: 2,
+                  })}
                 </span>
               )}
             </div>
@@ -256,7 +269,9 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
             {/* Quantity Selector */}
             {product.inStock && (
               <div className="flex items-center gap-4 mb-6">
-                <span className="text-sm font-medium text-gray-700">Cantidad:</span>
+                <span className="text-sm font-medium text-gray-700">
+                  Cantidad:
+                </span>
                 <div className="flex items-center border rounded-lg">
                   <button
                     onClick={decrementQuantity}

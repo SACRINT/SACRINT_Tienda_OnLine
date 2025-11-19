@@ -3,7 +3,14 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { wsClient, ConnectionStatus } from "./websocket";
-import { eventBus, Events, StockUpdateEvent, PriceUpdateEvent, OrderStatusEvent, NotificationEvent } from "./events";
+import {
+  eventBus,
+  Events,
+  StockUpdateEvent,
+  PriceUpdateEvent,
+  OrderStatusEvent,
+  NotificationEvent,
+} from "./events";
 import { presence, UserPresence } from "./presence";
 import { liveUpdates } from "./live-updates";
 
@@ -38,7 +45,10 @@ export function useWebSocket(url?: string): {
 }
 
 // Auto-connect WebSocket
-export function useAutoConnect(userId?: string, tenantId?: string): ConnectionStatus {
+export function useAutoConnect(
+  userId?: string,
+  tenantId?: string,
+): ConnectionStatus {
   const [status, setStatus] = useState<ConnectionStatus>("disconnected");
 
   useEffect(() => {
@@ -91,7 +101,7 @@ export function useStockUpdate(productId: string): {
           setStock(event.newStock);
           setLastUpdate(new Date());
         }
-      }
+      },
     );
 
     return () => {
@@ -124,7 +134,7 @@ export function usePriceUpdate(productId: string): {
           setSalePrice(event.newSalePrice || null);
           setLastUpdate(new Date());
         }
-      }
+      },
     );
 
     return () => {
@@ -154,7 +164,7 @@ export function useOrderStatus(orderId: string): {
           setStatus(event.newStatus);
           setLastUpdate(new Date());
         }
-      }
+      },
     );
 
     return () => {
@@ -181,7 +191,7 @@ export function useNotifications(): {
       Events.NOTIFICATION,
       (notification) => {
         setNotifications((prev) => [notification, ...prev].slice(0, 50));
-      }
+      },
     );
 
     return unsubscribe;
@@ -259,7 +269,11 @@ export function useTyping(channelId: string): {
   useEffect(() => {
     // Listen for typing events
     const unsubscribe = wsClient.on("user:typing", (message) => {
-      const { channelId: msgChannel, userId, isTyping } = message.payload as {
+      const {
+        channelId: msgChannel,
+        userId,
+        isTyping,
+      } = message.payload as {
         channelId: string;
         userId: string;
         isTyping: boolean;
@@ -295,7 +309,7 @@ export function useTyping(channelId: string): {
         }, 5000);
       }
     },
-    [channelId]
+    [channelId],
   );
 
   return {
@@ -308,7 +322,7 @@ export function useTyping(channelId: string): {
 // Event subscription hook
 export function useEvent<T = unknown>(
   event: string,
-  handler: (data: T) => void
+  handler: (data: T) => void,
 ): void {
   const handlerRef = useRef(handler);
   handlerRef.current = handler;

@@ -5,14 +5,7 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import {
-  MoreHorizontal,
-  Edit,
-  Trash2,
-  Eye,
-  Copy,
-  Archive,
-} from "lucide-react";
+import { MoreHorizontal, Edit, Trash2, Eye, Copy, Archive } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BadgeCustom } from "@/components/ui/badge-custom";
 
@@ -89,11 +82,23 @@ export function ProductTable({
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "active":
-        return <BadgeCustom variant="success" size="sm">Active</BadgeCustom>;
+        return (
+          <BadgeCustom variant="success" size="sm">
+            Active
+          </BadgeCustom>
+        );
       case "draft":
-        return <BadgeCustom variant="warning" size="sm">Draft</BadgeCustom>;
+        return (
+          <BadgeCustom variant="warning" size="sm">
+            Draft
+          </BadgeCustom>
+        );
       case "archived":
-        return <BadgeCustom variant="secondary" size="sm">Archived</BadgeCustom>;
+        return (
+          <BadgeCustom variant="secondary" size="sm">
+            Archived
+          </BadgeCustom>
+        );
       default:
         return null;
     }
@@ -148,7 +153,9 @@ export function ProductTable({
               <th className="p-3 text-left w-10">
                 <input
                   type="checkbox"
-                  checked={selectedIds.size === products.length && products.length > 0}
+                  checked={
+                    selectedIds.size === products.length && products.length > 0
+                  }
                   onChange={handleSelectAll}
                   className="rounded"
                 />
@@ -170,13 +177,19 @@ export function ProductTable({
               </tr>
             ) : products.length === 0 ? (
               <tr>
-                <td colSpan={7} className="p-8 text-center text-muted-foreground">
+                <td
+                  colSpan={7}
+                  className="p-8 text-center text-muted-foreground"
+                >
                   No products found
                 </td>
               </tr>
             ) : (
               products.map((product) => (
-                <tr key={product.id} className="border-b last:border-0 hover:bg-muted/50">
+                <tr
+                  key={product.id}
+                  className="border-b last:border-0 hover:bg-muted/50"
+                >
                   <td className="p-3">
                     <input
                       type="checkbox"
@@ -218,7 +231,9 @@ export function ProductTable({
                         variant="ghost"
                         size="icon"
                         onClick={() =>
-                          setOpenMenuId(openMenuId === product.id ? null : product.id)
+                          setOpenMenuId(
+                            openMenuId === product.id ? null : product.id,
+                          )
                         }
                       >
                         <MoreHorizontal className="h-4 w-4" />

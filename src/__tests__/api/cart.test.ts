@@ -2,11 +2,7 @@
 import { NextRequest } from "next/server";
 import { GET, POST } from "@/app/api/cart/route";
 import { auth } from "@/lib/auth/auth";
-import {
-  getOrCreateCart,
-  addItemToCart,
-  getCartTotal,
-} from "@/lib/db/cart";
+import { getOrCreateCart, addItemToCart, getCartTotal } from "@/lib/db/cart";
 
 // Mock dependencies
 jest.mock("@/lib/auth/auth");
@@ -229,7 +225,7 @@ describe("Cart API", () => {
       (auth as jest.Mock).mockResolvedValue(mockSession);
       (getOrCreateCart as jest.Mock).mockResolvedValue(mockCart);
       (addItemToCart as jest.Mock).mockRejectedValue(
-        new Error("Product is out of stock")
+        new Error("Product is out of stock"),
       );
 
       const request = new NextRequest("http://localhost:3000/api/cart", {
@@ -248,7 +244,7 @@ describe("Cart API", () => {
       (auth as jest.Mock).mockResolvedValue(mockSession);
       (getOrCreateCart as jest.Mock).mockResolvedValue(mockCart);
       (addItemToCart as jest.Mock).mockRejectedValue(
-        new Error("Product not found")
+        new Error("Product not found"),
       );
 
       const request = new NextRequest("http://localhost:3000/api/cart", {

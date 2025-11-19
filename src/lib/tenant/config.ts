@@ -54,7 +54,10 @@ export interface TenantLimits {
 }
 
 // Default configurations by plan
-export const PLAN_CONFIGS: Record<TenantConfig["plan"], { limits: TenantLimits; features: string[] }> = {
+export const PLAN_CONFIGS: Record<
+  TenantConfig["plan"],
+  { limits: TenantLimits; features: string[] }
+> = {
   free: {
     limits: {
       products: 10,

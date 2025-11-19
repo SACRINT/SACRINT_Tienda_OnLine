@@ -24,7 +24,7 @@ export const RETENTION_POLICIES = {
 
 // Cleanup abandoned carts
 export async function cleanupAbandonedCarts(
-  tenantId?: string
+  tenantId?: string,
 ): Promise<CleanupResult> {
   const start = Date.now();
   const cutoffDate = new Date();
@@ -73,11 +73,13 @@ export async function cleanupExpiredSessions(): Promise<CleanupResult> {
 
 // Cleanup old notifications
 export async function cleanupOldNotifications(
-  tenantId?: string
+  tenantId?: string,
 ): Promise<CleanupResult> {
   const start = Date.now();
   const cutoffDate = new Date();
-  cutoffDate.setDate(cutoffDate.getDate() - RETENTION_POLICIES.oldNotifications);
+  cutoffDate.setDate(
+    cutoffDate.getDate() - RETENTION_POLICIES.oldNotifications,
+  );
 
   // Get user IDs for tenant if specified
   let userIds: string[] | undefined;
@@ -112,7 +114,7 @@ export async function cleanupOldNotifications(
 
 // Run all cleanup tasks
 export async function runFullCleanup(
-  tenantId?: string
+  tenantId?: string,
 ): Promise<CleanupResult[]> {
   const results: CleanupResult[] = [];
 
@@ -142,21 +144,15 @@ export async function getDatabaseStats(): Promise<{
   tables: Array<{ name: string; count: number }>;
   totalRecords: number;
 }> {
-  const [
-    products,
-    orders,
-    users,
-    carts,
-    sessions,
-    notifications,
-  ] = await Promise.all([
-    db.product.count(),
-    db.order.count(),
-    db.user.count(),
-    db.cart.count(),
-    db.session.count(),
-    db.notification.count(),
-  ]);
+  const [products, orders, users, carts, sessions, notifications] =
+    await Promise.all([
+      db.product.count(),
+      db.order.count(),
+      db.user.count(),
+      db.cart.count(),
+      db.session.count(),
+      db.notification.count(),
+    ]);
 
   const tables = [
     { name: "Product", count: products },

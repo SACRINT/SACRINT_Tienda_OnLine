@@ -38,14 +38,55 @@ export interface NavItem {
 }
 
 const defaultNavItems: NavItem[] = [
-  { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
-  { id: "products", label: "Products", icon: Package, href: "/dashboard/products" },
-  { id: "orders", label: "Orders", icon: ShoppingCart, href: "/dashboard/orders", badge: 5 },
-  { id: "customers", label: "Customers", icon: Users, href: "/dashboard/customers" },
-  { id: "analytics", label: "Analytics", icon: BarChart3, href: "/dashboard/analytics" },
-  { id: "promotions", label: "Promotions", icon: Tag, href: "/dashboard/promotions" },
-  { id: "reviews", label: "Reviews", icon: MessageSquare, href: "/dashboard/reviews" },
-  { id: "settings", label: "Settings", icon: Settings, href: "/dashboard/settings" },
+  {
+    id: "dashboard",
+    label: "Dashboard",
+    icon: LayoutDashboard,
+    href: "/dashboard",
+  },
+  {
+    id: "products",
+    label: "Products",
+    icon: Package,
+    href: "/dashboard/products",
+  },
+  {
+    id: "orders",
+    label: "Orders",
+    icon: ShoppingCart,
+    href: "/dashboard/orders",
+    badge: 5,
+  },
+  {
+    id: "customers",
+    label: "Customers",
+    icon: Users,
+    href: "/dashboard/customers",
+  },
+  {
+    id: "analytics",
+    label: "Analytics",
+    icon: BarChart3,
+    href: "/dashboard/analytics",
+  },
+  {
+    id: "promotions",
+    label: "Promotions",
+    icon: Tag,
+    href: "/dashboard/promotions",
+  },
+  {
+    id: "reviews",
+    label: "Reviews",
+    icon: MessageSquare,
+    href: "/dashboard/reviews",
+  },
+  {
+    id: "settings",
+    label: "Settings",
+    icon: Settings,
+    href: "/dashboard/settings",
+  },
 ];
 
 export interface DashboardLayoutProps {
@@ -77,7 +118,9 @@ export function DashboardLayout({
   className,
 }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
-  const [expandedItems, setExpandedItems] = React.useState<Set<string>>(new Set());
+  const [expandedItems, setExpandedItems] = React.useState<Set<string>>(
+    new Set(),
+  );
 
   const toggleExpanded = (id: string) => {
     const newExpanded = new Set(expandedItems);
@@ -103,7 +146,7 @@ export function DashboardLayout({
       <aside
         className={cn(
           "fixed top-0 left-0 h-full w-64 bg-background border-r z-50 transform transition-transform lg:translate-x-0",
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          sidebarOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
         {/* Logo */}
@@ -140,7 +183,7 @@ export function DashboardLayout({
                     "w-full flex items-center justify-between px-4 py-2.5 text-sm transition-colors",
                     isActive
                       ? "bg-primary/10 text-primary font-medium"
-                      : "hover:bg-muted"
+                      : "hover:bg-muted",
                   )}
                 >
                   <div className="flex items-center gap-3">
@@ -156,7 +199,7 @@ export function DashboardLayout({
                     <ChevronDown
                       className={cn(
                         "h-4 w-4 transition-transform",
-                        isExpanded && "rotate-180"
+                        isExpanded && "rotate-180",
                       )}
                     />
                   )}
@@ -174,7 +217,7 @@ export function DashboardLayout({
                         }}
                         className={cn(
                           "w-full text-left px-4 py-2 text-sm hover:bg-muted",
-                          activeItem === child.id && "text-primary font-medium"
+                          activeItem === child.id && "text-primary font-medium",
                         )}
                       >
                         {child.label}
@@ -191,11 +234,7 @@ export function DashboardLayout({
         {user && (
           <div className="border-t p-4">
             <div className="flex items-center gap-3">
-              <AvatarCustom
-                src={user.avatar}
-                name={user.name}
-                size="sm"
-              />
+              <AvatarCustom src={user.avatar} name={user.name} size="sm" />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">{user.name}</p>
                 <p className="text-xs text-muted-foreground truncate">

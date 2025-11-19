@@ -39,9 +39,11 @@ async function getProducts() {
     });
 
     return products.map((product) => {
-      const avgRating = product.reviews.length > 0
-        ? product.reviews.reduce((sum, r) => sum + r.rating, 0) / product.reviews.length
-        : undefined;
+      const avgRating =
+        product.reviews.length > 0
+          ? product.reviews.reduce((sum, r) => sum + r.rating, 0) /
+            product.reviews.length
+          : undefined;
 
       return {
         id: product.id,
@@ -50,7 +52,9 @@ async function getProducts() {
         price: Number(product.salePrice || product.basePrice),
         salePrice: product.salePrice ? Number(product.salePrice) : undefined,
         originalPrice: Number(product.basePrice),
-        image: product.images[0]?.url || "https://images.unsplash.com/photo-1505740420928-5e560c06d30e",
+        image:
+          product.images[0]?.url ||
+          "https://images.unsplash.com/photo-1505740420928-5e560c06d30e",
         rating: avgRating,
         reviewCount: product.reviews.length,
         inStock: product.stock > 0,

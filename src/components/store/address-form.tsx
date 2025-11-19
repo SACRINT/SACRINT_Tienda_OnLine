@@ -91,7 +91,7 @@ export function AddressForm({
             onChange={(e) => handleChange("firstName", e.target.value)}
             className={cn(
               "w-full px-3 py-2 border rounded-md text-sm",
-              errors.firstName && "border-destructive"
+              errors.firstName && "border-destructive",
             )}
             required
           />
@@ -104,7 +104,7 @@ export function AddressForm({
             onChange={(e) => handleChange("lastName", e.target.value)}
             className={cn(
               "w-full px-3 py-2 border rounded-md text-sm",
-              errors.lastName && "border-destructive"
+              errors.lastName && "border-destructive",
             )}
             required
           />
@@ -132,7 +132,7 @@ export function AddressForm({
           placeholder="Street address"
           className={cn(
             "w-full px-3 py-2 border rounded-md text-sm",
-            errors.address1 && "border-destructive"
+            errors.address1 && "border-destructive",
           )}
           required
         />
@@ -157,7 +157,7 @@ export function AddressForm({
               onChange={(e) => handleChange("city", e.target.value)}
               className={cn(
                 "w-full px-3 py-2 border rounded-md text-sm",
-                errors.city && "border-destructive"
+                errors.city && "border-destructive",
               )}
               required
             />
@@ -184,7 +184,7 @@ export function AddressForm({
               onChange={(e) => handleChange("postalCode", e.target.value)}
               className={cn(
                 "w-full px-3 py-2 border rounded-md text-sm",
-                errors.postalCode && "border-destructive"
+                errors.postalCode && "border-destructive",
               )}
               required
             />
@@ -216,7 +216,7 @@ export function AddressForm({
             onChange={(e) => handleChange("phone", e.target.value)}
             className={cn(
               "w-full px-3 py-2 border rounded-md text-sm",
-              errors.phone && "border-destructive"
+              errors.phone && "border-destructive",
             )}
           />
         </FormField>
@@ -259,7 +259,7 @@ export function SavedAddressSelector({
             "flex items-start gap-3 p-4 border rounded-lg cursor-pointer transition-colors",
             selectedId === addr.id
               ? "border-primary bg-primary/5"
-              : "hover:bg-muted/50"
+              : "hover:bg-muted/50",
           )}
         >
           <input

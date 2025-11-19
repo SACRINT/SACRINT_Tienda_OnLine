@@ -1,9 +1,5 @@
 // i18n Tests
-import {
-  t,
-  getTranslations,
-  detectLocale,
-} from "@/lib/i18n/translations";
+import { t, getTranslations, detectLocale } from "@/lib/i18n/translations";
 import {
   formatCurrency,
   formatDate,

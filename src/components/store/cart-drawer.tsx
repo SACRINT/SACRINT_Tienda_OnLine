@@ -53,7 +53,7 @@ export function CartDrawer({
 
   const subtotal = items.reduce(
     (sum, item) => sum + item.price * item.quantity,
-    0
+    0,
   );
 
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
@@ -77,7 +77,7 @@ export function CartDrawer({
         className={cn(
           "fixed top-0 right-0 h-full w-full max-w-md bg-background shadow-xl z-50 transform transition-transform duration-300",
           open ? "translate-x-0" : "translate-x-full",
-          className
+          className,
         )}
         role="dialog"
         aria-modal="true"
@@ -115,7 +115,7 @@ export function CartDrawer({
                     style={{
                       width: `${Math.min(
                         (subtotal / freeShippingThreshold) * 100,
-                        100
+                        100,
                       )}%`,
                     }}
                   />
@@ -126,7 +126,10 @@ export function CartDrawer({
         )}
 
         {/* Items */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4" style={{ maxHeight: "calc(100vh - 280px)" }}>
+        <div
+          className="flex-1 overflow-y-auto p-4 space-y-4"
+          style={{ maxHeight: "calc(100vh - 280px)" }}
+        >
           {items.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <ShoppingBag className="h-12 w-12 text-muted-foreground mb-4" />
@@ -160,7 +163,9 @@ export function CartDrawer({
                 <div className="flex-1 min-w-0">
                   <h3 className="text-sm font-medium truncate">{item.name}</h3>
                   {item.variant && (
-                    <p className="text-sm text-muted-foreground">{item.variant}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {item.variant}
+                    </p>
                   )}
                   <p className="text-sm font-medium mt-1">
                     {formatPrice(item.price)}

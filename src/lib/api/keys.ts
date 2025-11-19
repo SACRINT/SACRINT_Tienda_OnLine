@@ -28,7 +28,7 @@ export async function generateApiKey(
     permissions?: string[];
     rateLimit?: number;
     expiresAt?: Date;
-  }
+  },
 ): Promise<{ key: string; apiKey: ApiKey }> {
   // Generate random key
   const keyBytes = randomBytes(32);
@@ -72,7 +72,7 @@ export async function generateApiKey(
 
 // Validate API key
 export async function validateApiKey(
-  key: string
+  key: string,
 ): Promise<{ valid: boolean; apiKey?: ApiKey; error?: string }> {
   if (!key.startsWith("sk_live_")) {
     return { valid: false, error: "Invalid key format" };
@@ -165,7 +165,7 @@ function hashKey(key: string): string {
 // Check if API key has permission
 export function apiKeyHasPermission(
   apiKey: ApiKey,
-  permission: string
+  permission: string,
 ): boolean {
   if (apiKey.permissions.includes("*")) {
     return true;

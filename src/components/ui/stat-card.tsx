@@ -34,24 +34,19 @@ export function StatCard({
     trend?.direction === "up"
       ? TrendingUp
       : trend?.direction === "down"
-      ? TrendingDown
-      : Minus;
+        ? TrendingDown
+        : Minus;
 
   const trendColor =
     trend?.direction === "up"
       ? "text-success"
       : trend?.direction === "down"
-      ? "text-destructive"
-      : "text-muted-foreground";
+        ? "text-destructive"
+        : "text-muted-foreground";
 
   if (loading) {
     return (
-      <div
-        className={cn(
-          "rounded-lg border bg-card p-6 shadow-sm",
-          className
-        )}
-      >
+      <div className={cn("rounded-lg border bg-card p-6 shadow-sm", className)}>
         <div className="flex items-center justify-between">
           <div className="h-4 w-24 animate-pulse rounded bg-muted" />
           <div className="h-8 w-8 animate-pulse rounded bg-muted" />
@@ -68,7 +63,7 @@ export function StatCard({
     <div
       className={cn(
         "rounded-lg border bg-card p-6 shadow-sm transition-shadow hover:shadow-md",
-        className
+        className,
       )}
     >
       <div className="flex items-center justify-between">

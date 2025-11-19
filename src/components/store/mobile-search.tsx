@@ -59,10 +59,7 @@ export function MobileSearch({
 
   return (
     <div
-      className={cn(
-        "fixed inset-0 bg-background z-50 lg:hidden",
-        className
-      )}
+      className={cn("fixed inset-0 bg-background z-50 lg:hidden", className)}
     >
       {/* Header */}
       <div className="flex items-center gap-3 p-4 border-b">

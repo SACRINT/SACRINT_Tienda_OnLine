@@ -114,14 +114,14 @@ export function StatusIndicator({
           "relative inline-flex rounded-full",
           styles.dot,
           config.dotColor,
-          className
+          className,
         )}
       >
         {pulse && (
           <span
             className={cn(
               "absolute inline-flex h-full w-full animate-ping rounded-full opacity-75",
-              config.dotColor
+              config.dotColor,
             )}
           />
         )}
@@ -137,15 +137,12 @@ export function StatusIndicator({
         config.color,
         styles.padding,
         styles.text,
-        className
+        className,
       )}
     >
       {showIcon && (
         <Icon
-          className={cn(
-            styles.icon,
-            status === "processing" && "animate-spin"
-          )}
+          className={cn(styles.icon, status === "processing" && "animate-spin")}
           aria-hidden="true"
         />
       )}
@@ -164,7 +161,10 @@ export type OrderStatus =
   | "cancelled"
   | "refunded";
 
-const orderStatusMap: Record<OrderStatus, { status: StatusType; label: string }> = {
+const orderStatusMap: Record<
+  OrderStatus,
+  { status: StatusType; label: string }
+> = {
   pending: { status: "pending", label: "Pending" },
   confirmed: { status: "success", label: "Confirmed" },
   processing: { status: "processing", label: "Processing" },
@@ -198,7 +198,10 @@ export function OrderStatusIndicator({
 // Payment status specific
 export type PaymentStatus = "pending" | "paid" | "failed" | "refunded";
 
-const paymentStatusMap: Record<PaymentStatus, { status: StatusType; label: string }> = {
+const paymentStatusMap: Record<
+  PaymentStatus,
+  { status: StatusType; label: string }
+> = {
   pending: { status: "pending", label: "Pending" },
   paid: { status: "success", label: "Paid" },
   failed: { status: "error", label: "Failed" },

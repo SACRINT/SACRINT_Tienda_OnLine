@@ -13,7 +13,7 @@ describe("Modal", () => {
     render(
       <Modal open={true} onClose={mockOnClose} title="Test Modal">
         <p>Modal content</p>
-      </Modal>
+      </Modal>,
     );
 
     expect(screen.getByText("Test Modal")).toBeInTheDocument();
@@ -24,7 +24,7 @@ describe("Modal", () => {
     render(
       <Modal open={false} onClose={mockOnClose} title="Test Modal">
         <p>Modal content</p>
-      </Modal>
+      </Modal>,
     );
 
     expect(screen.queryByText("Test Modal")).not.toBeInTheDocument();
@@ -34,7 +34,7 @@ describe("Modal", () => {
     render(
       <Modal open={true} onClose={mockOnClose} title="Test Modal">
         <p>Content</p>
-      </Modal>
+      </Modal>,
     );
 
     const closeButton = screen.getByRole("button", { name: /close|cerrar/i });
@@ -47,7 +47,7 @@ describe("Modal", () => {
     render(
       <Modal open={true} onClose={mockOnClose} title="Test Modal">
         <p>Content</p>
-      </Modal>
+      </Modal>,
     );
 
     const overlay = screen.getByTestId("modal-overlay");
@@ -60,7 +60,7 @@ describe("Modal", () => {
     render(
       <Modal open={true} onClose={mockOnClose} title="Test Modal">
         <p>Content</p>
-      </Modal>
+      </Modal>,
     );
 
     const content = screen.getByText("Content");
@@ -73,7 +73,7 @@ describe("Modal", () => {
     render(
       <Modal open={true} onClose={mockOnClose} title="Test Modal">
         <p>Content</p>
-      </Modal>
+      </Modal>,
     );
 
     fireEvent.keyDown(document, { key: "Escape" });
@@ -86,7 +86,7 @@ describe("Modal", () => {
       <Modal open={true} onClose={mockOnClose} title="Test Modal">
         <button>First</button>
         <button>Second</button>
-      </Modal>
+      </Modal>,
     );
 
     const firstButton = screen.getByText("First");
@@ -110,7 +110,7 @@ describe("Modal", () => {
         description="This is a description"
       >
         <p>Content</p>
-      </Modal>
+      </Modal>,
     );
 
     expect(screen.getByText("This is a description")).toBeInTheDocument();
@@ -125,7 +125,7 @@ describe("Modal", () => {
         footer={<button>Action</button>}
       >
         <p>Content</p>
-      </Modal>
+      </Modal>,
     );
 
     expect(screen.getByText("Action")).toBeInTheDocument();
@@ -135,7 +135,7 @@ describe("Modal", () => {
     render(
       <Modal open={true} onClose={mockOnClose} title="Large Modal" size="lg">
         <p>Content</p>
-      </Modal>
+      </Modal>,
     );
 
     const modal = screen.getByRole("dialog");
@@ -146,7 +146,7 @@ describe("Modal", () => {
     render(
       <Modal open={true} onClose={mockOnClose} title="Test Modal">
         <p>Content</p>
-      </Modal>
+      </Modal>,
     );
 
     expect(document.body).toHaveStyle({ overflow: "hidden" });
@@ -156,13 +156,13 @@ describe("Modal", () => {
     const { rerender } = render(
       <Modal open={true} onClose={mockOnClose} title="Test Modal">
         <p>Content</p>
-      </Modal>
+      </Modal>,
     );
 
     rerender(
       <Modal open={false} onClose={mockOnClose} title="Test Modal">
         <p>Content</p>
-      </Modal>
+      </Modal>,
     );
 
     expect(document.body).not.toHaveStyle({ overflow: "hidden" });
@@ -172,7 +172,7 @@ describe("Modal", () => {
     render(
       <Modal open={true} onClose={mockOnClose} title="Test Modal">
         <p>Content</p>
-      </Modal>
+      </Modal>,
     );
 
     const modal = screen.getByRole("dialog");

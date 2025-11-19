@@ -112,8 +112,8 @@ export function DashboardStats({
                     stat.change > 0
                       ? "up"
                       : stat.change < 0
-                      ? "down"
-                      : "neutral",
+                        ? "down"
+                        : "neutral",
                   label: stat.changeLabel,
                 }
               : undefined
@@ -146,8 +146,8 @@ export function MiniStat({ label, value, change, className }: MiniStatProps) {
               change > 0
                 ? "text-green-600"
                 : change < 0
-                ? "text-red-600"
-                : "text-muted-foreground"
+                  ? "text-red-600"
+                  : "text-muted-foreground",
             )}
           >
             {change > 0 ? (

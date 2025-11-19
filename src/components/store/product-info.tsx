@@ -79,11 +79,14 @@ export function ProductInfo({
   };
 
   // Group variants by type
-  const variantsByType = variants.reduce((acc, variant) => {
-    if (!acc[variant.type]) acc[variant.type] = [];
-    acc[variant.type].push(variant);
-    return acc;
-  }, {} as Record<string, ProductVariant[]>);
+  const variantsByType = variants.reduce(
+    (acc, variant) => {
+      if (!acc[variant.type]) acc[variant.type] = [];
+      acc[variant.type].push(variant);
+      return acc;
+    },
+    {} as Record<string, ProductVariant[]>,
+  );
 
   const isOutOfStock = stock === 0;
 
@@ -101,12 +104,14 @@ export function ProductInfo({
                 variant="ghost"
                 size="icon"
                 onClick={onWishlist}
-                aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+                aria-label={
+                  isWishlisted ? "Remove from wishlist" : "Add to wishlist"
+                }
               >
                 <Heart
                   className={cn(
                     "h-5 w-5",
-                    isWishlisted && "fill-red-500 text-red-500"
+                    isWishlisted && "fill-red-500 text-red-500",
                   )}
                 />
               </Button>
@@ -123,9 +128,7 @@ export function ProductInfo({
             )}
           </div>
         </div>
-        {sku && (
-          <p className="text-sm text-muted-foreground">SKU: {sku}</p>
-        )}
+        {sku && <p className="text-sm text-muted-foreground">SKU: {sku}</p>}
       </div>
 
       {/* Price */}
@@ -168,7 +171,8 @@ export function ProductInfo({
                   selectedVariants[type] === variant.value
                     ? "border-primary bg-primary/10"
                     : "border-input hover:border-muted-foreground",
-                  !variant.available && "opacity-50 cursor-not-allowed line-through"
+                  !variant.available &&
+                    "opacity-50 cursor-not-allowed line-through",
                 )}
                 style={
                   type === "color"

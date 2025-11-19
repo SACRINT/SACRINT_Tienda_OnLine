@@ -18,7 +18,7 @@ export interface BenchmarkResult {
 export async function benchmark(
   name: string,
   fn: () => Promise<void> | void,
-  iterations: number = 100
+  iterations: number = 100,
 ): Promise<BenchmarkResult> {
   const times: number[] = [];
 
@@ -71,12 +71,13 @@ export function formatBenchmarkResult(result: BenchmarkResult): string {
 // Compare two benchmark results
 export function compareBenchmarks(
   baseline: BenchmarkResult,
-  current: BenchmarkResult
+  current: BenchmarkResult,
 ): {
   improvement: number;
   faster: boolean;
 } {
-  const improvement = ((baseline.avgTime - current.avgTime) / baseline.avgTime) * 100;
+  const improvement =
+    ((baseline.avgTime - current.avgTime) / baseline.avgTime) * 100;
   return {
     improvement,
     faster: improvement > 0,
@@ -104,7 +105,7 @@ export function getMemoryUsage(): {
 
 // CPU usage estimate (simple)
 export async function estimateCpuUsage(
-  duration: number = 1000
+  duration: number = 1000,
 ): Promise<number> {
   const start = process.hrtime.bigint();
   let ops = 0;

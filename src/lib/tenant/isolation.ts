@@ -32,7 +32,9 @@ export function requireTenantContext(): string {
 }
 
 // Get tenant by ID
-export async function getTenantById(tenantId: string): Promise<TenantConfig | null> {
+export async function getTenantById(
+  tenantId: string,
+): Promise<TenantConfig | null> {
   const cacheKey = "tenant:" + tenantId;
   const cached = await cache.get<TenantConfig>(cacheKey);
   if (cached) return cached;
@@ -63,7 +65,9 @@ export async function getTenantById(tenantId: string): Promise<TenantConfig | nu
 }
 
 // Get tenant by slug
-export async function getTenantBySlug(slug: string): Promise<TenantConfig | null> {
+export async function getTenantBySlug(
+  slug: string,
+): Promise<TenantConfig | null> {
   const tenant = await db.tenant.findUnique({
     where: { slug },
   });
@@ -73,7 +77,9 @@ export async function getTenantBySlug(slug: string): Promise<TenantConfig | null
 }
 
 // Get tenant by domain
-export async function getTenantByDomain(domain: string): Promise<TenantConfig | null> {
+export async function getTenantByDomain(
+  domain: string,
+): Promise<TenantConfig | null> {
   // Check for custom domain
   const byCustomDomain = await db.tenant.findFirst({
     where: { customDomain: domain },
@@ -99,7 +105,7 @@ export async function getTenantByDomain(domain: string): Promise<TenantConfig | 
 // Validate tenant access for a user
 export async function validateTenantAccess(
   userId: string,
-  tenantId: string
+  tenantId: string,
 ): Promise<boolean> {
   const user = await db.user.findUnique({
     where: { id: userId },
@@ -118,7 +124,7 @@ export async function validateTenantAccess(
 // Check if tenant has feature
 export async function hasTenantFeature(
   tenantId: string,
-  feature: string
+  feature: string,
 ): Promise<boolean> {
   const tenant = await getTenantById(tenantId);
   if (!tenant) return false;
@@ -130,7 +136,7 @@ export async function hasTenantFeature(
 export async function checkTenantLimit(
   tenantId: string,
   resource: keyof TenantConfig["limits"],
-  currentCount: number
+  currentCount: number,
 ): Promise<{ allowed: boolean; limit: number; current: number }> {
   const tenant = await getTenantById(tenantId);
   if (!tenant) {
@@ -153,7 +159,7 @@ export async function checkTenantLimit(
 
 // Get tenant resource counts
 export async function getTenantResourceCounts(
-  tenantId: string
+  tenantId: string,
 ): Promise<Record<string, number>> {
   const [products, categories, orders, users] = await Promise.all([
     db.product.count({ where: { tenantId } }),
@@ -177,7 +183,7 @@ export async function invalidateTenantCache(tenantId: string): Promise<void> {
 
 // Middleware helper for tenant isolation
 export function withTenantIsolation<T extends { tenantId?: string }>(
-  query: T
+  query: T,
 ): T & { tenantId: string } {
   const tenantId = requireTenantContext();
   return { ...query, tenantId };

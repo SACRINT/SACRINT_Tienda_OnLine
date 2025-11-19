@@ -39,13 +39,13 @@ describe("RBAC Permissions", () => {
   describe("hasAnyPermission", () => {
     it("should return true if user has at least one permission", () => {
       expect(
-        hasAnyPermission("STAFF", ["products.read", "products.delete"])
+        hasAnyPermission("STAFF", ["products.read", "products.delete"]),
       ).toBe(true);
     });
 
     it("should return false if user has none of the permissions", () => {
       expect(
-        hasAnyPermission("STAFF", ["products.delete", "users.create"])
+        hasAnyPermission("STAFF", ["products.delete", "users.create"]),
       ).toBe(false);
     });
 
@@ -57,13 +57,13 @@ describe("RBAC Permissions", () => {
   describe("hasAllPermissions", () => {
     it("should return true if user has all permissions", () => {
       expect(
-        hasAllPermissions("MANAGER", ["products.read", "orders.read"])
+        hasAllPermissions("MANAGER", ["products.read", "orders.read"]),
       ).toBe(true);
     });
 
     it("should return false if user is missing any permission", () => {
       expect(
-        hasAllPermissions("MANAGER", ["products.read", "users.delete"])
+        hasAllPermissions("MANAGER", ["products.read", "users.delete"]),
       ).toBe(false);
     });
 

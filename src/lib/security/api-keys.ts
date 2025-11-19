@@ -68,14 +68,12 @@ export class InMemoryApiKeyStore implements ApiKeyStore {
   }
 
   async findByPrefix(prefix: string): Promise<ApiKey[]> {
-    return Array.from(this.keys.values()).filter(
-      (k) => k.keyPrefix === prefix
-    );
+    return Array.from(this.keys.values()).filter((k) => k.keyPrefix === prefix);
   }
 
   async findByTenant(tenantId: string): Promise<ApiKey[]> {
     return Array.from(this.keys.values()).filter(
-      (k) => k.tenantId === tenantId && !k.revokedAt
+      (k) => k.tenantId === tenantId && !k.revokedAt,
     );
   }
 
@@ -198,7 +196,7 @@ export const apiKeyManager = new ApiKeyManager();
 
 // Middleware helper
 export async function validateApiKey(
-  request: Request
+  request: Request,
 ): Promise<ApiKeyValidationResult> {
   // Check Authorization header
   const authHeader = request.headers.get("authorization");
@@ -224,7 +222,7 @@ export async function validateApiKey(
 // Require API key with scope
 export async function requireApiKey(
   request: Request,
-  requiredScopes?: ApiKeyScope[]
+  requiredScopes?: ApiKeyScope[],
 ): Promise<ApiKey> {
   const result = await validateApiKey(request);
 
@@ -233,7 +231,10 @@ export async function requireApiKey(
   }
 
   if (requiredScopes && requiredScopes.length > 0) {
-    const hasRequired = apiKeyManager.hasAnyScope(result.apiKey, requiredScopes);
+    const hasRequired = apiKeyManager.hasAnyScope(
+      result.apiKey,
+      requiredScopes,
+    );
     if (!hasRequired) {
       throw new Error("Insufficient API key scope");
     }

@@ -8,7 +8,12 @@ import { cn } from "@/lib/utils";
 import { X, LucideIcon } from "lucide-react";
 import { Button } from "./button";
 
-export type BannerVariant = "default" | "info" | "success" | "warning" | "error";
+export type BannerVariant =
+  | "default"
+  | "info"
+  | "success"
+  | "warning"
+  | "error";
 
 export interface BannerProps {
   children: React.ReactNode;
@@ -61,14 +66,16 @@ export function Banner({
         sticky && "sticky z-40",
         sticky && position === "top" && "top-0",
         sticky && position === "bottom" && "bottom-0",
-        className
+        className,
       )}
       role="banner"
     >
       <div className="mx-auto max-w-7xl">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            {Icon && <Icon className="h-5 w-5 flex-shrink-0" aria-hidden="true" />}
+            {Icon && (
+              <Icon className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
+            )}
             <p className="text-sm font-medium">{children}</p>
           </div>
 
@@ -119,7 +126,7 @@ export function AnnouncementBanner({
       href={href}
       className={cn(
         "block w-full bg-gradient-to-r from-primary to-primary/80 px-4 py-3 text-center text-sm font-medium text-primary-foreground hover:from-primary/90 hover:to-primary/70 transition-colors",
-        className
+        className,
       )}
     >
       {tag && (

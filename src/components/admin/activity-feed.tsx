@@ -60,9 +60,11 @@ const activityIcons: Record<ActivityType, LucideIcon> = {
 
 const activityColors: Record<ActivityType, string> = {
   order: "bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-400",
-  product: "bg-purple-100 text-purple-600 dark:bg-purple-900 dark:text-purple-400",
+  product:
+    "bg-purple-100 text-purple-600 dark:bg-purple-900 dark:text-purple-400",
   customer: "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-400",
-  review: "bg-yellow-100 text-yellow-600 dark:bg-yellow-900 dark:text-yellow-400",
+  review:
+    "bg-yellow-100 text-yellow-600 dark:bg-yellow-900 dark:text-yellow-400",
   message: "bg-cyan-100 text-cyan-600 dark:bg-cyan-900 dark:text-cyan-400",
   alert: "bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-400",
   success: "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-400",
@@ -111,7 +113,7 @@ export function ActivityFeed({
                 key={activity.id}
                 className={cn(
                   "flex items-start gap-3 p-4",
-                  onActivityClick && "cursor-pointer hover:bg-muted/50"
+                  onActivityClick && "cursor-pointer hover:bg-muted/50",
                 )}
                 onClick={() => onActivityClick?.(activity.id)}
               >
@@ -119,7 +121,7 @@ export function ActivityFeed({
                 <div
                   className={cn(
                     "flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center",
-                    activityColors[activity.type]
+                    activityColors[activity.type],
                   )}
                 >
                   <Icon className="h-4 w-4" />

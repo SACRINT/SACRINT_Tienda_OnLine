@@ -68,7 +68,7 @@ describe("Tenant Management", () => {
       (auth as jest.Mock).mockResolvedValue(null);
 
       await expect(getCurrentUserTenantId()).rejects.toThrow(
-        "Unauthorized - No session found"
+        "Unauthorized - No session found",
       );
     });
 
@@ -76,7 +76,7 @@ describe("Tenant Management", () => {
       (auth as jest.Mock).mockResolvedValue({ user: null });
 
       await expect(getCurrentUserTenantId()).rejects.toThrow(
-        "Unauthorized - No session found"
+        "Unauthorized - No session found",
       );
     });
   });
@@ -96,7 +96,7 @@ describe("Tenant Management", () => {
       });
 
       await expect(ensureTenantAccess("tenant_123")).rejects.toThrow(
-        "User has no tenant assigned"
+        "User has no tenant assigned",
       );
     });
 
@@ -106,7 +106,7 @@ describe("Tenant Management", () => {
       });
 
       await expect(ensureTenantAccess("tenant_123")).rejects.toThrow(
-        "Forbidden - User does not have access to this tenant"
+        "Forbidden - User does not have access to this tenant",
       );
     });
   });
@@ -206,7 +206,7 @@ describe("Tenant Management", () => {
       (auth as jest.Mock).mockResolvedValue(null);
 
       await expect(
-        createTenant({ name: "Test", slug: "test" })
+        createTenant({ name: "Test", slug: "test" }),
       ).rejects.toThrow("Unauthorized");
     });
 
@@ -215,7 +215,7 @@ describe("Tenant Management", () => {
 
       const tenant = await createTenant(
         { name: "Test Store", slug: "test-store" },
-        true
+        true,
       );
 
       expect(tenant).toEqual(mockTenant);
@@ -256,7 +256,9 @@ describe("Tenant Management", () => {
         name: "Updated Store",
       });
 
-      const tenant = await updateTenant("tenant_123", { name: "Updated Store" });
+      const tenant = await updateTenant("tenant_123", {
+        name: "Updated Store",
+      });
 
       expect(tenant!.name).toBe("Updated Store");
       expect(db.tenant.update).toHaveBeenCalledWith({
@@ -271,7 +273,7 @@ describe("Tenant Management", () => {
       });
 
       await expect(
-        updateTenant("tenant_123", { name: "Updated" })
+        updateTenant("tenant_123", { name: "Updated" }),
       ).rejects.toThrow("Forbidden");
     });
   });

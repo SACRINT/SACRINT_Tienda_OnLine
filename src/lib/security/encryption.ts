@@ -1,7 +1,12 @@
 // Data Encryption
 // Encrypt sensitive data at rest
 
-import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from "crypto";
+import {
+  createCipheriv,
+  createDecipheriv,
+  randomBytes,
+  scryptSync,
+} from "crypto";
 
 const ALGORITHM = "aes-256-gcm";
 const KEY_LENGTH = 32;
@@ -49,7 +54,9 @@ export function decrypt(ciphertext: string): string {
   const tag = Buffer.from(tagHex, "hex");
   const key = getEncryptionKey();
 
-  const decipher = createDecipheriv(ALGORITHM, key, iv);
+  const decipher = createDecipheriv(ALGORITHM, key, iv, {
+    authTagLength: 16,
+  });
   decipher.setAuthTag(tag);
 
   let decrypted = decipher.update(encrypted, "hex", "utf8");
@@ -94,7 +101,10 @@ export function verifyHash(value: string, hash: string): boolean {
 }
 
 // Mask sensitive data for logging
-export function maskSensitiveData(data: string, visibleChars: number = 4): string {
+export function maskSensitiveData(
+  data: string,
+  visibleChars: number = 4,
+): string {
   if (data.length <= visibleChars * 2) {
     return "*".repeat(data.length);
   }

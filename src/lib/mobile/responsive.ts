@@ -62,23 +62,31 @@ export function isDesktopView(): boolean {
 }
 
 // Responsive value helper
-export function responsiveValue<T>(
-  values: {
-    base: T;
-    sm?: T;
-    md?: T;
-    lg?: T;
-    xl?: T;
-    "2xl"?: T;
-  }
-): T {
+export function responsiveValue<T>(values: {
+  base: T;
+  sm?: T;
+  md?: T;
+  lg?: T;
+  xl?: T;
+  "2xl"?: T;
+}): T {
   const breakpoint = getCurrentBreakpoint();
 
   if (breakpoint === "2xl" && values["2xl"] !== undefined) return values["2xl"];
-  if ((breakpoint === "2xl" || breakpoint === "xl") && values.xl !== undefined) return values.xl;
-  if (["2xl", "xl", "lg"].includes(breakpoint || "") && values.lg !== undefined) return values.lg;
-  if (["2xl", "xl", "lg", "md"].includes(breakpoint || "") && values.md !== undefined) return values.md;
-  if (["2xl", "xl", "lg", "md", "sm"].includes(breakpoint || "") && values.sm !== undefined) return values.sm;
+  if ((breakpoint === "2xl" || breakpoint === "xl") && values.xl !== undefined)
+    return values.xl;
+  if (["2xl", "xl", "lg"].includes(breakpoint || "") && values.lg !== undefined)
+    return values.lg;
+  if (
+    ["2xl", "xl", "lg", "md"].includes(breakpoint || "") &&
+    values.md !== undefined
+  )
+    return values.md;
+  if (
+    ["2xl", "xl", "lg", "md", "sm"].includes(breakpoint || "") &&
+    values.sm !== undefined
+  )
+    return values.sm;
 
   return values.base;
 }
@@ -108,9 +116,15 @@ export function getScrollPosition(): { x: number; y: number } {
 }
 
 // Check if element is in viewport
-export function isInViewport(element: HTMLElement, threshold: number = 0): boolean {
+export function isInViewport(
+  element: HTMLElement,
+  threshold: number = 0,
+): boolean {
   const rect = element.getBoundingClientRect();
-  const viewHeight = Math.max(document.documentElement.clientHeight, window.innerHeight);
+  const viewHeight = Math.max(
+    document.documentElement.clientHeight,
+    window.innerHeight,
+  );
 
   return !(rect.bottom < threshold || rect.top - viewHeight >= -threshold);
 }
@@ -127,7 +141,7 @@ export function matchesMediaQuery(query: string): boolean {
 // Subscribe to media query changes
 export function subscribeToMediaQuery(
   query: string,
-  callback: (matches: boolean) => void
+  callback: (matches: boolean) => void,
 ): () => void {
   if (typeof window === "undefined") {
     return () => {};

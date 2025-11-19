@@ -96,7 +96,7 @@ export async function exportUserData(userId: string): Promise<{
 // Delete user data (GDPR right to be forgotten)
 export async function deleteUserData(
   userId: string,
-  options?: { keepOrders?: boolean }
+  options?: { keepOrders?: boolean },
 ): Promise<{ deleted: string[]; anonymized: string[] }> {
   const deleted: string[] = [];
   const anonymized: string[] = [];
@@ -145,7 +145,7 @@ export async function recordConsent(
   consentType: string,
   granted: boolean,
   version: string,
-  ipAddress?: string
+  ipAddress?: string,
 ): Promise<void> {
   await db.consent.create({
     data: {
@@ -161,7 +161,7 @@ export async function recordConsent(
 // Get consent status
 export async function getConsentStatus(
   userId: string,
-  consentType: string
+  consentType: string,
 ): Promise<ConsentRecord | null> {
   const consent = await db.consent.findFirst({
     where: { userId, type: consentType },
@@ -181,7 +181,9 @@ export async function getConsentStatus(
 }
 
 // Get all user consents
-export async function getUserConsents(userId: string): Promise<ConsentRecord[]> {
+export async function getUserConsents(
+  userId: string,
+): Promise<ConsentRecord[]> {
   const consents = await db.consent.findMany({
     where: { userId },
     orderBy: { createdAt: "desc" },
@@ -201,7 +203,7 @@ export async function getUserConsents(userId: string): Promise<ConsentRecord[]> 
 // Anonymize old data (data minimization)
 export async function anonymizeOldData(
   tenantId: string,
-  olderThanDays: number
+  olderThanDays: number,
 ): Promise<{ anonymizedCount: number }> {
   const cutoffDate = new Date();
   cutoffDate.setDate(cutoffDate.getDate() - olderThanDays);
@@ -225,9 +227,7 @@ export async function anonymizeOldData(
 }
 
 // Check data retention compliance
-export async function checkDataRetention(
-  tenantId: string
-): Promise<{
+export async function checkDataRetention(tenantId: string): Promise<{
   compliant: boolean;
   issues: string[];
 }> {
@@ -244,7 +244,9 @@ export async function checkDataRetention(
   });
 
   if (oldSessions > 0) {
-    issues.push("Found " + oldSessions + " expired sessions older than 2 years");
+    issues.push(
+      "Found " + oldSessions + " expired sessions older than 2 years",
+    );
   }
 
   return {

@@ -32,10 +32,7 @@ async function getProduct(idOrSlug: string) {
     const product = await db.product.findFirst({
       where: {
         tenantId: tenant.id,
-        OR: [
-          { slug: idOrSlug },
-          { id: idOrSlug },
-        ],
+        OR: [{ slug: idOrSlug }, { id: idOrSlug }],
         published: true,
       },
       include: {
@@ -65,7 +62,10 @@ async function getProduct(idOrSlug: string) {
   }
 }
 
-async function getRelatedProducts(categoryId: string, excludeProductId: string) {
+async function getRelatedProducts(
+  categoryId: string,
+  excludeProductId: string,
+) {
   try {
     const tenant = await db.tenant.findUnique({
       where: { slug: DEMO_TENANT_SLUG },
@@ -94,15 +94,19 @@ async function getRelatedProducts(categoryId: string, excludeProductId: string) 
     });
 
     return products.map((product) => {
-      const avgRating = product.reviews.length > 0
-        ? product.reviews.reduce((sum, r) => sum + r.rating, 0) / product.reviews.length
-        : undefined;
+      const avgRating =
+        product.reviews.length > 0
+          ? product.reviews.reduce((sum, r) => sum + r.rating, 0) /
+            product.reviews.length
+          : undefined;
 
       return {
         id: product.id,
         name: product.name,
         slug: product.slug,
-        image: product.images[0]?.url || "https://images.unsplash.com/photo-1505740420928-5e560c06d30e",
+        image:
+          product.images[0]?.url ||
+          "https://images.unsplash.com/photo-1505740420928-5e560c06d30e",
         price: Number(product.basePrice),
         salePrice: product.salePrice ? Number(product.salePrice) : undefined,
         rating: avgRating,
@@ -116,7 +120,9 @@ async function getRelatedProducts(categoryId: string, excludeProductId: string) 
   }
 }
 
-export default async function ProductDetailPage({ params }: ProductDetailPageProps) {
+export default async function ProductDetailPage({
+  params,
+}: ProductDetailPageProps) {
   const product = await getProduct(params.id);
 
   if (!product) {
@@ -128,9 +134,11 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
     : [];
 
   // Calculate average rating
-  const avgRating = product.reviews.length > 0
-    ? product.reviews.reduce((sum, r) => sum + r.rating, 0) / product.reviews.length
-    : 0;
+  const avgRating =
+    product.reviews.length > 0
+      ? product.reviews.reduce((sum, r) => sum + r.rating, 0) /
+        product.reviews.length
+      : 0;
 
   // Calculate rating distribution
   const ratingCounts = [0, 0, 0, 0, 0];
@@ -140,9 +148,10 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
   const ratingDistribution = [5, 4, 3, 2, 1].map((stars) => ({
     stars,
     count: ratingCounts[stars - 1],
-    percentage: product.reviews.length > 0
-      ? Math.round((ratingCounts[stars - 1] / product.reviews.length) * 100)
-      : 0,
+    percentage:
+      product.reviews.length > 0
+        ? Math.round((ratingCounts[stars - 1] / product.reviews.length) * 100)
+        : 0,
   }));
 
   // Transform gallery images
@@ -174,8 +183,11 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
     helpfulCount: 0,
   }));
 
-  const hasDiscount = product.salePrice && Number(product.salePrice) < Number(product.basePrice);
-  const currentPrice = hasDiscount ? Number(product.salePrice) : Number(product.basePrice);
+  const hasDiscount =
+    product.salePrice && Number(product.salePrice) < Number(product.basePrice);
+  const currentPrice = hasDiscount
+    ? Number(product.salePrice)
+    : Number(product.basePrice);
   const originalPrice = Number(product.basePrice);
   const discountPercent = hasDiscount
     ? Math.round(((originalPrice - currentPrice) / originalPrice) * 100)
@@ -183,7 +195,10 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
 
   // Extract features from description or use defaults
   const features = product.description
-    ? product.description.split('\n').filter(line => line.trim()).slice(0, 6)
+    ? product.description
+        .split("\n")
+        .filter((line) => line.trim())
+        .slice(0, 6)
     : [
         "Alta calidad garantizada",
         "Envío seguro y protegido",
@@ -249,12 +264,18 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
             {/* Price */}
             <div className="mt-6 flex items-baseline gap-3">
               <span className="text-4xl font-bold text-gray-900">
-                ${currentPrice.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
+                $
+                {currentPrice.toLocaleString("es-MX", {
+                  minimumFractionDigits: 2,
+                })}
               </span>
               {hasDiscount && (
                 <>
                   <span className="text-xl text-gray-500 line-through">
-                    ${originalPrice.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
+                    $
+                    {originalPrice.toLocaleString("es-MX", {
+                      minimumFractionDigits: 2,
+                    })}
                   </span>
                   <span className="rounded-full bg-red-100 px-3 py-1 text-sm font-bold text-red-700">
                     Ahorra {discountPercent}%
@@ -277,7 +298,9 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
             {/* Variants */}
             {product.variants.length > 0 && (
               <div className="mt-6">
-                <h3 className="text-sm font-medium text-gray-900">Variantes disponibles:</h3>
+                <h3 className="text-sm font-medium text-gray-900">
+                  Variantes disponibles:
+                </h3>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {product.variants.map((variant) => (
                     <span
@@ -383,7 +406,9 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
         {relatedProducts.length > 0 && (
           <div className="mt-16">
             <Suspense
-              fallback={<div className="animate-pulse">Cargando productos...</div>}
+              fallback={
+                <div className="animate-pulse">Cargando productos...</div>
+              }
             >
               <RelatedProducts products={relatedProducts} />
             </Suspense>

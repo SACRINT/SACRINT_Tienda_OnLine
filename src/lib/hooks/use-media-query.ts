@@ -73,7 +73,7 @@ export function useHasTouch(): boolean {
       "ontouchstart" in window ||
         navigator.maxTouchPoints > 0 ||
         // @ts-ignore - msMaxTouchPoints is IE specific
-        navigator.msMaxTouchPoints > 0
+        navigator.msMaxTouchPoints > 0,
     );
   }, []);
 
@@ -130,19 +130,19 @@ export function useSafeAreaInsets(): {
     // Set CSS variables for safe area
     document.documentElement.style.setProperty(
       "--sat",
-      "env(safe-area-inset-top)"
+      "env(safe-area-inset-top)",
     );
     document.documentElement.style.setProperty(
       "--sar",
-      "env(safe-area-inset-right)"
+      "env(safe-area-inset-right)",
     );
     document.documentElement.style.setProperty(
       "--sab",
-      "env(safe-area-inset-bottom)"
+      "env(safe-area-inset-bottom)",
     );
     document.documentElement.style.setProperty(
       "--sal",
-      "env(safe-area-inset-left)"
+      "env(safe-area-inset-left)",
     );
 
     computeInsets();

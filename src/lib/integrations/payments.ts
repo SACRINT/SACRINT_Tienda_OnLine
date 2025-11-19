@@ -16,7 +16,9 @@ export const PaymentIntentSchema = z.object({
 export const RefundSchema = z.object({
   paymentIntentId: z.string(),
   amount: z.number().positive().optional(), // Partial refund
-  reason: z.enum(["duplicate", "fraudulent", "requested_by_customer"]).optional(),
+  reason: z
+    .enum(["duplicate", "fraudulent", "requested_by_customer"])
+    .optional(),
 });
 
 export type PaymentIntent = z.infer<typeof PaymentIntentSchema>;
@@ -76,13 +78,22 @@ export interface PaymentService {
   // Customer management
   createCustomer(email: string, name?: string): Promise<PaymentCustomer>;
   getCustomer(customerId: string): Promise<PaymentCustomer | null>;
-  updateCustomer(customerId: string, data: Partial<PaymentCustomer>): Promise<PaymentCustomer>;
+  updateCustomer(
+    customerId: string,
+    data: Partial<PaymentCustomer>,
+  ): Promise<PaymentCustomer>;
 
   // Payment methods
   listPaymentMethods(customerId: string): Promise<PaymentMethod[]>;
-  attachPaymentMethod(customerId: string, paymentMethodId: string): Promise<void>;
+  attachPaymentMethod(
+    customerId: string,
+    paymentMethodId: string,
+  ): Promise<void>;
   detachPaymentMethod(paymentMethodId: string): Promise<void>;
-  setDefaultPaymentMethod(customerId: string, paymentMethodId: string): Promise<void>;
+  setDefaultPaymentMethod(
+    customerId: string,
+    paymentMethodId: string,
+  ): Promise<void>;
 }
 
 // Stripe implementation
@@ -132,7 +143,9 @@ export class StripePaymentService implements PaymentService {
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(`Payment intent failed: ${error.error?.message || response.statusText}`);
+      throw new Error(
+        `Payment intent failed: ${error.error?.message || response.statusText}`,
+      );
     }
 
     const result = await response.json();
@@ -155,7 +168,7 @@ export class StripePaymentService implements PaymentService {
           Authorization: `Bearer ${this.apiKey}`,
           "Content-Type": "application/x-www-form-urlencoded",
         },
-      }
+      },
     );
 
     if (!response.ok) {
@@ -182,7 +195,7 @@ export class StripePaymentService implements PaymentService {
         headers: {
           Authorization: `Bearer ${this.apiKey}`,
         },
-      }
+      },
     );
 
     if (!response.ok) {
@@ -287,7 +300,7 @@ export class StripePaymentService implements PaymentService {
 
   async updateCustomer(
     customerId: string,
-    data: Partial<PaymentCustomer>
+    data: Partial<PaymentCustomer>,
   ): Promise<PaymentCustomer> {
     const params = new URLSearchParams();
     if (data.email) params.append("email", data.email);
@@ -324,7 +337,7 @@ export class StripePaymentService implements PaymentService {
         headers: {
           Authorization: `Bearer ${this.apiKey}`,
         },
-      }
+      },
     );
 
     if (!response.ok) {
@@ -354,7 +367,7 @@ export class StripePaymentService implements PaymentService {
 
   async attachPaymentMethod(
     customerId: string,
-    paymentMethodId: string
+    paymentMethodId: string,
   ): Promise<void> {
     const response = await fetch(
       `${this.baseUrl}/payment_methods/${paymentMethodId}/attach`,
@@ -365,7 +378,7 @@ export class StripePaymentService implements PaymentService {
           "Content-Type": "application/x-www-form-urlencoded",
         },
         body: new URLSearchParams({ customer: customerId }).toString(),
-      }
+      },
     );
 
     if (!response.ok) {
@@ -382,7 +395,7 @@ export class StripePaymentService implements PaymentService {
         headers: {
           Authorization: `Bearer ${this.apiKey}`,
         },
-      }
+      },
     );
 
     if (!response.ok) {
@@ -393,7 +406,7 @@ export class StripePaymentService implements PaymentService {
 
   async setDefaultPaymentMethod(
     customerId: string,
-    paymentMethodId: string
+    paymentMethodId: string,
   ): Promise<void> {
     const response = await fetch(`${this.baseUrl}/customers/${customerId}`, {
       method: "POST",
@@ -408,7 +421,9 @@ export class StripePaymentService implements PaymentService {
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(`Set default payment method failed: ${error.error?.message}`);
+      throw new Error(
+        `Set default payment method failed: ${error.error?.message}`,
+      );
     }
   }
 }
@@ -486,7 +501,7 @@ class MockPaymentService implements PaymentService {
 
   async updateCustomer(
     customerId: string,
-    data: Partial<PaymentCustomer>
+    data: Partial<PaymentCustomer>,
   ): Promise<PaymentCustomer> {
     const customer = this.customers.get(customerId);
     if (!customer) {
@@ -504,7 +519,7 @@ class MockPaymentService implements PaymentService {
 
   async attachPaymentMethod(
     customerId: string,
-    paymentMethodId: string
+    paymentMethodId: string,
   ): Promise<void> {
     const methods = this.paymentMethods.get(customerId) || [];
     methods.push({
@@ -535,7 +550,7 @@ class MockPaymentService implements PaymentService {
 
   async setDefaultPaymentMethod(
     customerId: string,
-    paymentMethodId: string
+    paymentMethodId: string,
   ): Promise<void> {
     const methods = this.paymentMethods.get(customerId) || [];
     for (const method of methods) {

@@ -131,7 +131,7 @@ export function checkFraud(data: TransactionData): FraudCheckResult {
 export async function checkVelocity(
   identifier: string,
   windowMs: number,
-  maxAttempts: number
+  maxAttempts: number,
 ): Promise<{ allowed: boolean; attempts: number }> {
   // Implementation would use cache to track attempts
   // Simplified version

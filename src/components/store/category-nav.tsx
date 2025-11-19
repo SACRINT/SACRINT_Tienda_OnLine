@@ -67,7 +67,7 @@ function CategoryItem({
   level,
 }: CategoryItemProps) {
   const [isExpanded, setIsExpanded] = React.useState(
-    selectedCategory?.startsWith(category.slug) || false
+    selectedCategory?.startsWith(category.slug) || false,
   );
   const hasChildren = category.children && category.children.length > 0;
   const isSelected = selectedCategory === category.slug;
@@ -88,7 +88,7 @@ function CategoryItem({
           isSelected
             ? "bg-primary/10 text-primary font-medium"
             : "hover:bg-muted",
-          level > 0 && "pl-6"
+          level > 0 && "pl-6",
         )}
         aria-current={isSelected ? "page" : undefined}
       >
@@ -155,7 +155,7 @@ export function CategoryTabs({
             "px-4 py-2 text-sm font-medium rounded-full whitespace-nowrap transition-colors",
             !selectedCategory
               ? "bg-primary text-primary-foreground"
-              : "bg-muted hover:bg-muted/80"
+              : "bg-muted hover:bg-muted/80",
           )}
         >
           All
@@ -169,7 +169,7 @@ export function CategoryTabs({
             "px-4 py-2 text-sm font-medium rounded-full whitespace-nowrap transition-colors",
             selectedCategory === category.slug
               ? "bg-primary text-primary-foreground"
-              : "bg-muted hover:bg-muted/80"
+              : "bg-muted hover:bg-muted/80",
           )}
         >
           {category.name}
@@ -215,7 +215,7 @@ export function Breadcrumb({ items, className }: BreadcrumbProps) {
                   "text-sm",
                   index === items.length - 1
                     ? "font-medium"
-                    : "text-muted-foreground"
+                    : "text-muted-foreground",
                 )}
                 aria-current={index === items.length - 1 ? "page" : undefined}
               >

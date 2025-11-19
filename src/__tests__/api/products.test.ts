@@ -2,7 +2,11 @@
 import { NextRequest } from "next/server";
 import { GET, POST } from "@/app/api/products/route";
 import { auth } from "@/lib/auth/auth";
-import { getProducts, createProduct, isProductSkuAvailable } from "@/lib/db/products";
+import {
+  getProducts,
+  createProduct,
+  isProductSkuAvailable,
+} from "@/lib/db/products";
 import { getCategoryById } from "@/lib/db/categories";
 
 // Mock dependencies
@@ -91,13 +95,13 @@ describe("Products API", () => {
       });
 
       const request = new NextRequest(
-        "http://localhost:3000/api/products?categoryId=cat_123"
+        "http://localhost:3000/api/products?categoryId=cat_123",
       );
       await GET(request);
 
       expect(getProducts).toHaveBeenCalledWith(
         "tenant_123",
-        expect.objectContaining({ categoryId: "cat_123" })
+        expect.objectContaining({ categoryId: "cat_123" }),
       );
     });
 
@@ -109,13 +113,13 @@ describe("Products API", () => {
       });
 
       const request = new NextRequest(
-        "http://localhost:3000/api/products?search=test"
+        "http://localhost:3000/api/products?search=test",
       );
       await GET(request);
 
       expect(getProducts).toHaveBeenCalledWith(
         "tenant_123",
-        expect.objectContaining({ search: "test" })
+        expect.objectContaining({ search: "test" }),
       );
     });
 
@@ -127,13 +131,13 @@ describe("Products API", () => {
       });
 
       const request = new NextRequest(
-        "http://localhost:3000/api/products?minPrice=10&maxPrice=100"
+        "http://localhost:3000/api/products?minPrice=10&maxPrice=100",
       );
       await GET(request);
 
       expect(getProducts).toHaveBeenCalledWith(
         "tenant_123",
-        expect.objectContaining({ minPrice: "10", maxPrice: "100" })
+        expect.objectContaining({ minPrice: "10", maxPrice: "100" }),
       );
     });
 
@@ -145,7 +149,7 @@ describe("Products API", () => {
       });
 
       const request = new NextRequest(
-        "http://localhost:3000/api/products?page=2&limit=10"
+        "http://localhost:3000/api/products?page=2&limit=10",
       );
       const response = await GET(request);
       const data = await response.json();

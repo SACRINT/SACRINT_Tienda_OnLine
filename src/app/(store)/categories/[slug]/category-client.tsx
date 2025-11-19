@@ -73,7 +73,7 @@ export function CategoryPageClient({
   ]);
   const [selectedBrands, setSelectedBrands] = React.useState<string[]>([]);
   const [selectedRating, setSelectedRating] = React.useState<number | null>(
-    null
+    null,
   );
   const [inStockOnly, setInStockOnly] = React.useState(false);
 
@@ -153,7 +153,7 @@ export function CategoryPageClient({
               }
               className={cn(
                 "flex items-center gap-2 w-full p-2 rounded-md transition-colors",
-                selectedRating === rating ? "bg-primary/10" : "hover:bg-muted"
+                selectedRating === rating ? "bg-primary/10" : "hover:bg-muted",
               )}
             >
               <RatingStars rating={rating} size="sm" />
@@ -255,7 +255,7 @@ export function CategoryPageClient({
                 onClick={() => setGridCols(2)}
                 className={cn(
                   "p-2 transition-colors",
-                  gridCols === 2 ? "bg-muted" : "hover:bg-muted/50"
+                  gridCols === 2 ? "bg-muted" : "hover:bg-muted/50",
                 )}
               >
                 <LayoutGrid className="h-4 w-4" />
@@ -264,7 +264,7 @@ export function CategoryPageClient({
                 onClick={() => setGridCols(3)}
                 className={cn(
                   "p-2 transition-colors",
-                  gridCols === 3 ? "bg-muted" : "hover:bg-muted/50"
+                  gridCols === 3 ? "bg-muted" : "hover:bg-muted/50",
                 )}
               >
                 <Grid3X3 className="h-4 w-4" />
@@ -273,7 +273,7 @@ export function CategoryPageClient({
                 onClick={() => setGridCols(4)}
                 className={cn(
                   "p-2 transition-colors",
-                  gridCols === 4 ? "bg-muted" : "hover:bg-muted/50"
+                  gridCols === 4 ? "bg-muted" : "hover:bg-muted/50",
                 )}
               >
                 <SlidersHorizontal className="h-4 w-4" />
@@ -315,7 +315,7 @@ export function CategoryPageClient({
                   "grid gap-6",
                   gridCols === 2 && "grid-cols-1 sm:grid-cols-2",
                   gridCols === 3 && "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
-                  gridCols === 4 && "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"
+                  gridCols === 4 && "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4",
                 )}
               >
                 {sortedProducts.map((product) => (

@@ -102,7 +102,7 @@ class FeatureFlagService {
     // Check conditions
     if (flag.conditions && flag.conditions.length > 0) {
       return flag.conditions.every((condition) =>
-        this.evaluateCondition(condition, evalContext)
+        this.evaluateCondition(condition, evalContext),
       );
     }
 
@@ -119,7 +119,7 @@ class FeatureFlagService {
   // Get all enabled flags
   getEnabledFlags(context?: FeatureFlagContext): string[] {
     return Array.from(this.flags.keys()).filter((key) =>
-      this.isEnabled(key, context)
+      this.isEnabled(key, context),
     );
   }
 
@@ -146,7 +146,7 @@ class FeatureFlagService {
         Object.values(data.flags as Record<string, FeatureFlag>).forEach(
           (flag) => {
             this.flags.set(flag.key, flag);
-          }
+          },
         );
       }
     } catch (error) {
@@ -157,7 +157,7 @@ class FeatureFlagService {
   // Private methods
   private evaluateCondition(
     condition: FeatureFlagCondition,
-    context: FeatureFlagContext
+    context: FeatureFlagContext,
   ): boolean {
     let fieldValue: unknown;
 
@@ -188,7 +188,9 @@ class FeatureFlagService {
       case "lt":
         return Number(fieldValue) < Number(condition.value);
       case "in":
-        return Array.isArray(condition.value) && condition.value.includes(fieldValue);
+        return (
+          Array.isArray(condition.value) && condition.value.includes(fieldValue)
+        );
       default:
         return true;
     }

@@ -49,7 +49,7 @@ describe("Users Database Layer", () => {
       expect(db.user.findUnique).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { id: "user_123" },
-        })
+        }),
       );
     });
 
@@ -72,7 +72,7 @@ describe("Users Database Layer", () => {
       expect(db.user.findFirst).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { email: "test@example.com" },
-        })
+        }),
       );
     });
 
@@ -84,7 +84,7 @@ describe("Users Database Layer", () => {
       expect(db.user.findFirst).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { email: expect.stringMatching(/test@example.com/i) },
-        })
+        }),
       );
     });
 
@@ -122,13 +122,13 @@ describe("Users Database Layer", () => {
             email: "new@example.com",
             tenantId,
           }),
-        })
+        }),
       );
     });
 
     it("should throw error for duplicate email", async () => {
       (db.user.create as jest.Mock).mockRejectedValue(
-        new Error("Unique constraint failed on the fields: (`email`)")
+        new Error("Unique constraint failed on the fields: (`email`)"),
       );
 
       await expect(createUser(userData)).rejects.toThrow();
@@ -149,7 +149,7 @@ describe("Users Database Layer", () => {
         expect.objectContaining({
           where: { id: "user_123" },
           data: { name: "Updated Name" },
-        })
+        }),
       );
     });
 
@@ -188,7 +188,7 @@ describe("Users Database Layer", () => {
           include: expect.objectContaining({
             tenant: true,
           }),
-        })
+        }),
       );
     });
 

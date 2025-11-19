@@ -95,7 +95,7 @@ describe("Coupons API", () => {
       (db.coupon.findMany as jest.Mock).mockResolvedValue([mockCoupons[0]]);
 
       const request = new NextRequest(
-        "http://localhost:3000/api/coupons?active=true"
+        "http://localhost:3000/api/coupons?active=true",
       );
       await GET(request);
 
@@ -104,7 +104,7 @@ describe("Coupons API", () => {
           where: expect.objectContaining({
             isActive: true,
           }),
-        })
+        }),
       );
     });
   });
@@ -223,7 +223,7 @@ describe("Coupons API", () => {
           data: expect.objectContaining({
             code: "LOWERCASE",
           }),
-        })
+        }),
       );
     });
   });

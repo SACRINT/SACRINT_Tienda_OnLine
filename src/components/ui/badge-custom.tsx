@@ -72,7 +72,7 @@ export function BadgeCustom({
         "inline-flex items-center gap-1 rounded-full font-medium transition-colors",
         variantStyles[variant],
         sizeStyles[size],
-        className
+        className,
       )}
     >
       {dot && (

@@ -45,7 +45,7 @@ class Logger {
     level: LogLevel,
     message: string,
     context?: LogContext,
-    error?: Error
+    error?: Error,
   ): LogEntry {
     const entry: LogEntry = {
       level,
@@ -133,7 +133,7 @@ export const logger = new Logger();
 export function createRequestContext(
   request: Request,
   userId?: string,
-  tenantId?: string
+  tenantId?: string,
 ): LogContext {
   return {
     userId,

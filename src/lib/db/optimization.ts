@@ -164,7 +164,7 @@ export function createPaginatedResult<T>(
   data: T[],
   total: number,
   page: number,
-  limit: number
+  limit: number,
 ): PaginatedResult<T> {
   const totalPages = Math.ceil(total / limit);
 
@@ -225,7 +225,7 @@ export function getQueryStats(queryName: string) {
 // Batch loading helper (avoids N+1)
 export async function batchLoad<T, K>(
   keys: K[],
-  loader: (keys: K[]) => Promise<Map<K, T>>
+  loader: (keys: K[]) => Promise<Map<K, T>>,
 ): Promise<Map<K, T>> {
   if (keys.length === 0) return new Map();
   return loader(keys);
@@ -274,7 +274,7 @@ export async function withRetry<T>(
     retries?: number;
     delay?: number;
     backoff?: number;
-  } = {}
+  } = {},
 ): Promise<T> {
   const { retries = 3, delay = 100, backoff = 2 } = options;
 
@@ -310,7 +310,9 @@ export function trackConnection(action: "acquire" | "release") {
   if (action === "acquire") {
     connectionCount++;
     if (connectionCount > maxConnections * 0.8) {
-      console.warn(`[DB] High connection usage: ${connectionCount}/${maxConnections}`);
+      console.warn(
+        `[DB] High connection usage: ${connectionCount}/${maxConnections}`,
+      );
     }
   } else {
     connectionCount = Math.max(0, connectionCount - 1);
@@ -328,7 +330,7 @@ export function getConnectionStats() {
 // Query builder helpers
 export function buildSearchQuery(
   searchTerm: string,
-  fields: string[]
+  fields: string[],
 ): Prisma.ProductWhereInput {
   if (!searchTerm.trim()) return {};
 
@@ -347,7 +349,7 @@ export function buildSearchQuery(
 }
 
 export function buildFilterQuery(
-  filters: Record<string, string | string[] | number | boolean | undefined>
+  filters: Record<string, string | string[] | number | boolean | undefined>,
 ): Prisma.ProductWhereInput {
   const where: Prisma.ProductWhereInput = {};
 

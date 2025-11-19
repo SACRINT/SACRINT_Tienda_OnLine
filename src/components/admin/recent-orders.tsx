@@ -19,7 +19,13 @@ export interface RecentOrder {
     avatar?: string;
   };
   total: number;
-  status: "pending" | "confirmed" | "processing" | "shipped" | "delivered" | "cancelled";
+  status:
+    | "pending"
+    | "confirmed"
+    | "processing"
+    | "shipped"
+    | "delivered"
+    | "cancelled";
   items: number;
   date: string;
 }
@@ -114,7 +120,9 @@ export function RecentOrders({
                   </td>
                   <td className="p-3 text-right">
                     <p className="font-medium">{formatPrice(order.total)}</p>
-                    <p className="text-xs text-muted-foreground">{order.date}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {order.date}
+                    </p>
                   </td>
                   <td className="p-3 text-right">
                     {onViewOrder && (

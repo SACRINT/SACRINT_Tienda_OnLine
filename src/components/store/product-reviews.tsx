@@ -56,7 +56,7 @@ function StarRating({
             sizes[size],
             star <= rating
               ? "fill-yellow-400 text-yellow-400"
-              : "text-muted-foreground"
+              : "text-muted-foreground",
           )}
         />
       ))}
@@ -78,7 +78,7 @@ export function ProductReviews({
   className,
 }: ProductReviewsProps) {
   const [sortBy, setSortBy] = React.useState<"recent" | "helpful" | "rating">(
-    "recent"
+    "recent",
   );
 
   return (
@@ -96,7 +96,9 @@ export function ProductReviews({
         {/* Average rating */}
         <div className="text-center md:text-left">
           <div className="flex items-center justify-center gap-4 md:justify-start">
-            <span className="text-5xl font-bold">{averageRating.toFixed(1)}</span>
+            <span className="text-5xl font-bold">
+              {averageRating.toFixed(1)}
+            </span>
             <div>
               <StarRating rating={Math.round(averageRating)} size="lg" />
               <p className="mt-1 text-sm text-muted-foreground">
@@ -110,7 +112,8 @@ export function ProductReviews({
         <div className="space-y-2">
           {[5, 4, 3, 2, 1].map((rating) => {
             const count = ratingDistribution[rating] || 0;
-            const percentage = totalReviews > 0 ? (count / totalReviews) * 100 : 0;
+            const percentage =
+              totalReviews > 0 ? (count / totalReviews) * 100 : 0;
             return (
               <div key={rating} className="flex items-center gap-3">
                 <span className="w-12 text-sm">{rating} star</span>
@@ -148,17 +151,18 @@ export function ProductReviews({
           <div className="text-center py-12">
             <p className="text-muted-foreground">No reviews yet</p>
             {onWriteReview && (
-              <Button variant="outline" className="mt-4" onClick={onWriteReview}>
+              <Button
+                variant="outline"
+                className="mt-4"
+                onClick={onWriteReview}
+              >
                 Be the first to write a review
               </Button>
             )}
           </div>
         ) : (
           reviews.map((review) => (
-            <div
-              key={review.id}
-              className="border-b pb-6 last:border-0"
-            >
+            <div key={review.id} className="border-b pb-6 last:border-0">
               <div className="flex items-start gap-4">
                 <AvatarCustom
                   src={review.author.avatar}
@@ -235,11 +239,7 @@ export function ProductReviews({
       {/* Load more */}
       {hasMore && (
         <div className="text-center">
-          <Button
-            variant="outline"
-            onClick={onLoadMore}
-            disabled={loading}
-          >
+          <Button variant="outline" onClick={onLoadMore} disabled={loading}>
             {loading ? "Loading..." : "Load More Reviews"}
             <ChevronDown className="h-4 w-4 ml-2" />
           </Button>

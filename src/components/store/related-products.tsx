@@ -134,16 +134,16 @@ export function RelatedProducts({
                     </span>
                   </>
                 ) : (
-                  <span className="font-medium">{formatPrice(product.price)}</span>
+                  <span className="font-medium">
+                    {formatPrice(product.price)}
+                  </span>
                 )}
               </div>
               {product.rating && (
                 <div className="flex items-center gap-1 text-sm text-muted-foreground">
                   <span className="text-yellow-500">★</span>
                   <span>{product.rating.toFixed(1)}</span>
-                  {product.reviewCount && (
-                    <span>({product.reviewCount})</span>
-                  )}
+                  {product.reviewCount && <span>({product.reviewCount})</span>}
                 </div>
               )}
             </div>

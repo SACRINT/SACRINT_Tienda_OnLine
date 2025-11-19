@@ -31,7 +31,10 @@ export interface AlertCustomProps {
   className?: string;
 }
 
-const variantStyles: Record<AlertVariant, { bg: string; border: string; icon: LucideIcon }> = {
+const variantStyles: Record<
+  AlertVariant,
+  { bg: string; border: string; icon: LucideIcon }
+> = {
   default: {
     bg: "bg-background",
     border: "border",
@@ -91,12 +94,7 @@ export function AlertCustom({
 
   return (
     <div
-      className={cn(
-        "relative rounded-lg border p-4",
-        bg,
-        border,
-        className
-      )}
+      className={cn("relative rounded-lg border p-4", bg, border, className)}
       role="alert"
     >
       <div className="flex">
@@ -109,19 +107,11 @@ export function AlertCustom({
           </div>
         )}
         <div className={cn("flex-1", Icon && "ml-3")}>
-          {title && (
-            <h3 className="text-sm font-medium">{title}</h3>
-          )}
-          <div className={cn("text-sm", title && "mt-1")}>
-            {children}
-          </div>
+          {title && <h3 className="text-sm font-medium">{title}</h3>}
+          <div className={cn("text-sm", title && "mt-1")}>{children}</div>
           {action && (
             <div className="mt-3">
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={action.onClick}
-              >
+              <Button size="sm" variant="outline" onClick={action.onClick}>
                 {action.label}
               </Button>
             </div>

@@ -18,19 +18,11 @@ export const TextareaField = React.forwardRef<
   TextareaFieldProps
 >(
   (
-    {
-      className,
-      error,
-      showCount,
-      maxLength,
-      autoResize,
-      onChange,
-      ...props
-    },
-    ref
+    { className, error, showCount, maxLength, autoResize, onChange, ...props },
+    ref,
   ) => {
     const [charCount, setCharCount] = React.useState(
-      props.value?.toString().length || 0
+      props.value?.toString().length || 0,
     );
     const textareaRef = React.useRef<HTMLTextAreaElement | null>(null);
 
@@ -68,7 +60,7 @@ export const TextareaField = React.forwardRef<
             "disabled:cursor-not-allowed disabled:opacity-50",
             autoResize && "resize-none overflow-hidden",
             error && "border-destructive focus-visible:ring-destructive",
-            className
+            className,
           )}
           maxLength={maxLength}
           onChange={handleChange}
@@ -79,7 +71,7 @@ export const TextareaField = React.forwardRef<
             className={cn(
               "absolute bottom-2 right-2 text-xs text-muted-foreground",
               charCount > maxLength * 0.9 && "text-warning",
-              charCount >= maxLength && "text-destructive"
+              charCount >= maxLength && "text-destructive",
             )}
           >
             {charCount}/{maxLength}
@@ -87,7 +79,7 @@ export const TextareaField = React.forwardRef<
         )}
       </div>
     );
-  }
+  },
 );
 
 TextareaField.displayName = "TextareaField";

@@ -28,22 +28,35 @@ export function calculateRFMScores(
   metrics: CustomerMetrics,
   maxRecency: number = 365,
   maxFrequency: number = 50,
-  maxMonetary: number = 50000
+  maxMonetary: number = 50000,
 ): { r: number; f: number; m: number } {
   // Recency: lower is better
-  const r = Math.max(1, Math.min(5, 6 - Math.ceil((metrics.recency / maxRecency) * 5)));
-  
+  const r = Math.max(
+    1,
+    Math.min(5, 6 - Math.ceil((metrics.recency / maxRecency) * 5)),
+  );
+
   // Frequency: higher is better
-  const f = Math.max(1, Math.min(5, Math.ceil((metrics.frequency / maxFrequency) * 5)));
-  
+  const f = Math.max(
+    1,
+    Math.min(5, Math.ceil((metrics.frequency / maxFrequency) * 5)),
+  );
+
   // Monetary: higher is better
-  const m = Math.max(1, Math.min(5, Math.ceil((metrics.monetary / maxMonetary) * 5)));
+  const m = Math.max(
+    1,
+    Math.min(5, Math.ceil((metrics.monetary / maxMonetary) * 5)),
+  );
 
   return { r, f, m };
 }
 
 // Determine segment based on RFM scores
-export function determineSegment(r: number, f: number, m: number): CustomerSegment {
+export function determineSegment(
+  r: number,
+  f: number,
+  m: number,
+): CustomerSegment {
   const score = r * 100 + f * 10 + m;
 
   if (r >= 4 && f >= 4 && m >= 4) return "champions";
@@ -60,7 +73,10 @@ export function determineSegment(r: number, f: number, m: number): CustomerSegme
 }
 
 // Segment descriptions
-export const SEGMENT_DESCRIPTIONS: Record<CustomerSegment, { name: string; description: string; action: string }> = {
+export const SEGMENT_DESCRIPTIONS: Record<
+  CustomerSegment,
+  { name: string; description: string; action: string }
+> = {
   champions: {
     name: "Campeones",
     description: "Compradores frecuentes, alto gasto, recientes",

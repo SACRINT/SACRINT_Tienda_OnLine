@@ -24,7 +24,7 @@ export default function WishlistPage() {
       currency: "MXN",
     }).format(price);
 
-  const handleAddToCart = (item: typeof items[0]) => {
+  const handleAddToCart = (item: (typeof items)[0]) => {
     addToCart({
       productId: item.productId,
       variantId: null,
@@ -76,7 +76,9 @@ export default function WishlistPage() {
           <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
             <Heart className="h-12 w-12 text-muted-foreground" />
           </div>
-          <h1 className="text-2xl font-bold mb-4">Tu lista de deseos está vacía</h1>
+          <h1 className="text-2xl font-bold mb-4">
+            Tu lista de deseos está vacía
+          </h1>
           <p className="text-muted-foreground mb-8">
             Guarda tus productos favoritos para comprarlos más tarde
           </p>
@@ -98,7 +100,8 @@ export default function WishlistPage() {
           <div>
             <h1 className="text-3xl font-bold text-primary">Lista de Deseos</h1>
             <p className="text-muted-foreground mt-1">
-              {items.length} {items.length === 1 ? "producto" : "productos"} guardados
+              {items.length} {items.length === 1 ? "producto" : "productos"}{" "}
+              guardados
             </p>
           </div>
           <div className="flex gap-3 mt-4 sm:mt-0">

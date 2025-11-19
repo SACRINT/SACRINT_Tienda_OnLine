@@ -45,7 +45,8 @@ export function ListItem({
     <>
       {(avatar || Icon) && (
         <div className="flex-shrink-0">
-          {avatar || (Icon && <Icon className="h-5 w-5 text-muted-foreground" />)}
+          {avatar ||
+            (Icon && <Icon className="h-5 w-5 text-muted-foreground" />)}
         </div>
       )}
 
@@ -54,7 +55,7 @@ export function ListItem({
           <p
             className={cn(
               "text-sm font-medium truncate",
-              disabled && "text-muted-foreground"
+              disabled && "text-muted-foreground",
             )}
           >
             {title}
@@ -66,7 +67,9 @@ export function ListItem({
           )}
         </div>
         {description && (
-          <p className="text-sm text-muted-foreground truncate">{description}</p>
+          <p className="text-sm text-muted-foreground truncate">
+            {description}
+          </p>
         )}
         {children}
       </div>
@@ -94,7 +97,7 @@ export function ListItem({
         isInteractive && !disabled && "cursor-pointer hover:bg-muted/50",
         selected && "bg-muted",
         disabled && "opacity-50 cursor-not-allowed",
-        className
+        className,
       )}
       aria-disabled={disabled}
     >
@@ -116,7 +119,7 @@ export function List({ children, divided = true, className }: ListProps) {
       className={cn(
         "rounded-lg border bg-card",
         divided && "[&>*:not(:last-child)]:border-b",
-        className
+        className,
       )}
     >
       {children}
@@ -131,9 +134,7 @@ export interface SimpleListItemProps {
 }
 
 export function SimpleListItem({ children, className }: SimpleListItemProps) {
-  return (
-    <div className={cn("px-4 py-3 text-sm", className)}>{children}</div>
-  );
+  return <div className={cn("px-4 py-3 text-sm", className)}>{children}</div>;
 }
 
 export default ListItem;

@@ -99,7 +99,7 @@ export async function getPushSubscription(): Promise<PushSubscription | null> {
 // Show local notification (without push)
 export async function showNotification(
   title: string,
-  options?: NotificationOptions
+  options?: NotificationOptions,
 ): Promise<void> {
   if (Notification.permission !== "granted") {
     console.log("Notification permission not granted");
@@ -118,9 +118,7 @@ export async function showNotification(
 // Convert VAPID key to Uint8Array
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
-  const base64 = (base64String + padding)
-    .replace(/-/g, "+")
-    .replace(/_/g, "/");
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
 
   const rawData = window.atob(base64);
   const outputArray = new Uint8Array(rawData.length);
@@ -143,7 +141,9 @@ export interface AppNotification {
 }
 
 // Show app-specific notification
-export async function showAppNotification(notification: AppNotification): Promise<void> {
+export async function showAppNotification(
+  notification: AppNotification,
+): Promise<void> {
   const options: NotificationOptions = {
     body: notification.body,
     icon: PUSH_CONFIG.defaultIcon,
@@ -163,19 +163,13 @@ export async function showAppNotification(notification: AppNotification): Promis
   // Add actions based on type
   switch (notification.type) {
     case "order":
-      options.actions = [
-        { action: "view", title: "Ver pedido" },
-      ];
+      options.actions = [{ action: "view", title: "Ver pedido" }];
       break;
     case "promo":
-      options.actions = [
-        { action: "shop", title: "Comprar ahora" },
-      ];
+      options.actions = [{ action: "shop", title: "Comprar ahora" }];
       break;
     case "stock":
-      options.actions = [
-        { action: "view", title: "Ver producto" },
-      ];
+      options.actions = [{ action: "view", title: "Ver producto" }];
       break;
   }
 

@@ -14,7 +14,7 @@ export interface CohortData {
 // Get monthly cohort retention
 export async function getCohortRetention(
   tenantId: string,
-  months: number = 6
+  months: number = 6,
 ): Promise<CohortData[]> {
   const cohorts: CohortData[] = [];
   const now = new Date();
@@ -52,8 +52,16 @@ export async function getCohortRetention(
     const revenue: number[] = [];
 
     for (let j = 0; j <= i; j++) {
-      const periodStart = new Date(now.getFullYear(), now.getMonth() - i + j, 1);
-      const periodEnd = new Date(now.getFullYear(), now.getMonth() - i + j + 1, 0);
+      const periodStart = new Date(
+        now.getFullYear(),
+        now.getMonth() - i + j,
+        1,
+      );
+      const periodEnd = new Date(
+        now.getFullYear(),
+        now.getMonth() - i + j + 1,
+        0,
+      );
 
       // Count users who made a purchase in this period
       const activeUsers = await db.order.findMany({
@@ -86,9 +94,7 @@ export async function getCohortRetention(
 }
 
 // Get purchase frequency cohorts
-export async function getPurchaseFrequencyCohorts(
-  tenantId: string
-): Promise<{
+export async function getPurchaseFrequencyCohorts(tenantId: string): Promise<{
   oneTime: number;
   twoToThree: number;
   fourPlus: number;
@@ -119,7 +125,7 @@ export async function getPurchaseFrequencyCohorts(
 // Get average order value by purchase number
 export async function getAovByPurchaseNumber(
   tenantId: string,
-  maxPurchase: number = 5
+  maxPurchase: number = 5,
 ): Promise<{ purchaseNumber: number; averageValue: number }[]> {
   const results: { purchaseNumber: number; averageValue: number }[] = [];
 
@@ -167,9 +173,7 @@ export async function getAovByPurchaseNumber(
 }
 
 // Get time between purchases
-export async function getTimeBetweenPurchases(
-  tenantId: string
-): Promise<{
+export async function getTimeBetweenPurchases(tenantId: string): Promise<{
   average: number;
   median: number;
   distribution: { range: string; count: number }[];
@@ -194,7 +198,8 @@ export async function getTimeBetweenPurchases(
   for (const order of userOrders) {
     if (order.userId === lastUserId && lastDate) {
       const days = Math.floor(
-        (order.createdAt.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24)
+        (order.createdAt.getTime() - lastDate.getTime()) /
+          (1000 * 60 * 60 * 24),
       );
       gaps.push(days);
     }
@@ -219,8 +224,14 @@ export async function getTimeBetweenPurchases(
   const distribution = [
     { range: "0-7 días", count: gaps.filter((g) => g <= 7).length },
     { range: "8-14 días", count: gaps.filter((g) => g > 7 && g <= 14).length },
-    { range: "15-30 días", count: gaps.filter((g) => g > 14 && g <= 30).length },
-    { range: "31-60 días", count: gaps.filter((g) => g > 30 && g <= 60).length },
+    {
+      range: "15-30 días",
+      count: gaps.filter((g) => g > 14 && g <= 30).length,
+    },
+    {
+      range: "31-60 días",
+      count: gaps.filter((g) => g > 30 && g <= 60).length,
+    },
     { range: "60+ días", count: gaps.filter((g) => g > 60).length },
   ];
 

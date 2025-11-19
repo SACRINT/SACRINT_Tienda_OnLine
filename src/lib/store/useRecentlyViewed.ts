@@ -28,7 +28,9 @@ export const useRecentlyViewed = create<RecentlyViewedState>()(
       addItem: (item) =>
         set((state) => {
           // Remove if already exists
-          const filtered = state.items.filter((i) => i.productId !== item.productId);
+          const filtered = state.items.filter(
+            (i) => i.productId !== item.productId,
+          );
 
           // Add to beginning with timestamp
           const newItems = [
@@ -52,6 +54,6 @@ export const useRecentlyViewed = create<RecentlyViewedState>()(
     {
       name: "recently-viewed-storage",
       skipHydration: true,
-    }
-  )
+    },
+  ),
 );

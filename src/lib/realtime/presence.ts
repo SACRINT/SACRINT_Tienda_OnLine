@@ -79,7 +79,7 @@ class PresenceManager {
   // Get all online users
   getOnlineUsers(): UserPresence[] {
     return Array.from(this.presenceMap.values()).filter(
-      (p) => p.status === "online"
+      (p) => p.status === "online",
     );
   }
 
@@ -129,11 +129,14 @@ class PresenceManager {
       }
 
       // Set timeout for away status
-      this.activityTimeout = setTimeout(() => {
-        if (this.status === "online") {
-          this.setAway();
-        }
-      }, 5 * 60 * 1000); // 5 minutes of inactivity
+      this.activityTimeout = setTimeout(
+        () => {
+          if (this.status === "online") {
+            this.setAway();
+          }
+        },
+        5 * 60 * 1000,
+      ); // 5 minutes of inactivity
     };
 
     // Track user activity

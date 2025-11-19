@@ -61,7 +61,7 @@ export interface FunnelStep {
 export async function getDashboardMetrics(
   tenantId: string,
   startDate: Date,
-  endDate: Date
+  endDate: Date,
 ): Promise<DashboardMetrics> {
   const [revenue, orders, products, customers] = await Promise.all([
     getRevenueMetrics(tenantId, startDate, endDate),
@@ -79,7 +79,7 @@ export async function getDashboardMetrics(
 export async function getRevenueMetrics(
   tenantId: string,
   startDate: Date,
-  endDate: Date
+  endDate: Date,
 ): Promise<RevenueMetrics> {
   const orders = await db.order.findMany({
     where: {
@@ -115,7 +115,7 @@ export async function getRevenueMetrics(
     orders.map((o) => ({
       date: o.createdAt,
       value: o.total,
-    }))
+    })),
   );
 
   return { total, average, growth, byPeriod };
@@ -125,7 +125,7 @@ export async function getRevenueMetrics(
 export async function getOrderMetrics(
   tenantId: string,
   startDate: Date,
-  endDate: Date
+  endDate: Date,
 ): Promise<OrderMetrics> {
   const orders = await db.order.findMany({
     where: {
@@ -141,13 +141,11 @@ export async function getOrderMetrics(
   const total = orders.length;
   const pending = orders.filter((o) => o.status === "PENDING").length;
   const completed = orders.filter((o) =>
-    ["COMPLETED", "DELIVERED"].includes(o.status)
+    ["COMPLETED", "DELIVERED"].includes(o.status),
   ).length;
   const cancelled = orders.filter((o) => o.status === "CANCELLED").length;
   const averageValue =
-    total > 0
-      ? orders.reduce((sum, o) => sum + o.total, 0) / total
-      : 0;
+    total > 0 ? orders.reduce((sum, o) => sum + o.total, 0) / total : 0;
 
   // Calculate growth
   const periodLength = endDate.getTime() - startDate.getTime();
@@ -164,7 +162,9 @@ export async function getOrderMetrics(
 }
 
 // Product metrics
-export async function getProductMetrics(tenantId: string): Promise<ProductMetrics> {
+export async function getProductMetrics(
+  tenantId: string,
+): Promise<ProductMetrics> {
   const [total, active, outOfStock, lowStock] = await Promise.all([
     db.product.count({ where: { tenantId } }),
     db.product.count({ where: { tenantId, isActive: true } }),
@@ -198,14 +198,20 @@ export async function getProductMetrics(tenantId: string): Promise<ProductMetric
     };
   });
 
-  return { total, active, outOfStock, lowStock, topSelling: topSellingWithNames };
+  return {
+    total,
+    active,
+    outOfStock,
+    lowStock,
+    topSelling: topSellingWithNames,
+  };
 }
 
 // Customer metrics
 export async function getCustomerMetrics(
   tenantId: string,
   startDate: Date,
-  endDate: Date
+  endDate: Date,
 ): Promise<CustomerMetrics> {
   const [total, newCustomers] = await Promise.all([
     db.user.count({ where: { tenantId, role: "CUSTOMER" } }),
@@ -257,7 +263,7 @@ export async function getCustomerMetrics(
 export async function getConversionMetrics(
   tenantId: string,
   startDate: Date,
-  endDate: Date
+  endDate: Date,
 ): Promise<ConversionMetrics> {
   // Simplified funnel metrics
   const visitors = 1000; // Would come from analytics service
@@ -280,10 +286,26 @@ export async function getConversionMetrics(
 
   const funnel: FunnelStep[] = [
     { name: "Visitantes", count: visitors, percentage: 100 },
-    { name: "Vieron producto", count: productViews, percentage: (productViews / visitors) * 100 },
-    { name: "Añadieron al carrito", count: addToCarts, percentage: (addToCarts / visitors) * 100 },
-    { name: "Iniciaron checkout", count: checkouts, percentage: (checkouts / visitors) * 100 },
-    { name: "Compraron", count: purchases, percentage: (purchases / visitors) * 100 },
+    {
+      name: "Vieron producto",
+      count: productViews,
+      percentage: (productViews / visitors) * 100,
+    },
+    {
+      name: "Añadieron al carrito",
+      count: addToCarts,
+      percentage: (addToCarts / visitors) * 100,
+    },
+    {
+      name: "Iniciaron checkout",
+      count: checkouts,
+      percentage: (checkouts / visitors) * 100,
+    },
+    {
+      name: "Compraron",
+      count: purchases,
+      percentage: (purchases / visitors) * 100,
+    },
   ];
 
   return { rate, cartAbandonment, checkoutAbandonment, funnel };
@@ -291,7 +313,7 @@ export async function getConversionMetrics(
 
 // Helper: Group values by date
 function groupByDate(
-  items: { date: Date; value: number }[]
+  items: { date: Date; value: number }[],
 ): { date: string; value: number }[] {
   const grouped: Record<string, number> = {};
 

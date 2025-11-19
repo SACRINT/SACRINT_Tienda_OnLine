@@ -86,13 +86,13 @@ export function PullToRefresh({
         <div
           className={cn(
             "flex items-center gap-2 px-3 py-1.5 bg-muted rounded-full text-sm",
-            shouldTrigger && "text-primary"
+            shouldTrigger && "text-primary",
           )}
         >
           <RefreshCw
             className={cn(
               "h-4 w-4 transition-transform",
-              isRefreshing && "animate-spin"
+              isRefreshing && "animate-spin",
             )}
             style={{
               transform: `rotate(${progress * 180}deg)`,
@@ -102,8 +102,8 @@ export function PullToRefresh({
             {isRefreshing
               ? "Refreshing..."
               : shouldTrigger
-              ? "Release to refresh"
-              : "Pull to refresh"}
+                ? "Release to refresh"
+                : "Pull to refresh"}
           </span>
         </div>
       </div>

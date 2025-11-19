@@ -38,7 +38,7 @@ export async function getOptimizedProducts(
   tenantId: string,
   filters: ProductFilters = {},
   sort: ProductSortOptions = { field: "createdAt", order: "desc" },
-  pagination: PaginationParams = {}
+  pagination: PaginationParams = {},
 ) {
   const start = performance.now();
 
@@ -204,7 +204,9 @@ export async function getOptimizedCategories(tenantId: string) {
   });
 
   // Build tree structure
-  const categoryMap = new Map(categories.map((c) => [c.id, { ...c, children: [] as typeof categories }]));
+  const categoryMap = new Map(
+    categories.map((c) => [c.id, { ...c, children: [] as typeof categories }]),
+  );
   const tree: typeof categories = [];
 
   for (const category of categoryMap.values()) {
@@ -240,27 +242,22 @@ export async function getDashboardStats(tenantId: string) {
   }
 
   // Run all queries in parallel
-  const [
-    productCount,
-    orderCount,
-    customerCount,
-    recentOrders,
-    revenue,
-  ] = await Promise.all([
-    db.product.count({ where: { tenantId, published: true } }),
-    db.order.count({ where: { tenantId } }),
-    db.user.count({ where: { tenantId, role: "CUSTOMER" } }),
-    db.order.findMany({
-      where: { tenantId },
-      select: OPTIMIZED_SELECTS.orderList,
-      orderBy: { createdAt: "desc" },
-      take: 5,
-    }),
-    db.order.aggregate({
-      where: { tenantId, status: "DELIVERED" },
-      _sum: { total: true },
-    }),
-  ]);
+  const [productCount, orderCount, customerCount, recentOrders, revenue] =
+    await Promise.all([
+      db.product.count({ where: { tenantId, published: true } }),
+      db.order.count({ where: { tenantId } }),
+      db.user.count({ where: { tenantId, role: "CUSTOMER" } }),
+      db.order.findMany({
+        where: { tenantId },
+        select: OPTIMIZED_SELECTS.orderList,
+        orderBy: { createdAt: "desc" },
+        take: 5,
+      }),
+      db.order.aggregate({
+        where: { tenantId, status: "DELIVERED" },
+        _sum: { total: true },
+      }),
+    ]);
 
   const stats = {
     productCount,
@@ -283,7 +280,7 @@ export async function getDashboardStats(tenantId: string) {
 export async function searchProducts(
   tenantId: string,
   query: string,
-  limit: number = 20
+  limit: number = 20,
 ) {
   const start = performance.now();
 
@@ -329,7 +326,7 @@ export async function searchProducts(
 export async function getRelatedProducts(
   productId: string,
   tenantId: string,
-  limit: number = 4
+  limit: number = 4,
 ) {
   const start = performance.now();
 

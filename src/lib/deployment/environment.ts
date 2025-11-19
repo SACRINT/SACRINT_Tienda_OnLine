@@ -154,7 +154,9 @@ export function validateEnvironment(): ValidationResult {
 
     if (!value) {
       if (schema.required) {
-        errors.push("Missing required: " + schema.key + " - " + schema.description);
+        errors.push(
+          "Missing required: " + schema.key + " - " + schema.description,
+        );
       } else if (schema.default) {
         // Use default
         continue;

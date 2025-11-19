@@ -33,7 +33,11 @@ export interface QuickViewProps {
   product: QuickViewProduct | null;
   open: boolean;
   onClose: () => void;
-  onAddToCart?: (productId: string, quantity: number, variants: Record<string, string>) => void;
+  onAddToCart?: (
+    productId: string,
+    quantity: number,
+    variants: Record<string, string>,
+  ) => void;
   onViewDetails?: (productId: string) => void;
   currency?: string;
   className?: string;
@@ -50,7 +54,9 @@ export function QuickView({
 }: QuickViewProps) {
   const [selectedImage, setSelectedImage] = React.useState(0);
   const [quantity, setQuantity] = React.useState(1);
-  const [selectedVariants, setSelectedVariants] = React.useState<Record<string, string>>({});
+  const [selectedVariants, setSelectedVariants] = React.useState<
+    Record<string, string>
+  >({});
 
   // Reset state when product changes
   React.useEffect(() => {
@@ -69,14 +75,14 @@ export function QuickView({
   const handlePrevImage = () => {
     if (!product) return;
     setSelectedImage((prev) =>
-      prev === 0 ? product.images.length - 1 : prev - 1
+      prev === 0 ? product.images.length - 1 : prev - 1,
     );
   };
 
   const handleNextImage = () => {
     if (!product) return;
     setSelectedImage((prev) =>
-      prev === product.images.length - 1 ? 0 : prev + 1
+      prev === product.images.length - 1 ? 0 : prev + 1,
     );
   };
 
@@ -110,7 +116,7 @@ export function QuickView({
       <div
         className={cn(
           "relative bg-background rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] overflow-hidden",
-          className
+          className,
         )}
         role="dialog"
         aria-modal="true"
@@ -170,7 +176,7 @@ export function QuickView({
                       "flex-shrink-0 w-16 h-16 rounded-md overflow-hidden border-2",
                       index === selectedImage
                         ? "border-primary"
-                        : "border-transparent"
+                        : "border-transparent",
                     )}
                   >
                     <img
@@ -249,7 +255,7 @@ export function QuickView({
                         selectedVariants[variant.type] === option.value
                           ? "border-primary bg-primary/10"
                           : "border-input hover:border-muted-foreground",
-                        !option.available && "opacity-50 line-through"
+                        !option.available && "opacity-50 line-through",
                       )}
                     >
                       {option.label}

@@ -17,7 +17,10 @@ export const THRESHOLDS = {
 // Performance rating
 export type Rating = "good" | "needs-improvement" | "poor";
 
-export function getRating(name: keyof typeof THRESHOLDS, value: number): Rating {
+export function getRating(
+  name: keyof typeof THRESHOLDS,
+  value: number,
+): Rating {
   const threshold = THRESHOLDS[name];
   if (value <= threshold.good) return "good";
   if (value <= threshold.poor) return "needs-improvement";
@@ -34,7 +37,10 @@ export function initWebVitals(onReport?: ReportHandler) {
   const handleMetric = (metric: Metric) => {
     // Log to console in development
     if (process.env.NODE_ENV === "development") {
-      const rating = getRating(metric.name as keyof typeof THRESHOLDS, metric.value);
+      const rating = getRating(
+        metric.name as keyof typeof THRESHOLDS,
+        metric.value,
+      );
       console.log(`[Web Vitals] ${metric.name}:`, {
         value: metric.value.toFixed(2),
         rating,
@@ -100,7 +106,9 @@ export function observePerformance() {
   const longTaskObserver = new PerformanceObserver((list) => {
     for (const entry of list.getEntries()) {
       if (entry.duration > 50) {
-        console.warn(`[Performance] Long task detected: ${entry.duration.toFixed(2)}ms`);
+        console.warn(
+          `[Performance] Long task detected: ${entry.duration.toFixed(2)}ms`,
+        );
       }
     }
   });
@@ -114,9 +122,14 @@ export function observePerformance() {
   // Observe layout shifts
   const layoutShiftObserver = new PerformanceObserver((list) => {
     for (const entry of list.getEntries()) {
-      const layoutShift = entry as PerformanceEntry & { hadRecentInput: boolean; value: number };
+      const layoutShift = entry as PerformanceEntry & {
+        hadRecentInput: boolean;
+        value: number;
+      };
       if (!layoutShift.hadRecentInput && layoutShift.value > 0.01) {
-        console.warn(`[Performance] Layout shift: ${layoutShift.value.toFixed(4)}`);
+        console.warn(
+          `[Performance] Layout shift: ${layoutShift.value.toFixed(4)}`,
+        );
       }
     }
   });
@@ -137,13 +150,18 @@ export function observePerformance() {
 export function getNavigationTiming() {
   if (typeof window === "undefined" || !window.performance) return null;
 
-  const timing = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming;
+  const timing = performance.getEntriesByType(
+    "navigation",
+  )[0] as PerformanceNavigationTiming;
   if (!timing) return null;
 
   return {
     dns: timing.domainLookupEnd - timing.domainLookupStart,
     tcp: timing.connectEnd - timing.connectStart,
-    ssl: timing.secureConnectionStart > 0 ? timing.connectEnd - timing.secureConnectionStart : 0,
+    ssl:
+      timing.secureConnectionStart > 0
+        ? timing.connectEnd - timing.secureConnectionStart
+        : 0,
     ttfb: timing.responseStart - timing.requestStart,
     download: timing.responseEnd - timing.responseStart,
     domParse: timing.domInteractive - timing.responseEnd,
@@ -157,7 +175,9 @@ export function getNavigationTiming() {
 export function getResourceTiming() {
   if (typeof window === "undefined" || !window.performance) return [];
 
-  const resources = performance.getEntriesByType("resource") as PerformanceResourceTiming[];
+  const resources = performance.getEntriesByType(
+    "resource",
+  ) as PerformanceResourceTiming[];
 
   return resources.map((resource) => ({
     name: resource.name,
@@ -172,7 +192,15 @@ export function getResourceTiming() {
 export function getMemoryUsage() {
   if (typeof window === "undefined") return null;
 
-  const memory = (performance as Performance & { memory?: { usedJSHeapSize: number; totalJSHeapSize: number; jsHeapSizeLimit: number } }).memory;
+  const memory = (
+    performance as Performance & {
+      memory?: {
+        usedJSHeapSize: number;
+        totalJSHeapSize: number;
+        jsHeapSizeLimit: number;
+      };
+    }
+  ).memory;
   if (!memory) return null;
 
   return {
@@ -190,7 +218,10 @@ export function generatePerformanceReport() {
   const memory = getMemoryUsage();
 
   // Group resources by type
-  const resourcesByType: Record<string, { count: number; size: number; duration: number }> = {};
+  const resourcesByType: Record<
+    string,
+    { count: number; size: number; duration: number }
+  > = {};
 
   for (const resource of resources) {
     const type = resource.type;

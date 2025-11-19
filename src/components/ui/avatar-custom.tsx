@@ -99,7 +99,7 @@ export function AvatarCustom({
         className={cn(
           "relative flex items-center justify-center overflow-hidden rounded-full",
           sizeStyles[size],
-          !showImage && (name ? getColorFromName(name) : "bg-muted")
+          !showImage && (name ? getColorFromName(name) : "bg-muted"),
         )}
       >
         {showImage && (
@@ -114,7 +114,10 @@ export function AvatarCustom({
           <span className="font-medium text-white">{getInitials(name)}</span>
         )}
         {showFallback && (
-          <User className="h-1/2 w-1/2 text-muted-foreground" aria-hidden="true" />
+          <User
+            className="h-1/2 w-1/2 text-muted-foreground"
+            aria-hidden="true"
+          />
         )}
       </div>
 
@@ -123,7 +126,7 @@ export function AvatarCustom({
           className={cn(
             "absolute bottom-0 right-0 rounded-full ring-2 ring-background",
             statusStyles[status],
-            statusSizes[size]
+            statusSizes[size],
           )}
           aria-label={`Status: ${status}`}
         />
@@ -161,7 +164,7 @@ export function AvatarGroup({
         <div
           className={cn(
             "flex items-center justify-center rounded-full bg-muted ring-2 ring-background",
-            sizeStyles[size]
+            sizeStyles[size],
           )}
         >
           <span className="text-xs font-medium text-muted-foreground">

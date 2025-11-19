@@ -42,7 +42,7 @@ describe("Analytics API", () => {
       (getOverviewMetrics as jest.Mock).mockResolvedValue(mockOverviewMetrics);
 
       const request = new NextRequest(
-        "http://localhost:3000/api/analytics/overview"
+        "http://localhost:3000/api/analytics/overview",
       );
       const response = await getOverview(request);
       const data = await response.json();
@@ -56,7 +56,7 @@ describe("Analytics API", () => {
       (auth as jest.Mock).mockResolvedValue(null);
 
       const request = new NextRequest(
-        "http://localhost:3000/api/analytics/overview"
+        "http://localhost:3000/api/analytics/overview",
       );
       const response = await getOverview(request);
 
@@ -69,7 +69,7 @@ describe("Analytics API", () => {
       });
 
       const request = new NextRequest(
-        "http://localhost:3000/api/analytics/overview"
+        "http://localhost:3000/api/analytics/overview",
       );
       const response = await getOverview(request);
 
@@ -81,14 +81,14 @@ describe("Analytics API", () => {
       (getOverviewMetrics as jest.Mock).mockResolvedValue(mockOverviewMetrics);
 
       const request = new NextRequest(
-        "http://localhost:3000/api/analytics/overview?startDate=2024-01-01&endDate=2024-01-31"
+        "http://localhost:3000/api/analytics/overview?startDate=2024-01-01&endDate=2024-01-31",
       );
       await getOverview(request);
 
       expect(getOverviewMetrics).toHaveBeenCalledWith(
         "tenant_123",
         expect.any(Date),
-        expect.any(Date)
+        expect.any(Date),
       );
     });
   });
@@ -126,7 +126,7 @@ describe("Analytics API", () => {
       (getSalesMetrics as jest.Mock).mockResolvedValue(mockSalesMetrics);
 
       const request = new NextRequest(
-        "http://localhost:3000/api/analytics/sales"
+        "http://localhost:3000/api/analytics/sales",
       );
       const response = await getSales(request);
       const data = await response.json();
@@ -140,7 +140,7 @@ describe("Analytics API", () => {
       (auth as jest.Mock).mockResolvedValue(null);
 
       const request = new NextRequest(
-        "http://localhost:3000/api/analytics/sales"
+        "http://localhost:3000/api/analytics/sales",
       );
       const response = await getSales(request);
 
@@ -177,7 +177,7 @@ describe("Analytics API", () => {
       (getCustomerMetrics as jest.Mock).mockResolvedValue(mockCustomerMetrics);
 
       const request = new NextRequest(
-        "http://localhost:3000/api/analytics/customers"
+        "http://localhost:3000/api/analytics/customers",
       );
       const response = await getCustomers(request);
       const data = await response.json();
@@ -191,7 +191,7 @@ describe("Analytics API", () => {
       (auth as jest.Mock).mockResolvedValue(null);
 
       const request = new NextRequest(
-        "http://localhost:3000/api/analytics/customers"
+        "http://localhost:3000/api/analytics/customers",
       );
       const response = await getCustomers(request);
 
@@ -204,7 +204,7 @@ describe("Analytics API", () => {
       });
 
       const request = new NextRequest(
-        "http://localhost:3000/api/analytics/customers"
+        "http://localhost:3000/api/analytics/customers",
       );
       const response = await getCustomers(request);
 

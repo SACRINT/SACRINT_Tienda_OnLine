@@ -20,7 +20,7 @@ function normalizeText(text: string): string {
 async function getProductSuggestions(
   query: string,
   tenantId: string,
-  limit: number
+  limit: number,
 ): Promise<SearchSuggestion[]> {
   const normalizedQuery = normalizeText(query);
 
@@ -61,7 +61,7 @@ async function getProductSuggestions(
 async function getCategorySuggestions(
   query: string,
   tenantId: string,
-  limit: number
+  limit: number,
 ): Promise<SearchSuggestion[]> {
   const categories = await db.category.findMany({
     where: {
@@ -90,7 +90,7 @@ async function getCategorySuggestions(
 async function getQuerySuggestions(
   query: string,
   tenantId: string,
-  limit: number
+  limit: number,
 ): Promise<SearchSuggestion[]> {
   // Check cache for popular queries
   const cacheKey = "popular_queries:" + tenantId;
@@ -116,7 +116,7 @@ async function getQuerySuggestions(
 export async function getAutocomplete(
   query: string,
   tenantId: string,
-  maxSuggestions: number = AUTOCOMPLETE_CONFIG.maxSuggestions
+  maxSuggestions: number = AUTOCOMPLETE_CONFIG.maxSuggestions,
 ): Promise<SearchSuggestion[]> {
   if (query.length < AUTOCOMPLETE_CONFIG.minChars) {
     return [];
@@ -148,7 +148,7 @@ export async function getAutocomplete(
 // Get trending searches
 export async function getTrendingSearches(
   tenantId: string,
-  limit: number = 10
+  limit: number = 10,
 ): Promise<string[]> {
   const cacheKey = "trending_searches:" + tenantId;
   let trending = await cache.get<string[]>(cacheKey);
@@ -156,13 +156,7 @@ export async function getTrendingSearches(
   if (!trending) {
     // In production, this would aggregate from search analytics
     // For now, return common e-commerce terms
-    trending = [
-      "ofertas",
-      "nuevo",
-      "popular",
-      "rebajas",
-      "envío gratis",
-    ];
+    trending = ["ofertas", "nuevo", "popular", "rebajas", "envío gratis"];
     await cache.set(cacheKey, trending, { ttl: 3600 });
   }
 
@@ -172,7 +166,7 @@ export async function getTrendingSearches(
 // Get recent searches for a user
 export async function getRecentSearches(
   userId: string,
-  limit: number = 5
+  limit: number = 5,
 ): Promise<string[]> {
   const cacheKey = "recent_searches:" + userId;
   const recent = await cache.get<string[]>(cacheKey);
@@ -182,7 +176,7 @@ export async function getRecentSearches(
 // Save a search to user's recent searches
 export async function saveRecentSearch(
   userId: string,
-  query: string
+  query: string,
 ): Promise<void> {
   const cacheKey = "recent_searches:" + userId;
   let recent = await cache.get<string[]>(cacheKey);

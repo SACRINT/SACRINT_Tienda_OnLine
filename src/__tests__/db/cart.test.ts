@@ -44,7 +44,7 @@ jest.mock("@/lib/db/client", () => ({
         product: {
           findUnique: jest.fn(),
         },
-      })
+      }),
     ),
   },
 }));
@@ -120,7 +120,7 @@ describe("Cart Database Layer", () => {
             userId,
             tenantId,
           }),
-        })
+        }),
       );
     });
   });
@@ -138,7 +138,7 @@ describe("Cart Database Layer", () => {
           include: expect.objectContaining({
             items: expect.any(Object),
           }),
-        })
+        }),
       );
     });
 
@@ -173,7 +173,13 @@ describe("Cart Database Layer", () => {
       });
       (db.$transaction as jest.Mock).mockImplementation(transactionMock);
 
-      const result = await addItemToCart(tenantId, "cart_123", "prod_1", null, 1);
+      const result = await addItemToCart(
+        tenantId,
+        "cart_123",
+        "prod_1",
+        null,
+        1,
+      );
 
       expect(result).toBeDefined();
       expect(result.productId).toBe("prod_1");
@@ -204,7 +210,13 @@ describe("Cart Database Layer", () => {
       });
       (db.$transaction as jest.Mock).mockImplementation(transactionMock);
 
-      const result = await addItemToCart(tenantId, "cart_123", "prod_1", null, 1);
+      const result = await addItemToCart(
+        tenantId,
+        "cart_123",
+        "prod_1",
+        null,
+        1,
+      );
 
       expect(result.quantity).toBe(3);
     });
@@ -227,7 +239,7 @@ describe("Cart Database Layer", () => {
       (db.$transaction as jest.Mock).mockImplementation(transactionMock);
 
       await expect(
-        addItemToCart(tenantId, "cart_123", "prod_1", null, 1)
+        addItemToCart(tenantId, "cart_123", "prod_1", null, 1),
       ).rejects.toThrow("out of stock");
     });
 
@@ -249,7 +261,7 @@ describe("Cart Database Layer", () => {
       (db.$transaction as jest.Mock).mockImplementation(transactionMock);
 
       await expect(
-        addItemToCart(tenantId, "cart_123", "prod_1", null, 1)
+        addItemToCart(tenantId, "cart_123", "prod_1", null, 1),
       ).rejects.toThrow();
     });
   });
@@ -284,7 +296,7 @@ describe("Cart Database Layer", () => {
       expect(db.cartItem.delete).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { id: "item_1" },
-        })
+        }),
       );
     });
   });
@@ -298,7 +310,7 @@ describe("Cart Database Layer", () => {
       expect(db.cartItem.deleteMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { cartId: "cart_123" },
-        })
+        }),
       );
     });
   });

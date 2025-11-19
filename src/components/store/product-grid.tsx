@@ -178,13 +178,19 @@ function ProductCard({
         {/* Badges */}
         <div className="absolute top-2 left-2 flex flex-col gap-1">
           {product.isNew && (
-            <BadgeCustom variant="info" size="sm">New</BadgeCustom>
+            <BadgeCustom variant="info" size="sm">
+              New
+            </BadgeCustom>
           )}
           {product.isBestseller && (
-            <BadgeCustom variant="success" size="sm">Bestseller</BadgeCustom>
+            <BadgeCustom variant="success" size="sm">
+              Bestseller
+            </BadgeCustom>
           )}
           {discount > 0 && (
-            <BadgeCustom variant="error" size="sm">-{discount}%</BadgeCustom>
+            <BadgeCustom variant="error" size="sm">
+              -{discount}%
+            </BadgeCustom>
           )}
         </div>
 
@@ -201,7 +207,7 @@ function ProductCard({
               <Heart
                 className={cn(
                   "h-4 w-4",
-                  isWishlisted && "fill-red-500 text-red-500"
+                  isWishlisted && "fill-red-500 text-red-500",
                 )}
               />
             </Button>
@@ -262,7 +268,9 @@ function ProductCard({
         <div className="flex items-center gap-2">
           {product.salePrice ? (
             <>
-              <span className="font-medium">{formatPrice(product.salePrice)}</span>
+              <span className="font-medium">
+                {formatPrice(product.salePrice)}
+              </span>
               <span className="text-sm text-muted-foreground line-through">
                 {formatPrice(product.price)}
               </span>
@@ -329,7 +337,9 @@ function ProductListItem({
         <div className="flex items-start justify-between gap-4">
           <div>
             {product.category && (
-              <p className="text-xs text-muted-foreground">{product.category}</p>
+              <p className="text-xs text-muted-foreground">
+                {product.category}
+              </p>
             )}
             <h3 className="font-medium">
               <a
@@ -387,7 +397,7 @@ function ProductListItem({
               <Heart
                 className={cn(
                   "h-4 w-4 mr-2",
-                  isWishlisted && "fill-red-500 text-red-500"
+                  isWishlisted && "fill-red-500 text-red-500",
                 )}
               />
               Wishlist

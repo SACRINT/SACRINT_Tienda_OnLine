@@ -8,7 +8,8 @@ import { db } from "@/lib/db";
 
 export const metadata: Metadata = {
   title: "SACRINT Demo Store - Tu Tienda Online",
-  description: "Descubre productos de calidad en electrónica, ropa, hogar y deportes. Envío gratis en compras mayores a $1,000 MXN. Ofertas exclusivas disponibles.",
+  description:
+    "Descubre productos de calidad en electrónica, ropa, hogar y deportes. Envío gratis en compras mayores a $1,000 MXN. Ofertas exclusivas disponibles.",
   openGraph: {
     title: "SACRINT Demo Store",
     description: "Tu tienda en línea de confianza",
@@ -48,20 +49,26 @@ async function getFeaturedProducts() {
     });
 
     return products.map((product) => {
-      const avgRating = product.reviews.length > 0
-        ? product.reviews.reduce((sum, r) => sum + r.rating, 0) / product.reviews.length
-        : undefined;
+      const avgRating =
+        product.reviews.length > 0
+          ? product.reviews.reduce((sum, r) => sum + r.rating, 0) /
+            product.reviews.length
+          : undefined;
 
       return {
         id: product.id,
         name: product.name,
         slug: product.slug,
         price: Number(product.salePrice || product.basePrice),
-        originalPrice: product.salePrice ? Number(product.basePrice) : undefined,
+        originalPrice: product.salePrice
+          ? Number(product.basePrice)
+          : undefined,
         image: product.images[0]?.url,
         rating: avgRating,
         reviewCount: product.reviews.length,
-        isNew: new Date().getTime() - new Date(product.createdAt).getTime() < 7 * 24 * 60 * 60 * 1000,
+        isNew:
+          new Date().getTime() - new Date(product.createdAt).getTime() <
+          7 * 24 * 60 * 60 * 1000,
         isSale: !!product.salePrice,
       };
     });
@@ -135,7 +142,11 @@ export default async function HomePage() {
             Hasta 50% de descuento en productos seleccionados
           </p>
           <p className="text-lg mb-8">
-            Usa el código <span className="font-bold bg-white/20 px-3 py-1 rounded">BIENVENIDO10</span> para 10% de descuento
+            Usa el código{" "}
+            <span className="font-bold bg-white/20 px-3 py-1 rounded">
+              BIENVENIDO10
+            </span>{" "}
+            para 10% de descuento
           </p>
           <a
             href="/shop"

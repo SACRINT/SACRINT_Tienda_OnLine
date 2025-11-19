@@ -91,7 +91,7 @@ export function ProductForm({
   const handleRemoveTag = (tag: string) => {
     handleChange(
       "tags",
-      formData.tags.filter((t) => t !== tag)
+      formData.tags.filter((t) => t !== tag),
     );
   };
 
@@ -110,7 +110,7 @@ export function ProductForm({
   const handleUpdateVariant = (
     index: number,
     field: keyof ProductVariant,
-    value: any
+    value: any,
   ) => {
     const newVariants = [...formData.variants];
     newVariants[index] = { ...newVariants[index], [field]: value };
@@ -120,7 +120,7 @@ export function ProductForm({
   const handleRemoveVariant = (index: number) => {
     handleChange(
       "variants",
-      formData.variants.filter((_, i) => i !== index)
+      formData.variants.filter((_, i) => i !== index),
     );
   };
 
@@ -235,10 +235,16 @@ export function ProductForm({
       </FormSection>
 
       {/* Variants */}
-      <FormSection title="Variants" description="Add product variations like size or color">
+      <FormSection
+        title="Variants"
+        description="Add product variations like size or color"
+      >
         <div className="space-y-4">
           {formData.variants.map((variant, index) => (
-            <div key={variant.id} className="flex items-start gap-2 p-4 border rounded-lg">
+            <div
+              key={variant.id}
+              className="flex items-start gap-2 p-4 border rounded-lg"
+            >
               <GripVertical className="h-5 w-5 text-muted-foreground mt-2 cursor-grab" />
               <div className="flex-1 grid gap-3 sm:grid-cols-4">
                 <input
@@ -304,7 +310,9 @@ export function ProductForm({
               type="text"
               value={tagInput}
               onChange={(e) => setTagInput(e.target.value)}
-              onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), handleAddTag())}
+              onKeyPress={(e) =>
+                e.key === "Enter" && (e.preventDefault(), handleAddTag())
+              }
               placeholder="Add a tag"
               className="flex-1 px-3 py-2 border rounded-md"
             />
@@ -366,7 +374,11 @@ export function ProductForm({
           </Button>
         )}
         <Button type="submit" disabled={loading}>
-          {loading ? "Saving..." : initialData ? "Update Product" : "Create Product"}
+          {loading
+            ? "Saving..."
+            : initialData
+              ? "Update Product"
+              : "Create Product"}
         </Button>
       </div>
     </form>

@@ -30,7 +30,15 @@ export interface ConfirmationDialogProps {
   className?: string;
 }
 
-const typeStyles: Record<ConfirmationType, { icon: LucideIcon; iconBg: string; iconColor: string; buttonVariant: "destructive" | "default" }> = {
+const typeStyles: Record<
+  ConfirmationType,
+  {
+    icon: LucideIcon;
+    iconBg: string;
+    iconColor: string;
+    buttonVariant: "destructive" | "default";
+  }
+> = {
   danger: {
     icon: Trash2,
     iconBg: "bg-red-100 dark:bg-red-900",
@@ -65,7 +73,12 @@ export function ConfirmationDialog({
   className,
 }: ConfirmationDialogProps) {
   const [isLoading, setIsLoading] = React.useState(false);
-  const { icon: DefaultIcon, iconBg, iconColor, buttonVariant } = typeStyles[type];
+  const {
+    icon: DefaultIcon,
+    iconBg,
+    iconColor,
+    buttonVariant,
+  } = typeStyles[type];
   const Icon = icon || DefaultIcon;
 
   const handleConfirm = async () => {
@@ -95,7 +108,7 @@ export function ConfirmationDialog({
       <div
         className={cn(
           "relative bg-background rounded-lg shadow-lg max-w-md w-full mx-4 p-6",
-          className
+          className,
         )}
         role="alertdialog"
         aria-modal="true"
@@ -106,7 +119,7 @@ export function ConfirmationDialog({
           <div
             className={cn(
               "flex-shrink-0 flex items-center justify-center w-12 h-12 rounded-full mb-4 sm:mb-0 sm:mr-4",
-              iconBg
+              iconBg,
             )}
           >
             <Icon className={cn("h-6 w-6", iconColor)} aria-hidden="true" />
@@ -128,7 +141,11 @@ export function ConfirmationDialog({
         </div>
 
         <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-          <Button variant="outline" onClick={onClose} disabled={isLoading || loading}>
+          <Button
+            variant="outline"
+            onClick={onClose}
+            disabled={isLoading || loading}
+          >
             {cancelLabel}
           </Button>
           <Button

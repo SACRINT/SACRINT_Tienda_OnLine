@@ -26,14 +26,54 @@ export interface SettingsNavItem {
 }
 
 const defaultNavItems: SettingsNavItem[] = [
-  { id: "store", label: "Store", icon: Store, description: "Store information" },
-  { id: "profile", label: "Profile", icon: User, description: "Personal settings" },
-  { id: "notifications", label: "Notifications", icon: Bell, description: "Notification preferences" },
-  { id: "payments", label: "Payments", icon: CreditCard, description: "Payment methods" },
-  { id: "shipping", label: "Shipping", icon: Truck, description: "Shipping options" },
-  { id: "security", label: "Security", icon: Shield, description: "Security settings" },
-  { id: "appearance", label: "Appearance", icon: Palette, description: "Theme and display" },
-  { id: "domains", label: "Domains", icon: Globe, description: "Custom domains" },
+  {
+    id: "store",
+    label: "Store",
+    icon: Store,
+    description: "Store information",
+  },
+  {
+    id: "profile",
+    label: "Profile",
+    icon: User,
+    description: "Personal settings",
+  },
+  {
+    id: "notifications",
+    label: "Notifications",
+    icon: Bell,
+    description: "Notification preferences",
+  },
+  {
+    id: "payments",
+    label: "Payments",
+    icon: CreditCard,
+    description: "Payment methods",
+  },
+  {
+    id: "shipping",
+    label: "Shipping",
+    icon: Truck,
+    description: "Shipping options",
+  },
+  {
+    id: "security",
+    label: "Security",
+    icon: Shield,
+    description: "Security settings",
+  },
+  {
+    id: "appearance",
+    label: "Appearance",
+    icon: Palette,
+    description: "Theme and display",
+  },
+  {
+    id: "domains",
+    label: "Domains",
+    icon: Globe,
+    description: "Custom domains",
+  },
   { id: "email", label: "Email", icon: Mail, description: "Email templates" },
 ];
 
@@ -67,9 +107,7 @@ export function SettingsLayout({
                 onClick={() => onNavigate?.(item.id)}
                 className={cn(
                   "w-full flex items-center gap-3 px-3 py-2 text-left rounded-md transition-colors",
-                  isActive
-                    ? "bg-primary/10 text-primary"
-                    : "hover:bg-muted"
+                  isActive ? "bg-primary/10 text-primary" : "hover:bg-muted",
                 )}
               >
                 <Icon className="h-4 w-4" />

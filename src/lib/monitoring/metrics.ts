@@ -69,7 +69,7 @@ export class MetricsRegistry {
           .join(",");
 
         lines.push(
-          `${metric.name}${labelsStr ? `{${labelsStr}}` : ""} ${value.value}`
+          `${metric.name}${labelsStr ? `{${labelsStr}}` : ""} ${value.value}`,
         );
       }
     }
@@ -115,7 +115,7 @@ export abstract class Metric {
 
   protected getKey(labels: MetricLabels): string {
     return JSON.stringify(
-      Object.entries(labels).sort(([a], [b]) => a.localeCompare(b))
+      Object.entries(labels).sort(([a], [b]) => a.localeCompare(b)),
     );
   }
 
@@ -147,7 +147,7 @@ export class Counter extends Metric {
             acc[k] = v;
             return acc;
           },
-          {}
+          {},
         ),
         timestamp: new Date(),
       });
@@ -195,7 +195,7 @@ export class Gauge extends Metric {
             acc[k] = v;
             return acc;
           },
-          {}
+          {},
         ),
         timestamp: new Date(),
       });
@@ -217,7 +217,9 @@ export class Histogram extends Metric {
   constructor(
     name: string,
     description: string = "",
-    buckets: number[] = [0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10]
+    buckets: number[] = [
+      0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10,
+    ],
   ) {
     super(name, "histogram", description);
     this.bucketBounds = buckets.sort((a, b) => a - b);
@@ -254,7 +256,7 @@ export class Histogram extends Metric {
           acc[k] = v;
           return acc;
         },
-        {}
+        {},
       );
 
       // Buckets
@@ -310,32 +312,32 @@ export const metricsRegistry = new MetricsRegistry();
 // Pre-defined metrics
 export const httpRequestsTotal = new Counter(
   "http_requests_total",
-  "Total number of HTTP requests"
+  "Total number of HTTP requests",
 );
 
 export const httpRequestDuration = new Histogram(
   "http_request_duration_seconds",
-  "HTTP request duration in seconds"
+  "HTTP request duration in seconds",
 );
 
 export const activeConnections = new Gauge(
   "active_connections",
-  "Number of active connections"
+  "Number of active connections",
 );
 
 export const databaseQueryDuration = new Histogram(
   "database_query_duration_seconds",
-  "Database query duration in seconds"
+  "Database query duration in seconds",
 );
 
 export const cacheHits = new Counter(
   "cache_hits_total",
-  "Total number of cache hits"
+  "Total number of cache hits",
 );
 
 export const cacheMisses = new Counter(
   "cache_misses_total",
-  "Total number of cache misses"
+  "Total number of cache misses",
 );
 
 // Register default metrics
@@ -350,7 +352,7 @@ metricsRegistry.register(cacheMisses);
 export function measureTime<T>(
   fn: () => T | Promise<T>,
   histogram: Histogram,
-  labels: MetricLabels = {}
+  labels: MetricLabels = {},
 ): T | Promise<T> {
   const start = process.hrtime.bigint();
 

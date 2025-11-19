@@ -49,34 +49,52 @@ class ApiClient {
   }
 
   // GET request
-  async get<T>(path: string, options?: RequestOptions): Promise<ApiResponse<T>> {
+  async get<T>(
+    path: string,
+    options?: RequestOptions,
+  ): Promise<ApiResponse<T>> {
     return this.request<T>(path, { ...options, method: "GET" });
   }
 
   // POST request
-  async post<T>(path: string, body?: unknown, options?: RequestOptions): Promise<ApiResponse<T>> {
+  async post<T>(
+    path: string,
+    body?: unknown,
+    options?: RequestOptions,
+  ): Promise<ApiResponse<T>> {
     return this.request<T>(path, { ...options, method: "POST", body });
   }
 
   // PUT request
-  async put<T>(path: string, body?: unknown, options?: RequestOptions): Promise<ApiResponse<T>> {
+  async put<T>(
+    path: string,
+    body?: unknown,
+    options?: RequestOptions,
+  ): Promise<ApiResponse<T>> {
     return this.request<T>(path, { ...options, method: "PUT", body });
   }
 
   // PATCH request
-  async patch<T>(path: string, body?: unknown, options?: RequestOptions): Promise<ApiResponse<T>> {
+  async patch<T>(
+    path: string,
+    body?: unknown,
+    options?: RequestOptions,
+  ): Promise<ApiResponse<T>> {
     return this.request<T>(path, { ...options, method: "PATCH", body });
   }
 
   // DELETE request
-  async delete<T>(path: string, options?: RequestOptions): Promise<ApiResponse<T>> {
+  async delete<T>(
+    path: string,
+    options?: RequestOptions,
+  ): Promise<ApiResponse<T>> {
     return this.request<T>(path, { ...options, method: "DELETE" });
   }
 
   // Main request method
   private async request<T>(
     path: string,
-    options: RequestOptions = {}
+    options: RequestOptions = {},
   ): Promise<ApiResponse<T>> {
     const {
       method = "GET",
@@ -167,7 +185,8 @@ class ApiClient {
           headers: response.headers,
         };
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : "Unknown error";
+        const errorMessage =
+          err instanceof Error ? err.message : "Unknown error";
 
         lastError = {
           message: errorMessage,

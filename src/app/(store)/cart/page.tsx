@@ -17,7 +17,7 @@ export default function CartPage() {
     updateQuantity,
     subtotal,
     tax,
-    total
+    total,
   } = useCart();
 
   const [couponCode, setCouponCode] = React.useState("");
@@ -43,7 +43,11 @@ export default function CartPage() {
     removeItem(productId, variantId);
   };
 
-  const handleUpdateQuantity = (productId: string, newQuantity: number, variantId?: string | null) => {
+  const handleUpdateQuantity = (
+    productId: string,
+    newQuantity: number,
+    variantId?: string | null,
+  ) => {
     updateQuantity(productId, newQuantity, variantId);
   };
 
@@ -77,7 +81,7 @@ export default function CartPage() {
       const demoCode = couponCode.toUpperCase();
       if (demoCode === "BIENVENIDO10") {
         setAppliedCoupon(demoCode);
-        setCouponDiscount(subtotal() * 0.10);
+        setCouponDiscount(subtotal() * 0.1);
         setCouponCode("");
       } else if (demoCode === "ENVIOGRATIS") {
         setAppliedCoupon(demoCode);
@@ -85,7 +89,7 @@ export default function CartPage() {
         setCouponCode("");
       } else if (demoCode === "SUMMER20") {
         setAppliedCoupon(demoCode);
-        setCouponDiscount(subtotal() * 0.20);
+        setCouponDiscount(subtotal() * 0.2);
         setCouponCode("");
       } else {
         setCouponError("Cupón inválido");
@@ -158,7 +162,7 @@ export default function CartPage() {
           <div className="lg:col-span-2 space-y-4">
             {cartItems.map((item) => (
               <div
-                key={`${item.productId}-${item.variantId || 'default'}`}
+                key={`${item.productId}-${item.variantId || "default"}`}
                 className="flex gap-4 p-4 bg-white rounded-lg shadow-soft"
               >
                 {/* Product Image */}
@@ -190,7 +194,9 @@ export default function CartPage() {
                       )}
                     </div>
                     <button
-                      onClick={() => handleRemoveItem(item.productId, item.variantId)}
+                      onClick={() =>
+                        handleRemoveItem(item.productId, item.variantId)
+                      }
                       className="text-muted-foreground hover:text-error transition-colors"
                       aria-label="Eliminar producto"
                     >
@@ -203,7 +209,13 @@ export default function CartPage() {
                       value={item.quantity}
                       min={1}
                       max={99}
-                      onChange={(value) => handleUpdateQuantity(item.productId, value, item.variantId)}
+                      onChange={(value) =>
+                        handleUpdateQuantity(
+                          item.productId,
+                          value,
+                          item.variantId,
+                        )
+                      }
                       size="sm"
                     />
                     <div className="text-right">
@@ -336,7 +348,8 @@ export default function CartPage() {
               {/* Free Shipping Info */}
               {cartSubtotal < 1000 && (
                 <p className="text-xs text-muted-foreground text-center mt-4">
-                  Agrega {formatPrice(1000 - cartSubtotal)} más para envío gratis
+                  Agrega {formatPrice(1000 - cartSubtotal)} más para envío
+                  gratis
                 </p>
               )}
 

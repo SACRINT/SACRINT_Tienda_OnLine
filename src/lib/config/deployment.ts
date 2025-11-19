@@ -16,46 +16,123 @@ export const PRE_DEPLOYMENT_CHECKLIST: DeploymentChecklist[] = [
   {
     category: "Code Quality",
     items: [
-      { name: "All tests passing", description: "npm run test", required: true, automated: true },
-      { name: "No lint errors", description: "npm run lint", required: true, automated: true },
-      { name: "TypeScript compiles", description: "npm run type-check", required: true, automated: true },
-      { name: "Build succeeds", description: "npm run build", required: true, automated: true },
+      {
+        name: "All tests passing",
+        description: "npm run test",
+        required: true,
+        automated: true,
+      },
+      {
+        name: "No lint errors",
+        description: "npm run lint",
+        required: true,
+        automated: true,
+      },
+      {
+        name: "TypeScript compiles",
+        description: "npm run type-check",
+        required: true,
+        automated: true,
+      },
+      {
+        name: "Build succeeds",
+        description: "npm run build",
+        required: true,
+        automated: true,
+      },
     ],
   },
   {
     category: "Security",
     items: [
-      { name: "Dependencies updated", description: "npm audit", required: true, automated: true },
-      { name: "Secrets rotated", description: "Check env variables", required: false, automated: false },
-      { name: "Security headers", description: "Verify CSP, HSTS", required: true, automated: false },
+      {
+        name: "Dependencies updated",
+        description: "npm audit",
+        required: true,
+        automated: true,
+      },
+      {
+        name: "Secrets rotated",
+        description: "Check env variables",
+        required: false,
+        automated: false,
+      },
+      {
+        name: "Security headers",
+        description: "Verify CSP, HSTS",
+        required: true,
+        automated: false,
+      },
     ],
   },
   {
     category: "Performance",
     items: [
-      { name: "Lighthouse score > 90", description: "Run Lighthouse audit", required: true, automated: true },
-      { name: "Load tests pass", description: "Run load tests", required: false, automated: false },
-      { name: "Database indexed", description: "Verify indexes", required: true, automated: false },
+      {
+        name: "Lighthouse score > 90",
+        description: "Run Lighthouse audit",
+        required: true,
+        automated: true,
+      },
+      {
+        name: "Load tests pass",
+        description: "Run load tests",
+        required: false,
+        automated: false,
+      },
+      {
+        name: "Database indexed",
+        description: "Verify indexes",
+        required: true,
+        automated: false,
+      },
     ],
   },
   {
     category: "Operations",
     items: [
-      { name: "Monitoring enabled", description: "Verify alerts", required: true, automated: false },
-      { name: "Backups verified", description: "Test restore", required: true, automated: false },
-      { name: "Rollback plan ready", description: "Document procedure", required: true, automated: false },
+      {
+        name: "Monitoring enabled",
+        description: "Verify alerts",
+        required: true,
+        automated: false,
+      },
+      {
+        name: "Backups verified",
+        description: "Test restore",
+        required: true,
+        automated: false,
+      },
+      {
+        name: "Rollback plan ready",
+        description: "Document procedure",
+        required: true,
+        automated: false,
+      },
     ],
   },
 ];
 
 // Deployment stages
 export const DEPLOYMENT_STAGES = [
-  { name: "Build", description: "Compile and bundle application", duration: "2-5 min" },
+  {
+    name: "Build",
+    description: "Compile and bundle application",
+    duration: "2-5 min",
+  },
   { name: "Test", description: "Run automated tests", duration: "5-10 min" },
   { name: "Stage", description: "Deploy to staging", duration: "2-3 min" },
-  { name: "Verify", description: "Smoke tests on staging", duration: "5-10 min" },
+  {
+    name: "Verify",
+    description: "Smoke tests on staging",
+    duration: "5-10 min",
+  },
   { name: "Deploy", description: "Deploy to production", duration: "2-3 min" },
-  { name: "Monitor", description: "Watch metrics for issues", duration: "15-30 min" },
+  {
+    name: "Monitor",
+    description: "Watch metrics for issues",
+    duration: "15-30 min",
+  },
 ];
 
 // Rollback procedure
@@ -90,9 +167,24 @@ export interface FeatureFlag {
 }
 
 export const FEATURE_FLAGS: FeatureFlag[] = [
-  { name: "new_checkout", description: "New checkout flow", enabled: false, rolloutPercentage: 0 },
-  { name: "ai_recommendations", description: "AI product recommendations", enabled: false, rolloutPercentage: 0 },
-  { name: "instant_search", description: "Instant search results", enabled: true, rolloutPercentage: 100 },
+  {
+    name: "new_checkout",
+    description: "New checkout flow",
+    enabled: false,
+    rolloutPercentage: 0,
+  },
+  {
+    name: "ai_recommendations",
+    description: "AI product recommendations",
+    enabled: false,
+    rolloutPercentage: 0,
+  },
+  {
+    name: "instant_search",
+    description: "Instant search results",
+    enabled: true,
+    rolloutPercentage: 100,
+  },
 ];
 
 // Environment variables required for production

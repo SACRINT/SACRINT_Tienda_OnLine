@@ -17,7 +17,10 @@ export function getNetworkInfo(): NetworkInfo {
   };
 
   // @ts-ignore - Network Information API
-  const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  const connection =
+    navigator.connection ||
+    navigator.mozConnection ||
+    navigator.webkitConnection;
 
   if (connection) {
     info.effectiveType = connection.effectiveType;
@@ -52,7 +55,7 @@ export function isSlowConnection(): boolean {
 
 // Subscribe to online/offline events
 export function subscribeToNetworkChanges(
-  callback: (status: ConnectionStatus) => void
+  callback: (status: ConnectionStatus) => void,
 ): () => void {
   const handleOnline = () => callback("online");
   const handleOffline = () => callback("offline");
@@ -93,7 +96,7 @@ const actionQueue: QueuedAction[] = [];
 
 export function queueOfflineAction(
   id: string,
-  action: () => Promise<void>
+  action: () => Promise<void>,
 ): void {
   // Remove existing action with same ID
   const existingIndex = actionQueue.findIndex((a) => a.id === id);
@@ -109,9 +112,12 @@ export function queueOfflineAction(
 
   // Save to localStorage for persistence
   try {
-    localStorage.setItem("offline_queue", JSON.stringify(
-      actionQueue.map((a) => ({ id: a.id, timestamp: a.timestamp }))
-    ));
+    localStorage.setItem(
+      "offline_queue",
+      JSON.stringify(
+        actionQueue.map((a) => ({ id: a.id, timestamp: a.timestamp })),
+      ),
+    );
   } catch (e) {
     // localStorage might be full
   }
@@ -145,9 +151,12 @@ export async function processOfflineQueue(): Promise<{
     if (actionQueue.length === 0) {
       localStorage.removeItem("offline_queue");
     } else {
-      localStorage.setItem("offline_queue", JSON.stringify(
-        actionQueue.map((a) => ({ id: a.id, timestamp: a.timestamp }))
-      ));
+      localStorage.setItem(
+        "offline_queue",
+        JSON.stringify(
+          actionQueue.map((a) => ({ id: a.id, timestamp: a.timestamp })),
+        ),
+      );
     }
   } catch (e) {
     // Ignore

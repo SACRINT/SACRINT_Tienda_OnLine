@@ -38,7 +38,7 @@ export const CheckboxField = React.forwardRef<
             "peer-checked:bg-primary peer-checked:border-primary",
             "peer-disabled:cursor-not-allowed peer-disabled:opacity-50",
             error && "border-destructive",
-            className
+            className,
           )}
         >
           <Check

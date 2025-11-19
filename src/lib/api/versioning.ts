@@ -57,7 +57,10 @@ export function extractVersion(request: Request): ApiVersion {
 
   // Check header
   const headerVersion = request.headers.get("X-API-Version");
-  if (headerVersion && SUPPORTED_VERSIONS.includes(headerVersion as ApiVersion)) {
+  if (
+    headerVersion &&
+    SUPPORTED_VERSIONS.includes(headerVersion as ApiVersion)
+  ) {
     return headerVersion as ApiVersion;
   }
 
@@ -71,10 +74,7 @@ export function extractVersion(request: Request): ApiVersion {
 }
 
 // Add version headers to response
-export function addVersionHeaders(
-  headers: Headers,
-  version: ApiVersion
-): void {
+export function addVersionHeaders(headers: Headers, version: ApiVersion): void {
   headers.set("X-API-Version", version);
   headers.set("X-API-Current-Version", CURRENT_VERSION);
 
@@ -93,10 +93,7 @@ export function isVersionSupported(version: string): boolean {
 }
 
 // Version-specific response transformer
-export function transformResponse(
-  data: unknown,
-  version: ApiVersion
-): unknown {
+export function transformResponse(data: unknown, version: ApiVersion): unknown {
   // Transform response based on version
   // Add version-specific transformations here
   switch (version) {

@@ -75,7 +75,7 @@ export function ToastCustom({
       className={cn(
         "pointer-events-auto w-full max-w-sm overflow-hidden rounded-lg border shadow-lg",
         bg,
-        className
+        className,
       )}
       role="alert"
     >
@@ -90,15 +90,13 @@ export function ToastCustom({
           <div className="ml-3 w-0 flex-1">
             <p className="text-sm font-medium">{title}</p>
             {description && (
-              <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {description}
+              </p>
             )}
             {action && (
               <div className="mt-3">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={action.onClick}
-                >
+                <Button size="sm" variant="outline" onClick={action.onClick}>
                   {action.label}
                 </Button>
               </div>
@@ -151,7 +149,7 @@ export function ToastContainer({
     <div
       className={cn(
         "pointer-events-none fixed z-50 flex flex-col gap-2 p-4",
-        positionStyles[position]
+        positionStyles[position],
       )}
     >
       {children}

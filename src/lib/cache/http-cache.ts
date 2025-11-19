@@ -41,7 +41,7 @@ export type CacheProfile = keyof typeof CACHE_PROFILES;
 // Apply cache headers to response
 export function applyCacheHeaders(
   response: NextResponse,
-  profile: CacheProfile
+  profile: CacheProfile,
 ): NextResponse {
   const headers = CACHE_PROFILES[profile];
 
@@ -67,10 +67,7 @@ export function generateETag(content: string | object): string {
 }
 
 // Check if request has matching ETag
-export function hasMatchingETag(
-  request: NextRequest,
-  etag: string
-): boolean {
+export function hasMatchingETag(request: NextRequest, etag: string): boolean {
   const ifNoneMatch = request.headers.get("if-none-match");
   return ifNoneMatch === etag;
 }
@@ -79,7 +76,7 @@ export function hasMatchingETag(
 export function cachedJsonResponse(
   data: object,
   profile: CacheProfile = "api",
-  status: number = 200
+  status: number = 200,
 ): NextResponse {
   const etag = generateETag(data);
   const response = NextResponse.json(data, { status });
@@ -98,7 +95,7 @@ export function notModifiedResponse(): NextResponse {
 // Middleware helper for caching
 export function withCaching(
   handler: (request: NextRequest) => Promise<NextResponse>,
-  profile: CacheProfile = "api"
+  profile: CacheProfile = "api",
 ) {
   return async (request: NextRequest): Promise<NextResponse> => {
     const response = await handler(request);
@@ -109,7 +106,7 @@ export function withCaching(
 // Vary header helper
 export function setVaryHeaders(
   response: NextResponse,
-  headers: string[]
+  headers: string[],
 ): NextResponse {
   response.headers.set("Vary", headers.join(", "));
   return response;
@@ -118,7 +115,7 @@ export function setVaryHeaders(
 // Cache key generator for API routes
 export function generateCacheKey(
   request: NextRequest,
-  additionalKeys: string[] = []
+  additionalKeys: string[] = [],
 ): string {
   const url = new URL(request.url);
   const baseKey = `${url.pathname}${url.search}`;

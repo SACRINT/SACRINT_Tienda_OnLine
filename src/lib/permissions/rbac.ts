@@ -26,42 +26,76 @@ export type Permission =
   | "api.access"
   | "webhooks.manage";
 
-export type Role = "SUPER_ADMIN" | "STORE_OWNER" | "MANAGER" | "STAFF" | "CUSTOMER";
+export type Role =
+  | "SUPER_ADMIN"
+  | "STORE_OWNER"
+  | "MANAGER"
+  | "STAFF"
+  | "CUSTOMER";
 
 // Role permissions mapping
 export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
   SUPER_ADMIN: [
-    "products.read", "products.create", "products.update", "products.delete",
-    "orders.read", "orders.update", "orders.cancel", "orders.refund",
-    "customers.read", "customers.update", "customers.delete",
-    "analytics.read", "analytics.export",
-    "settings.read", "settings.update",
-    "users.read", "users.create", "users.update", "users.delete",
-    "billing.read", "billing.manage",
-    "api.access", "webhooks.manage",
+    "products.read",
+    "products.create",
+    "products.update",
+    "products.delete",
+    "orders.read",
+    "orders.update",
+    "orders.cancel",
+    "orders.refund",
+    "customers.read",
+    "customers.update",
+    "customers.delete",
+    "analytics.read",
+    "analytics.export",
+    "settings.read",
+    "settings.update",
+    "users.read",
+    "users.create",
+    "users.update",
+    "users.delete",
+    "billing.read",
+    "billing.manage",
+    "api.access",
+    "webhooks.manage",
   ],
   STORE_OWNER: [
-    "products.read", "products.create", "products.update", "products.delete",
-    "orders.read", "orders.update", "orders.cancel", "orders.refund",
-    "customers.read", "customers.update",
-    "analytics.read", "analytics.export",
-    "settings.read", "settings.update",
-    "users.read", "users.create", "users.update",
-    "billing.read", "billing.manage",
-    "api.access", "webhooks.manage",
+    "products.read",
+    "products.create",
+    "products.update",
+    "products.delete",
+    "orders.read",
+    "orders.update",
+    "orders.cancel",
+    "orders.refund",
+    "customers.read",
+    "customers.update",
+    "analytics.read",
+    "analytics.export",
+    "settings.read",
+    "settings.update",
+    "users.read",
+    "users.create",
+    "users.update",
+    "billing.read",
+    "billing.manage",
+    "api.access",
+    "webhooks.manage",
   ],
   MANAGER: [
-    "products.read", "products.create", "products.update",
-    "orders.read", "orders.update", "orders.cancel",
-    "customers.read", "customers.update",
+    "products.read",
+    "products.create",
+    "products.update",
+    "orders.read",
+    "orders.update",
+    "orders.cancel",
+    "customers.read",
+    "customers.update",
     "analytics.read",
     "users.read",
   ],
-  STAFF: [
-    "products.read",
-    "orders.read", "orders.update",
-    "customers.read",
-  ],
+  STAFF: ["products.read", "orders.read", "orders.update", "customers.read"],
   CUSTOMER: [],
 };
 
@@ -71,12 +105,18 @@ export function hasPermission(role: Role, permission: Permission): boolean {
 }
 
 // Check if role has any of the permissions
-export function hasAnyPermission(role: Role, permissions: Permission[]): boolean {
+export function hasAnyPermission(
+  role: Role,
+  permissions: Permission[],
+): boolean {
   return permissions.some((p) => hasPermission(role, p));
 }
 
 // Check if role has all permissions
-export function hasAllPermissions(role: Role, permissions: Permission[]): boolean {
+export function hasAllPermissions(
+  role: Role,
+  permissions: Permission[],
+): boolean {
   return permissions.every((p) => hasPermission(role, p));
 }
 
@@ -88,7 +128,7 @@ export function getRolePermissions(role: Role): Permission[] {
 // Permission guard for API routes
 export function requirePermission(
   userRole: Role,
-  requiredPermission: Permission
+  requiredPermission: Permission,
 ): void {
   if (!hasPermission(userRole, requiredPermission)) {
     throw new Error("Forbidden: Missing permission " + requiredPermission);
@@ -123,7 +163,10 @@ export const PERMISSION_DESCRIPTIONS: Record<Permission, string> = {
 };
 
 // Role descriptions
-export const ROLE_DESCRIPTIONS: Record<Role, { name: string; description: string }> = {
+export const ROLE_DESCRIPTIONS: Record<
+  Role,
+  { name: string; description: string }
+> = {
   SUPER_ADMIN: {
     name: "Super Administrador",
     description: "Acceso completo al sistema",

@@ -53,14 +53,14 @@ export function PaymentSettings({
 }: PaymentSettingsProps) {
   const handleToggleMethod = (methodId: string, enabled: boolean) => {
     const newMethods = settings.methods.map((method) =>
-      method.id === methodId ? { ...method, enabled } : method
+      method.id === methodId ? { ...method, enabled } : method,
     );
     onChange({ ...settings, methods: newMethods });
   };
 
   const handleToggleTestMode = (methodId: string, testMode: boolean) => {
     const newMethods = settings.methods.map((method) =>
-      method.id === methodId ? { ...method, testMode } : method
+      method.id === methodId ? { ...method, testMode } : method,
     );
     onChange({ ...settings, methods: newMethods });
   };

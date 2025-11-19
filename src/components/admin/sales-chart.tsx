@@ -39,12 +39,19 @@ export function SalesChart({
     }).format(value);
   };
 
-  const maxValue = Math.max(...data.map((d) => d.value), ...data.map((d) => d.previousValue || 0));
+  const maxValue = Math.max(
+    ...data.map((d) => d.value),
+    ...data.map((d) => d.previousValue || 0),
+  );
   const totalValue = data.reduce((sum, d) => sum + d.value, 0);
-  const previousTotal = data.reduce((sum, d) => sum + (d.previousValue || 0), 0);
-  const changePercent = previousTotal > 0
-    ? ((totalValue - previousTotal) / previousTotal) * 100
-    : 0;
+  const previousTotal = data.reduce(
+    (sum, d) => sum + (d.previousValue || 0),
+    0,
+  );
+  const changePercent =
+    previousTotal > 0
+      ? ((totalValue - previousTotal) / previousTotal) * 100
+      : 0;
 
   return (
     <div className={cn("rounded-lg border bg-card p-4", className)}>
@@ -53,12 +60,14 @@ export function SalesChart({
         <div>
           <h3 className="font-semibold">{title}</h3>
           <div className="flex items-baseline gap-2 mt-1">
-            <span className="text-2xl font-bold">{formatValue(totalValue)}</span>
+            <span className="text-2xl font-bold">
+              {formatValue(totalValue)}
+            </span>
             {showComparison && (
               <span
                 className={cn(
                   "text-sm",
-                  changePercent >= 0 ? "text-green-600" : "text-red-600"
+                  changePercent >= 0 ? "text-green-600" : "text-red-600",
                 )}
               >
                 {changePercent >= 0 ? "+" : ""}
@@ -91,7 +100,10 @@ export function SalesChart({
       ) : type === "bar" ? (
         <div className="h-64 flex items-end gap-2">
           {data.map((point, index) => (
-            <div key={index} className="flex-1 flex flex-col items-center gap-1">
+            <div
+              key={index}
+              className="flex-1 flex flex-col items-center gap-1"
+            >
               <div className="w-full flex items-end justify-center gap-1 h-48">
                 {showComparison && point.previousValue && (
                   <div
@@ -109,7 +121,9 @@ export function SalesChart({
                   title={formatValue(point.value)}
                 />
               </div>
-              <span className="text-xs text-muted-foreground">{point.label}</span>
+              <span className="text-xs text-muted-foreground">
+                {point.label}
+              </span>
             </div>
           ))}
         </div>
@@ -141,7 +155,7 @@ export function SalesChart({
                   ${data
                     .map(
                       (point, i) =>
-                        `L ${i * 50 + 25} ${200 - (point.value / maxValue) * 180}`
+                        `L ${i * 50 + 25} ${200 - (point.value / maxValue) * 180}`,
                     )
                     .join(" ")}
                   L ${(data.length - 1) * 50 + 25} 200
@@ -160,7 +174,7 @@ export function SalesChart({
                     (point, i) =>
                       `${i * 50 + 25},${
                         200 - ((point.previousValue || 0) / maxValue) * 180
-                      }`
+                      }`,
                   )
                   .join(" ")}
                 fill="none"
@@ -176,7 +190,7 @@ export function SalesChart({
               points={data
                 .map(
                   (point, i) =>
-                    `${i * 50 + 25},${200 - (point.value / maxValue) * 180}`
+                    `${i * 50 + 25},${200 - (point.value / maxValue) * 180}`,
                 )
                 .join(" ")}
               fill="none"

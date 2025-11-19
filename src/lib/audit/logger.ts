@@ -63,7 +63,7 @@ export async function logAudit(
   userEmail: string,
   action: AuditAction,
   resource: AuditResource,
-  options?: AuditOptions
+  options?: AuditOptions,
 ): Promise<void> {
   try {
     await db.auditLog.create({
@@ -98,7 +98,7 @@ export async function getAuditLogs(
     endDate?: Date;
     limit?: number;
     offset?: number;
-  }
+  },
 ): Promise<{ entries: AuditEntry[]; total: number }> {
   const where: Record<string, unknown> = { tenantId };
 
@@ -153,7 +153,7 @@ export async function getResourceAuditLogs(
   tenantId: string,
   resource: AuditResource,
   resourceId: string,
-  limit: number = 20
+  limit: number = 20,
 ): Promise<AuditEntry[]> {
   const { entries } = await getAuditLogs(tenantId, {
     resource,
@@ -167,7 +167,7 @@ export async function getResourceAuditLogs(
 export async function getUserActivity(
   tenantId: string,
   userId: string,
-  limit: number = 50
+  limit: number = 50,
 ): Promise<AuditEntry[]> {
   const { entries } = await getAuditLogs(tenantId, {
     userId,
@@ -178,30 +178,89 @@ export async function getUserActivity(
 
 // Helper for common audit actions
 export const audit = {
-  userLogin: (tenantId: string, userId: string, email: string, metadata?: AuditOptions["metadata"]) =>
-    logAudit(tenantId, userId, email, "login", "user", { metadata }),
+  userLogin: (
+    tenantId: string,
+    userId: string,
+    email: string,
+    metadata?: AuditOptions["metadata"],
+  ) => logAudit(tenantId, userId, email, "login", "user", { metadata }),
 
   userLogout: (tenantId: string, userId: string, email: string) =>
     logAudit(tenantId, userId, email, "logout", "user"),
 
-  productCreated: (tenantId: string, userId: string, email: string, productId: string, details?: Record<string, unknown>) =>
-    logAudit(tenantId, userId, email, "create", "product", { resourceId: productId, details }),
+  productCreated: (
+    tenantId: string,
+    userId: string,
+    email: string,
+    productId: string,
+    details?: Record<string, unknown>,
+  ) =>
+    logAudit(tenantId, userId, email, "create", "product", {
+      resourceId: productId,
+      details,
+    }),
 
-  productUpdated: (tenantId: string, userId: string, email: string, productId: string, details?: Record<string, unknown>) =>
-    logAudit(tenantId, userId, email, "update", "product", { resourceId: productId, details }),
+  productUpdated: (
+    tenantId: string,
+    userId: string,
+    email: string,
+    productId: string,
+    details?: Record<string, unknown>,
+  ) =>
+    logAudit(tenantId, userId, email, "update", "product", {
+      resourceId: productId,
+      details,
+    }),
 
-  productDeleted: (tenantId: string, userId: string, email: string, productId: string) =>
-    logAudit(tenantId, userId, email, "delete", "product", { resourceId: productId }),
+  productDeleted: (
+    tenantId: string,
+    userId: string,
+    email: string,
+    productId: string,
+  ) =>
+    logAudit(tenantId, userId, email, "delete", "product", {
+      resourceId: productId,
+    }),
 
-  orderCreated: (tenantId: string, userId: string, email: string, orderId: string, details?: Record<string, unknown>) =>
-    logAudit(tenantId, userId, email, "create", "order", { resourceId: orderId, details }),
+  orderCreated: (
+    tenantId: string,
+    userId: string,
+    email: string,
+    orderId: string,
+    details?: Record<string, unknown>,
+  ) =>
+    logAudit(tenantId, userId, email, "create", "order", {
+      resourceId: orderId,
+      details,
+    }),
 
-  orderUpdated: (tenantId: string, userId: string, email: string, orderId: string, details?: Record<string, unknown>) =>
-    logAudit(tenantId, userId, email, "update", "order", { resourceId: orderId, details }),
+  orderUpdated: (
+    tenantId: string,
+    userId: string,
+    email: string,
+    orderId: string,
+    details?: Record<string, unknown>,
+  ) =>
+    logAudit(tenantId, userId, email, "update", "order", {
+      resourceId: orderId,
+      details,
+    }),
 
-  settingsChanged: (tenantId: string, userId: string, email: string, details?: Record<string, unknown>) =>
-    logAudit(tenantId, userId, email, "settings_change", "settings", { details }),
+  settingsChanged: (
+    tenantId: string,
+    userId: string,
+    email: string,
+    details?: Record<string, unknown>,
+  ) =>
+    logAudit(tenantId, userId, email, "settings_change", "settings", {
+      details,
+    }),
 
-  dataExported: (tenantId: string, userId: string, email: string, resource: AuditResource, details?: Record<string, unknown>) =>
-    logAudit(tenantId, userId, email, "export", resource, { details }),
+  dataExported: (
+    tenantId: string,
+    userId: string,
+    email: string,
+    resource: AuditResource,
+    details?: Record<string, unknown>,
+  ) => logAudit(tenantId, userId, email, "export", resource, { details }),
 };

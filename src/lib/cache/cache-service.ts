@@ -45,7 +45,7 @@ class CacheService {
   async set<T>(
     key: string,
     value: T,
-    options: CacheOptions = {}
+    options: CacheOptions = {},
   ): Promise<void> {
     const ttl = options.ttl || CACHE_TTL.MEDIUM;
     const tags = options.tags || [];
@@ -98,7 +98,7 @@ class CacheService {
   async getOrSet<T>(
     key: string,
     fetcher: () => Promise<T>,
-    options: CacheOptions = {}
+    options: CacheOptions = {},
   ): Promise<T> {
     const cached = await this.get<T>(key);
     if (cached !== null) return cached;
@@ -182,8 +182,7 @@ export const cacheKeys = {
   // User data
   user: (id: string) => `user:${id}`,
   userOrders: (userId: string) => `orders:user:${userId}`,
-  userCart: (userId: string, tenantId: string) =>
-    `cart:${userId}:${tenantId}`,
+  userCart: (userId: string, tenantId: string) => `cart:${userId}:${tenantId}`,
 
   // Tenant data
   tenant: (id: string) => `tenant:${id}`,
@@ -207,7 +206,7 @@ export const cacheTags = {
 export async function cacheProducts<T>(
   tenantId: string,
   fetcher: () => Promise<T>,
-  ttl: number = CACHE_TTL.MEDIUM
+  ttl: number = CACHE_TTL.MEDIUM,
 ): Promise<T> {
   return cache.getOrSet(cacheKeys.products(tenantId), fetcher, {
     ttl,
@@ -218,7 +217,7 @@ export async function cacheProducts<T>(
 export async function cacheCategories<T>(
   tenantId: string,
   fetcher: () => Promise<T>,
-  ttl: number = CACHE_TTL.HOUR
+  ttl: number = CACHE_TTL.HOUR,
 ): Promise<T> {
   return cache.getOrSet(cacheKeys.categories(tenantId), fetcher, {
     ttl,

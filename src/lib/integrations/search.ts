@@ -7,10 +7,12 @@ import { z } from "zod";
 export const SearchQuerySchema = z.object({
   query: z.string().min(1),
   filters: z.record(z.union([z.string(), z.array(z.string())])).optional(),
-  sort: z.object({
-    field: z.string(),
-    direction: z.enum(["asc", "desc"]),
-  }).optional(),
+  sort: z
+    .object({
+      field: z.string(),
+      direction: z.enum(["asc", "desc"]),
+    })
+    .optional(),
   page: z.number().positive().default(1),
   pageSize: z.number().positive().max(100).default(20),
   facets: z.array(z.string()).optional(),
@@ -72,12 +74,24 @@ export interface SearchService {
   clearIndex(tenantId?: string): Promise<void>;
 
   // Searching
-  search(tenantId: string, query: SearchQuery): Promise<SearchResult<ProductSearchData>>;
+  search(
+    tenantId: string,
+    query: SearchQuery,
+  ): Promise<SearchResult<ProductSearchData>>;
   suggest(tenantId: string, query: string, limit?: number): Promise<string[]>;
 
   // Analytics
-  trackSearch(tenantId: string, query: string, resultCount: number): Promise<void>;
-  trackClick(tenantId: string, query: string, productId: string, position: number): Promise<void>;
+  trackSearch(
+    tenantId: string,
+    query: string,
+    resultCount: number,
+  ): Promise<void>;
+  trackClick(
+    tenantId: string,
+    query: string,
+    productId: string,
+    position: number,
+  ): Promise<void>;
   getPopularSearches(tenantId: string, limit?: number): Promise<string[]>;
 }
 
@@ -120,7 +134,7 @@ export class AlgoliaSearchService implements SearchService {
             body: obj,
           })),
         }),
-      }
+      },
     );
 
     if (!response.ok) {
@@ -131,7 +145,7 @@ export class AlgoliaSearchService implements SearchService {
 
   async updateProduct(
     id: string,
-    product: Partial<ProductSearchData>
+    product: Partial<ProductSearchData>,
   ): Promise<void> {
     const response = await fetch(
       `${this.baseUrl}/1/indexes/${this.indexName}/${id}/partial`,
@@ -143,7 +157,7 @@ export class AlgoliaSearchService implements SearchService {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(product),
-      }
+      },
     );
 
     if (!response.ok) {
@@ -161,7 +175,7 @@ export class AlgoliaSearchService implements SearchService {
           "X-Algolia-Application-Id": this.appId,
           "X-Algolia-API-Key": this.apiKey,
         },
-      }
+      },
     );
 
     if (!response.ok) {
@@ -185,7 +199,7 @@ export class AlgoliaSearchService implements SearchService {
           body: JSON.stringify({
             filters: `tenantId:${tenantId}`,
           }),
-        }
+        },
       );
 
       if (!response.ok) {
@@ -201,7 +215,7 @@ export class AlgoliaSearchService implements SearchService {
             "X-Algolia-Application-Id": this.appId,
             "X-Algolia-API-Key": this.apiKey,
           },
-        }
+        },
       );
 
       if (!response.ok) {
@@ -212,7 +226,7 @@ export class AlgoliaSearchService implements SearchService {
 
   async search(
     tenantId: string,
-    query: SearchQuery
+    query: SearchQuery,
   ): Promise<SearchResult<ProductSearchData>> {
     const validated = SearchQuerySchema.parse(query);
 
@@ -232,7 +246,7 @@ export class AlgoliaSearchService implements SearchService {
             return `(${value.map((v) => `${key}:${v}`).join(" OR ")})`;
           }
           return `${key}:${value}`;
-        }
+        },
       );
       params.filters += ` AND ${filterStrings.join(" AND ")}`;
     }
@@ -252,7 +266,7 @@ export class AlgoliaSearchService implements SearchService {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(params),
-      }
+      },
     );
 
     if (!response.ok) {
@@ -269,10 +283,9 @@ export class AlgoliaSearchService implements SearchService {
         data: hit as ProductSearchData,
         highlights: hit._highlightResult
           ? Object.fromEntries(
-              Object.entries(hit._highlightResult).map(([key, value]: [string, any]) => [
-                key,
-                [value.value],
-              ])
+              Object.entries(hit._highlightResult).map(
+                ([key, value]: [string, any]) => [key, [value.value]],
+              ),
             )
           : undefined,
       })),
@@ -282,13 +295,15 @@ export class AlgoliaSearchService implements SearchService {
       totalPages: result.nbPages,
       facets: result.facets
         ? Object.fromEntries(
-            Object.entries(result.facets).map(([key, values]: [string, any]) => [
-              key,
-              Object.entries(values).map(([value, count]) => ({
-                value,
-                count: count as number,
-              })),
-            ])
+            Object.entries(result.facets).map(
+              ([key, values]: [string, any]) => [
+                key,
+                Object.entries(values).map(([value, count]) => ({
+                  value,
+                  count: count as number,
+                })),
+              ],
+            ),
           )
         : undefined,
       processingTimeMs: result.processingTimeMS,
@@ -298,7 +313,7 @@ export class AlgoliaSearchService implements SearchService {
   async suggest(
     tenantId: string,
     query: string,
-    limit: number = 10
+    limit: number = 10,
   ): Promise<string[]> {
     const result = await this.search(tenantId, {
       query,
@@ -312,7 +327,7 @@ export class AlgoliaSearchService implements SearchService {
   async trackSearch(
     tenantId: string,
     query: string,
-    resultCount: number
+    resultCount: number,
   ): Promise<void> {
     // Analytics would be sent to Algolia Insights API
     console.log("Search tracked:", { tenantId, query, resultCount });
@@ -322,14 +337,14 @@ export class AlgoliaSearchService implements SearchService {
     tenantId: string,
     query: string,
     productId: string,
-    position: number
+    position: number,
   ): Promise<void> {
     console.log("Click tracked:", { tenantId, query, productId, position });
   }
 
   async getPopularSearches(
     tenantId: string,
-    limit: number = 10
+    limit: number = 10,
   ): Promise<string[]> {
     // Would fetch from Algolia Analytics
     return [];
@@ -339,7 +354,11 @@ export class AlgoliaSearchService implements SearchService {
 // In-memory search for development
 export class InMemorySearchService implements SearchService {
   private products = new Map<string, ProductSearchData>();
-  private searchHistory: Array<{ tenantId: string; query: string; count: number }> = [];
+  private searchHistory: Array<{
+    tenantId: string;
+    query: string;
+    count: number;
+  }> = [];
 
   async indexProduct(product: ProductSearchData): Promise<void> {
     this.products.set(product.id, product);
@@ -353,7 +372,7 @@ export class InMemorySearchService implements SearchService {
 
   async updateProduct(
     id: string,
-    product: Partial<ProductSearchData>
+    product: Partial<ProductSearchData>,
   ): Promise<void> {
     const existing = this.products.get(id);
     if (existing) {
@@ -379,14 +398,14 @@ export class InMemorySearchService implements SearchService {
 
   async search(
     tenantId: string,
-    query: SearchQuery
+    query: SearchQuery,
   ): Promise<SearchResult<ProductSearchData>> {
     const startTime = Date.now();
     const validated = SearchQuerySchema.parse(query);
 
     // Filter by tenant
     let results = Array.from(this.products.values()).filter(
-      (p) => p.tenantId === tenantId
+      (p) => p.tenantId === tenantId,
     );
 
     // Text search
@@ -396,8 +415,8 @@ export class InMemorySearchService implements SearchService {
         (term) =>
           p.name.toLowerCase().includes(term) ||
           p.description.toLowerCase().includes(term) ||
-          p.tags.some((t) => t.toLowerCase().includes(term))
-      )
+          p.tags.some((t) => t.toLowerCase().includes(term)),
+      ),
     );
 
     // Apply filters
@@ -481,7 +500,7 @@ export class InMemorySearchService implements SearchService {
   async suggest(
     tenantId: string,
     query: string,
-    limit: number = 10
+    limit: number = 10,
   ): Promise<string[]> {
     const results = await this.search(tenantId, {
       query,
@@ -495,7 +514,7 @@ export class InMemorySearchService implements SearchService {
   async trackSearch(
     tenantId: string,
     query: string,
-    resultCount: number
+    resultCount: number,
   ): Promise<void> {
     this.searchHistory.push({ tenantId, query, count: resultCount });
     console.log("Mock search tracked:", { tenantId, query, resultCount });
@@ -505,14 +524,19 @@ export class InMemorySearchService implements SearchService {
     tenantId: string,
     query: string,
     productId: string,
-    position: number
+    position: number,
   ): Promise<void> {
-    console.log("Mock click tracked:", { tenantId, query, productId, position });
+    console.log("Mock click tracked:", {
+      tenantId,
+      query,
+      productId,
+      position,
+    });
   }
 
   async getPopularSearches(
     tenantId: string,
-    limit: number = 10
+    limit: number = 10,
   ): Promise<string[]> {
     const searches = this.searchHistory
       .filter((s) => s.tenantId === tenantId)

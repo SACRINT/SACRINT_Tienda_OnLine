@@ -17,11 +17,11 @@ export const mockCache = {
     async (
       key: string,
       value: unknown,
-      options?: { ttl?: number; tags?: string[] }
+      options?: { ttl?: number; tags?: string[] },
     ): Promise<void> => {
       const expiry = options?.ttl ? Date.now() + options.ttl * 1000 : 0;
       cacheStore.set(key, { value, expiry });
-    }
+    },
   ),
 
   delete: jest.fn(async (key: string): Promise<void> => {

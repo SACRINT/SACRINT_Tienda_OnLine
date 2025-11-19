@@ -201,7 +201,7 @@ describe("Input Sanitization", () => {
 
     it("should allow HTML when specified", () => {
       expect(sanitizeInput("<b>bold</b>", { allowHtml: true })).toBe(
-        "<b>bold</b>"
+        "<b>bold</b>",
       );
     });
 
@@ -318,7 +318,7 @@ describe("Input Sanitization", () => {
   describe("validateContentType", () => {
     it("should validate allowed content types", () => {
       expect(
-        validateContentType("image/jpeg", ["image/jpeg", "image/png"])
+        validateContentType("image/jpeg", ["image/jpeg", "image/png"]),
       ).toBe(true);
     });
 
@@ -330,7 +330,7 @@ describe("Input Sanitization", () => {
       expect(
         validateContentType("application/json; charset=utf-8", [
           "application/json",
-        ])
+        ]),
       ).toBe(true);
     });
 
@@ -342,34 +342,34 @@ describe("Input Sanitization", () => {
   describe("validateFileExtension", () => {
     it("should validate allowed extensions", () => {
       expect(validateFileExtension("image.jpg", allowedImageExtensions)).toBe(
-        true
+        true,
       );
       expect(validateFileExtension("photo.png", allowedImageExtensions)).toBe(
-        true
+        true,
       );
     });
 
     it("should reject disallowed extensions", () => {
       expect(validateFileExtension("script.js", allowedImageExtensions)).toBe(
-        false
+        false,
       );
       expect(validateFileExtension("file.exe", allowedImageExtensions)).toBe(
-        false
+        false,
       );
     });
 
     it("should be case-insensitive", () => {
       expect(validateFileExtension("image.JPG", allowedImageExtensions)).toBe(
-        true
+        true,
       );
       expect(validateFileExtension("image.PNG", allowedImageExtensions)).toBe(
-        true
+        true,
       );
     });
 
     it("should handle no extension", () => {
       expect(validateFileExtension("noextension", allowedImageExtensions)).toBe(
-        false
+        false,
       );
     });
   });

@@ -43,7 +43,7 @@ export class CloudinaryStorageService implements StorageService {
 
   async upload(
     file: File | Buffer,
-    options?: UploadOptions
+    options?: UploadOptions,
   ): Promise<UploadResult> {
     // Validate file
     if (options?.maxSize) {
@@ -84,12 +84,14 @@ export class CloudinaryStorageService implements StorageService {
       {
         method: "POST",
         body: formData,
-      }
+      },
     );
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(`Upload failed: ${error.error?.message || response.statusText}`);
+      throw new Error(
+        `Upload failed: ${error.error?.message || response.statusText}`,
+      );
     }
 
     const result = await response.json();
@@ -104,7 +106,9 @@ export class CloudinaryStorageService implements StorageService {
 
   async delete(key: string): Promise<void> {
     const timestamp = Math.floor(Date.now() / 1000);
-    const signature = this.generateSignature(`public_id=${key}&timestamp=${timestamp}`);
+    const signature = this.generateSignature(
+      `public_id=${key}&timestamp=${timestamp}`,
+    );
 
     const formData = new FormData();
     formData.append("public_id", key);
@@ -117,7 +121,7 @@ export class CloudinaryStorageService implements StorageService {
       {
         method: "POST",
         body: formData,
-      }
+      },
     );
 
     if (!response.ok) {
@@ -127,7 +131,9 @@ export class CloudinaryStorageService implements StorageService {
 
   async getSignedUrl(key: string, expiresIn: number = 3600): Promise<string> {
     const timestamp = Math.floor(Date.now() / 1000) + expiresIn;
-    const signature = this.generateSignature(`expires_at=${timestamp}&public_id=${key}`);
+    const signature = this.generateSignature(
+      `expires_at=${timestamp}&public_id=${key}`,
+    );
 
     return `https://res.cloudinary.com/${this.cloudName}/image/upload/s--${signature}--/${key}`;
   }
@@ -140,7 +146,9 @@ export class CloudinaryStorageService implements StorageService {
 
   private generateSignature(params: string): string {
     // In production, use crypto for HMAC-SHA1
-    return Buffer.from(`${params}${this.apiSecret}`).toString("base64").slice(0, 8);
+    return Buffer.from(`${params}${this.apiSecret}`)
+      .toString("base64")
+      .slice(0, 8);
   }
 }
 
@@ -155,7 +163,7 @@ export class S3StorageService implements StorageService {
     bucket: string,
     region: string,
     accessKeyId: string,
-    secretAccessKey: string
+    secretAccessKey: string,
   ) {
     this.bucket = bucket;
     this.region = region;
@@ -165,7 +173,7 @@ export class S3StorageService implements StorageService {
 
   async upload(
     file: File | Buffer,
-    options?: UploadOptions
+    options?: UploadOptions,
   ): Promise<UploadResult> {
     // Validate file
     if (options?.maxSize) {
@@ -271,7 +279,7 @@ class MockStorageService implements StorageService {
 
   async upload(
     file: File | Buffer,
-    options?: UploadOptions
+    options?: UploadOptions,
   ): Promise<UploadResult> {
     const key = options?.filename || `mock_${Date.now()}`;
     const result: UploadResult = {
@@ -298,7 +306,7 @@ class MockStorageService implements StorageService {
 
   async list(prefix?: string): Promise<string[]> {
     return Array.from(this.files.keys()).filter((key) =>
-      prefix ? key.startsWith(prefix) : true
+      prefix ? key.startsWith(prefix) : true,
     );
   }
 }
