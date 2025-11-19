@@ -3,6 +3,8 @@ import "./globals.css";
 import { ServiceWorkerRegistration } from "@/components/shared/ServiceWorkerRegistration";
 import { PWAInstallPrompt } from "@/components/shared/PWAInstallPrompt";
 import { MobileBottomNav } from "@/components/shared/MobileNav";
+import { SkipToContent } from "@/components/shared/SkipToContent";
+import { ToastContainer } from "@/components/ui/toast-container";
 import { StoreHeader, StoreFooter } from "@/components/store";
 
 export const metadata: Metadata = {
@@ -52,6 +54,7 @@ export default function RootLayout({
         />
       </head>
       <body>
+        <SkipToContent />
         <ServiceWorkerRegistration />
         <PWAInstallPrompt />
 
@@ -60,7 +63,9 @@ export default function RootLayout({
           <StoreHeader />
 
           {/* Main Content */}
-          <main className="flex-grow pb-16 md:pb-0">{children}</main>
+          <main id="main-content" className="flex-grow pb-16 md:pb-0" tabIndex={-1}>
+            {children}
+          </main>
 
           {/* Footer */}
           <StoreFooter />
@@ -68,6 +73,9 @@ export default function RootLayout({
           {/* Mobile Bottom Navigation */}
           <MobileBottomNav />
         </div>
+
+        {/* Toast Notifications */}
+        <ToastContainer />
       </body>
     </html>
   );
