@@ -83,14 +83,75 @@ DESIGN-SYSTEM-GUIDE.md
 ---
 
 ## Sprint 8: Admin Dashboard (Semanas 5-8)
+**Estado**: ✅ COMPLETADO
+**Duración**: 2025-11-19
+
+### Semana 5 - Dashboard Home + Analytics
+**Commit**: `b33e140`
+- ✅ 8 KPI Cards (Revenue, Orders, Products, Customers, AOV, Conversion, Repeat, Cart Abandonment)
+- ✅ LineChart para tendencia de ingresos (12 meses)
+- ✅ PieChart para distribución de estados de órdenes
+- ✅ Top 5 productos por ingresos
+- ✅ Lista de órdenes recientes
+- ✅ Selector de rango de fechas (7d, 30d, 90d, 12m)
+- ✅ Instalación de recharts
+
+### Semana 6 - Products Management
+**Commit**: `b33e140`
+- ✅ ProductForm mejorado con 5 tabs (Básico, Imágenes, Variantes, Envío, SEO)
+- ✅ Gestión de variantes de producto con atributos
+- ✅ Galería de imágenes con selección principal
+- ✅ Campos SEO con preview de Google
+- ✅ Sistema de etiquetas
+- ✅ Información de envío (peso, dimensiones)
+- ✅ CSV import/export con templates
+- ✅ Tracking de progreso y reportes de error
+
+### Semana 7 - Orders Management
+**Commit**: `72651b2`
+- ✅ OrderTimeline component con tracking visual
+- ✅ OrderStatusProgress bar mostrando workflow
+- ✅ Página de detalle de orden mejorada con timeline
+- ✅ Acciones de imprimir y reenviar
+- ✅ Mejor layout con colores del design system
+- ✅ Iconos y colores específicos por estado
+
+### Semana 8 - Customers + Settings
+**Commit**: `9069a2d`
+- ✅ Customers page con stats cards
+- ✅ Búsqueda y filtros
+- ✅ Tabla mejorada con avatars y badges de estado
+- ✅ Tracking de total gastado
+- ✅ Export functionality
+- ✅ Settings page con 4 tabs:
+  - Tienda: Info básica, config regional, apariencia
+  - Pagos: Stripe status, métodos adicionales
+  - Envíos: Envío gratis, zonas, integraciones
+  - Notificaciones: Email y alertas de admin
+
+**Archivos entregados**:
+```
+/app/(dashboard)/page.tsx (Dashboard con KPIs)
+/app/(dashboard)/products/page.tsx
+/app/(dashboard)/orders/[id]/page.tsx
+/app/(dashboard)/customers/page.tsx
+/app/(dashboard)/settings/page.tsx
+/components/dashboard/ProductForm.tsx (mejorado)
+/components/dashboard/CSVOperations.tsx
+/components/dashboard/OrderTimeline.tsx
+```
+
+---
+
+## Sprint 9: Customer Account + Payments (Semanas 9-12)
 **Estado**: 🔄 EN PROGRESO
 **Inicio**: Ahora
 
 ### Objetivos:
-- Semana 5: Dashboard Home + Analytics
-- Semana 6: Products Management
-- Semana 7: Orders Management
-- Semana 8: Customers + Settings
+- Semana 9: Customer Account Pages
+- Semana 10: Shipping Integration (SkyDropx)
+- Semana 11: Payment Methods (Mercado Pago)
+- Semana 12: Checkout Final
 
 ---
 
@@ -99,16 +160,16 @@ DESIGN-SYSTEM-GUIDE.md
 | Sprint | Semanas | Estado | Commits |
 |--------|---------|--------|---------|
 | Sprint 7 | 1-4 | ✅ Completado | 4 |
-| Sprint 8 | 5-8 | 🔄 En progreso | 0 |
-| Sprint 9 | 9-12 | ⏳ Pendiente | - |
+| Sprint 8 | 5-8 | ✅ Completado | 4 |
+| Sprint 9 | 9-12 | 🔄 En progreso | 0 |
 | Sprint 10 | 13-16 | ⏳ Pendiente | - |
 | Sprint 11 | 17-20 | ⏳ Pendiente | - |
 | Sprint 12 | 21-24 | ⏳ Pendiente | - |
 
-**Total de commits**: 4
-**Archivos creados/modificados**: 60+
-**Componentes UI**: 40+
-**Páginas**: 5
+**Total de commits**: 8
+**Archivos creados/modificados**: 70+
+**Componentes UI**: 45+
+**Páginas**: 12
 
 ---
 
