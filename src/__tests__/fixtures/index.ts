@@ -107,19 +107,19 @@ export const fixtures = {
   // API key fixtures
   apiKeys: {
     valid: {
-      key: "sk_live_valid_test_key_123456789",
+      key: "test_key_valid_fixture_123456789",
       tenantId: "tenant_active",
       permissions: ["*"],
       rateLimit: 1000,
     },
     limited: {
-      key: "sk_live_limited_test_key_123456",
+      key: "test_key_limited_fixture_123456",
       tenantId: "tenant_active",
       permissions: ["products.read", "orders.read"],
       rateLimit: 100,
     },
     expired: {
-      key: "sk_live_expired_test_key_12345",
+      key: "test_key_expired_fixture_12345",
       tenantId: "tenant_active",
       expiresAt: new Date("2020-01-01"),
     },
