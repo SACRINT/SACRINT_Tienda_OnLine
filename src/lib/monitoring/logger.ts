@@ -1,151 +1,146 @@
 // Structured Logging System
-// Centralized logging with different levels and formatting
+// Production-ready logging with levels, context, and formatting
 
 export type LogLevel = "debug" | "info" | "warn" | "error";
 
-interface LogEntry {
-  timestamp: string;
-  level: LogLevel;
-  message: string;
-  context?: Record<string, any>;
+export interface LogContext {
   userId?: string;
   tenantId?: string;
   requestId?: string;
+  action?: string;
+  [key: string]: unknown;
 }
+
+export interface LogEntry {
+  level: LogLevel;
+  message: string;
+  timestamp: string;
+  context?: LogContext;
+  error?: {
+    name: string;
+    message: string;
+    stack?: string;
+  };
+}
+
+const LOG_LEVELS: Record<LogLevel, number> = {
+  debug: 0,
+  info: 1,
+  warn: 2,
+  error: 3,
+};
 
 class Logger {
-  private isDevelopment = process.env.NODE_ENV === "development";
-  private isProduction = process.env.NODE_ENV === "production";
+  private minLevel: LogLevel;
 
-  private formatLog(entry: LogEntry): string {
-    if (this.isDevelopment) {
-      // Pretty format for development
-      return JSON.stringify(entry, null, 2);
-    }
-
-    // Single line JSON for production (better for log aggregation)
-    return JSON.stringify(entry);
+  constructor() {
+    this.minLevel = process.env.NODE_ENV === "production" ? "info" : "debug";
   }
 
-  private log(level: LogLevel, message: string, context?: Record<string, any>) {
+  private shouldLog(level: LogLevel): boolean {
+    return LOG_LEVELS[level] >= LOG_LEVELS[this.minLevel];
+  }
+
+  private formatEntry(
+    level: LogLevel,
+    message: string,
+    context?: LogContext,
+    error?: Error
+  ): LogEntry {
     const entry: LogEntry = {
-      timestamp: new Date().toISOString(),
       level,
       message,
-      context,
+      timestamp: new Date().toISOString(),
     };
 
-    const formattedLog = this.formatLog(entry);
+    if (context) {
+      entry.context = context;
+    }
 
-    switch (level) {
+    if (error) {
+      entry.error = {
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+      };
+    }
+
+    return entry;
+  }
+
+  private output(entry: LogEntry): void {
+    const json = JSON.stringify(entry);
+
+    switch (entry.level) {
       case "debug":
-        if (this.isDevelopment) console.debug(formattedLog);
+        console.debug(json);
         break;
       case "info":
-        console.log(formattedLog);
+        console.info(json);
         break;
       case "warn":
-        console.warn(formattedLog);
+        console.warn(json);
         break;
       case "error":
-        console.error(formattedLog);
-        // Also send to Sentry in production
-        if (this.isProduction && context?.error) {
-          // Import dynamically to avoid circular dependencies
-          import("./sentry").then(({ captureError }) => {
-            captureError(context.error, context);
-          });
-        }
+        console.error(json);
         break;
     }
+  }
 
-    // In production, also log to external service if configured
-    if (this.isProduction) {
-      this.sendToExternalService(entry);
+  debug(message: string, context?: LogContext): void {
+    if (this.shouldLog("debug")) {
+      this.output(this.formatEntry("debug", message, context));
     }
   }
 
-  private async sendToExternalService(entry: LogEntry) {
-    // Send to log aggregation service (e.g., Logtail, Datadog, etc.)
-    if (process.env.LOGTAIL_TOKEN) {
-      try {
-        await fetch("https://in.logtail.com/", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${process.env.LOGTAIL_TOKEN}`,
-          },
-          body: JSON.stringify(entry),
-        });
-      } catch (error) {
-        // Silently fail - don't want logging to break the app
-        console.error("Failed to send log to external service:", error);
-      }
+  info(message: string, context?: LogContext): void {
+    if (this.shouldLog("info")) {
+      this.output(this.formatEntry("info", message, context));
     }
   }
 
-  debug(message: string, context?: Record<string, any>) {
-    this.log("debug", message, context);
+  warn(message: string, context?: LogContext): void {
+    if (this.shouldLog("warn")) {
+      this.output(this.formatEntry("warn", message, context));
+    }
   }
 
-  info(message: string, context?: Record<string, any>) {
-    this.log("info", message, context);
+  error(message: string, error?: Error, context?: LogContext): void {
+    if (this.shouldLog("error")) {
+      this.output(this.formatEntry("error", message, context, error));
+    }
   }
 
-  warn(message: string, context?: Record<string, any>) {
-    this.log("warn", message, context);
+  // Audit logging for security events
+  audit(action: string, context: LogContext): void {
+    this.info("AUDIT: " + action, { ...context, action, audit: true });
   }
 
-  error(message: string, error?: Error, context?: Record<string, any>) {
-    this.log("error", message, {
+  // Performance logging
+  perf(operation: string, durationMs: number, context?: LogContext): void {
+    this.info("PERF: " + operation, {
       ...context,
-      error: error
-        ? {
-            name: error.name,
-            message: error.message,
-            stack: error.stack,
-          }
-        : undefined,
+      operation,
+      durationMs,
+      perf: true,
     });
-  }
-
-  // Audit logging for compliance
-  audit(action: string, userId: string, details: Record<string, any>) {
-    this.info(`AUDIT: ${action}`, {
-      audit: true,
-      userId,
-      action,
-      ...details,
-    });
-
-    // Store audit logs in database for compliance
-    if (this.isProduction) {
-      this.storeAuditLog(action, userId, details);
-    }
-  }
-
-  private async storeAuditLog(
-    action: string,
-    userId: string,
-    details: Record<string, any>,
-  ) {
-    try {
-      // TODO: Implement audit log storage when auditLog model is added to Prisma schema
-      // For now, just log to console
-      console.log("[AUDIT]", {
-        action,
-        userId,
-        details,
-        timestamp: new Date().toISOString(),
-      });
-    } catch (error) {
-      console.error("Failed to store audit log:", error);
-    }
   }
 }
 
-// Export singleton instance
 export const logger = new Logger();
 
-// Convenience exports
-export const { debug, info, warn, error, audit } = logger;
+// Request context helper
+export function createRequestContext(
+  request: Request,
+  userId?: string,
+  tenantId?: string
+): LogContext {
+  return {
+    userId,
+    tenantId,
+    requestId: crypto.randomUUID(),
+    method: request.method,
+    url: request.url,
+    userAgent: request.headers.get("user-agent") || undefined,
+  };
+}
