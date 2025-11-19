@@ -1,3 +1,2 @@
-// Cache Module Index
-
 export * from "./cache-service";
+export * from "./http-cache";

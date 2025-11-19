@@ -1,113 +1,49 @@
-// Schema.org Structured Data generators
-import { siteConfig } from "./metadata";
+// SEO Utilities - Structured Data & Meta Tags
 
-// Organization schema
-export function generateOrganizationSchema() {
-  return {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    name: siteConfig.name,
-    url: siteConfig.url,
-    logo: `${siteConfig.url}/logo.png`,
-    sameAs: [
-      "https://facebook.com/sacrint",
-      "https://twitter.com/sacrint",
-      "https://instagram.com/sacrint",
-    ],
-    contactPoint: {
-      "@type": "ContactPoint",
-      telephone: "+52-55-1234-5678",
-      contactType: "customer service",
-      availableLanguage: ["Spanish"],
-    },
-  };
-}
-
-// Website schema
-export function generateWebsiteSchema() {
-  return {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    name: siteConfig.name,
-    url: siteConfig.url,
-    potentialAction: {
-      "@type": "SearchAction",
-      target: {
-        "@type": "EntryPoint",
-        urlTemplate: `${siteConfig.url}/search?q={search_term_string}`,
-      },
-      "query-input": "required name=search_term_string",
-    },
-  };
-}
-
-// Product schema
-export function generateProductSchema(product: {
+export interface ProductStructuredData {
+  id: string;
   name: string;
   description: string;
-  sku: string;
+  image: string[];
   price: number;
-  compareAtPrice?: number;
-  images: string[];
-  brand?: string;
-  category?: string;
-  inStock: boolean;
+  currency?: string;
+  availability?: "InStock" | "OutOfStock" | "PreOrder";
+  sku?: string;
   rating?: number;
   reviewCount?: number;
-  url: string;
-}) {
-  const schema: any = {
+}
+
+export function generateProductJsonLd(product: ProductStructuredData): object {
+  const availability = product.availability || "InStock";
+  return {
     "@context": "https://schema.org",
     "@type": "Product",
     name: product.name,
     description: product.description,
+    image: product.image,
     sku: product.sku,
-    image: product.images,
-    url: product.url,
     offers: {
       "@type": "Offer",
       price: product.price,
-      priceCurrency: "MXN",
-      availability: product.inStock
-        ? "https://schema.org/InStock"
-        : "https://schema.org/OutOfStock",
-      seller: {
-        "@type": "Organization",
-        name: siteConfig.name,
-      },
+      priceCurrency: product.currency || "MXN",
+      availability: "https://schema.org/" + availability,
     },
+    aggregateRating: product.rating
+      ? {
+          "@type": "AggregateRating",
+          ratingValue: product.rating,
+          reviewCount: product.reviewCount || 0,
+        }
+      : undefined,
   };
-
-  if (product.brand) {
-    schema.brand = {
-      "@type": "Brand",
-      name: product.brand,
-    };
-  }
-
-  if (product.compareAtPrice && product.compareAtPrice > product.price) {
-    schema.offers.priceValidUntil = new Date(
-      Date.now() + 30 * 24 * 60 * 60 * 1000,
-    )
-      .toISOString()
-      .split("T")[0];
-  }
-
-  if (product.rating && product.reviewCount) {
-    schema.aggregateRating = {
-      "@type": "AggregateRating",
-      ratingValue: product.rating,
-      reviewCount: product.reviewCount,
-    };
-  }
-
-  return schema;
 }
 
-// Breadcrumb schema
-export function generateBreadcrumbSchema(
-  items: Array<{ name: string; url: string }>,
-) {
+export interface BreadcrumbItem {
+  name: string;
+  url: string;
+}
+
+export function generateBreadcrumbJsonLd(items: BreadcrumbItem[]): object {
   return {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -120,124 +56,55 @@ export function generateBreadcrumbSchema(
   };
 }
 
-// FAQ schema
-export function generateFAQSchema(
-  faqs: Array<{ question: string; answer: string }>,
-) {
+export function generateWebsiteJsonLd(name: string, url: string): object {
   return {
     "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: faqs.map((faq) => ({
-      "@type": "Question",
-      name: faq.question,
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: faq.answer,
-      },
-    })),
+    "@type": "WebSite",
+    name,
+    url,
   };
 }
 
-// Local business schema (for physical stores)
-export function generateLocalBusinessSchema(store: {
-  name: string;
-  address: {
-    street: string;
-    city: string;
-    state: string;
-    postalCode: string;
-    country: string;
-  };
-  phone: string;
-  hours: string[];
-  geo?: { lat: number; lng: number };
-}) {
-  return {
-    "@context": "https://schema.org",
-    "@type": "Store",
-    name: store.name,
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: store.address.street,
-      addressLocality: store.address.city,
-      addressRegion: store.address.state,
-      postalCode: store.address.postalCode,
-      addressCountry: store.address.country,
-    },
-    telephone: store.phone,
-    openingHours: store.hours,
-    ...(store.geo && {
-      geo: {
-        "@type": "GeoCoordinates",
-        latitude: store.geo.lat,
-        longitude: store.geo.lng,
-      },
-    }),
-  };
-}
-
-// Article/Blog schema
-export function generateArticleSchema(article: {
+export interface PageMetadata {
   title: string;
   description: string;
-  author: string;
-  publishedAt: Date;
-  modifiedAt?: Date;
-  image: string;
-  url: string;
-}) {
-  return {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    headline: article.title,
-    description: article.description,
-    image: article.image,
-    author: {
-      "@type": "Person",
-      name: article.author,
-    },
-    publisher: {
-      "@type": "Organization",
-      name: siteConfig.name,
-      logo: {
-        "@type": "ImageObject",
-        url: `${siteConfig.url}/logo.png`,
-      },
-    },
-    datePublished: article.publishedAt.toISOString(),
-    dateModified: (article.modifiedAt || article.publishedAt).toISOString(),
-    mainEntityOfPage: {
-      "@type": "WebPage",
-      "@id": article.url,
-    },
-  };
+  keywords?: string[];
+  image?: string;
+  url?: string;
 }
 
-// Review schema
-export function generateReviewSchema(review: {
-  author: string;
-  rating: number;
-  reviewBody: string;
-  datePublished: Date;
-  productName: string;
-}) {
-  return {
-    "@context": "https://schema.org",
-    "@type": "Review",
-    author: {
-      "@type": "Person",
-      name: review.author,
-    },
-    reviewRating: {
-      "@type": "Rating",
-      ratingValue: review.rating,
-      bestRating: 5,
-    },
-    reviewBody: review.reviewBody,
-    datePublished: review.datePublished.toISOString(),
-    itemReviewed: {
-      "@type": "Product",
-      name: review.productName,
-    },
+export function generateMetaTags(meta: PageMetadata): Record<string, string> {
+  const tags: Record<string, string> = {
+    title: meta.title,
+    description: meta.description,
   };
+
+  if (meta.keywords && meta.keywords.length) {
+    tags.keywords = meta.keywords.join(", ");
+  }
+
+  tags["og:title"] = meta.title;
+  tags["og:description"] = meta.description;
+  tags["og:type"] = "website";
+  tags["og:locale"] = "es_MX";
+  if (meta.image) tags["og:image"] = meta.image;
+  if (meta.url) tags["og:url"] = meta.url;
+
+  tags["twitter:card"] = "summary_large_image";
+  tags["twitter:title"] = meta.title;
+  tags["twitter:description"] = meta.description;
+  if (meta.image) tags["twitter:image"] = meta.image;
+
+  return tags;
+}
+
+export function formatPageTitle(title: string, siteName: string = "SACRINT Tienda"): string {
+  return title + " | " + siteName;
+}
+
+export function truncateDescription(description: string, maxLength: number = 160): string {
+  if (description.length <= maxLength) return description;
+  const truncated = description.substring(0, maxLength - 3);
+  const lastSpace = truncated.lastIndexOf(" ");
+  return truncated.substring(0, lastSpace) + "...";
 }
