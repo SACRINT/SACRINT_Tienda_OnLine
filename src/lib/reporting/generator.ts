@@ -152,9 +152,7 @@ async function generateSalesReport(
 }
 
 // Inventory report
-async function generateInventoryReport(
-  tenantId: string,
-): Promise<{
+async function generateInventoryReport(tenantId: string): Promise<{
   data: unknown;
   summary: Record<string, string | number>;
   title: string;
