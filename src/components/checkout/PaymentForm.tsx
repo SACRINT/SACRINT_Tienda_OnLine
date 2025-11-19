@@ -1,11 +1,11 @@
 // Payment Form Component
-// Stripe Elements integration for payment processing
+// Multiple payment methods for Mexican market
 
 "use client";
-import Image from "next/image";
 
 import { useState } from "react";
-import { CreditCard, Lock, AlertCircle, CheckCircle2 } from "lucide-react";
+import { CreditCard, Lock, AlertCircle, CheckCircle2, Store, Smartphone, Building2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export interface PaymentFormProps {
   amount: number;
@@ -23,12 +23,20 @@ export interface BillingAddress {
   country: string;
 }
 
+type PaymentMethodType = "card" | "mercadopago" | "oxxo" | "transfer";
+
+const formatPrice = (price: number) =>
+  new Intl.NumberFormat("es-MX", {
+    style: "currency",
+    currency: "MXN",
+  }).format(price);
+
 export function PaymentForm({
   amount,
   onPaymentMethodReady,
   onError,
 }: PaymentFormProps) {
-  const [paymentMethod, setPaymentMethod] = useState<"card" | "paypal">("card");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethodType>("card");
   const [saveCard, setSaveCard] = useState(false);
   const [billingAddress, setBillingAddress] = useState<BillingAddress>({
     fullName: "",
@@ -37,7 +45,7 @@ export function PaymentForm({
     city: "",
     state: "",
     postalCode: "",
-    country: "United States",
+    country: "México",
   });
 
   // Mock card details (in production, use Stripe Elements)
@@ -110,19 +118,19 @@ export function PaymentForm({
     const newErrors: typeof errors = {};
 
     if (!validateCardNumber(cardDetails.number)) {
-      newErrors.number = "Invalid card number";
+      newErrors.number = "Número de tarjeta inválido";
     }
 
     if (!validateExpiry(cardDetails.expiry)) {
-      newErrors.expiry = "Invalid expiry date (MM/YY)";
+      newErrors.expiry = "Fecha de expiración inválida (MM/AA)";
     }
 
     if (!validateCVC(cardDetails.cvc)) {
-      newErrors.cvc = "Invalid CVC";
+      newErrors.cvc = "CVC inválido";
     }
 
     if (!cardDetails.name.trim()) {
-      newErrors.name = "Cardholder name is required";
+      newErrors.name = "El nombre del titular es requerido";
     }
 
     setErrors(newErrors);
@@ -132,37 +140,61 @@ export function PaymentForm({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-semibold text-gray-900">Payment Method</h2>
-        <p className="mt-1 text-sm text-gray-600">
-          All transactions are secure and encrypted
+        <h2 className="text-xl font-semibold text-primary">Método de Pago</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Todas las transacciones son seguras y encriptadas
         </p>
       </div>
 
       {/* Payment Method Tabs */}
-      <div className="flex gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <button
           onClick={() => setPaymentMethod("card")}
-          className={`flex flex-1 items-center justify-center gap-2 rounded-lg border-2 px-6 py-3 font-medium transition-all ${
+          className={cn(
+            "flex flex-col items-center justify-center gap-2 rounded-lg border-2 p-4 font-medium transition-all",
             paymentMethod === "card"
-              ? "border-blue-600 bg-blue-50 text-blue-700"
-              : "border-gray-200 bg-white text-gray-700 hover:border-gray-300"
-          }`}
+              ? "border-primary bg-primary/5 text-primary"
+              : "border-border bg-background text-foreground hover:border-primary/50"
+          )}
         >
-          <CreditCard className="h-5 w-5" />
-          <span>Credit Card</span>
+          <CreditCard className="h-6 w-6" />
+          <span className="text-sm">Tarjeta</span>
         </button>
         <button
-          onClick={() => setPaymentMethod("paypal")}
-          className={`flex flex-1 items-center justify-center gap-2 rounded-lg border-2 px-6 py-3 font-medium transition-all ${
-            paymentMethod === "paypal"
-              ? "border-blue-600 bg-blue-50 text-blue-700"
-              : "border-gray-200 bg-white text-gray-700 hover:border-gray-300"
-          }`}
+          onClick={() => setPaymentMethod("mercadopago")}
+          className={cn(
+            "flex flex-col items-center justify-center gap-2 rounded-lg border-2 p-4 font-medium transition-all",
+            paymentMethod === "mercadopago"
+              ? "border-primary bg-primary/5 text-primary"
+              : "border-border bg-background text-foreground hover:border-primary/50"
+          )}
         >
-          <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M20.067 8.478c.492.88.556 2.014.3 3.327-.74 3.806-3.276 5.12-6.514 5.12h-.5a.805.805 0 00-.794.68l-.04.22-.63 3.993-.032.17a.804.804 0 01-.794.679H7.72a.483.483 0 01-.477-.558L7.418 21h1.518l.95-6.02h1.385c4.678 0 7.75-2.203 8.796-6.502z" />
-          </svg>
-          <span>PayPal</span>
+          <Smartphone className="h-6 w-6" />
+          <span className="text-sm">Mercado Pago</span>
+        </button>
+        <button
+          onClick={() => setPaymentMethod("oxxo")}
+          className={cn(
+            "flex flex-col items-center justify-center gap-2 rounded-lg border-2 p-4 font-medium transition-all",
+            paymentMethod === "oxxo"
+              ? "border-primary bg-primary/5 text-primary"
+              : "border-border bg-background text-foreground hover:border-primary/50"
+          )}
+        >
+          <Store className="h-6 w-6" />
+          <span className="text-sm">OXXO</span>
+        </button>
+        <button
+          onClick={() => setPaymentMethod("transfer")}
+          className={cn(
+            "flex flex-col items-center justify-center gap-2 rounded-lg border-2 p-4 font-medium transition-all",
+            paymentMethod === "transfer"
+              ? "border-primary bg-primary/5 text-primary"
+              : "border-border bg-background text-foreground hover:border-primary/50"
+          )}
+        >
+          <Building2 className="h-6 w-6" />
+          <span className="text-sm">Transferencia</span>
         </button>
       </div>
 
@@ -171,8 +203,8 @@ export function PaymentForm({
         <div className="space-y-4">
           {/* Card Number */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Card Number *
+            <label className="block text-sm font-medium text-foreground">
+              Número de Tarjeta *
             </label>
             <div className="relative mt-1">
               <input
@@ -180,15 +212,16 @@ export function PaymentForm({
                 value={cardDetails.number}
                 onChange={(e) => handleCardNumberChange(e.target.value)}
                 maxLength={19}
-                className={`w-full rounded-lg border ${
-                  errors.number ? "border-red-300" : "border-gray-300"
-                } px-4 py-3 pl-12 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                className={cn(
+                  "w-full rounded-lg border px-4 py-3 pl-12 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20",
+                  errors.number ? "border-error" : "border-border"
+                )}
                 placeholder="1234 5678 9012 3456"
               />
-              <CreditCard className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+              <CreditCard className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
             </div>
             {errors.number && (
-              <p className="mt-1 flex items-center gap-1 text-sm text-red-600">
+              <p className="mt-1 flex items-center gap-1 text-sm text-error">
                 <AlertCircle className="h-4 w-4" />
                 {errors.number}
               </p>
@@ -197,8 +230,8 @@ export function PaymentForm({
 
           {/* Cardholder Name */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Cardholder Name *
+            <label className="block text-sm font-medium text-foreground">
+              Nombre del Titular *
             </label>
             <input
               type="text"
@@ -209,13 +242,14 @@ export function PaymentForm({
                   setErrors({ ...errors, name: undefined });
                 }
               }}
-              className={`mt-1 w-full rounded-lg border ${
-                errors.name ? "border-red-300" : "border-gray-300"
-              } px-4 py-3 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500`}
-              placeholder="JOHN DOE"
+              className={cn(
+                "mt-1 w-full rounded-lg border px-4 py-3 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20",
+                errors.name ? "border-error" : "border-border"
+              )}
+              placeholder="JUAN PÉREZ"
             />
             {errors.name && (
-              <p className="mt-1 flex items-center gap-1 text-sm text-red-600">
+              <p className="mt-1 flex items-center gap-1 text-sm text-error">
                 <AlertCircle className="h-4 w-4" />
                 {errors.name}
               </p>
@@ -225,28 +259,29 @@ export function PaymentForm({
           {/* Expiry and CVC */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Expiry Date *
+              <label className="block text-sm font-medium text-foreground">
+                Fecha de Expiración *
               </label>
               <input
                 type="text"
                 value={cardDetails.expiry}
                 onChange={(e) => handleExpiryChange(e.target.value)}
                 maxLength={5}
-                className={`mt-1 w-full rounded-lg border ${
-                  errors.expiry ? "border-red-300" : "border-gray-300"
-                } px-4 py-3 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                placeholder="MM/YY"
+                className={cn(
+                  "mt-1 w-full rounded-lg border px-4 py-3 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20",
+                  errors.expiry ? "border-error" : "border-border"
+                )}
+                placeholder="MM/AA"
               />
               {errors.expiry && (
-                <p className="mt-1 flex items-center gap-1 text-sm text-red-600">
+                <p className="mt-1 flex items-center gap-1 text-sm text-error">
                   <AlertCircle className="h-4 w-4" />
                   {errors.expiry}
                 </p>
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-foreground">
                 CVC *
               </label>
               <input
@@ -254,13 +289,14 @@ export function PaymentForm({
                 value={cardDetails.cvc}
                 onChange={(e) => handleCVCChange(e.target.value)}
                 maxLength={4}
-                className={`mt-1 w-full rounded-lg border ${
-                  errors.cvc ? "border-red-300" : "border-gray-300"
-                } px-4 py-3 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                className={cn(
+                  "mt-1 w-full rounded-lg border px-4 py-3 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20",
+                  errors.cvc ? "border-error" : "border-border"
+                )}
                 placeholder="123"
               />
               {errors.cvc && (
-                <p className="mt-1 flex items-center gap-1 text-sm text-red-600">
+                <p className="mt-1 flex items-center gap-1 text-sm text-error">
                   <AlertCircle className="h-4 w-4" />
                   {errors.cvc}
                 </p>
@@ -275,67 +311,117 @@ export function PaymentForm({
               id="saveCard"
               checked={saveCard}
               onChange={(e) => setSaveCard(e.target.checked)}
-              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
             />
-            <label htmlFor="saveCard" className="text-sm text-gray-700">
-              Save this card for future purchases
+            <label htmlFor="saveCard" className="text-sm text-muted-foreground">
+              Guardar esta tarjeta para futuras compras
             </label>
           </div>
 
           {/* Security Badges */}
-          <div className="flex flex-wrap items-center gap-4 rounded-lg bg-gray-50 p-4">
+          <div className="flex flex-wrap items-center gap-4 rounded-lg bg-muted p-4">
             <div className="flex items-center gap-2">
-              <Lock className="h-5 w-5 text-green-600" />
-              <span className="text-sm text-gray-700">SSL Encrypted</span>
+              <Lock className="h-5 w-5 text-success" />
+              <span className="text-sm text-foreground">Encriptado SSL</span>
             </div>
             <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-5 w-5 text-green-600" />
-              <span className="text-sm text-gray-700">PCI Compliant</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Image
-                src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg"
-                alt="Stripe"
-                className="h-5"
-              />
-              <span className="text-sm text-gray-700">Powered by Stripe</span>
+              <CheckCircle2 className="h-5 w-5 text-success" />
+              <span className="text-sm text-foreground">PCI Compliant</span>
             </div>
           </div>
         </div>
       )}
 
-      {/* PayPal Payment */}
-      {paymentMethod === "paypal" && (
+      {/* Mercado Pago Payment */}
+      {paymentMethod === "mercadopago" && (
         <div className="space-y-4">
-          <div className="rounded-lg border-2 border-dashed border-gray-300 p-8 text-center">
-            <svg
-              className="mx-auto h-16 w-16 text-blue-600"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-            >
-              <path d="M20.067 8.478c.492.88.556 2.014.3 3.327-.74 3.806-3.276 5.12-6.514 5.12h-.5a.805.805 0 00-.794.68l-.04.22-.63 3.993-.032.17a.804.804 0 01-.794.679H7.72a.483.483 0 01-.477-.558L7.418 21h1.518l.95-6.02h1.385c4.678 0 7.75-2.203 8.796-6.502z" />
-            </svg>
-            <h3 className="mt-4 text-lg font-semibold text-gray-900">
-              Pay with PayPal
+          <div className="rounded-lg border-2 border-dashed border-accent/50 p-8 text-center bg-accent/5">
+            <Smartphone className="mx-auto h-16 w-16 text-accent" />
+            <h3 className="mt-4 text-lg font-semibold text-foreground">
+              Pagar con Mercado Pago
             </h3>
-            <p className="mt-2 text-sm text-gray-600">
-              You&apos;ll be redirected to PayPal to complete your purchase
+            <p className="mt-2 text-sm text-muted-foreground">
+              Serás redirigido a Mercado Pago para completar tu compra de forma segura
             </p>
-            <button className="mt-6 inline-flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-blue-700">
-              Continue to PayPal
+            <div className="mt-4 text-xs text-muted-foreground">
+              Acepta: Tarjetas de crédito/débito, dinero en cuenta, Mercado Crédito
+            </div>
+            <button className="mt-6 inline-flex items-center gap-2 rounded-lg bg-[#009ee3] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#0077b3]">
+              Continuar con Mercado Pago
             </button>
           </div>
         </div>
       )}
 
+      {/* OXXO Payment */}
+      {paymentMethod === "oxxo" && (
+        <div className="space-y-4">
+          <div className="rounded-lg border-2 border-dashed border-warning/50 p-8 text-center bg-warning/5">
+            <Store className="mx-auto h-16 w-16 text-warning" />
+            <h3 className="mt-4 text-lg font-semibold text-foreground">
+              Pagar en OXXO
+            </h3>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Recibirás un código de barras para pagar en cualquier tienda OXXO
+            </p>
+            <div className="mt-4 space-y-2 text-sm text-muted-foreground">
+              <p>• El pago se refleja en 1-3 horas hábiles</p>
+              <p>• Tienes 72 horas para realizar el pago</p>
+              <p>• Comisión: $15 MXN</p>
+            </div>
+            <button className="mt-6 inline-flex items-center gap-2 rounded-lg bg-warning px-6 py-3 font-semibold text-white transition-colors hover:bg-warning/90">
+              Generar Código de Pago
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Bank Transfer */}
+      {paymentMethod === "transfer" && (
+        <div className="space-y-4">
+          <div className="rounded-lg border-2 border-dashed border-primary/50 p-8 text-center bg-primary/5">
+            <Building2 className="mx-auto h-16 w-16 text-primary" />
+            <h3 className="mt-4 text-lg font-semibold text-foreground">
+              Transferencia Bancaria
+            </h3>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Realiza una transferencia SPEI desde tu banca en línea
+            </p>
+            <div className="mt-4 bg-background rounded-lg p-4 text-left">
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Banco:</span>
+                  <span className="font-medium">BBVA México</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">CLABE:</span>
+                  <span className="font-mono font-medium">0121 8000 0123 4567 89</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Beneficiario:</span>
+                  <span className="font-medium">SACRINT SA de CV</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Referencia:</span>
+                  <span className="font-mono font-medium">ORD-{Date.now().toString().slice(-8)}</span>
+                </div>
+              </div>
+            </div>
+            <div className="mt-4 text-xs text-muted-foreground">
+              El pago se verifica en 1-24 horas hábiles
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Order Total */}
-      <div className="rounded-lg bg-blue-50 p-4">
+      <div className="rounded-lg bg-primary/5 p-4">
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-blue-900">
-            Amount to be charged:
+          <span className="text-sm font-medium text-foreground">
+            Total a pagar:
           </span>
-          <span className="text-2xl font-bold text-blue-900">
-            ${amount.toFixed(2)}
+          <span className="text-2xl font-bold text-primary">
+            {formatPrice(amount)}
           </span>
         </div>
       </div>
