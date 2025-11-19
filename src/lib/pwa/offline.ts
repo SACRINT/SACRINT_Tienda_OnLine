@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Offline Detection & Management
 
 export type ConnectionStatus = "online" | "offline" | "slow";

@@ -1,0 +1,20 @@
+# Gitleaks configuration
+# See https://github.com/gitleaks/gitleaks#configuration
+
+title = "Gitleaks config for SACRINT Tienda Online"
+
+# Allow list - paths to ignore
+[allowlist]
+  description = "Global allowlist for test fixtures and generated code"
+  paths = [
+    '''src/__tests__/fixtures/.*''',
+    '''src/__tests__/mocks/.*''',
+    '''\.test\.(ts|tsx|js|jsx)$''',
+  ]
+
+# Ignore specific rules for certain patterns
+[[rules]]
+  id = "generic-api-key"
+  description = "Generic API Key"
+  regex = '''(?i)(?:key|api|token|secret|password|credential)[^:]*:?\s*['\"]([a-zA-Z0-9_\-]{20,})['\"]'''
+  allowlist = { paths = ['''src/__tests__/.*'''] }

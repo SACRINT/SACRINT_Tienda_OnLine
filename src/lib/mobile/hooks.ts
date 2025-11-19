@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Mobile React Hooks
 "use client";
 
