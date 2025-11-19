@@ -3,67 +3,103 @@
 
 "use client";
 
-import { Check, Truck, Clock, Zap } from "lucide-react";
+import { Check, Truck, Clock, Zap, Package, Info } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export interface ShippingOption {
   id: string;
   name: string;
   description: string;
+  carrier?: string;
   price: number;
   estimatedDays: string;
-  icon: "truck" | "clock" | "zap";
+  icon: "truck" | "clock" | "zap" | "standard" | "express" | "same-day";
 }
 
 export interface ShippingMethodProps {
   options: ShippingOption[];
   selectedMethodId?: string;
   onMethodSelect: (method: ShippingOption) => void;
+  subtotal?: number;
+  freeShippingThreshold?: number;
 }
 
 const ICON_MAP = {
   truck: Truck,
   clock: Clock,
   zap: Zap,
+  standard: Package,
+  express: Truck,
+  "same-day": Zap,
 };
+
+const formatPrice = (price: number) =>
+  new Intl.NumberFormat("es-MX", {
+    style: "currency",
+    currency: "MXN",
+  }).format(price);
 
 export function ShippingMethod({
   options,
   selectedMethodId,
   onMethodSelect,
+  subtotal = 0,
+  freeShippingThreshold = 999,
 }: ShippingMethodProps) {
+  const qualifiesForFreeShipping = subtotal >= freeShippingThreshold;
+
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-semibold text-gray-900">
-          Choose Shipping Method
+        <h2 className="text-xl font-semibold text-primary">
+          Método de Envío
         </h2>
-        <p className="mt-1 text-sm text-gray-600">
-          Select how fast you&apos;d like to receive your order
+        <p className="mt-1 text-sm text-muted-foreground">
+          Selecciona cómo deseas recibir tu pedido
         </p>
       </div>
 
+      {/* Free Shipping Banner */}
+      {qualifiesForFreeShipping ? (
+        <div className="p-3 bg-success/10 rounded-lg flex items-center gap-2">
+          <Truck className="h-5 w-5 text-success" />
+          <span className="text-sm font-medium text-success">
+            ¡Envío gratis disponible en tu compra!
+          </span>
+        </div>
+      ) : (
+        <div className="p-3 bg-muted rounded-lg flex items-center gap-2">
+          <Info className="h-5 w-5 text-muted-foreground" />
+          <span className="text-sm text-muted-foreground">
+            Agrega {formatPrice(freeShippingThreshold - subtotal)} más para envío gratis
+          </span>
+        </div>
+      )}
+
       {/* Shipping Options */}
-      <div className="space-y-4">
+      <div className="space-y-3">
         {options.map((option) => {
-          const Icon = ICON_MAP[option.icon];
+          const Icon = ICON_MAP[option.icon] || Package;
           const isSelected = selectedMethodId === option.id;
-          const isFree = option.price === 0;
+          const isFree = option.price === 0 || (qualifiesForFreeShipping && option.id === "standard");
+          const finalPrice = isFree ? 0 : option.price;
 
           return (
             <button
               key={option.id}
               onClick={() => onMethodSelect(option)}
-              className={`relative w-full rounded-lg border-2 p-4 text-left transition-all ${
+              className={cn(
+                "relative w-full rounded-lg border-2 p-4 text-left transition-all",
                 isSelected
-                  ? "border-blue-600 bg-blue-50"
-                  : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-md"
-              }`}
+                  ? "border-primary bg-primary/5"
+                  : "border-border bg-background hover:border-primary/50 hover:shadow-soft"
+              )}
             >
               {/* Selected Checkmark */}
               {isSelected && (
                 <div className="absolute right-4 top-4">
-                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-600">
-                    <Check className="h-4 w-4 text-white" />
+                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary">
+                    <Check className="h-4 w-4 text-primary-foreground" />
                   </div>
                 </div>
               )}
@@ -71,29 +107,32 @@ export function ShippingMethod({
               <div className="flex items-start gap-4">
                 {/* Icon */}
                 <div
-                  className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg ${
-                    isSelected ? "bg-blue-100" : "bg-gray-100"
-                  }`}
+                  className={cn(
+                    "flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg",
+                    isSelected ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                  )}
                 >
-                  <Icon
-                    className={`h-6 w-6 ${
-                      isSelected ? "text-blue-600" : "text-gray-600"
-                    }`}
-                  />
+                  <Icon className="h-6 w-6" />
                 </div>
 
                 {/* Content */}
                 <div className="flex-1">
                   <div className="flex items-start justify-between">
                     <div>
-                      <h3 className="font-semibold text-gray-900">
+                      <h3 className="font-semibold text-foreground">
                         {option.name}
                       </h3>
-                      <p className="mt-1 text-sm text-gray-600">
+                      <p className="mt-1 text-sm text-muted-foreground">
                         {option.description}
                       </p>
-                      <p className="mt-2 text-sm font-medium text-gray-900">
-                        Estimated delivery: {option.estimatedDays}
+                      {option.carrier && (
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          {option.carrier}
+                        </p>
+                      )}
+                      <p className="mt-2 text-sm font-medium text-foreground flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        {option.estimatedDays}
                       </p>
                     </div>
                   </div>
@@ -102,12 +141,19 @@ export function ShippingMethod({
                 {/* Price */}
                 <div className="flex-shrink-0 text-right">
                   {isFree ? (
-                    <span className="rounded-full bg-green-100 px-3 py-1 text-sm font-semibold text-green-700">
-                      FREE
-                    </span>
+                    <div>
+                      {option.price > 0 && (
+                        <span className="text-sm text-muted-foreground line-through mr-2">
+                          {formatPrice(option.price)}
+                        </span>
+                      )}
+                      <span className="rounded-full bg-success/10 text-success px-3 py-1 text-sm font-semibold">
+                        Gratis
+                      </span>
+                    </div>
                   ) : (
-                    <p className="text-lg font-bold text-gray-900">
-                      ${option.price.toFixed(2)}
+                    <p className="text-lg font-bold text-primary">
+                      {formatPrice(finalPrice)}
                     </p>
                   )}
                 </div>
@@ -118,32 +164,20 @@ export function ShippingMethod({
       </div>
 
       {/* Info Box */}
-      <div className="rounded-lg bg-blue-50 p-4">
+      <div className="rounded-lg bg-accent/10 p-4">
         <div className="flex gap-3">
           <div className="flex-shrink-0">
-            <svg
-              className="h-5 w-5 text-blue-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
+            <Info className="h-5 w-5 text-accent" />
           </div>
           <div className="flex-1">
-            <h4 className="text-sm font-semibold text-blue-900">
-              Shipping Information
+            <h4 className="text-sm font-semibold text-foreground">
+              Información de Envío
             </h4>
-            <ul className="mt-2 space-y-1 text-sm text-blue-800">
-              <li>• Free shipping on orders over $50</li>
-              <li>• Delivery times are estimates and may vary</li>
-              <li>• Track your order with the tracking number provided</li>
-              <li>• P.O. Boxes accepted for standard shipping only</li>
+            <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
+              <li>• Envío gratis en pedidos mayores a {formatPrice(freeShippingThreshold)}</li>
+              <li>• Los tiempos de entrega son estimados</li>
+              <li>• Recibirás un número de rastreo para seguir tu pedido</li>
+              <li>• Envíos a toda la República Mexicana</li>
             </ul>
           </div>
         </div>
@@ -156,34 +190,29 @@ export function ShippingMethod({
 export const DEFAULT_SHIPPING_OPTIONS: ShippingOption[] = [
   {
     id: "standard",
-    name: "Standard Shipping",
-    description: "Regular delivery at the best value",
-    price: 5.99,
-    estimatedDays: "5-7 business days",
-    icon: "truck",
+    name: "Envío Estándar",
+    description: "Entrega regular al mejor precio",
+    carrier: "Estafeta",
+    price: 99,
+    estimatedDays: "3-5 días hábiles",
+    icon: "standard",
   },
   {
     id: "express",
-    name: "Express Shipping",
-    description: "Faster delivery for when you need it sooner",
-    price: 12.99,
-    estimatedDays: "2-3 business days",
-    icon: "clock",
+    name: "Envío Express",
+    description: "Entrega rápida para cuando lo necesitas pronto",
+    carrier: "FedEx",
+    price: 199,
+    estimatedDays: "1-2 días hábiles",
+    icon: "express",
   },
   {
-    id: "overnight",
-    name: "Overnight Shipping",
-    description: "Next business day delivery",
-    price: 24.99,
-    estimatedDays: "1 business day",
-    icon: "zap",
-  },
-  {
-    id: "free",
-    name: "Free Standard Shipping",
-    description: "For orders over $50",
-    price: 0,
-    estimatedDays: "5-7 business days",
-    icon: "truck",
+    id: "same-day",
+    name: "Mismo Día",
+    description: "Entrega el mismo día (CDMX y área metropolitana)",
+    carrier: "99 Minutos",
+    price: 299,
+    estimatedDays: "Hoy antes de 6pm",
+    icon: "same-day",
   },
 ];
