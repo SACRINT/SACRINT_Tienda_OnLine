@@ -1,205 +1,425 @@
+"use client"
+
+import * as React from "react"
+import Link from "next/link"
+import {
+  DollarSign,
+  ShoppingCart,
+  Package,
+  Users,
+  TrendingUp,
+  TrendingDown,
+  ArrowUpRight,
+  ArrowDownRight,
+  BarChart3,
+  Activity,
+  CreditCard,
+  Repeat,
+  Eye,
+  Calendar,
+} from "lucide-react"
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Badge } from "@/components/ui/badge"
+import { Progress } from "@/components/ui/progress"
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from "recharts"
+
+// Mock data
+const kpiData = {
+  revenue: { value: 158750, change: 12.5, trend: "up" },
+  orders: { value: 342, change: 8.2, trend: "up" },
+  products: { value: 156, change: -2.1, trend: "down" },
+  customers: { value: 1247, change: 15.3, trend: "up" },
+  avgOrderValue: { value: 464, change: 3.8, trend: "up" },
+  conversionRate: { value: 3.2, change: 0.5, trend: "up" },
+  repeatCustomers: { value: 28, change: 4.2, trend: "up" },
+  cartAbandonment: { value: 68, change: -5.1, trend: "down" },
+}
+
+const revenueData = [
+  { name: "Ene", revenue: 45000, orders: 120 },
+  { name: "Feb", revenue: 52000, orders: 145 },
+  { name: "Mar", revenue: 48000, orders: 130 },
+  { name: "Abr", revenue: 61000, orders: 168 },
+  { name: "May", revenue: 55000, orders: 152 },
+  { name: "Jun", revenue: 67000, orders: 189 },
+  { name: "Jul", revenue: 72000, orders: 198 },
+  { name: "Ago", revenue: 69000, orders: 185 },
+  { name: "Sep", revenue: 81000, orders: 220 },
+  { name: "Oct", revenue: 93000, orders: 256 },
+  { name: "Nov", revenue: 158750, orders: 342 },
+]
+
+const orderStatusData = [
+  { name: "Completadas", value: 245, color: "#22c55e" },
+  { name: "En Proceso", value: 67, color: "#3b82f6" },
+  { name: "Pendientes", value: 18, color: "#f59e0b" },
+  { name: "Canceladas", value: 12, color: "#ef4444" },
+]
+
+const topProductsData = [
+  { name: "Auriculares BT Pro", sales: 89, revenue: 133411 },
+  { name: "Camiseta Premium", sales: 156, revenue: 93444 },
+  { name: "Zapatillas Ultra", sales: 67, revenue: 167433 },
+  { name: "Smartwatch Fit", sales: 45, revenue: 148455 },
+  { name: "Lámpara LED", sales: 78, revenue: 70122 },
+]
+
+const recentOrders = [
+  { id: "ORD-001", customer: "María García", total: 2999, status: "completed", date: "Hace 5 min" },
+  { id: "ORD-002", customer: "Carlos López", total: 1598, status: "processing", date: "Hace 15 min" },
+  { id: "ORD-003", customer: "Ana Martínez", total: 4497, status: "pending", date: "Hace 32 min" },
+  { id: "ORD-004", customer: "José Rodríguez", total: 899, status: "completed", date: "Hace 1 hora" },
+  { id: "ORD-005", customer: "Laura Sánchez", total: 3298, status: "completed", date: "Hace 2 horas" },
+]
+
+const statusColors: Record<string, string> = {
+  completed: "bg-success/10 text-success",
+  processing: "bg-info/10 text-info",
+  pending: "bg-warning/10 text-warning",
+  cancelled: "bg-error/10 text-error",
+}
+
+const statusLabels: Record<string, string> = {
+  completed: "Completada",
+  processing: "En Proceso",
+  pending: "Pendiente",
+  cancelled: "Cancelada",
+}
 
 export default function DashboardPage() {
-  // TODO: Obtener datos reales cuando el backend esté listo
-  const stats = {
-    totalOrders: 0,
-    totalRevenue: 0,
-    totalProducts: 0,
-    totalCustomers: 0,
-  };
+  const [dateRange, setDateRange] = React.useState("30d")
+
+  const formatCurrency = (value: number) =>
+    new Intl.NumberFormat("es-MX", {
+      style: "currency",
+      currency: "MXN",
+      minimumFractionDigits: 0,
+    }).format(value)
+
+  const formatNumber = (value: number) =>
+    new Intl.NumberFormat("es-MX").format(value)
 
   return (
     <div className="space-y-8">
-      <div>
-        <h2 className="text-3xl font-bold text-primary mb-2">
-          Bienvenido a tu Dashboard
-        </h2>
-        <p className="text-gray-600">
-          Gestiona tu tienda, productos y órdenes desde aquí
-        </p>
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-primary">Dashboard</h1>
+          <p className="text-muted-foreground">
+            Bienvenido de vuelta. Aquí está el resumen de tu tienda.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Select value={dateRange} onValueChange={setDateRange}>
+            <SelectTrigger className="w-[180px]">
+              <Calendar className="h-4 w-4 mr-2" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="7d">Últimos 7 días</SelectItem>
+              <SelectItem value="30d">Últimos 30 días</SelectItem>
+              <SelectItem value="90d">Últimos 90 días</SelectItem>
+              <SelectItem value="12m">Últimos 12 meses</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button variant="outline" asChild>
+            <Link href="/analytics/reports">Ver Reportes</Link>
+          </Button>
+        </div>
       </div>
 
-      {/* Stats Grid */}
+      {/* KPI Cards - Row 1 */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {/* Revenue */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Órdenes Totales
-            </CardTitle>
-            <svg
-              className="h-4 w-4 text-gray-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-              />
-            </svg>
+            <CardTitle className="text-sm font-medium">Ingresos</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalOrders}</div>
-            <p className="text-xs text-gray-500">
-              Integración con backend pendiente
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Ingresos Totales
-            </CardTitle>
-            <svg
-              className="h-4 w-4 text-gray-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              ${stats.totalRevenue.toLocaleString()}
+            <div className="text-2xl font-bold">{formatCurrency(kpiData.revenue.value)}</div>
+            <div className="flex items-center text-xs mt-1">
+              {kpiData.revenue.trend === "up" ? (
+                <ArrowUpRight className="h-4 w-4 text-success mr-1" />
+              ) : (
+                <ArrowDownRight className="h-4 w-4 text-error mr-1" />
+              )}
+              <span className={kpiData.revenue.trend === "up" ? "text-success" : "text-error"}>
+                {kpiData.revenue.change}%
+              </span>
+              <span className="text-muted-foreground ml-1">vs mes anterior</span>
             </div>
-            <p className="text-xs text-gray-500">
-              Integración con backend pendiente
-            </p>
           </CardContent>
         </Card>
 
+        {/* Orders */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Órdenes</CardTitle>
+            <ShoppingCart className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{formatNumber(kpiData.orders.value)}</div>
+            <div className="flex items-center text-xs mt-1">
+              <ArrowUpRight className="h-4 w-4 text-success mr-1" />
+              <span className="text-success">{kpiData.orders.change}%</span>
+              <span className="text-muted-foreground ml-1">vs mes anterior</span>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Products */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Productos</CardTitle>
-            <svg
-              className="h-4 w-4 text-gray-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-              />
-            </svg>
+            <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalProducts}</div>
-            <p className="text-xs text-gray-500">
-              Integración con backend pendiente
-            </p>
+            <div className="text-2xl font-bold">{formatNumber(kpiData.products.value)}</div>
+            <div className="flex items-center text-xs mt-1">
+              <ArrowDownRight className="h-4 w-4 text-error mr-1" />
+              <span className="text-error">{Math.abs(kpiData.products.change)}%</span>
+              <span className="text-muted-foreground ml-1">stock bajo</span>
+            </div>
           </CardContent>
         </Card>
 
+        {/* Customers */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Clientes</CardTitle>
-            <svg
-              className="h-4 w-4 text-gray-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-              />
-            </svg>
+            <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalCustomers}</div>
-            <p className="text-xs text-gray-500">
-              Integración con backend pendiente
-            </p>
+            <div className="text-2xl font-bold">{formatNumber(kpiData.customers.value)}</div>
+            <div className="flex items-center text-xs mt-1">
+              <ArrowUpRight className="h-4 w-4 text-success mr-1" />
+              <span className="text-success">{kpiData.customers.change}%</span>
+              <span className="text-muted-foreground ml-1">nuevos</span>
+            </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Acciones Rápidas</CardTitle>
-          <CardDescription>Comienza a gestionar tu tienda</CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-4 md:grid-cols-3">
-          <button className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary transition-colors">
-            <svg
-              className="h-10 w-10 text-gray-400 mb-2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-              />
-            </svg>
-            <span className="text-sm font-medium">Agregar Producto</span>
-          </button>
+      {/* KPI Cards - Row 2 */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {/* AOV */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Valor Promedio</CardTitle>
+            <CreditCard className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{formatCurrency(kpiData.avgOrderValue.value)}</div>
+            <div className="flex items-center text-xs mt-1">
+              <ArrowUpRight className="h-4 w-4 text-success mr-1" />
+              <span className="text-success">{kpiData.avgOrderValue.change}%</span>
+            </div>
+          </CardContent>
+        </Card>
 
-          <button className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary transition-colors">
-            <svg
-              className="h-10 w-10 text-gray-400 mb-2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-              />
-            </svg>
-            <span className="text-sm font-medium">Ver Órdenes</span>
-          </button>
+        {/* Conversion Rate */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Tasa Conversión</CardTitle>
+            <Activity className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{kpiData.conversionRate.value}%</div>
+            <div className="flex items-center text-xs mt-1">
+              <ArrowUpRight className="h-4 w-4 text-success mr-1" />
+              <span className="text-success">+{kpiData.conversionRate.change}%</span>
+            </div>
+          </CardContent>
+        </Card>
 
-          <button className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary transition-colors">
-            <svg
-              className="h-10 w-10 text-gray-400 mb-2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-              />
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-              />
-            </svg>
-            <span className="text-sm font-medium">Configurar Tienda</span>
-          </button>
-        </CardContent>
-      </Card>
+        {/* Repeat Customers */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Clientes Recurrentes</CardTitle>
+            <Repeat className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{kpiData.repeatCustomers.value}%</div>
+            <div className="flex items-center text-xs mt-1">
+              <ArrowUpRight className="h-4 w-4 text-success mr-1" />
+              <span className="text-success">{kpiData.repeatCustomers.change}%</span>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Cart Abandonment */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Abandono Carrito</CardTitle>
+            <Eye className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{kpiData.cartAbandonment.value}%</div>
+            <div className="flex items-center text-xs mt-1">
+              <ArrowDownRight className="h-4 w-4 text-success mr-1" />
+              <span className="text-success">{Math.abs(kpiData.cartAbandonment.change)}%</span>
+              <span className="text-muted-foreground ml-1">mejor</span>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Charts Row */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+        {/* Revenue Chart */}
+        <Card className="col-span-4">
+          <CardHeader>
+            <CardTitle>Tendencia de Ingresos</CardTitle>
+            <CardDescription>Ingresos mensuales del último año</CardDescription>
+          </CardHeader>
+          <CardContent className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={revenueData}>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                <XAxis dataKey="name" className="text-xs" />
+                <YAxis className="text-xs" tickFormatter={(value) => `$${value / 1000}k`} />
+                <Tooltip
+                  formatter={(value: number) => formatCurrency(value)}
+                  contentStyle={{ backgroundColor: "hsl(var(--background))", border: "1px solid hsl(var(--border))" }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="revenue"
+                  stroke="hsl(var(--primary))"
+                  strokeWidth={2}
+                  dot={{ fill: "hsl(var(--primary))", strokeWidth: 2 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        {/* Order Status Chart */}
+        <Card className="col-span-3">
+          <CardHeader>
+            <CardTitle>Estado de Órdenes</CardTitle>
+            <CardDescription>Distribución actual</CardDescription>
+          </CardHeader>
+          <CardContent className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={orderStatusData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={90}
+                  paddingAngle={5}
+                  dataKey="value"
+                >
+                  {orderStatusData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  contentStyle={{ backgroundColor: "hsl(var(--background))", border: "1px solid hsl(var(--border))" }}
+                />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Bottom Row */}
+      <div className="grid gap-4 md:grid-cols-2">
+        {/* Top Products */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Productos Más Vendidos</CardTitle>
+            <CardDescription>Top 5 por ingresos</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {topProductsData.map((product, index) => (
+                <div key={index} className="flex items-center">
+                  <div className="w-8 text-sm font-medium text-muted-foreground">
+                    #{index + 1}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{product.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {product.sales} ventas
+                    </p>
+                  </div>
+                  <div className="text-sm font-medium">
+                    {formatCurrency(product.revenue)}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Recent Orders */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle>Órdenes Recientes</CardTitle>
+              <CardDescription>Últimas 5 órdenes</CardDescription>
+            </div>
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/orders">Ver Todas</Link>
+            </Button>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {recentOrders.map((order) => (
+                <div key={order.id} className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div>
+                      <p className="text-sm font-medium">{order.customer}</p>
+                      <p className="text-xs text-muted-foreground">{order.id} · {order.date}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Badge variant="secondary" className={statusColors[order.status]}>
+                      {statusLabels[order.status]}
+                    </Badge>
+                    <span className="text-sm font-medium">
+                      {formatCurrency(order.total)}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
-  );
+  )
 }
