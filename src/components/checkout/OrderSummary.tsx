@@ -5,8 +5,15 @@
 import Image from "next/image";
 
 import { Package, MapPin, Truck, CreditCard, Tag, Edit2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import type { Address } from "@/components/account";
 import type { ShippingOption } from "./ShippingMethod";
+
+const formatPrice = (price: number) =>
+  new Intl.NumberFormat("es-MX", {
+    style: "currency",
+    currency: "MXN",
+  }).format(price);
 
 export interface CartItem {
   id: string;
@@ -46,25 +53,23 @@ export function OrderSummary({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-semibold text-gray-900">
-          Review Your Order
-        </h2>
-        <p className="mt-1 text-sm text-gray-600">
-          Please review all details before placing your order
+        <h2 className="text-xl font-semibold text-primary">Revisar Pedido</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Revisa todos los detalles antes de confirmar tu pedido
         </p>
       </div>
 
       {/* Order Items */}
-      <div className="rounded-lg border border-gray-200 bg-white">
-        <div className="border-b border-gray-200 px-6 py-4">
+      <div className="rounded-lg border border-border bg-background">
+        <div className="border-b border-border px-6 py-4">
           <div className="flex items-center justify-between">
-            <h3 className="flex items-center gap-2 font-semibold text-gray-900">
+            <h3 className="flex items-center gap-2 font-semibold text-foreground">
               <Package className="h-5 w-5" />
-              Order Items ({items.length})
+              Productos ({items.length})
             </h3>
           </div>
         </div>
-        <div className="divide-y divide-gray-200">
+        <div className="divide-y divide-border">
           {items.map((item) => (
             <div key={item.id} className="flex gap-4 px-6 py-4">
               {item.productImage ? (
@@ -74,28 +79,30 @@ export function OrderSummary({
                   className="h-20 w-20 rounded-lg object-cover"
                 />
               ) : (
-                <div className="flex h-20 w-20 items-center justify-center rounded-lg bg-gray-100">
-                  <Package className="h-10 w-10 text-gray-400" />
+                <div className="flex h-20 w-20 items-center justify-center rounded-lg bg-muted">
+                  <Package className="h-10 w-10 text-muted-foreground" />
                 </div>
               )}
               <div className="flex-1">
-                <h4 className="font-medium text-gray-900">
+                <h4 className="font-medium text-foreground">
                   {item.productName}
                 </h4>
                 {item.variantInfo && (
-                  <p className="text-sm text-gray-600">{item.variantInfo}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {item.variantInfo}
+                  </p>
                 )}
-                <p className="mt-1 text-sm text-gray-600">
-                  Qty: {item.quantity}
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Cantidad: {item.quantity}
                 </p>
               </div>
               <div className="text-right">
-                <p className="font-semibold text-gray-900">
-                  ${item.price.toFixed(2)}
+                <p className="font-semibold text-foreground">
+                  {formatPrice(item.price)}
                 </p>
                 {item.quantity > 1 && (
-                  <p className="text-sm text-gray-600">
-                    ${(item.price / item.quantity).toFixed(2)} each
+                  <p className="text-sm text-muted-foreground">
+                    {formatPrice(item.price / item.quantity)} c/u
                   </p>
                 )}
               </div>
@@ -105,27 +112,27 @@ export function OrderSummary({
       </div>
 
       {/* Shipping Address */}
-      <div className="rounded-lg border border-gray-200 bg-white">
-        <div className="border-b border-gray-200 px-6 py-4">
+      <div className="rounded-lg border border-border bg-background">
+        <div className="border-b border-border px-6 py-4">
           <div className="flex items-center justify-between">
-            <h3 className="flex items-center gap-2 font-semibold text-gray-900">
+            <h3 className="flex items-center gap-2 font-semibold text-foreground">
               <MapPin className="h-5 w-5" />
-              Shipping Address
+              Dirección de Envío
             </h3>
             <button
               onClick={() => onEdit?.("shipping")}
-              className="flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700"
+              className="flex items-center gap-1 text-sm font-medium text-primary hover:text-accent"
             >
               <Edit2 className="h-4 w-4" />
-              Edit
+              Editar
             </button>
           </div>
         </div>
         <div className="px-6 py-4">
-          <p className="font-medium text-gray-900">
+          <p className="font-medium text-foreground">
             {shippingAddress.fullName}
           </p>
-          <div className="mt-2 space-y-1 text-sm text-gray-600">
+          <div className="mt-2 space-y-1 text-sm text-muted-foreground">
             <p>{shippingAddress.addressLine1}</p>
             {shippingAddress.addressLine2 && (
               <p>{shippingAddress.addressLine2}</p>
@@ -141,41 +148,43 @@ export function OrderSummary({
       </div>
 
       {/* Shipping Method */}
-      <div className="rounded-lg border border-gray-200 bg-white">
-        <div className="border-b border-gray-200 px-6 py-4">
+      <div className="rounded-lg border border-border bg-background">
+        <div className="border-b border-border px-6 py-4">
           <div className="flex items-center justify-between">
-            <h3 className="flex items-center gap-2 font-semibold text-gray-900">
+            <h3 className="flex items-center gap-2 font-semibold text-foreground">
               <Truck className="h-5 w-5" />
-              Shipping Method
+              Método de Envío
             </h3>
             <button
               onClick={() => onEdit?.("method")}
-              className="flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700"
+              className="flex items-center gap-1 text-sm font-medium text-primary hover:text-accent"
             >
               <Edit2 className="h-4 w-4" />
-              Edit
+              Editar
             </button>
           </div>
         </div>
         <div className="px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-medium text-gray-900">{shippingMethod.name}</p>
-              <p className="text-sm text-gray-600">
+              <p className="font-medium text-foreground">
+                {shippingMethod.name}
+              </p>
+              <p className="text-sm text-muted-foreground">
                 {shippingMethod.description}
               </p>
-              <p className="mt-1 text-sm text-gray-600">
-                Estimated delivery: {shippingMethod.estimatedDays}
+              <p className="mt-1 text-sm text-muted-foreground">
+                Entrega estimada: {shippingMethod.estimatedDays}
               </p>
             </div>
             <div className="text-right">
               {shippingMethod.price === 0 ? (
-                <span className="rounded-full bg-green-100 px-3 py-1 text-sm font-semibold text-green-700">
-                  FREE
+                <span className="rounded-full bg-success/10 px-3 py-1 text-sm font-semibold text-success">
+                  Gratis
                 </span>
               ) : (
-                <p className="font-semibold text-gray-900">
-                  ${shippingMethod.price.toFixed(2)}
+                <p className="font-semibold text-foreground">
+                  {formatPrice(shippingMethod.price)}
                 </p>
               )}
             </div>
@@ -184,84 +193,88 @@ export function OrderSummary({
       </div>
 
       {/* Payment Method */}
-      <div className="rounded-lg border border-gray-200 bg-white">
-        <div className="border-b border-gray-200 px-6 py-4">
+      <div className="rounded-lg border border-border bg-background">
+        <div className="border-b border-border px-6 py-4">
           <div className="flex items-center justify-between">
-            <h3 className="flex items-center gap-2 font-semibold text-gray-900">
+            <h3 className="flex items-center gap-2 font-semibold text-foreground">
               <CreditCard className="h-5 w-5" />
-              Payment Method
+              Método de Pago
             </h3>
             <button
               onClick={() => onEdit?.("payment")}
-              className="flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700"
+              className="flex items-center gap-1 text-sm font-medium text-primary hover:text-accent"
             >
               <Edit2 className="h-4 w-4" />
-              Edit
+              Editar
             </button>
           </div>
         </div>
         <div className="px-6 py-4">
           <div className="flex items-center gap-3">
-            <CreditCard className="h-8 w-8 text-gray-400" />
+            <CreditCard className="h-8 w-8 text-muted-foreground" />
             <div>
-              <p className="font-medium text-gray-900">Credit Card</p>
-              <p className="text-sm text-gray-600">•••• •••• •••• 4242</p>
+              <p className="font-medium text-foreground">Tarjeta de Crédito</p>
+              <p className="text-sm text-muted-foreground">
+                •••• •••• •••• 4242
+              </p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Price Breakdown */}
-      <div className="rounded-lg border border-gray-200 bg-white">
-        <div className="border-b border-gray-200 px-6 py-4">
-          <h3 className="flex items-center gap-2 font-semibold text-gray-900">
+      <div className="rounded-lg border border-border bg-background">
+        <div className="border-b border-border px-6 py-4">
+          <h3 className="flex items-center gap-2 font-semibold text-foreground">
             <Tag className="h-5 w-5" />
-            Price Details
+            Detalles del Precio
           </h3>
         </div>
         <div className="space-y-3 px-6 py-4">
           <div className="flex justify-between text-sm">
-            <span className="text-gray-600">Subtotal</span>
-            <span className="font-medium text-gray-900">
-              ${subtotal.toFixed(2)}
+            <span className="text-muted-foreground">Subtotal</span>
+            <span className="font-medium text-foreground">
+              {formatPrice(subtotal)}
             </span>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-gray-600">Shipping</span>
-            <span className="font-medium text-gray-900">
+            <span className="text-muted-foreground">Envío</span>
+            <span className="font-medium text-foreground">
               {shippingCost === 0 ? (
-                <span className="text-green-600">FREE</span>
+                <span className="text-success">Gratis</span>
               ) : (
-                `$${shippingCost.toFixed(2)}`
+                formatPrice(shippingCost)
               )}
             </span>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-gray-600">Estimated Tax</span>
-            <span className="font-medium text-gray-900">${tax.toFixed(2)}</span>
+            <span className="text-muted-foreground">IVA (16%)</span>
+            <span className="font-medium text-foreground">
+              {formatPrice(tax)}
+            </span>
           </div>
           {discount > 0 && (
             <div className="flex justify-between text-sm">
-              <span className="flex items-center gap-2 text-gray-600">
-                Discount
+              <span className="flex items-center gap-2 text-muted-foreground">
+                Descuento
                 {couponCode && (
-                  <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-700">
+                  <span className="rounded-full bg-success/10 px-2 py-0.5 text-xs font-semibold text-success">
                     {couponCode}
                   </span>
                 )}
               </span>
-              <span className="font-medium text-green-600">
-                -${discount.toFixed(2)}
+              <span className="font-medium text-success">
+                -{formatPrice(discount)}
               </span>
             </div>
           )}
-          <div className="border-t border-gray-200 pt-3">
+          <div className="border-t border-border pt-3">
             <div className="flex justify-between">
-              <span className="text-base font-semibold text-gray-900">
-                Order Total
+              <span className="text-base font-semibold text-foreground">
+                Total
               </span>
-              <span className="text-2xl font-bold text-gray-900">
-                ${total.toFixed(2)}
+              <span className="text-2xl font-bold text-primary">
+                {formatPrice(total)}
               </span>
             </div>
           </div>
@@ -269,23 +282,23 @@ export function OrderSummary({
       </div>
 
       {/* Terms and Conditions */}
-      <div className="rounded-lg bg-gray-50 p-4">
-        <p className="text-sm text-gray-600">
-          By placing this order, you agree to our{" "}
+      <div className="rounded-lg bg-muted p-4">
+        <p className="text-sm text-muted-foreground">
+          Al realizar este pedido, aceptas nuestros{" "}
           <a
             href="/terms"
-            className="font-medium text-blue-600 hover:text-blue-700"
+            className="font-medium text-primary hover:text-accent"
           >
-            Terms of Service
+            Términos de Servicio
           </a>{" "}
-          and{" "}
+          y{" "}
           <a
             href="/privacy"
-            className="font-medium text-blue-600 hover:text-blue-700"
+            className="font-medium text-primary hover:text-accent"
           >
-            Privacy Policy
+            Política de Privacidad
           </a>
-          . Your payment information is processed securely.
+          . Tu información de pago se procesa de forma segura.
         </p>
       </div>
     </div>
