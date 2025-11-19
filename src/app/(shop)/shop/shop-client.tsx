@@ -1,11 +1,12 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useState, useEffect } from "react";
 import {
   ShopHero,
   ProductCard,
   FilterSidebar,
 } from "@/components/shop";
+import { useCart } from "@/lib/store/useCart";
 
 interface Product {
   id: string;
@@ -35,11 +36,35 @@ interface ShopPageClientProps {
 }
 
 export function ShopPageClient({ products, categories }: ShopPageClientProps) {
+  const { addItem } = useCart();
   const [sortBy, setSortBy] = useState("featured");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 50000]);
   const [inStockOnly, setInStockOnly] = useState(false);
   const [onSaleOnly, setOnSaleOnly] = useState(false);
+  const [addedToCart, setAddedToCart] = useState<string | null>(null);
+
+  // Hydrate cart on mount
+  useEffect(() => {
+    useCart.persist.rehydrate();
+  }, []);
+
+  const handleAddToCart = (productId: string) => {
+    const product = products.find((p) => p.id === productId);
+    if (product) {
+      addItem({
+        productId: product.id,
+        variantId: null,
+        quantity: 1,
+        price: product.price,
+        name: product.name,
+        image: product.image,
+        sku: product.slug,
+      });
+      setAddedToCart(productId);
+      setTimeout(() => setAddedToCart(null), 2000);
+    }
+  };
 
   // Filter products
   const filteredProducts = products.filter((product) => {
@@ -192,13 +217,9 @@ export function ShopPageClient({ products, categories }: ShopPageClientProps) {
                       reviewCount={product.reviewCount}
                       inStock={product.inStock}
                       category={product.category}
-                      onAddToCart={(productId) => {
-                        console.log("Add to cart:", productId);
-                        // TODO: Implement cart functionality
-                      }}
+                      onAddToCart={handleAddToCart}
                       onToggleWishlist={(productId) => {
                         console.log("Toggle wishlist:", productId);
-                        // TODO: Implement wishlist functionality
                       }}
                     />
                   ))}

@@ -7,6 +7,7 @@ import {
   ProductReviews,
   RelatedProducts,
 } from "@/components/shop";
+import { AddToCartButton } from "@/components/shop/AddToCartButton";
 import { Star, Truck, Shield, RotateCcw, Heart, Share2 } from "lucide-react";
 
 interface ProductDetailPageProps {
@@ -292,12 +293,16 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
 
             {/* Add to Cart */}
             <div className="mt-8 flex gap-4">
-              <button
-                className="flex-1 rounded-lg bg-blue-600 px-8 py-4 font-semibold text-white transition-all hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={product.stock === 0}
-              >
-                {product.stock > 0 ? "Agregar al Carrito" : "Agotado"}
-              </button>
+              <div className="flex-1">
+                <AddToCartButton
+                  productId={product.id}
+                  productName={product.name}
+                  productSlug={product.slug}
+                  productPrice={currentPrice}
+                  productImage={galleryImages[0]?.url || ""}
+                  stock={product.stock}
+                />
+              </div>
               <button className="rounded-lg border-2 border-gray-300 p-4 transition-all hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <Heart className="h-6 w-6 text-gray-600" />
               </button>
