@@ -1,23 +1,21 @@
 // Testing Utilities
 
-import { vi } from "vitest";
-
 // Mock localStorage
 export function createMockLocalStorage() {
   const store: Record<string, string> = {};
 
   return {
-    getItem: vi.fn((key: string) => store[key] || null),
-    setItem: vi.fn((key: string, value: string) => {
+    getItem: jest.fn((key: string) => store[key] || null),
+    setItem: jest.fn((key: string, value: string) => {
       store[key] = value;
     }),
-    removeItem: vi.fn((key: string) => {
+    removeItem: jest.fn((key: string) => {
       delete store[key];
     }),
-    clear: vi.fn(() => {
+    clear: jest.fn(() => {
       Object.keys(store).forEach((key) => delete store[key]);
     }),
-    key: vi.fn((index: number) => Object.keys(store)[index] || null),
+    key: jest.fn((index: number) => Object.keys(store)[index] || null),
     get length() {
       return Object.keys(store).length;
     },
@@ -28,24 +26,24 @@ export function createMockLocalStorage() {
 
 // Mock window.matchMedia
 export function createMockMatchMedia(matches = false) {
-  return vi.fn().mockImplementation((query) => ({
+  return jest.fn().mockImplementation((query) => ({
     matches,
     media: query,
     onchange: null,
-    addListener: vi.fn(),
-    removeListener: vi.fn(),
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
-    dispatchEvent: vi.fn(),
+    addListener: jest.fn(),
+    removeListener: jest.fn(),
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn(),
+    dispatchEvent: jest.fn(),
   }));
 }
 
 // Mock IntersectionObserver
 export function createMockIntersectionObserver() {
-  return vi.fn().mockImplementation(() => ({
-    observe: vi.fn(),
-    unobserve: vi.fn(),
-    disconnect: vi.fn(),
+  return jest.fn().mockImplementation(() => ({
+    observe: jest.fn(),
+    unobserve: jest.fn(),
+    disconnect: jest.fn(),
     root: null,
     rootMargin: "",
     thresholds: [],
@@ -54,16 +52,16 @@ export function createMockIntersectionObserver() {
 
 // Mock ResizeObserver
 export function createMockResizeObserver() {
-  return vi.fn().mockImplementation(() => ({
-    observe: vi.fn(),
-    unobserve: vi.fn(),
-    disconnect: vi.fn(),
+  return jest.fn().mockImplementation(() => ({
+    observe: jest.fn(),
+    unobserve: jest.fn(),
+    disconnect: jest.fn(),
   }));
 }
 
 // Mock fetch
 export function createMockFetch(responses: Map<string, Response> = new Map()) {
-  return vi.fn().mockImplementation((url: string) => {
+  return jest.fn().mockImplementation((url: string) => {
     const response = responses.get(url);
     if (response) {
       return Promise.resolve(response);
@@ -231,13 +229,13 @@ export function setupGlobalMocks() {
     localStorage,
     cleanup: () => {
       localStorage.clear();
-      vi.clearAllMocks();
+      jest.clearAllMocks();
     },
   };
 }
 
 // Clean up after tests
 export function cleanupTests() {
-  vi.clearAllMocks();
-  vi.clearAllTimers();
+  jest.clearAllMocks();
+  jest.clearAllTimers();
 }

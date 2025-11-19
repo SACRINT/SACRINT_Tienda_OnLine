@@ -143,7 +143,7 @@ const relatedProducts = [
 
 export default function ProductDetailPage() {
   const params = useParams();
-  const slug = params.slug as string;
+  const productId = params.id as string;
 
   const [selectedImage, setSelectedImage] = React.useState(0);
   const [selectedColor, setSelectedColor] = React.useState(
