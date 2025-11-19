@@ -2,8 +2,9 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ShoppingCart, Search, Menu, X, User } from "lucide-react";
+import { ShoppingCart, Search, Menu, X, User, Heart } from "lucide-react";
 import { useCart } from "@/lib/store/useCart";
+import { useWishlist } from "@/lib/store/useWishlist";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -32,16 +33,19 @@ const navigation = [
 
 export function StoreHeader() {
   const { itemCount } = useCart();
+  const { itemCount: wishlistCount } = useWishlist();
   const [mounted, setMounted] = React.useState(false);
   const [isSearchOpen, setIsSearchOpen] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState("");
 
   React.useEffect(() => {
     useCart.persist.rehydrate();
+    useWishlist.persist.rehydrate();
     setMounted(true);
   }, []);
 
   const cartCount = mounted ? itemCount() : 0;
+  const wishlistItemCount = mounted ? wishlistCount() : 0;
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -130,6 +134,18 @@ export function StoreHeader() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+
+            {/* Wishlist */}
+            <Link href="/wishlist">
+              <Button variant="ghost" size="icon" className="relative">
+                <Heart className="h-5 w-5" />
+                {wishlistItemCount > 0 && (
+                  <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center">
+                    {wishlistItemCount > 99 ? "99+" : wishlistItemCount}
+                  </span>
+                )}
+              </Button>
+            </Link>
 
             {/* Cart */}
             <Link href="/cart">
