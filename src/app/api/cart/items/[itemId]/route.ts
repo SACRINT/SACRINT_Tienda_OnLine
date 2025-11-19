@@ -2,13 +2,13 @@
 // PATCH /api/cart/items/[itemId] - Update item quantity
 // DELETE /api/cart/items/[itemId] - Remove item from cart
 
-import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/lib/auth/auth'
-import {
-  updateCartItemQuantity,
-  removeCartItem,
-} from '@/lib/db/cart'
-import { UpdateCartItemSchema } from '@/lib/security/schemas/order-schemas'
+import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth/auth";
+import { updateCartItemQuantity, removeCartItem } from "@/lib/db/cart";
+import { UpdateCartItemSchema } from "@/lib/security/schemas/order-schemas";
+
+// Force dynamic rendering for this API route
+export const dynamic = "force-dynamic";
 
 /**
  * PATCH /api/cart/items/[itemId]
@@ -16,50 +16,48 @@ import { UpdateCartItemSchema } from '@/lib/security/schemas/order-schemas'
  */
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { itemId: string } }
+  { params }: { params: { itemId: string } },
 ) {
   try {
-    const session = await auth()
+    const session = await auth();
 
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { tenantId } = session.user
+    const { tenantId } = session.user;
 
     if (!tenantId) {
       return NextResponse.json(
-        { error: 'User has no tenant assigned' },
-        { status: 404 }
-      )
+        { error: "User has no tenant assigned" },
+        { status: 404 },
+      );
     }
 
-    const itemId = params.itemId
+    const itemId = params.itemId;
 
-    const body = await req.json()
-    const validation = UpdateCartItemSchema.safeParse(body)
+    const body = await req.json();
+    const validation = UpdateCartItemSchema.safeParse(body);
 
     if (!validation.success) {
       return NextResponse.json(
         {
-          error: 'Invalid data',
+          error: "Invalid data",
           issues: validation.error.issues,
         },
-        { status: 400 }
-      )
+        { status: 400 },
+      );
     }
 
-    const { quantity } = validation.data
+    const { quantity } = validation.data;
 
     try {
-      const cartItem = await updateCartItemQuantity(tenantId, itemId, quantity)
+      const cartItem = await updateCartItemQuantity(tenantId, itemId, quantity);
 
-      console.log(
-        `[CART] Updated item ${itemId} quantity to ${quantity}`
-      )
+      console.log(`[CART] Updated item ${itemId} quantity to ${quantity}`);
 
       return NextResponse.json({
-        message: 'Cart item updated',
+        message: "Cart item updated",
         cartItem: {
           id: cartItem.id,
           productId: cartItem.productId,
@@ -74,25 +72,25 @@ export async function PATCH(
           },
           variant: cartItem.variant || null,
         },
-      })
+      });
     } catch (error) {
-      console.error('[CART] Update item error:', error)
+      console.error("[CART] Update item error:", error);
 
       return NextResponse.json(
         {
-          error: 'Failed to update cart item',
-          message: error instanceof Error ? error.message : 'Unknown error',
+          error: "Failed to update cart item",
+          message: error instanceof Error ? error.message : "Unknown error",
         },
-        { status: 400 }
-      )
+        { status: 400 },
+      );
     }
   } catch (error) {
-    console.error('[CART] PATCH error:', error)
+    console.error("[CART] PATCH error:", error);
 
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }
 
@@ -102,51 +100,51 @@ export async function PATCH(
  */
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { itemId: string } }
+  { params }: { params: { itemId: string } },
 ) {
   try {
-    const session = await auth()
+    const session = await auth();
 
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { tenantId } = session.user
+    const { tenantId } = session.user;
 
     if (!tenantId) {
       return NextResponse.json(
-        { error: 'User has no tenant assigned' },
-        { status: 404 }
-      )
+        { error: "User has no tenant assigned" },
+        { status: 404 },
+      );
     }
 
-    const itemId = params.itemId
+    const itemId = params.itemId;
 
     try {
-      await removeCartItem(itemId)
+      await removeCartItem(itemId);
 
-      console.log(`[CART] Removed item ${itemId} from cart`)
+      console.log(`[CART] Removed item ${itemId} from cart`);
 
       return NextResponse.json({
-        message: 'Item removed from cart',
-      })
+        message: "Item removed from cart",
+      });
     } catch (error) {
-      console.error('[CART] Remove item error:', error)
+      console.error("[CART] Remove item error:", error);
 
       return NextResponse.json(
         {
-          error: 'Failed to remove cart item',
-          message: error instanceof Error ? error.message : 'Unknown error',
+          error: "Failed to remove cart item",
+          message: error instanceof Error ? error.message : "Unknown error",
         },
-        { status: 400 }
-      )
+        { status: 400 },
+      );
     }
   } catch (error) {
-    console.error('[CART] DELETE error:', error)
+    console.error("[CART] DELETE error:", error);
 
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }

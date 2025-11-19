@@ -2,15 +2,18 @@
 // GET /api/cart - Get user's cart
 // POST /api/cart/items - Add item to cart
 
-import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/lib/auth/auth'
+import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth/auth";
 import {
   getOrCreateCart,
   getUserCart,
   addItemToCart,
   getCartTotal,
-} from '@/lib/db/cart'
-import { AddCartItemSchema } from '@/lib/security/schemas/order-schemas'
+} from "@/lib/db/cart";
+import { AddCartItemSchema } from "@/lib/security/schemas/order-schemas";
+
+// Force dynamic rendering for this API route
+export const dynamic = "force-dynamic";
 
 /**
  * GET /api/cart
@@ -18,26 +21,26 @@ import { AddCartItemSchema } from '@/lib/security/schemas/order-schemas'
  */
 export async function GET(req: NextRequest) {
   try {
-    const session = await auth()
+    const session = await auth();
 
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { tenantId } = session.user
+    const { tenantId } = session.user;
 
     if (!tenantId) {
       return NextResponse.json(
-        { error: 'User has no tenant assigned' },
-        { status: 404 }
-      )
+        { error: "User has no tenant assigned" },
+        { status: 404 },
+      );
     }
 
     // Get or create cart
-    const cart = await getOrCreateCart(session.user.id, tenantId)
+    const cart = await getOrCreateCart(session.user.id, tenantId);
 
     // Calculate totals
-    const totals = await getCartTotal(tenantId, cart.id, 99, 0.16)
+    const totals = await getCartTotal(tenantId, cart.id, 99, 0.16);
 
     return NextResponse.json({
       cart: {
@@ -77,14 +80,14 @@ export async function GET(req: NextRequest) {
         updatedAt: cart.updatedAt,
       },
       totals,
-    })
+    });
   } catch (error) {
-    console.error('[CART] GET error:', error)
+    console.error("[CART] GET error:", error);
 
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }
 
@@ -94,38 +97,38 @@ export async function GET(req: NextRequest) {
  */
 export async function POST(req: NextRequest) {
   try {
-    const session = await auth()
+    const session = await auth();
 
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { tenantId } = session.user
+    const { tenantId } = session.user;
 
     if (!tenantId) {
       return NextResponse.json(
-        { error: 'User has no tenant assigned' },
-        { status: 404 }
-      )
+        { error: "User has no tenant assigned" },
+        { status: 404 },
+      );
     }
 
-    const body = await req.json()
-    const validation = AddCartItemSchema.safeParse(body)
+    const body = await req.json();
+    const validation = AddCartItemSchema.safeParse(body);
 
     if (!validation.success) {
       return NextResponse.json(
         {
-          error: 'Invalid data',
+          error: "Invalid data",
           issues: validation.error.issues,
         },
-        { status: 400 }
-      )
+        { status: 400 },
+      );
     }
 
-    const { productId, variantId, quantity } = validation.data
+    const { productId, variantId, quantity } = validation.data;
 
     // Get or create cart
-    const cart = await getOrCreateCart(session.user.id, tenantId)
+    const cart = await getOrCreateCart(session.user.id, tenantId);
 
     // Add item to cart
     try {
@@ -134,16 +137,16 @@ export async function POST(req: NextRequest) {
         cart.id,
         productId,
         variantId,
-        quantity
-      )
+        quantity,
+      );
 
       console.log(
-        `[CART] Added ${quantity}x product ${cartItem.productId} to cart ${cart.id}`
-      )
+        `[CART] Added ${quantity}x product ${cartItem.productId} to cart ${cart.id}`,
+      );
 
       return NextResponse.json(
         {
-          message: 'Item added to cart',
+          message: "Item added to cart",
           cartItem: {
             id: cartItem.id,
             productId: cartItem.productId,
@@ -152,25 +155,25 @@ export async function POST(req: NextRequest) {
             priceSnapshot: Number(cartItem.priceSnapshot),
           },
         },
-        { status: 201 }
-      )
+        { status: 201 },
+      );
     } catch (error) {
-      console.error('[CART] Add item error:', error)
+      console.error("[CART] Add item error:", error);
 
       return NextResponse.json(
         {
-          error: 'Failed to add item to cart',
-          message: error instanceof Error ? error.message : 'Unknown error',
+          error: "Failed to add item to cart",
+          message: error instanceof Error ? error.message : "Unknown error",
         },
-        { status: 400 }
-      )
+        { status: 400 },
+      );
     }
   } catch (error) {
-    console.error('[CART] POST error:', error)
+    console.error("[CART] POST error:", error);
 
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }

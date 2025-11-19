@@ -1,10 +1,13 @@
 // API Route - Dashboard Top Products
 // GET /api/admin/dashboard/products - Returns top selling products
 
-import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/lib/auth/auth'
-import { getTopProducts } from '@/lib/db/dashboard'
-import { TopProductsSchema } from '@/lib/security/schemas/dashboard-schemas'
+import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth/auth";
+import { getTopProducts } from "@/lib/db/dashboard";
+import { TopProductsSchema } from "@/lib/security/schemas/dashboard-schemas";
+
+// Force dynamic rendering for this API route
+export const dynamic = "force-dynamic";
 
 /**
  * GET /api/admin/dashboard/products
@@ -16,39 +19,39 @@ import { TopProductsSchema } from '@/lib/security/schemas/dashboard-schemas'
  */
 export async function GET(req: NextRequest) {
   try {
-    const session = await auth()
+    const session = await auth();
 
     if (!session?.user?.tenantId) {
       return NextResponse.json(
-        { error: 'Unauthorized - No tenant ID found' },
-        { status: 401 }
-      )
+        { error: "Unauthorized - No tenant ID found" },
+        { status: 401 },
+      );
     }
 
     // Parse query parameter
-    const limitParam = req.nextUrl.searchParams.get('limit')
-    const limit = limitParam ? parseInt(limitParam) : 10
+    const limitParam = req.nextUrl.searchParams.get("limit");
+    const limit = limitParam ? parseInt(limitParam) : 10;
 
     // Validate input
     const validation = TopProductsSchema.safeParse({
       tenantId: session.user.tenantId,
       limit,
-    })
+    });
 
     if (!validation.success) {
       return NextResponse.json(
         {
-          error: 'Invalid request data',
+          error: "Invalid request data",
           issues: validation.error.issues,
         },
-        { status: 400 }
-      )
+        { status: 400 },
+      );
     }
 
     const products = await getTopProducts(
       validation.data.tenantId,
-      validation.data.limit
-    )
+      validation.data.limit,
+    );
 
     return NextResponse.json({
       success: true,
@@ -57,12 +60,12 @@ export async function GET(req: NextRequest) {
         limit: validation.data.limit,
         count: products.length,
       },
-    })
+    });
   } catch (error: any) {
-    console.error('[DASHBOARD PRODUCTS] Error:', error)
+    console.error("[DASHBOARD PRODUCTS] Error:", error);
     return NextResponse.json(
-      { error: error.message || 'Failed to fetch top products' },
-      { status: 500 }
-    )
+      { error: error.message || "Failed to fetch top products" },
+      { status: 500 },
+    );
   }
 }

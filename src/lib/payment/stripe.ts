@@ -1,17 +1,17 @@
 // Stripe Payment Integration
 // Functions for handling Stripe payments, refunds, and webhooks
 
-import Stripe from 'stripe'
+import Stripe from "stripe";
 
 // Initialize Stripe with secret key from environment
 if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('STRIPE_SECRET_KEY is not defined in environment variables')
+  throw new Error("STRIPE_SECRET_KEY is not defined in environment variables");
 }
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2025-10-29.clover',
+  apiVersion: "2025-10-29.clover",
   typescript: true,
-})
+});
 
 /**
  * Creates a Stripe Payment Intent for checkout
@@ -24,17 +24,17 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 export async function createPaymentIntent(
   orderId: string,
   amount: number,
-  currency: string = 'usd',
-  customerEmail: string
+  currency: string = "usd",
+  customerEmail: string,
 ) {
   try {
     // Validate amount (minimum $0.50 USD)
     if (amount < 50) {
-      throw new Error('Amount must be at least $0.50 USD')
+      throw new Error("Amount must be at least $0.50 USD");
     }
 
     // Create idempotency key to prevent duplicate charges
-    const idempotencyKey = `order_${orderId}_${Date.now()}`
+    const idempotencyKey = `order_${orderId}_${Date.now()}`;
 
     const paymentIntent = await stripe.paymentIntents.create(
       {
@@ -52,12 +52,12 @@ export async function createPaymentIntent(
       },
       {
         idempotencyKey,
-      }
-    )
+      },
+    );
 
     console.log(
-      `[STRIPE] Created Payment Intent: ${paymentIntent.id} for order ${orderId}, amount: $${(amount / 100).toFixed(2)}`
-    )
+      `[STRIPE] Created Payment Intent: ${paymentIntent.id} for order ${orderId}, amount: $${(amount / 100).toFixed(2)}`,
+    );
 
     return {
       paymentIntentId: paymentIntent.id,
@@ -65,15 +65,15 @@ export async function createPaymentIntent(
       amount: paymentIntent.amount,
       currency: paymentIntent.currency,
       status: paymentIntent.status,
-    }
+    };
   } catch (error) {
-    console.error('[STRIPE] Error creating payment intent:', error)
+    console.error("[STRIPE] Error creating payment intent:", error);
 
     if (error instanceof Stripe.errors.StripeError) {
-      throw new Error(`Stripe error: ${error.message}`)
+      throw new Error(`Stripe error: ${error.message}`);
     }
 
-    throw error
+    throw error;
   }
 }
 
@@ -84,7 +84,7 @@ export async function createPaymentIntent(
  */
 export async function getPaymentIntent(paymentIntentId: string) {
   try {
-    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId)
+    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
 
     return {
       id: paymentIntent.id,
@@ -93,15 +93,15 @@ export async function getPaymentIntent(paymentIntentId: string) {
       status: paymentIntent.status,
       metadata: paymentIntent.metadata,
       created: new Date(paymentIntent.created * 1000),
-    }
+    };
   } catch (error) {
-    console.error('[STRIPE] Error retrieving payment intent:', error)
+    console.error("[STRIPE] Error retrieving payment intent:", error);
 
     if (error instanceof Stripe.errors.StripeError) {
-      throw new Error(`Stripe error: ${error.message}`)
+      throw new Error(`Stripe error: ${error.message}`);
     }
 
-    throw error
+    throw error;
   }
 }
 
@@ -110,14 +110,16 @@ export async function getPaymentIntent(paymentIntentId: string) {
  * @param paymentIntentId - Payment Intent ID
  * @returns True if payment succeeded
  */
-export async function validatePaymentIntent(paymentIntentId: string): Promise<boolean> {
+export async function validatePaymentIntent(
+  paymentIntentId: string,
+): Promise<boolean> {
   try {
-    const paymentIntent = await getPaymentIntent(paymentIntentId)
+    const paymentIntent = await getPaymentIntent(paymentIntentId);
 
-    return paymentIntent.status === 'succeeded'
+    return paymentIntent.status === "succeeded";
   } catch (error) {
-    console.error('[STRIPE] Error validating payment intent:', error)
-    return false
+    console.error("[STRIPE] Error validating payment intent:", error);
+    return false;
   }
 }
 
@@ -131,30 +133,30 @@ export async function validatePaymentIntent(paymentIntentId: string): Promise<bo
 export async function createRefund(
   paymentIntentId: string,
   amount?: number,
-  reason?: string
+  reason?: string,
 ) {
   try {
     const refundData: Stripe.RefundCreateParams = {
       payment_intent: paymentIntentId,
-      reason: 'requested_by_customer',
-    }
+      reason: "requested_by_customer",
+    };
 
     if (amount) {
-      refundData.amount = Math.round(amount)
+      refundData.amount = Math.round(amount);
     }
 
     if (reason) {
       refundData.metadata = {
         reason,
         timestamp: new Date().toISOString(),
-      }
+      };
     }
 
-    const refund = await stripe.refunds.create(refundData)
+    const refund = await stripe.refunds.create(refundData);
 
     console.log(
-      `[STRIPE] Created refund: ${refund.id} for ${paymentIntentId}, amount: $${((refund.amount || 0) / 100).toFixed(2)}`
-    )
+      `[STRIPE] Created refund: ${refund.id} for ${paymentIntentId}, amount: $${((refund.amount || 0) / 100).toFixed(2)}`,
+    );
 
     return {
       refundId: refund.id,
@@ -162,15 +164,15 @@ export async function createRefund(
       currency: refund.currency,
       status: refund.status,
       created: new Date(refund.created * 1000),
-    }
+    };
   } catch (error) {
-    console.error('[STRIPE] Error creating refund:', error)
+    console.error("[STRIPE] Error creating refund:", error);
 
     if (error instanceof Stripe.errors.StripeError) {
-      throw new Error(`Stripe error: ${error.message}`)
+      throw new Error(`Stripe error: ${error.message}`);
     }
 
-    throw error
+    throw error;
   }
 }
 
@@ -182,24 +184,28 @@ export async function createRefund(
  */
 export async function handleWebhookEvent(
   payload: string | Buffer,
-  signature: string
+  signature: string,
 ): Promise<Stripe.Event | null> {
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
   if (!webhookSecret) {
-    console.error('[STRIPE] STRIPE_WEBHOOK_SECRET not configured')
-    return null
+    console.error("[STRIPE] STRIPE_WEBHOOK_SECRET not configured");
+    return null;
   }
 
   try {
-    const event = stripe.webhooks.constructEvent(payload, signature, webhookSecret)
+    const event = stripe.webhooks.constructEvent(
+      payload,
+      signature,
+      webhookSecret,
+    );
 
-    console.log(`[STRIPE] Webhook event received: ${event.type}`)
+    console.log(`[STRIPE] Webhook event received: ${event.type}`);
 
-    return event
+    return event;
   } catch (error) {
-    console.error('[STRIPE] Webhook signature verification failed:', error)
-    return null
+    console.error("[STRIPE] Webhook signature verification failed:", error);
+    return null;
   }
 }
 
@@ -209,45 +215,46 @@ export async function handleWebhookEvent(
  * @returns Order ID if payment succeeded, null otherwise
  */
 export async function processPaymentWebhook(
-  event: Stripe.Event
+  event: Stripe.Event,
 ): Promise<string | null> {
   switch (event.type) {
-    case 'payment_intent.succeeded': {
-      const paymentIntent = event.data.object as Stripe.PaymentIntent
+    case "payment_intent.succeeded": {
+      const paymentIntent = event.data.object as Stripe.PaymentIntent;
 
-      const orderId = paymentIntent.metadata.orderId
+      const orderId = paymentIntent.metadata.orderId;
 
       console.log(
-        `[STRIPE] Payment succeeded for order: ${orderId}, amount: $${(paymentIntent.amount / 100).toFixed(2)}`
-      )
+        `[STRIPE] Payment succeeded for order: ${orderId}, amount: $${(paymentIntent.amount / 100).toFixed(2)}`,
+      );
 
-      return orderId
+      return orderId;
     }
 
-    case 'payment_intent.payment_failed': {
-      const paymentIntent = event.data.object as Stripe.PaymentIntent
+    case "payment_intent.payment_failed": {
+      const paymentIntent = event.data.object as Stripe.PaymentIntent;
 
-      const orderId = paymentIntent.metadata.orderId
-      const errorMessage = paymentIntent.last_payment_error?.message || 'Unknown error'
+      const orderId = paymentIntent.metadata.orderId;
+      const errorMessage =
+        paymentIntent.last_payment_error?.message || "Unknown error";
 
       console.error(
-        `[STRIPE] Payment failed for order: ${orderId}, reason: ${errorMessage}`
-      )
+        `[STRIPE] Payment failed for order: ${orderId}, reason: ${errorMessage}`,
+      );
 
-      return null
+      return null;
     }
 
-    case 'charge.refunded': {
-      const charge = event.data.object as Stripe.Charge
+    case "charge.refunded": {
+      const charge = event.data.object as Stripe.Charge;
 
-      console.log(`[STRIPE] Refund processed for charge: ${charge.id}`)
+      console.log(`[STRIPE] Refund processed for charge: ${charge.id}`);
 
-      return null
+      return null;
     }
 
     default:
-      console.log(`[STRIPE] Unhandled event type: ${event.type}`)
-      return null
+      console.log(`[STRIPE] Unhandled event type: ${event.type}`);
+      return null;
   }
 }
 
@@ -256,14 +263,14 @@ export async function processPaymentWebhook(
  * @returns Stripe publishable key
  */
 export function getPublishableKey(): string {
-  const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+  const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
 
   if (!publishableKey) {
-    throw new Error('NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY is not defined')
+    throw new Error("NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY is not defined");
   }
 
-  return publishableKey
+  return publishableKey;
 }
 
 // Export Stripe instance for advanced usage
-export { stripe }
+export { stripe };

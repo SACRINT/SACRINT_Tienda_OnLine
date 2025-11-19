@@ -1,0 +1,372 @@
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                                                                               ║
+║                  📊 PLAN 12 SEMANAS - ARQUITECTO A                            ║
+║              De Security Fixes a Producción Ready                             ║
+║                                                                               ║
+║                              17 de Noviembre, 2025                            ║
+║                                                                               ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+DURACIÓN: 12 semanas (~3 meses)
+ARQUITECTO: Full Stack Backend (40h/semana)
+OBJETIVO: MVP Completo + Producción
+
+═══════════════════════════════════════════════════════════════════════════════
+📋 RESUMEN POR SEMANA
+═══════════════════════════════════════════════════════════════════════════════
+
+SEMANAS 1-2: SECURITY FIXES + CORE (40h)
+├─ Tenant Isolation Refactor (12h) ⭐ CRÍTICO
+├─ User Profiles (8h)
+├─ Stripe Webhooks (6h)
+├─ Email Notifications (10h)
+└─ Tests (4h)
+
+SEMANAS 3-4: ADVANCED FEATURES (40h)
+├─ Product Search + Filters (8h)
+├─ Product Variants Enhancement (6h)
+├─ Bulk Upload Products (6h)
+├─ Coupon System (10h)
+└─ Promotional Analytics (10h)
+
+SEMANAS 5-6: TESTING + OPTIMIZATION (35h)
+├─ Unit Tests (6h) - 80% coverage
+├─ Integration Tests (6h)
+├─ E2E Tests (6h)
+├─ Database Optimization (6h)
+├─ API Performance (6h)
+└─ Load Testing (5h)
+
+SEMANAS 7-8: DASHBOARD + ADMIN (35h)
+├─ Admin Dashboard APIs (8h)
+├─ Order Management (6h)
+├─ Customer Management (6h)
+├─ Advanced Reporting (10h)
+└─ Export Functionality (5h)
+
+SEMANAS 9-10: DEVOPS + DEPLOYMENT (30h)
+├─ Production Configuration (5h)
+├─ Database Migration (5h)
+├─ CI/CD Pipeline (5h)
+├─ Monitoring + Alerts (8h)
+└─ Security Hardening (7h)
+
+SEMANAS 11-12: LAUNCH + SUPPORT (20h)
+├─ Final Testing (6h)
+├─ Documentation (4h)
+├─ Launch (2h)
+└─ Post-Launch Support (8h)
+
+─────────────────────────────────────────────────────────────────────────────
+TOTAL: 200 HORAS (~5 SEMANAS FULL-TIME)
+─────────────────────────────────────────────────────────────────────────────
+
+═══════════════════════════════════════════════════════════════════════════════
+🎯 TAREAS CRÍTICAS POR ORDEN
+═══════════════════════════════════════════════════════════════════════════════
+
+1️⃣  SEMANA 1: Tenant Isolation (BLOQUEA TODO)
+   └─ 33 funciones DAL necesitan refactor
+   └─ 10 endpoints API necesitan actualización
+   └─ ~12 horas
+   └─ SIN ESTO → No se puede pasar a producción
+
+2️⃣  SEMANA 1-2: Core Features MVP
+   ├─ User profiles (para que usuarios gestionen cuentas)
+   ├─ Stripe webhooks (para validar pagos)
+   └─ Email notifications (para confirmaciones)
+
+3️⃣  SEMANAS 3-6: Features + Testing
+   └─ Features avanzadas + cobertura de tests
+
+4️⃣  SEMANAS 7-10: DevOps + Production Ready
+   └─ Deployment, monitoring, security
+
+5️⃣  SEMANAS 11-12: Launch
+   └─ Go live + support
+
+═══════════════════════════════════════════════════════════════════════════════
+📁 ARCHIVOS PRINCIPALES POR SEMANA
+═══════════════════════════════════════════════════════════════════════════════
+
+SEMANA 1: SECURITY FIXES
+├─ src/lib/db/*.ts (refactor de 8 archivos)
+├─ src/app/api/*/* (update de 10 endpoints)
+├─ __tests__/security/tenant-isolation.test.ts (nuevos tests)
+└─ create AUDITORIA-FIXES-APLICADOS.md
+
+SEMANA 2: CORE FEATURES
+├─ src/lib/db/users.ts (extensiones)
+├─ src/app/api/users/* (nuevos endpoints)
+├─ src/lib/payment/stripe-webhooks.ts (nuevo)
+├─ src/app/api/webhooks/stripe/route.ts (nuevo)
+├─ src/lib/email/* (nuevo módulo)
+└─ src/app/api/email/* (nuevo endpoint)
+
+SEMANA 3-4: ADVANCED
+├─ src/lib/db/products-search.ts
+├─ src/app/api/products/search/*
+├─ src/lib/db/coupons.ts
+├─ src/app/api/coupons/*
+└─ Tests para todo
+
+SEMANA 5-6: TESTING
+├─ __tests__/lib/db/* (unit tests)
+├─ __tests__/api/* (integration tests)
+├─ __tests__/e2e/* (E2E tests)
+└─ Reports de coverage
+
+SEMANA 7-8: ADMIN
+├─ Endpoints /api/admin/* (enhance)
+├─ __tests__/api/admin/*
+└─ Reporting module
+
+SEMANA 9-10: DEVOPS
+├─ .env.production (update)
+├─ .github/workflows/* (CI/CD)
+├─ src/lib/monitoring/* (nuevo)
+├─ Database migration scripts
+└─ Deployment runbook
+
+═══════════════════════════════════════════════════════════════════════════════
+⏱️ TIMELINE VISUAL
+═══════════════════════════════════════════════════════════════════════════════
+
+Semana  1: ████████████░░░░░ Security Fixes
+Semana  2: ░░░░░░░░░░░░░░░░░ Core Features
+Semana  3-4: ████████████████ Advanced Features
+Semana  5-6: ████████████░░░░ Testing + Optimization
+Semana  7-8: ████████████████ Dashboard + Admin
+Semana  9-10: ██████████████░░ DevOps + Deployment
+Semana 11-12: ██████████░░░░░░ Launch + Support
+
+✓ Security fixes COMPLETE → Week 2
+✓ MVP Core COMPLETE → Week 4
+✓ Advanced features COMPLETE → Week 6
+✓ Fully tested COMPLETE → Week 8
+✓ Production ready COMPLETE → Week 10
+✓ LIVE IN PRODUCTION → Week 12
+
+═══════════════════════════════════════════════════════════════════════════════
+🔥 PRIORIDADES POR SEVERIDAD
+═══════════════════════════════════════════════════════════════════════════════
+
+BLOQUEA PRODUCCIÓN (Semana 1):
+  □ Tenant Isolation refactor (12h)
+  □ API endpoint updates (3h)
+  □ Security tests (2h)
+  └─ Total: 17 horas
+
+CRÍTICO PARA MVP (Semana 2):
+  □ User profiles (8h)
+  □ Stripe webhooks (6h)
+  □ Email notifications (10h)
+  └─ Total: 24 horas
+
+IMPORTANTE (Semanas 3-6):
+  □ Advanced features
+  □ Comprehensive testing
+  □ Performance optimization
+  └─ Total: 75 horas
+
+NECESARIO PARA PRODUCCIÓN (Semanas 7-10):
+  □ Admin dashboard
+  □ Monitoring
+  □ CI/CD
+  □ Database migration
+  └─ Total: 65 horas
+
+FINAL (Semanas 11-12):
+  □ Testing final
+  □ Launch
+  □ Post-launch support
+  └─ Total: 20 horas
+
+═══════════════════════════════════════════════════════════════════════════════
+📊 ESTIMACIONES POR SPRINT
+═══════════════════════════════════════════════════════════════════════════════
+
+Sprint 1A (Semana 1.1): Tenant Isolation
+├─ Refactor DAL: 8-10h
+├─ Update APIs: 2-3h
+├─ Tests: 1-2h
+└─ Total: 12h ⭐ CRÍTICO
+
+Sprint 1B (Semana 1.2-2): Core Features
+├─ User Profiles: 6-8h
+├─ Webhooks: 4-6h
+├─ Email: 8-10h
+└─ Total: 20h
+
+Sprint 2A (Semana 3): Advanced (Part 1)
+├─ Search: 8h
+├─ Variants: 6h
+├─ Bulk Upload: 6h
+└─ Total: 20h
+
+Sprint 2B (Semana 4): Advanced (Part 2)
+├─ Coupons: 10h
+├─ Analytics: 10h
+└─ Total: 20h
+
+Sprint 3A (Semana 5): Testing
+├─ Unit tests: 6h
+├─ Integration: 6h
+├─ E2E: 6h
+└─ Total: 18h
+
+Sprint 3B (Semana 6): Optimization
+├─ DB optimization: 6h
+├─ API performance: 6h
+├─ Load testing: 5h
+└─ Total: 17h
+
+Sprint 4A (Semana 7): Admin APIs
+├─ Dashboard: 8h
+├─ Order mgmt: 6h
+├─ Customer mgmt: 6h
+└─ Total: 20h
+
+Sprint 4B (Semana 8): Reporting
+├─ Advanced reporting: 10h
+├─ Export: 5h
+└─ Total: 15h
+
+Sprint 5A (Semana 9): Production Setup
+├─ Environment: 5h
+├─ Migrations: 5h
+├─ CI/CD: 5h
+└─ Total: 15h
+
+Sprint 5B (Semana 10): Monitoring
+├─ Monitoring: 8h
+├─ Security: 7h
+└─ Total: 15h
+
+Sprint 6A (Semana 11): Pre-Launch
+├─ Testing: 6h
+├─ Docs: 4h
+└─ Total: 10h
+
+Sprint 6B (Semana 12): Launch
+├─ Launch: 2h
+├─ Support: 8h
+└─ Total: 10h
+
+═══════════════════════════════════════════════════════════════════════════════
+🚀 CÓMO EMPEZAR
+═══════════════════════════════════════════════════════════════════════════════
+
+PASO 1: Merge Sprint 6 work a develop
+  git checkout develop
+  git merge claude/backend-sprint-0-setup-015dEmHcuBzmf5REjbx5Fp9m
+  git push origin develop
+
+PASO 2: Crear rama para Sprint 1
+  git checkout -b feature/sprint-1-security-fixes
+
+PASO 3: Leer plan completo
+  Abre: PLAN-12-SEMANAS-ARQUITECTO-A.md
+  Lee semanas 1-2 en detalle
+
+PASO 4: Comenzar Tarea 1.1 (Tenant Isolation)
+  - Refactor src/lib/db/users.ts PRIMERO
+  - Seguir el patrón exacto indicado
+  - Crear tests mientras avanzas
+  - Commit cada archivo
+
+PASO 5: Daily standup
+  - 09:00 cada día con la directora
+  - Status updates
+  - Blockers
+  - Next steps
+
+═══════════════════════════════════════════════════════════════════════════════
+📈 MÉTRICAS DE ÉXITO
+═══════════════════════════════════════════════════════════════════════════════
+
+POR SPRINT:
+  □ 95%+ tasks completadas (mínimo 85%)
+  □ Tests para todas las features
+  □ Code review aprobado
+  □ 0 ESLint warnings
+  □ TypeScript strict mode
+
+POR FASE:
+  □ Security: Vulnerabilidad fija verificada
+  □ Features: Working endpoint con tests
+  □ Testing: 80%+ coverage
+  □ DevOps: Production config tested
+  □ Launch: Zero-downtime deployment
+
+═══════════════════════════════════════════════════════════════════════════════
+⚠️ CRITICAL SUCCESS FACTORS
+═══════════════════════════════════════════════════════════════════════════════
+
+1. TENANT ISOLATION PERFECTO (Semana 1)
+   └─ Sin esto, no es seguro para producción
+
+2. STRIPE WEBHOOKS FUNCIONALES (Semana 2)
+   └─ Pagos deben validarse correctamente
+
+3. TESTS COMPREHENSIVOS (Semana 6)
+   └─ 80%+ coverage obligatorio
+
+4. MONITORING SETUP (Semana 10)
+   └─ Necesario para producción
+
+5. PERFORMANCE OK (Semana 6)
+   └─ < 200ms response time, < 100MB memory
+
+═══════════════════════════════════════════════════════════════════════════════
+📞 COMUNICACIÓN
+═══════════════════════════════════════════════════════════════════════════════
+
+DIARIO:
+  - 09:00: Standup (15 min)
+  - 17:00: Status update (commit + message)
+
+DOS VECES POR SEMANA:
+  - Tuesday 14:00: Progress review (30 min)
+  - Friday 16:00: Sprint review (1h)
+
+CADA DOS SEMANAS:
+  - Friday 15:00: Sprint planning (2h)
+
+EMERGENCIAS:
+  - Slack directo si hay blocker
+  - Respuesta inmediata para issues críticos
+
+═══════════════════════════════════════════════════════════════════════════════
+✅ DOCUMENTO COMPLETO
+═══════════════════════════════════════════════════════════════════════════════
+
+Para ver TODOS los detalles, abre:
+
+  PLAN-12-SEMANAS-ARQUITECTO-A.md
+
+Incluye:
+  ✓ Descripción completa de cada tarea
+  ✓ Archivos a crear/modificar
+  ✓ Endpoints exactos
+  ✓ Schemas Prisma
+  ✓ Tests requeridos
+  ✓ Timeline detallado
+  ✓ Risk management
+  ✓ Metrics de success
+
+═══════════════════════════════════════════════════════════════════════════════
+🎯 PRÓXIMOS PASOS INMEDIATOS
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Leer este resumen (5 min)
+2. Leer plan completo (30 min)
+3. Merge a develop (5 min)
+4. Crear rama feature/sprint-1 (2 min)
+5. Comenzar Tarea 1.1 (8-10 horas)
+
+ESTIMADO PARA COMPLETAR SEMANA 1: 40 horas
+
+COMENZAR: AHORA 🚀
+
+═══════════════════════════════════════════════════════════════════════════════

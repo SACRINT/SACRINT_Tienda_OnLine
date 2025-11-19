@@ -1,0 +1,147 @@
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                                                                               ║
+║         🎯 INSTRUCCIONES SPRINT 6 - LISTAS PARA ARQUITECTO A                 ║
+║                                                                               ║
+║                              17 de Noviembre, 2025                            ║
+║                                                                               ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+ESTADO: ✅ INSTRUCCIONES COMPLETADAS Y PUSHEADAS
+
+─────────────────────────────────────────────────────────────────────────────
+📋 ARCHIVOS CREADOS (Lee en este orden)
+─────────────────────────────────────────────────────────────────────────────
+
+1. 📄 INSTRUCCIONES-DIRECTAS-PARA-ARQUITECTO-A.txt  [← COMIENZA AQUÍ]
+   └─ Instrucciones paso a paso (7 pasos claros)
+   └─ Comando específicos a ejecutar
+   └─ Timeline de 4-5 horas
+
+2. 📄 RESUMEN-SPRINT-6-PARA-ARQUITECTO-A.md
+   └─ Visión general de las 3 tareas (5 min read)
+   └─ Checklists rápidos
+   └─ Links a documentación completa
+
+3. 📄 INSTRUCCIONES-ARQUITECTO-A-SPRINT-6-AUDITORIA-Y-PLANNING.md
+   └─ Documentación COMPLETA y detallada
+   └─ 7 checklists de auditoría
+   └─ Templates para reportes
+   └─ Timeline detallado
+
+─────────────────────────────────────────────────────────────────────────────
+🎬 CÓMO DAR ESTAS INSTRUCCIONES AL ARQUITECTO
+─────────────────────────────────────────────────────────────────────────────
+
+OPCIÓN A - Simple (recomendado):
+"Lee el archivo: INSTRUCCIONES-DIRECTAS-PARA-ARQUITECTO-A.txt
+Sigue los 7 pasos. Cuando termines, notifícame."
+
+OPCIÓN B - Explicación completa:
+"Necesito que hagas 3 cosas:
+1. Auditoría de seguridad (2-2.5 horas)
+2. Reporte de vulnerabilidades (30 min)
+3. Planning de Sprint 6 (1.5-2 horas)
+
+Abre: INSTRUCCIONES-DIRECTAS-PARA-ARQUITECTO-A.txt
+Sigue cada paso. No saltes tareas."
+
+OPCIÓN C - Señalar archivos:
+"Tienes 3 documentos en la raíz:
+- INSTRUCCIONES-DIRECTAS-PARA-ARQUITECTO-A.txt (PRINCIPAL)
+- RESUMEN-SPRINT-6-PARA-ARQUITECTO-A.md (OVERVIEW)
+- INSTRUCCIONES-ARQUITECTO-A-SPRINT-6-AUDITORIA-Y-PLANNING.md (DETALLADO)
+
+Comienza con el primero."
+
+─────────────────────────────────────────────────────────────────────────────
+✅ TAREAS DEFINIDAS PARA ARCHITECT A
+─────────────────────────────────────────────────────────────────────────────
+
+TAREA 1: AUDITORÍA DE SEGURIDAD (2-2.5 horas)
+├─ Revisar tenant isolation en 8 archivos DAL
+├─ Validar RBAC en 10+ endpoints
+├─ Verificar validación Zod
+├─ Buscar secrets hardcodeados
+├─ Chequear SQL injection
+├─ Revisar headers de seguridad
+└─ Resultado: Lista de hallazgos (si los hay)
+
+TAREA 2: REPORTE DE AUDITORÍA (30 min)
+├─ Crear archivo: AUDITORIA-SEGURIDAD-SPRINT-6.md
+├─ Documentar vulnerabilidades por severidad
+├─ Conclusión: ¿Seguro para producción?
+└─ Resultado: Reporte profesional
+
+TAREA 3: PLANNING SPRINT 6 (1.5-2 horas)
+├─ Identificar features faltantes para MVP
+├─ Estimación de horas
+├─ Backlog priorizado
+├─ Crear archivo: SPRINT-6-SPECIFICATIONS.md
+└─ Resultado: Hoja de ruta para próximo sprint
+
+ENTREGA: Git commit con ambos archivos (.md)
+
+─────────────────────────────────────────────────────────────────────────────
+📊 ARCHIVOS QUE GENERA EL ARQUITECTO
+─────────────────────────────────────────────────────────────────────────────
+
+Después de completar las 3 tareas, debe crear:
+
+✓ AUDITORIA-SEGURIDAD-SPRINT-6.md
+  └─ Hallazgos de seguridad con severidades
+
+✓ SPRINT-6-SPECIFICATIONS.md
+  └─ Features, estimaciones, timeline
+
+✓ 1 commit con ambos archivos
+
+─────────────────────────────────────────────────────────────────────────────
+⏱️ TIMELINE ESTIMADO
+─────────────────────────────────────────────────────────────────────────────
+
+Auditoría:                2.0-2.5 horas
+Reporte:                  0.5 horas
+Planning:                 1.5-2.0 horas
+─────────────────────────────────────────────────────────────────────────────
+TOTAL:                    4.5-5.5 horas (~media jornada)
+
+─────────────────────────────────────────────────────────────────────────────
+🔍 RAMAS Y CONFIGURACIÓN
+─────────────────────────────────────────────────────────────────────────────
+
+Rama de trabajo: develop
+Rama de entrega: develop (luego se mergeará a main)
+Comandos iniciales:
+  git checkout develop
+  git pull origin develop
+
+─────────────────────────────────────────────────────────────────────────────
+✨ LO QUE NECESITA SABER EL ARQUITECTO
+─────────────────────────────────────────────────────────────────────────────
+
+1. Debe leer INSTRUCCIONES-DIRECTAS-PARA-ARQUITECTO-A.txt PRIMERO
+2. Las 3 tareas son SECUENCIALES (no saltar)
+3. Documentar TODO, incluso hallazgos pequeños
+4. NO debe corregir vulnerabilidades aún (solo reportar)
+5. Si toma > 6 horas, notificar a directora
+6. Entrega: 2 archivos .md + 1 commit
+
+─────────────────────────────────────────────────────────────────────────────
+✅ ESTADO ACTUAL
+─────────────────────────────────────────────────────────────────────────────
+
+Backend:    ✅ Sprints 1-5 completados
+Frontend:   ⏳ Sprints 1-2 completados
+Seguridad:  ⏳ A AUDITAR (Sprint 6)
+Planning:   ⏳ A DEFINIR (Sprint 6)
+
+Producción: 🚀 Lista después de Sprint 6
+
+─────────────────────────────────────────────────────────────────────────────
+
+👉 ACCIÓN INMEDIATA:
+
+Dale al Arquitecto A este documento y dile:
+"Lee INSTRUCCIONES-DIRECTAS-PARA-ARQUITECTO-A.txt y comienza."
+
+────────────────────────────────────────────────────────────────────────────

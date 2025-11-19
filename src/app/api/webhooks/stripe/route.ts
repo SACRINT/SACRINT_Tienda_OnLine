@@ -10,13 +10,19 @@
 //    - charge.refunded
 // 4. Copy webhook signing secret to STRIPE_WEBHOOK_SECRET env variable
 
-import { NextRequest, NextResponse } from 'next/server'
-import { headers } from 'next/headers'
-import { handleWebhookEvent } from '@/lib/payment/stripe'
-import { db } from '@/lib/db/client'
-import { confirmInventoryReservation, cancelInventoryReservation } from '@/lib/db/inventory'
-import { sendOrderConfirmationEmail, sendPaymentFailedEmail } from '@/lib/email/send'
-import Stripe from 'stripe'
+import { NextRequest, NextResponse } from "next/server";
+import { headers } from "next/headers";
+import { handleWebhookEvent } from "@/lib/payment/stripe";
+import { db } from "@/lib/db/client";
+import {
+  confirmInventoryReservation,
+  cancelInventoryReservation,
+} from "@/lib/db/inventory";
+import {
+  sendOrderConfirmationEmail,
+  sendPaymentFailedEmail,
+} from "@/lib/email/send";
+import Stripe from "stripe";
 
 /**
  * POST /api/webhooks/stripe
@@ -30,92 +36,92 @@ import Stripe from 'stripe'
 export async function POST(req: NextRequest) {
   try {
     // Get the raw body for signature verification
-    const body = await req.text()
+    const body = await req.text();
 
     // Get the Stripe signature from headers
-    const headersList = await headers()
-    const signature = headersList.get('stripe-signature')
+    const headersList = await headers();
+    const signature = headersList.get("stripe-signature");
 
     if (!signature) {
-      console.error('[WEBHOOK] Missing Stripe signature')
+      console.error("[WEBHOOK] Missing Stripe signature");
       return NextResponse.json(
-        { error: 'Missing Stripe signature' },
-        { status: 400 }
-      )
+        { error: "Missing Stripe signature" },
+        { status: 400 },
+      );
     }
 
     // Verify and parse the webhook event
-    const event = await handleWebhookEvent(body, signature)
+    const event = await handleWebhookEvent(body, signature);
 
     if (!event) {
-      console.error('[WEBHOOK] Invalid webhook signature or event')
+      console.error("[WEBHOOK] Invalid webhook signature or event");
       return NextResponse.json(
-        { error: 'Invalid webhook signature' },
-        { status: 401 }
-      )
+        { error: "Invalid webhook signature" },
+        { status: 401 },
+      );
     }
 
     // Process the event based on type
     switch (event.type) {
-      case 'payment_intent.succeeded': {
-        const paymentIntent = event.data.object as Stripe.PaymentIntent
-        const orderId = paymentIntent.metadata.orderId
+      case "payment_intent.succeeded": {
+        const paymentIntent = event.data.object as Stripe.PaymentIntent;
+        const orderId = paymentIntent.metadata.orderId;
 
         if (!orderId) {
-          console.error('[WEBHOOK] No orderId in payment intent metadata')
+          console.error("[WEBHOOK] No orderId in payment intent metadata");
           return NextResponse.json(
-            { error: 'Missing orderId in metadata' },
-            { status: 400 }
-          )
+            { error: "Missing orderId in metadata" },
+            { status: 400 },
+          );
         }
 
-        console.log(`[WEBHOOK] Payment succeeded for order: ${orderId}`)
+        console.log(`[WEBHOOK] Payment succeeded for order: ${orderId}`);
 
         // Get the order to extract tenantId and reservationId
         const order = await db.order.findUnique({
           where: { id: orderId },
           include: {
-            inventoryReservations: {
-              where: { status: 'PENDING' },
-              orderBy: { createdAt: 'desc' },
-              take: 1,
-            },
+            inventoryReservation: true,
           },
-        })
+        });
 
         if (!order) {
-          console.error(`[WEBHOOK] Order not found: ${orderId}`)
+          console.error(`[WEBHOOK] Order not found: ${orderId}`);
           return NextResponse.json(
-            { error: 'Order not found' },
-            { status: 404 }
-          )
+            { error: "Order not found" },
+            { status: 404 },
+          );
         }
 
-        const reservationId = order.inventoryReservations[0]?.id
+        const reservationId = order.inventoryReservation?.id;
 
         if (!reservationId) {
-          console.error(`[WEBHOOK] No pending inventory reservation found for order: ${orderId}`)
+          console.error(
+            `[WEBHOOK] No pending inventory reservation found for order: ${orderId}`,
+          );
           // Continue anyway, just update order status
         }
 
         try {
           // Confirm inventory reservation (deducts actual stock)
           if (reservationId) {
-            await confirmInventoryReservation(order.tenantId, reservationId)
-            console.log(`[WEBHOOK] Inventory confirmed for reservation: ${reservationId}`)
+            await confirmInventoryReservation(order.tenantId, reservationId);
+            console.log(
+              `[WEBHOOK] Inventory confirmed for reservation: ${reservationId}`,
+            );
           }
 
           // Update order status to PROCESSING and payment status to COMPLETED
           await db.order.update({
             where: { id: orderId },
             data: {
-              status: 'PROCESSING',
-              paymentStatus: 'COMPLETED',
+              status: "PROCESSING",
+              paymentStatus: "COMPLETED",
               paymentId: paymentIntent.id,
             },
-          })
+          });
 
-          console.log(`[WEBHOOK] Order ${orderId} updated to PROCESSING`)
+          console.log(`[WEBHOOK] Order ${orderId} updated to PROCESSING`);
 
           // Send order confirmation email
           try {
@@ -131,19 +137,23 @@ export async function POST(req: NextRequest) {
                   },
                 },
               },
-            })
+            });
 
             if (fullOrder && fullOrder.user.email) {
               await sendOrderConfirmationEmail({
                 orderNumber: fullOrder.orderNumber,
-                customerName: fullOrder.user.name || 'Customer',
+                customerName: fullOrder.user.name || "Customer",
                 customerEmail: fullOrder.user.email,
-                orderTotal: Math.round(fullOrder.total * 100),
+                orderTotal: Math.round(
+                  parseFloat(String(fullOrder.total)) * 100,
+                ),
                 orderDate: fullOrder.createdAt.toLocaleDateString(),
-                items: fullOrder.items.map((item) => ({
+                items: fullOrder.items.map((item: any) => ({
                   name: item.product.name,
                   quantity: item.quantity,
-                  price: Math.round(item.priceAtPurchase * 100),
+                  price: Math.round(
+                    parseFloat(String(item.priceAtPurchase)) * 100,
+                  ),
                 })),
                 shippingAddress: {
                   street: fullOrder.shippingAddress.street,
@@ -152,89 +162,100 @@ export async function POST(req: NextRequest) {
                   postalCode: fullOrder.shippingAddress.postalCode,
                   country: fullOrder.shippingAddress.country,
                 },
-              })
+              });
 
-              console.log(`[WEBHOOK] Sent order confirmation email for order ${orderId}`)
+              console.log(
+                `[WEBHOOK] Sent order confirmation email for order ${orderId}`,
+              );
             }
           } catch (emailError) {
             // Log email error but don't fail the webhook
-            console.error(`[WEBHOOK] Failed to send confirmation email for order ${orderId}:`, emailError)
+            console.error(
+              `[WEBHOOK] Failed to send confirmation email for order ${orderId}:`,
+              emailError,
+            );
           }
 
           return NextResponse.json({
             received: true,
             orderId,
-            status: 'success',
-          })
+            status: "success",
+          });
         } catch (error) {
-          console.error(`[WEBHOOK] Error processing payment success for order ${orderId}:`, error)
+          console.error(
+            `[WEBHOOK] Error processing payment success for order ${orderId}:`,
+            error,
+          );
 
           // Log the error but return 200 to Stripe to prevent retries
           // We'll handle this manually
           return NextResponse.json({
             received: true,
             orderId,
-            status: 'error',
-            message: error instanceof Error ? error.message : 'Unknown error',
-          })
+            status: "error",
+            message: error instanceof Error ? error.message : "Unknown error",
+          });
         }
       }
 
-      case 'payment_intent.payment_failed': {
-        const paymentIntent = event.data.object as Stripe.PaymentIntent
-        const orderId = paymentIntent.metadata.orderId
-        const errorMessage = paymentIntent.last_payment_error?.message || 'Unknown error'
+      case "payment_intent.payment_failed": {
+        const paymentIntent = event.data.object as Stripe.PaymentIntent;
+        const orderId = paymentIntent.metadata.orderId;
+        const errorMessage =
+          paymentIntent.last_payment_error?.message || "Unknown error";
 
         if (!orderId) {
-          console.error('[WEBHOOK] No orderId in payment intent metadata')
+          console.error("[WEBHOOK] No orderId in payment intent metadata");
           return NextResponse.json(
-            { error: 'Missing orderId in metadata' },
-            { status: 400 }
-          )
+            { error: "Missing orderId in metadata" },
+            { status: 400 },
+          );
         }
 
-        console.error(`[WEBHOOK] Payment failed for order: ${orderId}, reason: ${errorMessage}`)
+        console.error(
+          `[WEBHOOK] Payment failed for order: ${orderId}, reason: ${errorMessage}`,
+        );
 
         // Get the order to extract tenantId and reservationId
         const order = await db.order.findUnique({
           where: { id: orderId },
           include: {
-            inventoryReservations: {
-              where: { status: 'PENDING' },
-              orderBy: { createdAt: 'desc' },
-              take: 1,
-            },
+            inventoryReservation: true,
           },
-        })
+        });
 
         if (!order) {
-          console.error(`[WEBHOOK] Order not found: ${orderId}`)
+          console.error(`[WEBHOOK] Order not found: ${orderId}`);
           return NextResponse.json(
-            { error: 'Order not found' },
-            { status: 404 }
-          )
+            { error: "Order not found" },
+            { status: 404 },
+          );
         }
 
-        const reservationId = order.inventoryReservations[0]?.id
+        const reservationId = order.inventoryReservation?.id;
 
         try {
           // Cancel inventory reservation (releases reserved stock)
           if (reservationId) {
-            await cancelInventoryReservation(order.tenantId, reservationId)
-            console.log(`[WEBHOOK] Inventory reservation cancelled: ${reservationId}`)
+            await cancelInventoryReservation(order.tenantId, reservationId);
+            console.log(
+              `[WEBHOOK] Inventory reservation cancelled: ${reservationId}`,
+            );
           }
 
           // Update order status to CANCELLED and payment status to FAILED
           await db.order.update({
             where: { id: orderId },
             data: {
-              status: 'CANCELLED',
-              paymentStatus: 'FAILED',
+              status: "CANCELLED",
+              paymentStatus: "FAILED",
               adminNotes: `Payment failed: ${errorMessage}`,
             },
-          })
+          });
 
-          console.log(`[WEBHOOK] Order ${orderId} marked as CANCELLED due to payment failure`)
+          console.log(
+            `[WEBHOOK] Order ${orderId} marked as CANCELLED due to payment failure`,
+          );
 
           // Send payment failure email
           try {
@@ -244,59 +265,71 @@ export async function POST(req: NextRequest) {
               include: {
                 user: true,
               },
-            })
+            });
 
             if (fullOrder && fullOrder.user.email) {
               await sendPaymentFailedEmail({
                 orderNumber: fullOrder.orderNumber,
-                customerName: fullOrder.user.name || 'Customer',
+                customerName: fullOrder.user.name || "Customer",
                 customerEmail: fullOrder.user.email,
-                orderTotal: Math.round(fullOrder.total * 100),
+                orderTotal: Math.round(
+                  parseFloat(String(fullOrder.total)) * 100,
+                ),
                 failureReason: errorMessage,
-                retryUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://yourdomain.com'}/shop`,
-              })
+                retryUrl: `${process.env.NEXT_PUBLIC_APP_URL || "https://yourdomain.com"}/shop`,
+              });
 
-              console.log(`[WEBHOOK] Sent payment failure email for order ${orderId}`)
+              console.log(
+                `[WEBHOOK] Sent payment failure email for order ${orderId}`,
+              );
             }
           } catch (emailError) {
             // Log email error but don't fail the webhook
-            console.error(`[WEBHOOK] Failed to send payment failure email for order ${orderId}:`, emailError)
+            console.error(
+              `[WEBHOOK] Failed to send payment failure email for order ${orderId}:`,
+              emailError,
+            );
           }
 
           return NextResponse.json({
             received: true,
             orderId,
-            status: 'failed',
-          })
+            status: "failed",
+          });
         } catch (error) {
-          console.error(`[WEBHOOK] Error processing payment failure for order ${orderId}:`, error)
+          console.error(
+            `[WEBHOOK] Error processing payment failure for order ${orderId}:`,
+            error,
+          );
 
           return NextResponse.json({
             received: true,
             orderId,
-            status: 'error',
-            message: error instanceof Error ? error.message : 'Unknown error',
-          })
+            status: "error",
+            message: error instanceof Error ? error.message : "Unknown error",
+          });
         }
       }
 
-      case 'charge.refunded': {
-        const charge = event.data.object as Stripe.Charge
-        const paymentIntentId = charge.payment_intent as string
+      case "charge.refunded": {
+        const charge = event.data.object as Stripe.Charge;
+        const paymentIntentId = charge.payment_intent as string;
 
-        console.log(`[WEBHOOK] Refund processed for charge: ${charge.id}`)
+        console.log(`[WEBHOOK] Refund processed for charge: ${charge.id}`);
 
         // Find order by payment intent ID
         const order = await db.order.findFirst({
           where: { paymentId: paymentIntentId },
-        })
+        });
 
         if (!order) {
-          console.error(`[WEBHOOK] Order not found for payment intent: ${paymentIntentId}`)
+          console.error(
+            `[WEBHOOK] Order not found for payment intent: ${paymentIntentId}`,
+          );
           return NextResponse.json(
-            { error: 'Order not found' },
-            { status: 404 }
-          )
+            { error: "Order not found" },
+            { status: 404 },
+          );
         }
 
         try {
@@ -304,54 +337,57 @@ export async function POST(req: NextRequest) {
           await db.order.update({
             where: { id: order.id },
             data: {
-              status: 'REFUNDED',
-              paymentStatus: 'REFUNDED',
+              status: "REFUNDED",
+              paymentStatus: "REFUNDED",
               adminNotes: `Refunded on ${new Date().toISOString()}`,
             },
-          })
+          });
 
-          console.log(`[WEBHOOK] Order ${order.id} marked as REFUNDED`)
+          console.log(`[WEBHOOK] Order ${order.id} marked as REFUNDED`);
 
           // TODO: Send refund confirmation email here
 
           return NextResponse.json({
             received: true,
             orderId: order.id,
-            status: 'refunded',
-          })
+            status: "refunded",
+          });
         } catch (error) {
-          console.error(`[WEBHOOK] Error processing refund for order ${order.id}:`, error)
+          console.error(
+            `[WEBHOOK] Error processing refund for order ${order.id}:`,
+            error,
+          );
 
           return NextResponse.json({
             received: true,
             orderId: order.id,
-            status: 'error',
-            message: error instanceof Error ? error.message : 'Unknown error',
-          })
+            status: "error",
+            message: error instanceof Error ? error.message : "Unknown error",
+          });
         }
       }
 
       default:
-        console.log(`[WEBHOOK] Unhandled event type: ${event.type}`)
+        console.log(`[WEBHOOK] Unhandled event type: ${event.type}`);
         return NextResponse.json({
           received: true,
           type: event.type,
-          status: 'ignored',
-        })
+          status: "ignored",
+        });
     }
   } catch (error) {
-    console.error('[WEBHOOK] Unexpected error:', error)
+    console.error("[WEBHOOK] Unexpected error:", error);
 
     return NextResponse.json(
       {
-        error: 'Webhook processing failed',
-        message: error instanceof Error ? error.message : 'Unknown error',
+        error: "Webhook processing failed",
+        message: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 }
-    )
+      { status: 500 },
+    );
   }
 }
 
 // Disable body parser for raw body access (required for Stripe signature verification)
-export const runtime = 'nodejs'
-export const dynamic = 'force-dynamic'
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";

@@ -1,10 +1,13 @@
 // Product Search API
 // GET /api/products/search - Advanced product search with filters
 
-import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/lib/auth/auth'
-import { searchProducts } from '@/lib/db/products'
-import { ProductSearchSchema } from '@/lib/security/schemas/product-schemas'
+import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth/auth";
+import { searchProducts } from "@/lib/db/products";
+import { ProductSearchSchema } from "@/lib/security/schemas/product-schemas";
+
+// Force dynamic rendering for this API route
+export const dynamic = "force-dynamic";
 
 /**
  * GET /api/products/search
@@ -21,52 +24,49 @@ import { ProductSearchSchema } from '@/lib/security/schemas/product-schemas'
  */
 export async function GET(req: NextRequest) {
   try {
-    const session = await auth()
+    const session = await auth();
 
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { tenantId } = session.user
+    const { tenantId } = session.user;
 
     if (!tenantId) {
       return NextResponse.json(
-        { error: 'User has no tenant assigned' },
-        { status: 404 }
-      )
+        { error: "User has no tenant assigned" },
+        { status: 404 },
+      );
     }
 
     // Parse and validate query parameters
-    const { searchParams } = new URL(req.url)
+    const { searchParams } = new URL(req.url);
 
     const searchInput = {
-      q: searchParams.get('q'),
-      categoryId: searchParams.get('categoryId'),
-      minPrice: searchParams.get('minPrice'),
-      maxPrice: searchParams.get('maxPrice'),
-      page: searchParams.get('page') || '1',
-      limit: searchParams.get('limit') || '20',
-    }
+      q: searchParams.get("q"),
+      categoryId: searchParams.get("categoryId"),
+      minPrice: searchParams.get("minPrice"),
+      maxPrice: searchParams.get("maxPrice"),
+      page: searchParams.get("page") || "1",
+      limit: searchParams.get("limit") || "20",
+    };
 
-    const validation = ProductSearchSchema.safeParse(searchInput)
+    const validation = ProductSearchSchema.safeParse(searchInput);
 
     if (!validation.success) {
       return NextResponse.json(
         {
-          error: 'Invalid search parameters',
+          error: "Invalid search parameters",
           issues: validation.error.issues,
         },
-        { status: 400 }
-      )
+        { status: 400 },
+      );
     }
 
-    const validatedInput = validation.data
+    const validatedInput = validation.data;
 
     // Search products
-    const result = await searchProducts(tenantId, validatedInput)
+    const result = await searchProducts(tenantId, validatedInput);
 
     return NextResponse.json({
       products: result.products.map((product: any) => ({
@@ -97,12 +97,12 @@ export async function GET(req: NextRequest) {
         limit: validatedInput.limit,
       },
       query: validatedInput.q,
-    })
+    });
   } catch (error) {
-    console.error('[PRODUCTS] SEARCH error:', error)
+    console.error("[PRODUCTS] SEARCH error:", error);
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }

@@ -15,33 +15,53 @@
  * export { UserRole } from '@prisma/client'
  */
 
-export type UserRole = 'SUPER_ADMIN' | 'STORE_OWNER' | 'CUSTOMER'
+export type UserRole = "SUPER_ADMIN" | "STORE_OWNER" | "CUSTOMER";
 
 // Inventory Reason Type (from validation schema)
 // Used in InventoryLog to track why stock was adjusted
 // IMPORTANT: Must match AdjustInventorySchema enum values in /lib/security/schemas/review-schemas.ts
-export type InventoryReason = 'RECOUNT' | 'RETURN' | 'DAMAGE' | 'PURCHASE' | 'OTHER'
+export type InventoryReason =
+  | "RECOUNT"
+  | "RETURN"
+  | "DAMAGE"
+  | "PURCHASE"
+  | "OTHER";
 
 // Order Status Type (from Prisma schema)
 // enum OrderStatus { PENDING, PROCESSING, SHIPPED, DELIVERED, CANCELLED, REFUNDED }
-export type OrderStatus = 'PENDING' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED' | 'REFUNDED'
+export type OrderStatus =
+  | "PENDING"
+  | "PROCESSING"
+  | "SHIPPED"
+  | "DELIVERED"
+  | "CANCELLED"
+  | "REFUNDED";
 
 // Payment Status Type (from Prisma schema)
 // enum PaymentStatus { PENDING, COMPLETED, FAILED, REFUNDED }
-export type PaymentStatus = 'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED'
+export type PaymentStatus = "PENDING" | "COMPLETED" | "FAILED" | "REFUNDED";
 
 // Payment Method Type (from Prisma schema)
 // enum PaymentMethod { CREDIT_CARD, STRIPE, MERCADO_PAGO, PAYPAL, OXXO, BANK_TRANSFER }
-export type PaymentMethod = 'CREDIT_CARD' | 'STRIPE' | 'MERCADO_PAGO' | 'PAYPAL' | 'OXXO' | 'BANK_TRANSFER'
+export type PaymentMethod =
+  | "CREDIT_CARD"
+  | "STRIPE"
+  | "MERCADO_PAGO"
+  | "PAYPAL"
+  | "OXXO"
+  | "BANK_TRANSFER";
 
 // Helper to check if a string is a valid UserRole
 export function isValidUserRole(role: unknown): role is UserRole {
-  return typeof role === 'string' && ['SUPER_ADMIN', 'STORE_OWNER', 'CUSTOMER'].includes(role)
+  return (
+    typeof role === "string" &&
+    ["SUPER_ADMIN", "STORE_OWNER", "CUSTOMER"].includes(role)
+  );
 }
 
 // Constants for cleaner code
 export const USER_ROLES = {
-  SUPER_ADMIN: 'SUPER_ADMIN' as const,
-  STORE_OWNER: 'STORE_OWNER' as const,
-  CUSTOMER: 'CUSTOMER' as const,
-} as const
+  SUPER_ADMIN: "SUPER_ADMIN" as const,
+  STORE_OWNER: "STORE_OWNER" as const,
+  CUSTOMER: "CUSTOMER" as const,
+} as const;

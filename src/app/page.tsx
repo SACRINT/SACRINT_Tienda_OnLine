@@ -1,5 +1,5 @@
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
   return (
@@ -10,7 +10,8 @@ export default function Home() {
           Bienvenido a Tienda Online 2025
         </h1>
         <p className="text-xl md:text-2xl text-neutral-dark text-center mb-8 max-w-3xl mx-auto">
-          Plataforma e-commerce SaaS multi-tenant con seguridad de nivel bancario
+          Plataforma e-commerce SaaS multi-tenant con seguridad de nivel
+          bancario
         </p>
 
         {/* CTA Buttons */}
@@ -21,7 +22,10 @@ export default function Home() {
             </Button>
           </Link>
           <Link href="/signup">
-            <Button variant="outline" className="w-full sm:w-auto border-2 border-accent text-primary hover:bg-neutral-light px-8 py-6 text-lg">
+            <Button
+              variant="outline"
+              className="w-full sm:w-auto border-2 border-accent text-primary hover:bg-neutral-light px-8 py-6 text-lg"
+            >
               Crear Tienda
             </Button>
           </Link>
@@ -34,7 +38,8 @@ export default function Home() {
             <div className="text-5xl mb-4">🔐</div>
             <h2 className="text-2xl font-bold text-primary mb-3">Seguridad</h2>
             <p className="text-neutral-dark">
-              Protección de nivel bancario con PCI DSS compliance y validaciones en dos capas
+              Protección de nivel bancario con PCI DSS compliance y validaciones
+              en dos capas
             </p>
           </div>
 
@@ -43,7 +48,8 @@ export default function Home() {
             <div className="text-5xl mb-4">⚡</div>
             <h2 className="text-2xl font-bold text-accent mb-3">Escalable</h2>
             <p className="text-neutral-dark">
-              Arquitectura multi-tenant completamente aislada para múltiples vendedores
+              Arquitectura multi-tenant completamente aislada para múltiples
+              vendedores
             </p>
           </div>
 
@@ -59,7 +65,9 @@ export default function Home() {
 
         {/* Tech Stack */}
         <div className="mt-20 p-8 bg-primary text-white rounded-lg shadow-xl">
-          <h2 className="text-3xl font-bold mb-6 text-center">Stack Tecnológico</h2>
+          <h2 className="text-3xl font-bold mb-6 text-center">
+            Stack Tecnológico
+          </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
             <div className="p-4 bg-primary-light rounded-lg">
               <p className="font-bold text-lg mb-2">Frontend</p>
@@ -83,10 +91,12 @@ export default function Home() {
         {/* Status Badge */}
         <div className="mt-12 text-center">
           <div className="inline-block bg-green-100 border border-green-400 text-green-700 px-6 py-3 rounded-lg">
-            <p className="font-semibold">✅ Sprint 0 Completado - Sistema Listo</p>
+            <p className="font-semibold">
+              ✅ Sprint 0 Completado - Sistema Listo
+            </p>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }

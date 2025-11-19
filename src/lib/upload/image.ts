@@ -1,42 +1,45 @@
 // Image Upload Utilities
 // Handles image upload to Vercel Blob Storage with validation and optimization
 
-import { put } from '@vercel/blob'
-import sharp from 'sharp'
+import { put } from "@vercel/blob";
+import sharp from "sharp";
 
 // Allowed image MIME types
 const ALLOWED_MIME_TYPES = [
-  'image/jpeg',
-  'image/jpg',
-  'image/png',
-  'image/webp',
-  'image/gif',
-]
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+];
 
 // Max file size: 10MB
-const MAX_FILE_SIZE = 10 * 1024 * 1024
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
 // Image optimization settings
-const IMAGE_QUALITY = 85
-const MAX_WIDTH = 2000
-const MAX_HEIGHT = 2000
+const IMAGE_QUALITY = 85;
+const MAX_WIDTH = 2000;
+const MAX_HEIGHT = 2000;
 
 /**
  * Validates an image file
  * Checks file type and size
  */
-export function validateImageFile(file: File): { valid: boolean; error?: string } {
+export function validateImageFile(file: File): {
+  valid: boolean;
+  error?: string;
+} {
   // Check file exists
   if (!file || file.size === 0) {
-    return { valid: false, error: 'File is empty or missing' }
+    return { valid: false, error: "File is empty or missing" };
   }
 
   // Check file type
   if (!ALLOWED_MIME_TYPES.includes(file.type)) {
     return {
       valid: false,
-      error: `Invalid file type. Allowed types: ${ALLOWED_MIME_TYPES.join(', ')}`,
-    }
+      error: `Invalid file type. Allowed types: ${ALLOWED_MIME_TYPES.join(", ")}`,
+    };
   }
 
   // Check file size
@@ -44,10 +47,10 @@ export function validateImageFile(file: File): { valid: boolean; error?: string 
     return {
       valid: false,
       error: `File too large. Maximum size: ${MAX_FILE_SIZE / (1024 * 1024)}MB`,
-    }
+    };
   }
 
-  return { valid: true }
+  return { valid: true };
 }
 
 /**
@@ -61,75 +64,75 @@ export function validateImageFile(file: File): { valid: boolean; error?: string 
 export async function uploadImage(
   file: File,
   options: {
-    tenantId: string
-    userId: string
-    folder?: string
-  }
+    tenantId: string;
+    userId: string;
+    folder?: string;
+  },
 ): Promise<{
-  url: string
-  pathname: string
-  width: number
-  height: number
+  url: string;
+  pathname: string;
+  width: number;
+  height: number;
 }> {
-  const { tenantId, userId, folder = 'products' } = options
+  const { tenantId, userId, folder = "products" } = options;
 
   // Convert File to Buffer
-  const arrayBuffer = await file.arrayBuffer()
-  const buffer = Buffer.from(arrayBuffer)
+  const arrayBuffer = await file.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
 
   // Get image metadata
-  const metadata = await sharp(buffer).metadata()
-  const originalWidth = metadata.width || 0
-  const originalHeight = metadata.height || 0
+  const metadata = await sharp(buffer as any).metadata();
+  const originalWidth = metadata.width || 0;
+  const originalHeight = metadata.height || 0;
 
   // Optimize image
-  let optimizedBuffer = buffer
+  let optimizedBuffer: any = buffer;
 
   // Resize if image is too large
   if (originalWidth > MAX_WIDTH || originalHeight > MAX_HEIGHT) {
-    optimizedBuffer = await sharp(buffer)
+    optimizedBuffer = await sharp(buffer as any)
       .resize(MAX_WIDTH, MAX_HEIGHT, {
-        fit: 'inside',
+        fit: "inside",
         withoutEnlargement: true,
       })
       .jpeg({ quality: IMAGE_QUALITY })
-      .toBuffer()
+      .toBuffer();
   } else {
     // Just compress
-    optimizedBuffer = await sharp(buffer)
+    optimizedBuffer = await sharp(buffer as any)
       .jpeg({ quality: IMAGE_QUALITY })
-      .toBuffer()
+      .toBuffer();
   }
 
   // Get final dimensions
-  const finalMetadata = await sharp(optimizedBuffer).metadata()
-  const finalWidth = finalMetadata.width || 0
-  const finalHeight = finalMetadata.height || 0
+  const finalMetadata = await sharp(optimizedBuffer).metadata();
+  const finalWidth = finalMetadata.width || 0;
+  const finalHeight = finalMetadata.height || 0;
 
   // Generate unique filename
-  const timestamp = Date.now()
-  const randomString = Math.random().toString(36).substring(2, 8)
-  const extension = file.name.split('.').pop() || 'jpg'
-  const filename = `${folder}/${tenantId}/${timestamp}-${randomString}.${extension}`
+  const timestamp = Date.now();
+  const randomString = Math.random().toString(36).substring(2, 8);
+  const extension = file.name.split(".").pop() || "jpg";
+  const filename = `${folder}/${tenantId}/${timestamp}-${randomString}.${extension}`;
 
   // Upload to Vercel Blob
   // Note: In development, this will use local storage
   // In production, set BLOB_READ_WRITE_TOKEN environment variable
   const blob = await put(filename, optimizedBuffer, {
-    access: 'public',
-    contentType: 'image/jpeg',
-  })
+    access: "public",
+    contentType: "image/jpeg",
+  });
 
   console.log(
-    `[UPLOAD] Uploaded image: ${filename} (${originalWidth}x${originalHeight} → ${finalWidth}x${finalHeight})`
-  )
+    `[UPLOAD] Uploaded image: ${filename} (${originalWidth}x${originalHeight} → ${finalWidth}x${finalHeight})`,
+  );
 
   return {
     url: blob.url,
     pathname: blob.pathname,
     width: finalWidth,
     height: finalHeight,
-  }
+  };
 }
 
 /**
@@ -139,18 +142,18 @@ export async function uploadImage(
 export async function deleteImage(url: string): Promise<void> {
   try {
     // Extract pathname from URL
-    const pathname = url.includes('blob.vercel-storage.com')
+    const pathname = url.includes("blob.vercel-storage.com")
       ? new URL(url).pathname
-      : url
+      : url;
 
     // Delete from Vercel Blob
-    const { del } = await import('@vercel/blob')
-    await del(pathname)
+    const { del } = await import("@vercel/blob");
+    await del(pathname);
 
-    console.log(`[UPLOAD] Deleted image: ${pathname}`)
+    console.log(`[UPLOAD] Deleted image: ${pathname}`);
   } catch (error) {
-    console.error('[UPLOAD] Failed to delete image:', error)
-    throw new Error('Failed to delete image')
+    console.error("[UPLOAD] Failed to delete image:", error);
+    throw new Error("Failed to delete image");
   }
 }
 
@@ -162,20 +165,20 @@ export async function deleteImage(url: string): Promise<void> {
  */
 export async function generateThumbnail(
   file: File,
-  size: number = 200
+  size: number = 200,
 ): Promise<Buffer> {
-  const arrayBuffer = await file.arrayBuffer()
-  const buffer = Buffer.from(arrayBuffer)
+  const arrayBuffer = await file.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
 
-  const thumbnail = await sharp(buffer)
+  const thumbnail = await sharp(buffer as any)
     .resize(size, size, {
-      fit: 'cover',
-      position: 'center',
+      fit: "cover",
+      position: "center",
     })
     .jpeg({ quality: 80 })
-    .toBuffer()
+    .toBuffer();
 
-  return thumbnail
+  return thumbnail;
 }
 
 /**
@@ -188,15 +191,20 @@ export async function generateThumbnail(
 export async function validateImageDimensions(
   file: File,
   minWidth: number = 400,
-  minHeight: number = 400
-): Promise<{ valid: boolean; error?: string; width?: number; height?: number }> {
+  minHeight: number = 400,
+): Promise<{
+  valid: boolean;
+  error?: string;
+  width?: number;
+  height?: number;
+}> {
   try {
-    const arrayBuffer = await file.arrayBuffer()
-    const buffer = Buffer.from(arrayBuffer)
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
 
-    const metadata = await sharp(buffer).metadata()
-    const width = metadata.width || 0
-    const height = metadata.height || 0
+    const metadata = await sharp(buffer as any).metadata();
+    const width = metadata.width || 0;
+    const height = metadata.height || 0;
 
     if (width < minWidth || height < minHeight) {
       return {
@@ -204,11 +212,11 @@ export async function validateImageDimensions(
         error: `Image dimensions too small. Minimum: ${minWidth}x${minHeight}px, got: ${width}x${height}px`,
         width,
         height,
-      }
+      };
     }
 
-    return { valid: true, width, height }
+    return { valid: true, width, height };
   } catch (error) {
-    return { valid: false, error: 'Failed to read image metadata' }
+    return { valid: false, error: "Failed to read image metadata" };
   }
 }
