@@ -17,6 +17,7 @@ import {
   Repeat,
   Eye,
   Calendar,
+  Loader2,
 } from "lucide-react";
 import {
   Card,
@@ -51,18 +52,26 @@ import {
   Legend,
 } from "recharts";
 
-// Mock data
-const kpiData = {
-  revenue: { value: 158750, change: 12.5, trend: "up" },
-  orders: { value: 342, change: 8.2, trend: "up" },
-  products: { value: 156, change: -2.1, trend: "down" },
-  customers: { value: 1247, change: 15.3, trend: "up" },
-  avgOrderValue: { value: 464, change: 3.8, trend: "up" },
-  conversionRate: { value: 3.2, change: 0.5, trend: "up" },
-  repeatCustomers: { value: 28, change: 4.2, trend: "up" },
-  cartAbandonment: { value: 68, change: -5.1, trend: "down" },
-};
+// Types for dashboard data
+interface KPIData {
+  revenue: { value: number; change: number; trend: string };
+  orders: { value: number; change: number; trend: string };
+  products: { value: number; change: number; trend: string };
+  customers: { value: number; change: number; trend: string };
+  avgOrderValue: { value: number; change: number; trend: string };
+  conversionRate: { value: number; change: number; trend: string };
+  repeatCustomers: { value: number; change: number; trend: string };
+  cartAbandonment: { value: number; change: number; trend: string };
+}
 
+interface DashboardData {
+  kpiData: KPIData;
+  topProductsData: Array<{ name: string; sales: number; revenue: number }>;
+  recentOrders: Array<{ id: string; customer: string; total: number; status: string; date: string }>;
+  orderStatusData: Array<{ name: string; value: number; color: string }>;
+}
+
+// Static revenue data for chart (could be fetched from API in future)
 const revenueData = [
   { name: "Ene", revenue: 45000, orders: 120 },
   { name: "Feb", revenue: 52000, orders: 145 },
@@ -75,59 +84,6 @@ const revenueData = [
   { name: "Sep", revenue: 81000, orders: 220 },
   { name: "Oct", revenue: 93000, orders: 256 },
   { name: "Nov", revenue: 158750, orders: 342 },
-];
-
-const orderStatusData = [
-  { name: "Completadas", value: 245, color: "#22c55e" },
-  { name: "En Proceso", value: 67, color: "#3b82f6" },
-  { name: "Pendientes", value: 18, color: "#f59e0b" },
-  { name: "Canceladas", value: 12, color: "#ef4444" },
-];
-
-const topProductsData = [
-  { name: "Auriculares BT Pro", sales: 89, revenue: 133411 },
-  { name: "Camiseta Premium", sales: 156, revenue: 93444 },
-  { name: "Zapatillas Ultra", sales: 67, revenue: 167433 },
-  { name: "Smartwatch Fit", sales: 45, revenue: 148455 },
-  { name: "Lámpara LED", sales: 78, revenue: 70122 },
-];
-
-const recentOrders = [
-  {
-    id: "ORD-001",
-    customer: "María García",
-    total: 2999,
-    status: "completed",
-    date: "Hace 5 min",
-  },
-  {
-    id: "ORD-002",
-    customer: "Carlos López",
-    total: 1598,
-    status: "processing",
-    date: "Hace 15 min",
-  },
-  {
-    id: "ORD-003",
-    customer: "Ana Martínez",
-    total: 4497,
-    status: "pending",
-    date: "Hace 32 min",
-  },
-  {
-    id: "ORD-004",
-    customer: "José Rodríguez",
-    total: 899,
-    status: "completed",
-    date: "Hace 1 hora",
-  },
-  {
-    id: "ORD-005",
-    customer: "Laura Sánchez",
-    total: 3298,
-    status: "completed",
-    date: "Hace 2 horas",
-  },
 ];
 
 const statusColors: Record<string, string> = {
@@ -146,6 +102,26 @@ const statusLabels: Record<string, string> = {
 
 export default function DashboardPage() {
   const [dateRange, setDateRange] = React.useState("30d");
+  const [dashboardData, setDashboardData] = React.useState<DashboardData | null>(null);
+  const [isLoading, setIsLoading] = React.useState(true);
+
+  // Fetch dashboard data
+  React.useEffect(() => {
+    async function fetchData() {
+      try {
+        const response = await fetch("/api/dashboard/stats");
+        if (response.ok) {
+          const data = await response.json();
+          setDashboardData(data);
+        }
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
 
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat("es-MX", {
@@ -156,6 +132,35 @@ export default function DashboardPage() {
 
   const formatNumber = (value: number) =>
     new Intl.NumberFormat("es-MX").format(value);
+
+  // Use fetched data or fallback to defaults
+  const kpiData = dashboardData?.kpiData || {
+    revenue: { value: 0, change: 0, trend: "up" },
+    orders: { value: 0, change: 0, trend: "up" },
+    products: { value: 0, change: 0, trend: "up" },
+    customers: { value: 0, change: 0, trend: "up" },
+    avgOrderValue: { value: 0, change: 0, trend: "up" },
+    conversionRate: { value: 0, change: 0, trend: "up" },
+    repeatCustomers: { value: 0, change: 0, trend: "up" },
+    cartAbandonment: { value: 0, change: 0, trend: "down" },
+  };
+
+  const topProductsData = dashboardData?.topProductsData || [];
+  const recentOrders = dashboardData?.recentOrders || [];
+  const orderStatusData = dashboardData?.orderStatusData || [
+    { name: "Completadas", value: 0, color: "#22c55e" },
+    { name: "En Proceso", value: 0, color: "#3b82f6" },
+    { name: "Pendientes", value: 0, color: "#f59e0b" },
+    { name: "Canceladas", value: 0, color: "#ef4444" },
+  ];
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
