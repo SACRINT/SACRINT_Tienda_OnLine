@@ -1,0 +1,96 @@
+{
+  "app": {
+    "name": "Tienda Online",
+    "tagline": "Tu tienda de confianza"
+  },
+  "nav": {
+    "home": "Inicio",
+    "shop": "Tienda",
+    "categories": "Categorías",
+    "cart": "Carrito",
+    "account": "Mi Cuenta",
+    "orders": "Mis Pedidos",
+    "wishlist": "Favoritos",
+    "logout": "Cerrar Sesión"
+  },
+  "actions": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "create": "Crear",
+    "update": "Actualizar",
+    "submit": "Enviar",
+    "confirm": "Confirmar",
+    "back": "Volver",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "sort": "Ordenar",
+    "clear": "Limpiar",
+    "apply": "Aplicar",
+    "close": "Cerrar",
+    "view": "Ver",
+    "download": "Descargar",
+    "share": "Compartir",
+    "copy": "Copiar"
+  },
+  "status": {
+    "loading": "Cargando...",
+    "saving": "Guardando...",
+    "success": "Éxito",
+    "error": "Error",
+    "pending": "Pendiente",
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "completed": "Completado",
+    "cancelled": "Cancelado"
+  },
+  "messages": {
+    "saved": "Guardado correctamente",
+    "deleted": "Eliminado correctamente",
+    "updated": "Actualizado correctamente",
+    "created": "Creado correctamente",
+    "error": "Ha ocurrido un error",
+    "confirm_delete": "¿Estás seguro de que deseas eliminar este elemento?",
+    "no_results": "No se encontraron resultados",
+    "loading_error": "Error al cargar los datos"
+  },
+  "validation": {
+    "required": "Este campo es obligatorio",
+    "email": "Ingresa un correo electrónico válido",
+    "min_length": "Debe tener al menos {{min}} caracteres",
+    "max_length": "No puede exceder {{max}} caracteres",
+    "password_match": "Las contraseñas no coinciden",
+    "invalid_format": "Formato inválido"
+  },
+  "pagination": {
+    "showing": "Mostrando {{from}} a {{to}} de {{total}}",
+    "page": "Página {{page}} de {{total}}",
+    "items_per_page": "Elementos por página",
+    "first": "Primera",
+    "last": "Última"
+  },
+  "time": {
+    "now": "Ahora",
+    "today": "Hoy",
+    "yesterday": "Ayer",
+    "tomorrow": "Mañana",
+    "this_week": "Esta semana",
+    "last_week": "Semana pasada",
+    "this_month": "Este mes",
+    "last_month": "Mes pasado"
+  },
+  "footer": {
+    "about": "Sobre Nosotros",
+    "contact": "Contacto",
+    "terms": "Términos y Condiciones",
+    "privacy": "Política de Privacidad",
+    "help": "Ayuda",
+    "faq": "Preguntas Frecuentes",
+    "shipping": "Envíos",
+    "returns": "Devoluciones",
+    "copyright": "© {{year}} Tienda Online. Todos los derechos reservados."
+  }
+}
