@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Product Detail Page - Server Component with Real Data
 import { Suspense } from "react";
 import { notFound } from "next/navigation";

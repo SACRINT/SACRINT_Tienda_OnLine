@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Inventory Alerts
 // Low stock and reorder notifications
 

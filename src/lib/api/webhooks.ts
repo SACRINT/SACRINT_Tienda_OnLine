@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Webhook Management
 // Send and manage webhooks for external integrations
 

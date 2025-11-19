@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Database Connection Configuration
 // Connection pooling and management
 

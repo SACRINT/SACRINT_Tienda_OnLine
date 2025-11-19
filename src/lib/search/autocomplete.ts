@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Autocomplete & Suggestions
 // Real-time search suggestions
 

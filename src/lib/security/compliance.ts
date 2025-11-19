@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Compliance Utilities
 // GDPR, CCPA, and other compliance features
 

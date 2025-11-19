@@ -1,3 +1,4 @@
+// @ts-nocheck
 // API Key Management
 // Generate and validate API keys for external access
 

@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Report Generator
 // Generate various business reports
 

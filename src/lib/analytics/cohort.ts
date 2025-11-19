@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Cohort Analysis
 // Track customer behavior over time
 

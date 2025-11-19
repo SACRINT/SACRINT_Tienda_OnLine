@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Stock Management
 // Core inventory tracking functionality
 

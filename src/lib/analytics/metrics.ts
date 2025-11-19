@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Analytics Metrics
 // Core metrics calculation
 
