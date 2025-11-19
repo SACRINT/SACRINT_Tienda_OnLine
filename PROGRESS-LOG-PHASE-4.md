@@ -10,8 +10,8 @@
 
 ### Sprint 1 (Weeks 1-8: Optimization & Stability)
 
-- [x] Semana 1: Core Web Vitals optimization - Commit: (pending)
-- [ ] Semana 2: Database optimization
+- [x] Semana 1: Core Web Vitals optimization - Commit: 5a98f11
+- [x] Semana 2: Database optimization - Commit: (pending)
 - [ ] Semana 3: Caching & CDN
 - [ ] Semana 4: Monitoring & Error tracking
 - [ ] Semana 5: Load testing
@@ -90,3 +90,33 @@
 ---
 
 **Last Updated**: 2025-11-19
+
+### Week 2: Database Optimization & Scaling
+
+**Status**: Complete
+**Started**: 2025-11-19
+**Completed**: 2025-11-19
+
+#### Tasks
+
+- [x] In-memory caching service with TTL support
+- [x] Cache key builders and tag-based invalidation
+- [x] Optimized Prisma queries with select fields
+- [x] Pagination helpers and utilities
+- [x] Connection pooling configuration
+- [x] Query performance logging
+- [x] Batch operation helpers
+- [x] Transaction helpers with timeout
+
+#### Deliverables
+
+- `/src/lib/cache/cache-service.ts` - Caching layer with TTL
+- `/src/lib/db/optimization.ts` - Query optimization utilities
+- `/src/lib/db/optimized-queries.ts` - Cached product/category queries
+- `/src/lib/db/connection.ts` - Connection pooling & retry logic
+
+#### Performance Targets
+
+- Query time: <50ms average
+- Cache hit rate: >70%
+- Max concurrent users: 10,000+
