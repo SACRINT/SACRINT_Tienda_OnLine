@@ -2,11 +2,24 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Trash2, Upload, X, GripVertical, Image as ImageIcon } from "lucide-react";
+import {
+  Plus,
+  Trash2,
+  Upload,
+  X,
+  GripVertical,
+  Image as ImageIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -83,14 +96,14 @@ export function ProductForm({ product, categories }: ProductFormProps) {
 
   // Variants
   const [variants, setVariants] = useState<ProductVariant[]>(
-    product?.variants || []
+    product?.variants || [],
   );
-  const [hasVariants, setHasVariants] = useState((product?.variants?.length || 0) > 0);
+  const [hasVariants, setHasVariants] = useState(
+    (product?.variants?.length || 0) > 0,
+  );
 
   // Images
-  const [images, setImages] = useState<ProductImage[]>(
-    product?.images || []
-  );
+  const [images, setImages] = useState<ProductImage[]>(product?.images || []);
 
   // SEO
   const [seoData, setSeoData] = useState({
@@ -199,7 +212,7 @@ export function ProductForm({ product, categories }: ProductFormProps) {
     variantIndex: number,
     attrIndex: number,
     field: "name" | "value",
-    value: string
+    value: string,
   ) => {
     const updated = [...variants];
     updated[variantIndex].attributes[attrIndex][field] = value;
@@ -209,7 +222,7 @@ export function ProductForm({ product, categories }: ProductFormProps) {
   const removeVariantAttribute = (variantIndex: number, attrIndex: number) => {
     const updated = [...variants];
     updated[variantIndex].attributes = updated[variantIndex].attributes.filter(
-      (_, i) => i !== attrIndex
+      (_, i) => i !== attrIndex,
     );
     setVariants(updated);
   };
@@ -240,7 +253,7 @@ export function ProductForm({ product, categories }: ProductFormProps) {
       images.map((img) => ({
         ...img,
         isPrimary: img.id === imageId,
-      }))
+      })),
     );
   };
 
@@ -278,9 +291,7 @@ export function ProductForm({ product, categories }: ProductFormProps) {
           <Card>
             <CardHeader>
               <CardTitle>Información Básica</CardTitle>
-              <CardDescription>
-                Datos principales del producto
-              </CardDescription>
+              <CardDescription>Datos principales del producto</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
@@ -443,7 +454,8 @@ export function ProductForm({ product, categories }: ProductFormProps) {
             <CardHeader>
               <CardTitle>Galería de Imágenes</CardTitle>
               <CardDescription>
-                Sube hasta 10 imágenes del producto. La primera será la principal.
+                Sube hasta 10 imágenes del producto. La primera será la
+                principal.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -564,7 +576,11 @@ export function ProductForm({ product, categories }: ProductFormProps) {
                             <Input
                               value={variant.name}
                               onChange={(e) =>
-                                updateVariant(variantIndex, "name", e.target.value)
+                                updateVariant(
+                                  variantIndex,
+                                  "name",
+                                  e.target.value,
+                                )
                               }
                               placeholder="Ej: Talla M - Azul"
                             />
@@ -574,7 +590,11 @@ export function ProductForm({ product, categories }: ProductFormProps) {
                             <Input
                               value={variant.sku}
                               onChange={(e) =>
-                                updateVariant(variantIndex, "sku", e.target.value)
+                                updateVariant(
+                                  variantIndex,
+                                  "sku",
+                                  e.target.value,
+                                )
                               }
                               placeholder="Ej: CAM-001-M-AZ"
                             />
@@ -590,7 +610,7 @@ export function ProductForm({ product, categories }: ProductFormProps) {
                                 updateVariant(
                                   variantIndex,
                                   "price",
-                                  parseFloat(e.target.value) || 0
+                                  parseFloat(e.target.value) || 0,
                                 )
                               }
                             />
@@ -605,7 +625,7 @@ export function ProductForm({ product, categories }: ProductFormProps) {
                                 updateVariant(
                                   variantIndex,
                                   "stock",
-                                  parseInt(e.target.value) || 0
+                                  parseInt(e.target.value) || 0,
                                 )
                               }
                             />
@@ -626,7 +646,7 @@ export function ProductForm({ product, categories }: ProductFormProps) {
                                     variantIndex,
                                     attrIndex,
                                     "name",
-                                    e.target.value
+                                    e.target.value,
                                   )
                                 }
                                 placeholder="Ej: Talla"
@@ -639,7 +659,7 @@ export function ProductForm({ product, categories }: ProductFormProps) {
                                     variantIndex,
                                     attrIndex,
                                     "value",
-                                    e.target.value
+                                    e.target.value,
                                   )
                                 }
                                 placeholder="Ej: M"
@@ -651,7 +671,10 @@ export function ProductForm({ product, categories }: ProductFormProps) {
                                   variant="ghost"
                                   size="icon"
                                   onClick={() =>
-                                    removeVariantAttribute(variantIndex, attrIndex)
+                                    removeVariantAttribute(
+                                      variantIndex,
+                                      attrIndex,
+                                    )
                                   }
                                 >
                                   <X className="h-4 w-4" />
@@ -722,7 +745,10 @@ export function ProductForm({ product, categories }: ProductFormProps) {
                 <Label>Dimensiones (cm)</Label>
                 <div className="grid grid-cols-3 gap-4 mt-2">
                   <div>
-                    <Label htmlFor="length" className="text-xs text-muted-foreground">
+                    <Label
+                      htmlFor="length"
+                      className="text-xs text-muted-foreground"
+                    >
                       Largo
                     </Label>
                     <Input
@@ -741,7 +767,10 @@ export function ProductForm({ product, categories }: ProductFormProps) {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="width" className="text-xs text-muted-foreground">
+                    <Label
+                      htmlFor="width"
+                      className="text-xs text-muted-foreground"
+                    >
                       Ancho
                     </Label>
                     <Input
@@ -760,7 +789,10 @@ export function ProductForm({ product, categories }: ProductFormProps) {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="height" className="text-xs text-muted-foreground">
+                    <Label
+                      htmlFor="height"
+                      className="text-xs text-muted-foreground"
+                    >
                       Alto
                     </Label>
                     <Input
@@ -868,13 +900,18 @@ export function ProductForm({ product, categories }: ProductFormProps) {
               <Separator />
 
               <div className="p-4 bg-muted rounded-lg">
-                <p className="text-sm font-medium mb-2">Vista previa en Google</p>
+                <p className="text-sm font-medium mb-2">
+                  Vista previa en Google
+                </p>
                 <div className="space-y-1">
                   <p className="text-primary text-lg hover:underline cursor-pointer">
-                    {seoData.metaTitle || formData.name || "Título del producto"}
+                    {seoData.metaTitle ||
+                      formData.name ||
+                      "Título del producto"}
                   </p>
                   <p className="text-sm text-success">
-                    tutienda.com/productos/{formData.sku?.toLowerCase() || "producto"}
+                    tutienda.com/productos/
+                    {formData.sku?.toLowerCase() || "producto"}
                   </p>
                   <p className="text-sm text-muted-foreground">
                     {seoData.metaDescription ||
@@ -890,22 +927,14 @@ export function ProductForm({ product, categories }: ProductFormProps) {
 
       {/* Submit Buttons */}
       <div className="flex gap-4 sticky bottom-4 bg-background p-4 rounded-lg shadow-lg border">
-        <Button
-          type="submit"
-          disabled={loading}
-          className="flex-1"
-        >
+        <Button type="submit" disabled={loading} className="flex-1">
           {loading
             ? "Guardando..."
             : product
               ? "Actualizar Producto"
               : "Crear Producto"}
         </Button>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => router.back()}
-        >
+        <Button type="button" variant="outline" onClick={() => router.back()}>
           Cancelar
         </Button>
       </div>

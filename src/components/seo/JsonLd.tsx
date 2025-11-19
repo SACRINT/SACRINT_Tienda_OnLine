@@ -1,11 +1,11 @@
 // JSON-LD Structured Data Component
 
 interface JsonLdProps {
-  data: object | object[]
+  data: object | object[];
 }
 
 export function JsonLd({ data }: JsonLdProps) {
-  const jsonLd = Array.isArray(data) ? data : [data]
+  const jsonLd = Array.isArray(data) ? data : [data];
 
   return (
     <>
@@ -19,10 +19,10 @@ export function JsonLd({ data }: JsonLdProps) {
         />
       ))}
     </>
-  )
+  );
 }
 
 // Convenience component for multiple schemas
 export function MultipleJsonLd({ schemas }: { schemas: object[] }) {
-  return <JsonLd data={schemas} />
+  return <JsonLd data={schemas} />;
 }

@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Truck, Shield, CreditCard, HeadphonesIcon } from "lucide-react"
-import { cn } from "@/lib/utils"
+import * as React from "react";
+import { Truck, Shield, CreditCard, HeadphonesIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface ValueItem {
-  icon: React.ReactNode
-  title: string
-  description: string
+  icon: React.ReactNode;
+  title: string;
+  description: string;
 }
 
 const defaultValues: ValueItem[] = [
@@ -31,11 +31,11 @@ const defaultValues: ValueItem[] = [
     title: "Soporte 24/7",
     description: "Siempre disponibles para ti",
   },
-]
+];
 
 interface ValuePropositionProps {
-  values?: ValueItem[]
-  className?: string
+  values?: ValueItem[];
+  className?: string;
 }
 
 export function ValueProposition({
@@ -47,10 +47,7 @@ export function ValueProposition({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {values.map((item, index) => (
-            <div
-              key={index}
-              className="flex flex-col items-center text-center"
-            >
+            <div key={index} className="flex flex-col items-center text-center">
               <div className="mb-4 p-3 bg-white/10 rounded-full">
                 {item.icon}
               </div>
@@ -61,5 +58,5 @@ export function ValueProposition({
         </div>
       </div>
     </section>
-  )
+  );
 }

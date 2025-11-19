@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { Skeleton } from "@/components/ui/skeleton"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 // Product Card Skeleton
 export function ProductCardSkeleton() {
@@ -17,7 +17,7 @@ export function ProductCardSkeleton() {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
 
 // Product Grid Skeleton
@@ -28,7 +28,7 @@ export function ProductGridSkeleton({ count = 8 }: { count?: number }) {
         <ProductCardSkeleton key={i} />
       ))}
     </div>
-  )
+  );
 }
 
 // Table Row Skeleton
@@ -39,11 +39,17 @@ export function TableRowSkeleton({ columns = 5 }: { columns?: number }) {
         <Skeleton key={i} className="h-4 flex-1" />
       ))}
     </div>
-  )
+  );
 }
 
 // Table Skeleton
-export function TableSkeleton({ rows = 5, columns = 5 }: { rows?: number; columns?: number }) {
+export function TableSkeleton({
+  rows = 5,
+  columns = 5,
+}: {
+  rows?: number;
+  columns?: number;
+}) {
   return (
     <div className="space-y-2">
       <div className="flex items-center space-x-4 py-3 border-b">
@@ -55,7 +61,7 @@ export function TableSkeleton({ rows = 5, columns = 5 }: { rows?: number; column
         <TableRowSkeleton key={i} columns={columns} />
       ))}
     </div>
-  )
+  );
 }
 
 // Stats Card Skeleton
@@ -72,7 +78,7 @@ export function StatsCardSkeleton() {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
 
 // Dashboard Stats Skeleton
@@ -83,7 +89,7 @@ export function DashboardStatsSkeleton({ count = 4 }: { count?: number }) {
         <StatsCardSkeleton key={i} />
       ))}
     </div>
-  )
+  );
 }
 
 // Chart Skeleton
@@ -97,7 +103,7 @@ export function ChartSkeleton({ height = 300 }: { height?: number }) {
         <Skeleton className={`w-full`} style={{ height }} />
       </CardContent>
     </Card>
-  )
+  );
 }
 
 // Order Card Skeleton
@@ -116,7 +122,7 @@ export function OrderCardSkeleton() {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
 
 // Profile Form Skeleton
@@ -139,7 +145,7 @@ export function ProfileFormSkeleton() {
         <Skeleton className="h-10 w-32" />
       </CardContent>
     </Card>
-  )
+  );
 }
 
 // Cart Item Skeleton
@@ -156,7 +162,7 @@ export function CartItemSkeleton() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 // Page Header Skeleton
@@ -166,7 +172,7 @@ export function PageHeaderSkeleton() {
       <Skeleton className="h-8 w-48" />
       <Skeleton className="h-4 w-64" />
     </div>
-  )
+  );
 }
 
 // Full Page Loading Skeleton
@@ -181,5 +187,5 @@ export function PageLoadingSkeleton() {
       </div>
       <TableSkeleton />
     </div>
-  )
+  );
 }

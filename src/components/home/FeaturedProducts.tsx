@@ -1,25 +1,25 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import Link from "next/link"
-import Image from "next/image"
-import { Heart, ShoppingCart } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { RatingStars } from "@/components/ui/rating-stars"
-import { cn } from "@/lib/utils"
+import * as React from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { Heart, ShoppingCart } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { RatingStars } from "@/components/ui/rating-stars";
+import { cn } from "@/lib/utils";
 
 interface Product {
-  id: string
-  name: string
-  slug: string
-  price: number
-  originalPrice?: number
-  image?: string
-  rating?: number
-  reviewCount?: number
-  isNew?: boolean
-  isSale?: boolean
+  id: string;
+  name: string;
+  slug: string;
+  price: number;
+  originalPrice?: number;
+  image?: string;
+  rating?: number;
+  reviewCount?: number;
+  isNew?: boolean;
+  isSale?: boolean;
 }
 
 const defaultProducts: Product[] = [
@@ -61,13 +61,13 @@ const defaultProducts: Product[] = [
     reviewCount: 312,
     isNew: true,
   },
-]
+];
 
 interface FeaturedProductsProps {
-  title?: string
-  subtitle?: string
-  products?: Product[]
-  viewAllHref?: string
+  title?: string;
+  subtitle?: string;
+  products?: Product[];
+  viewAllHref?: string;
 }
 
 export function FeaturedProducts({
@@ -80,7 +80,7 @@ export function FeaturedProducts({
     new Intl.NumberFormat("es-MX", {
       style: "currency",
       currency: "MXN",
-    }).format(price)
+    }).format(price);
 
   return (
     <section className="py-16">
@@ -117,10 +117,14 @@ export function FeaturedProducts({
                 {/* Badges */}
                 <div className="absolute top-2 left-2 flex flex-col gap-1">
                   {product.isNew && (
-                    <Badge className="bg-mint text-mint-foreground">Nuevo</Badge>
+                    <Badge className="bg-mint text-mint-foreground">
+                      Nuevo
+                    </Badge>
                   )}
                   {product.isSale && (
-                    <Badge className="bg-error text-error-foreground">Oferta</Badge>
+                    <Badge className="bg-error text-error-foreground">
+                      Oferta
+                    </Badge>
                   )}
                 </div>
 
@@ -188,5 +192,5 @@ export function FeaturedProducts({
         </div>
       </div>
     </section>
-  )
+  );
 }

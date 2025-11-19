@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import Link from "next/link"
+import * as React from "react";
+import Link from "next/link";
 import {
   Heart,
   ShoppingCart,
@@ -9,29 +9,29 @@ import {
   Share2,
   Package,
   Star,
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 
 interface WishlistItem {
-  id: string
-  productId: string
-  name: string
-  price: number
-  salePrice: number | null
-  image: string | null
-  rating: number
-  reviews: number
-  inStock: boolean
-  addedAt: string
+  id: string;
+  productId: string;
+  name: string;
+  price: number;
+  salePrice: number | null;
+  image: string | null;
+  rating: number;
+  reviews: number;
+  inStock: boolean;
+  addedAt: string;
 }
 
 // Mock wishlist data
@@ -96,45 +96,45 @@ const initialWishlist: WishlistItem[] = [
     inStock: true,
     addedAt: "2024-02-20",
   },
-]
+];
 
 export default function WishlistPage() {
-  const [wishlist, setWishlist] = React.useState(initialWishlist)
-  const [sortBy, setSortBy] = React.useState("recent")
+  const [wishlist, setWishlist] = React.useState(initialWishlist);
+  const [sortBy, setSortBy] = React.useState("recent");
 
   const formatPrice = (price: number) =>
     new Intl.NumberFormat("es-MX", {
       style: "currency",
       currency: "MXN",
-    }).format(price)
+    }).format(price);
 
   const formatDate = (date: string) =>
     new Date(date).toLocaleDateString("es-MX", {
       day: "2-digit",
       month: "short",
-    })
+    });
 
   const handleRemove = (id: string) => {
-    setWishlist(wishlist.filter((item) => item.id !== id))
-  }
+    setWishlist(wishlist.filter((item) => item.id !== id));
+  };
 
   const handleAddToCart = (item: WishlistItem) => {
     // Add to cart logic
-    console.log("Add to cart:", item.name)
-  }
+    console.log("Add to cart:", item.name);
+  };
 
   const sortedWishlist = [...wishlist].sort((a, b) => {
     switch (sortBy) {
       case "price-low":
-        return (a.salePrice || a.price) - (b.salePrice || b.price)
+        return (a.salePrice || a.price) - (b.salePrice || b.price);
       case "price-high":
-        return (b.salePrice || b.price) - (a.salePrice || a.price)
+        return (b.salePrice || b.price) - (a.salePrice || a.price);
       case "name":
-        return a.name.localeCompare(b.name)
+        return a.name.localeCompare(b.name);
       default:
-        return new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime()
+        return new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime();
     }
-  })
+  });
 
   return (
     <div className="min-h-screen bg-background py-8">
@@ -142,9 +142,7 @@ export default function WishlistPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-primary">
-              Lista de Deseos
-            </h1>
+            <h1 className="text-2xl font-bold text-primary">Lista de Deseos</h1>
             <p className="text-muted-foreground mt-1">
               {wishlist.length} productos guardados
             </p>
@@ -157,7 +155,9 @@ export default function WishlistPage() {
               <SelectContent>
                 <SelectItem value="recent">Más recientes</SelectItem>
                 <SelectItem value="price-low">Precio: Menor a mayor</SelectItem>
-                <SelectItem value="price-high">Precio: Mayor a menor</SelectItem>
+                <SelectItem value="price-high">
+                  Precio: Mayor a menor
+                </SelectItem>
                 <SelectItem value="name">Nombre</SelectItem>
               </SelectContent>
             </Select>
@@ -209,7 +209,11 @@ export default function WishlistPage() {
                   {/* Sale Badge */}
                   {item.salePrice && (
                     <Badge className="absolute top-2 left-2 bg-error">
-                      -{Math.round(((item.price - item.salePrice) / item.price) * 100)}%
+                      -
+                      {Math.round(
+                        ((item.price - item.salePrice) / item.price) * 100,
+                      )}
+                      %
                     </Badge>
                   )}
 
@@ -290,5 +294,5 @@ export default function WishlistPage() {
         )}
       </div>
     </div>
-  )
+  );
 }

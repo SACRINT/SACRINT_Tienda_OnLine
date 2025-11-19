@@ -1,30 +1,30 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Truck, Package, Zap, Clock, MapPin, Info } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Badge } from "@/components/ui/badge"
-import { Skeleton } from "@/components/ui/skeleton"
-import { cn } from "@/lib/utils"
+import * as React from "react";
+import { Truck, Package, Zap, Clock, MapPin, Info } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 
 interface ShippingOption {
-  id: string
-  carrier: string
-  service: string
-  price: number
-  estimatedDays: string
-  icon: "standard" | "express" | "same-day"
+  id: string;
+  carrier: string;
+  service: string;
+  price: number;
+  estimatedDays: string;
+  icon: "standard" | "express" | "same-day";
 }
 
 interface ShippingCalculatorProps {
-  subtotal: number
-  onSelect?: (option: ShippingOption) => void
-  selectedId?: string
-  postalCode?: string
+  subtotal: number;
+  onSelect?: (option: ShippingOption) => void;
+  selectedId?: string;
+  postalCode?: string;
 }
 
 // Mock shipping options
@@ -53,7 +53,7 @@ const getShippingOptions = (postalCode: string): ShippingOption[] => [
     estimatedDays: "Hoy antes de 6pm",
     icon: "same-day",
   },
-]
+];
 
 export function ShippingCalculator({
   subtotal,
@@ -61,50 +61,50 @@ export function ShippingCalculator({
   selectedId,
   postalCode: initialPostalCode = "",
 }: ShippingCalculatorProps) {
-  const [postalCode, setPostalCode] = React.useState(initialPostalCode)
-  const [loading, setLoading] = React.useState(false)
-  const [options, setOptions] = React.useState<ShippingOption[]>([])
-  const [selected, setSelected] = React.useState<string>(selectedId || "")
+  const [postalCode, setPostalCode] = React.useState(initialPostalCode);
+  const [loading, setLoading] = React.useState(false);
+  const [options, setOptions] = React.useState<ShippingOption[]>([]);
+  const [selected, setSelected] = React.useState<string>(selectedId || "");
 
-  const freeShippingThreshold = 999
-  const qualifiesForFreeShipping = subtotal >= freeShippingThreshold
+  const freeShippingThreshold = 999;
+  const qualifiesForFreeShipping = subtotal >= freeShippingThreshold;
 
   const formatPrice = (price: number) =>
     new Intl.NumberFormat("es-MX", {
       style: "currency",
       currency: "MXN",
-    }).format(price)
+    }).format(price);
 
   const calculateShipping = async () => {
-    if (postalCode.length !== 5) return
+    if (postalCode.length !== 5) return;
 
-    setLoading(true)
+    setLoading(true);
     // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    const shippingOptions = getShippingOptions(postalCode)
-    setOptions(shippingOptions)
-    setLoading(false)
-  }
+    const shippingOptions = getShippingOptions(postalCode);
+    setOptions(shippingOptions);
+    setLoading(false);
+  };
 
   const handleSelect = (optionId: string) => {
-    setSelected(optionId)
-    const option = options.find((o) => o.id === optionId)
+    setSelected(optionId);
+    const option = options.find((o) => o.id === optionId);
     if (option && onSelect) {
-      onSelect(option)
+      onSelect(option);
     }
-  }
+  };
 
   const getIcon = (type: string) => {
     switch (type) {
       case "express":
-        return <Truck className="h-5 w-5" />
+        return <Truck className="h-5 w-5" />;
       case "same-day":
-        return <Zap className="h-5 w-5" />
+        return <Zap className="h-5 w-5" />;
       default:
-        return <Package className="h-5 w-5" />
+        return <Package className="h-5 w-5" />;
     }
-  }
+  };
 
   return (
     <Card>
@@ -127,7 +127,8 @@ export function ShippingCalculator({
           <div className="p-3 bg-muted rounded-lg flex items-center gap-2">
             <Info className="h-5 w-5 text-muted-foreground" />
             <span className="text-sm text-muted-foreground">
-              Agrega {formatPrice(freeShippingThreshold - subtotal)} más para envío gratis
+              Agrega {formatPrice(freeShippingThreshold - subtotal)} más para
+              envío gratis
             </span>
           </div>
         )}
@@ -144,7 +145,9 @@ export function ShippingCalculator({
                 id="postalCode"
                 placeholder="Código Postal"
                 value={postalCode}
-                onChange={(e) => setPostalCode(e.target.value.replace(/\D/g, "").slice(0, 5))}
+                onChange={(e) =>
+                  setPostalCode(e.target.value.replace(/\D/g, "").slice(0, 5))
+                }
                 className="pl-10"
                 maxLength={5}
               />
@@ -172,8 +175,9 @@ export function ShippingCalculator({
           <RadioGroup value={selected} onValueChange={handleSelect}>
             <div className="space-y-3">
               {options.map((option) => {
-                const isFree = qualifiesForFreeShipping && option.id === "standard"
-                const finalPrice = isFree ? 0 : option.price
+                const isFree =
+                  qualifiesForFreeShipping && option.id === "standard";
+                const finalPrice = isFree ? 0 : option.price;
 
                 return (
                   <label
@@ -182,7 +186,7 @@ export function ShippingCalculator({
                       "flex items-center justify-between p-4 rounded-lg border cursor-pointer transition-colors",
                       selected === option.id
                         ? "border-primary bg-primary/5"
-                        : "hover:border-primary/50"
+                        : "hover:border-primary/50",
                     )}
                   >
                     <div className="flex items-center gap-3">
@@ -192,7 +196,7 @@ export function ShippingCalculator({
                           "p-2 rounded-full",
                           selected === option.id
                             ? "bg-primary text-primary-foreground"
-                            : "bg-muted text-muted-foreground"
+                            : "bg-muted text-muted-foreground",
                         )}
                       >
                         {getIcon(option.icon)}
@@ -230,7 +234,7 @@ export function ShippingCalculator({
                       </p>
                     </div>
                   </label>
-                )
+                );
               })}
             </div>
           </RadioGroup>
@@ -247,5 +251,5 @@ export function ShippingCalculator({
         )}
       </CardContent>
     </Card>
-  )
+  );
 }

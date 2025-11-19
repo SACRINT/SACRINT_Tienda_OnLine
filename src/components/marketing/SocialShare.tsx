@@ -1,21 +1,21 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Share2, Link, Check } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import * as React from "react";
+import { Share2, Link, Check } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
-import { cn } from "@/lib/utils"
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
 interface SocialShareProps {
-  url: string
-  title: string
-  description?: string
-  image?: string
-  className?: string
+  url: string;
+  title: string;
+  description?: string;
+  image?: string;
+  className?: string;
 }
 
 export function SocialShare({
@@ -25,11 +25,11 @@ export function SocialShare({
   image,
   className,
 }: SocialShareProps) {
-  const [copied, setCopied] = React.useState(false)
+  const [copied, setCopied] = React.useState(false);
 
-  const shareUrl = encodeURIComponent(url)
-  const shareTitle = encodeURIComponent(title)
-  const shareDescription = encodeURIComponent(description || "")
+  const shareUrl = encodeURIComponent(url);
+  const shareTitle = encodeURIComponent(title);
+  const shareDescription = encodeURIComponent(description || "");
 
   const platforms = [
     {
@@ -72,17 +72,17 @@ export function SocialShare({
       ),
       color: "hover:text-[#E60023]",
     },
-  ]
+  ];
 
   const copyToClipboard = async () => {
-    await navigator.clipboard.writeText(url)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
+    await navigator.clipboard.writeText(url);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const handleShare = (platformUrl: string) => {
-    window.open(platformUrl, "_blank", "width=600,height=400")
-  }
+    window.open(platformUrl, "_blank", "width=600,height=400");
+  };
 
   return (
     <Popover>
@@ -102,7 +102,7 @@ export function SocialShare({
                 onClick={() => handleShare(platform.url)}
                 className={cn(
                   "flex items-center justify-center p-2 rounded-lg hover:bg-muted transition-colors",
-                  platform.color
+                  platform.color,
                 )}
                 title={platform.name}
               >
@@ -126,5 +126,5 @@ export function SocialShare({
         </div>
       </PopoverContent>
     </Popover>
-  )
+  );
 }

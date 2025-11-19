@@ -4,7 +4,15 @@
 "use client";
 
 import { useState } from "react";
-import { CreditCard, Lock, AlertCircle, CheckCircle2, Store, Smartphone, Building2 } from "lucide-react";
+import {
+  CreditCard,
+  Lock,
+  AlertCircle,
+  CheckCircle2,
+  Store,
+  Smartphone,
+  Building2,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface PaymentFormProps {
@@ -154,7 +162,7 @@ export function PaymentForm({
             "flex flex-col items-center justify-center gap-2 rounded-lg border-2 p-4 font-medium transition-all",
             paymentMethod === "card"
               ? "border-primary bg-primary/5 text-primary"
-              : "border-border bg-background text-foreground hover:border-primary/50"
+              : "border-border bg-background text-foreground hover:border-primary/50",
           )}
         >
           <CreditCard className="h-6 w-6" />
@@ -166,7 +174,7 @@ export function PaymentForm({
             "flex flex-col items-center justify-center gap-2 rounded-lg border-2 p-4 font-medium transition-all",
             paymentMethod === "mercadopago"
               ? "border-primary bg-primary/5 text-primary"
-              : "border-border bg-background text-foreground hover:border-primary/50"
+              : "border-border bg-background text-foreground hover:border-primary/50",
           )}
         >
           <Smartphone className="h-6 w-6" />
@@ -178,7 +186,7 @@ export function PaymentForm({
             "flex flex-col items-center justify-center gap-2 rounded-lg border-2 p-4 font-medium transition-all",
             paymentMethod === "oxxo"
               ? "border-primary bg-primary/5 text-primary"
-              : "border-border bg-background text-foreground hover:border-primary/50"
+              : "border-border bg-background text-foreground hover:border-primary/50",
           )}
         >
           <Store className="h-6 w-6" />
@@ -190,7 +198,7 @@ export function PaymentForm({
             "flex flex-col items-center justify-center gap-2 rounded-lg border-2 p-4 font-medium transition-all",
             paymentMethod === "transfer"
               ? "border-primary bg-primary/5 text-primary"
-              : "border-border bg-background text-foreground hover:border-primary/50"
+              : "border-border bg-background text-foreground hover:border-primary/50",
           )}
         >
           <Building2 className="h-6 w-6" />
@@ -214,7 +222,7 @@ export function PaymentForm({
                 maxLength={19}
                 className={cn(
                   "w-full rounded-lg border px-4 py-3 pl-12 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20",
-                  errors.number ? "border-error" : "border-border"
+                  errors.number ? "border-error" : "border-border",
                 )}
                 placeholder="1234 5678 9012 3456"
               />
@@ -244,7 +252,7 @@ export function PaymentForm({
               }}
               className={cn(
                 "mt-1 w-full rounded-lg border px-4 py-3 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20",
-                errors.name ? "border-error" : "border-border"
+                errors.name ? "border-error" : "border-border",
               )}
               placeholder="JUAN PÉREZ"
             />
@@ -269,7 +277,7 @@ export function PaymentForm({
                 maxLength={5}
                 className={cn(
                   "mt-1 w-full rounded-lg border px-4 py-3 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20",
-                  errors.expiry ? "border-error" : "border-border"
+                  errors.expiry ? "border-error" : "border-border",
                 )}
                 placeholder="MM/AA"
               />
@@ -291,7 +299,7 @@ export function PaymentForm({
                 maxLength={4}
                 className={cn(
                   "mt-1 w-full rounded-lg border px-4 py-3 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20",
-                  errors.cvc ? "border-error" : "border-border"
+                  errors.cvc ? "border-error" : "border-border",
                 )}
                 placeholder="123"
               />
@@ -341,10 +349,12 @@ export function PaymentForm({
               Pagar con Mercado Pago
             </h3>
             <p className="mt-2 text-sm text-muted-foreground">
-              Serás redirigido a Mercado Pago para completar tu compra de forma segura
+              Serás redirigido a Mercado Pago para completar tu compra de forma
+              segura
             </p>
             <div className="mt-4 text-xs text-muted-foreground">
-              Acepta: Tarjetas de crédito/débito, dinero en cuenta, Mercado Crédito
+              Acepta: Tarjetas de crédito/débito, dinero en cuenta, Mercado
+              Crédito
             </div>
             <button className="mt-6 inline-flex items-center gap-2 rounded-lg bg-[#009ee3] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#0077b3]">
               Continuar con Mercado Pago
@@ -395,7 +405,9 @@ export function PaymentForm({
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">CLABE:</span>
-                  <span className="font-mono font-medium">0121 8000 0123 4567 89</span>
+                  <span className="font-mono font-medium">
+                    0121 8000 0123 4567 89
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Beneficiario:</span>
@@ -403,7 +415,9 @@ export function PaymentForm({
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Referencia:</span>
-                  <span className="font-mono font-medium">ORD-{Date.now().toString().slice(-8)}</span>
+                  <span className="font-mono font-medium">
+                    ORD-{Date.now().toString().slice(-8)}
+                  </span>
                 </div>
               </div>
             </div>

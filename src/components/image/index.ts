@@ -4,6 +4,6 @@ export {
   ProductImage,
   AvatarImage,
   BackgroundImage,
-} from "./OptimizedImage"
+} from "./OptimizedImage";
 
-export { ImageGallery } from "./ImageGallery"
+export { ImageGallery } from "./ImageGallery";

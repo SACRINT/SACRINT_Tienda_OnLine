@@ -11,7 +11,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ProductsTable } from "@/components/dashboard/ProductsTable";
-import { CSVOperations, PRODUCT_CSV_COLUMNS } from "@/components/dashboard/CSVOperations";
+import {
+  CSVOperations,
+  PRODUCT_CSV_COLUMNS,
+} from "@/components/dashboard/CSVOperations";
 
 export default async function ProductsPage({
   searchParams,

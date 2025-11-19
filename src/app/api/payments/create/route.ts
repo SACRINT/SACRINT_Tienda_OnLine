@@ -1,12 +1,12 @@
-import { NextResponse } from "next/server"
-import { z } from "zod"
+import { NextResponse } from "next/server";
+import { z } from "zod";
 import {
   generateOXXOReference,
   generateOrderReference,
   calculateOXXOExpiration,
   BANK_TRANSFER_CONFIG,
   isAmountValidForMethod,
-} from "@/lib/payments"
+} from "@/lib/payments";
 
 const createPaymentSchema = z.object({
   orderId: z.string().min(1, "Order ID es requerido"),
@@ -23,14 +23,14 @@ const createPaymentSchema = z.object({
     .optional(),
   customerEmail: z.string().email("Email inválido"),
   customerName: z.string().min(1, "Nombre es requerido"),
-})
+});
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json()
+    const body = await request.json();
 
     // Validate request
-    const validationResult = createPaymentSchema.safeParse(body)
+    const validationResult = createPaymentSchema.safeParse(body);
 
     if (!validationResult.success) {
       return NextResponse.json(
@@ -38,19 +38,25 @@ export async function POST(request: Request) {
           error: "Datos de pago inválidos",
           details: validationResult.error.flatten().fieldErrors,
         },
-        { status: 400 }
-      )
+        { status: 400 },
+      );
     }
 
-    const { orderId, amount, paymentMethod, cardData, customerEmail, customerName } =
-      validationResult.data
+    const {
+      orderId,
+      amount,
+      paymentMethod,
+      cardData,
+      customerEmail,
+      customerName,
+    } = validationResult.data;
 
     // Check if amount is valid for payment method
     if (!isAmountValidForMethod(amount, paymentMethod)) {
       return NextResponse.json(
         { error: "El monto no es válido para este método de pago" },
-        { status: 400 }
-      )
+        { status: 400 },
+      );
     }
 
     // Process based on payment method
@@ -61,7 +67,7 @@ export async function POST(request: Request) {
       amount,
       paymentMethod,
       status: "pending",
-    }
+    };
 
     switch (paymentMethod) {
       case "card":
@@ -71,8 +77,8 @@ export async function POST(request: Request) {
           status: "processing",
           message: "Procesando pago con tarjeta",
           // Would return client_secret for Stripe Elements
-        }
-        break
+        };
+        break;
 
       case "mercadopago":
         // In production: Create MercadoPago preference
@@ -81,12 +87,12 @@ export async function POST(request: Request) {
           status: "pending",
           redirectUrl: "https://www.mercadopago.com.mx/checkout/v1/redirect",
           message: "Redirigiendo a Mercado Pago",
-        }
-        break
+        };
+        break;
 
       case "oxxo":
-        const oxxoReference = generateOXXOReference()
-        const oxxoExpiration = calculateOXXOExpiration()
+        const oxxoReference = generateOXXOReference();
+        const oxxoExpiration = calculateOXXOExpiration();
         paymentResult = {
           ...paymentResult,
           status: "pending",
@@ -104,11 +110,11 @@ export async function POST(request: Request) {
             ],
           },
           message: "Código de pago OXXO generado",
-        }
-        break
+        };
+        break;
 
       case "transfer":
-        const orderReference = generateOrderReference(orderId)
+        const orderReference = generateOrderReference(orderId);
         paymentResult = {
           ...paymentResult,
           status: "pending",
@@ -119,19 +125,19 @@ export async function POST(request: Request) {
             amount,
           },
           message: "Datos de transferencia generados",
-        }
-        break
+        };
+        break;
     }
 
     // In production: Save payment intent to database
     // await db.paymentIntent.create({ data: paymentResult })
 
-    return NextResponse.json(paymentResult)
+    return NextResponse.json(paymentResult);
   } catch (error) {
-    console.error("Error creating payment:", error)
+    console.error("Error creating payment:", error);
     return NextResponse.json(
       { error: "Error al crear el pago" },
-      { status: 500 }
-    )
+      { status: 500 },
+    );
   }
 }

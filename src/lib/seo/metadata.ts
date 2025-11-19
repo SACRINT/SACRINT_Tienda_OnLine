@@ -1,15 +1,16 @@
 // SEO Metadata utilities
-import { Metadata } from "next"
+import { Metadata } from "next";
 
 // Base site configuration
 export const siteConfig = {
   name: "SACRINT Tienda Online",
-  description: "Tu tienda online de confianza con los mejores productos y precios en México",
+  description:
+    "Tu tienda online de confianza con los mejores productos y precios en México",
   url: process.env.NEXT_PUBLIC_SITE_URL || "https://sacrint.com",
   ogImage: "/og-image.jpg",
   locale: "es_MX",
   twitterHandle: "@sacrint",
-}
+};
 
 // Base metadata that all pages inherit
 export const baseMetadata: Metadata = {
@@ -73,21 +74,21 @@ export const baseMetadata: Metadata = {
     google: process.env.GOOGLE_SITE_VERIFICATION,
     // yandex: process.env.YANDEX_VERIFICATION,
   },
-}
+};
 
 // Generate metadata for product pages
 export function generateProductMetadata(product: {
-  name: string
-  description: string
-  price: number
-  images: string[]
-  category?: string
-  brand?: string
-  sku?: string
+  name: string;
+  description: string;
+  price: number;
+  images: string[];
+  category?: string;
+  brand?: string;
+  sku?: string;
 }): Metadata {
-  const title = product.name
-  const description = product.description.slice(0, 160)
-  const image = product.images[0] || siteConfig.ogImage
+  const title = product.name;
+  const description = product.description.slice(0, 160);
+  const image = product.images[0] || siteConfig.ogImage;
 
   return {
     title,
@@ -111,19 +112,19 @@ export function generateProductMetadata(product: {
       description,
       images: [image],
     },
-  }
+  };
 }
 
 // Generate metadata for category pages
 export function generateCategoryMetadata(category: {
-  name: string
-  description?: string
-  productCount?: number
+  name: string;
+  description?: string;
+  productCount?: number;
 }): Metadata {
-  const title = `${category.name} - Productos`
+  const title = `${category.name} - Productos`;
   const description =
     category.description ||
-    `Explora nuestra colección de ${category.name}. ${category.productCount || ""} productos disponibles.`
+    `Explora nuestra colección de ${category.name}. ${category.productCount || ""} productos disponibles.`;
 
   return {
     title,
@@ -133,11 +134,14 @@ export function generateCategoryMetadata(category: {
       description,
       type: "website",
     },
-  }
+  };
 }
 
 // Generate metadata for search results
-export function generateSearchMetadata(query: string, resultCount: number): Metadata {
+export function generateSearchMetadata(
+  query: string,
+  resultCount: number,
+): Metadata {
   return {
     title: `"${query}" - Resultados de búsqueda`,
     description: `${resultCount} resultados encontrados para "${query}"`,
@@ -145,12 +149,12 @@ export function generateSearchMetadata(query: string, resultCount: number): Meta
       index: false,
       follow: true,
     },
-  }
+  };
 }
 
 // Canonical URL generator
 export function getCanonicalUrl(path: string): string {
-  return `${siteConfig.url}${path}`
+  return `${siteConfig.url}${path}`;
 }
 
 // Alternate language URLs
@@ -159,5 +163,5 @@ export function getAlternateUrls(path: string) {
     "es-MX": `${siteConfig.url}${path}`,
     // Add more languages as needed
     // "en-US": `${siteConfig.url}/en${path}`,
-  }
+  };
 }

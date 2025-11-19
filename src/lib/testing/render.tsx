@@ -1,34 +1,30 @@
 // React Testing Library Render Utilities
 
-import * as React from "react"
-import { render, RenderOptions } from "@testing-library/react"
-import userEvent from "@testing-library/user-event"
-import { ToastProvider } from "@/components/notifications/Toast"
+import * as React from "react";
+import { render, RenderOptions } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { ToastProvider } from "@/components/notifications/Toast";
 
 // All providers wrapper
 function AllProviders({ children }: { children: React.ReactNode }) {
-  return (
-    <ToastProvider>
-      {children}
-    </ToastProvider>
-  )
+  return <ToastProvider>{children}</ToastProvider>;
 }
 
 // Custom render with providers
 function customRender(
   ui: React.ReactElement,
-  options?: Omit<RenderOptions, "wrapper">
+  options?: Omit<RenderOptions, "wrapper">,
 ) {
   return {
     user: userEvent.setup(),
     ...render(ui, { wrapper: AllProviders, ...options }),
-  }
+  };
 }
 
 // Re-export everything
-export * from "@testing-library/react"
-export { customRender as render }
-export { userEvent }
+export * from "@testing-library/react";
+export { customRender as render };
+export { userEvent };
 
 // Screen queries helpers
 export const queries = {
@@ -49,34 +45,34 @@ export const queries = {
 
   // By test ID
   byTestId: (testId: string) => ({ "data-testid": testId }),
-}
+};
 
 // Async helpers
 export async function waitForElement(
   callback: () => HTMLElement | null,
-  timeout = 1000
+  timeout = 1000,
 ): Promise<HTMLElement> {
-  const startTime = Date.now()
+  const startTime = Date.now();
 
   while (Date.now() - startTime < timeout) {
-    const element = callback()
+    const element = callback();
     if (element) {
-      return element
+      return element;
     }
-    await new Promise((resolve) => setTimeout(resolve, 50))
+    await new Promise((resolve) => setTimeout(resolve, 50));
   }
 
-  throw new Error("Element not found within timeout")
+  throw new Error("Element not found within timeout");
 }
 
 // Fire custom events
 export function fireCustomEvent(
   element: HTMLElement,
   eventName: string,
-  detail?: unknown
+  detail?: unknown,
 ) {
-  const event = new CustomEvent(eventName, { detail, bubbles: true })
-  element.dispatchEvent(event)
+  const event = new CustomEvent(eventName, { detail, bubbles: true });
+  element.dispatchEvent(event);
 }
 
 // Mock component for testing
@@ -86,14 +82,14 @@ export function createMockComponent(name: string) {
       <div data-testid={`mock-${name}`} {...props}>
         Mock {name}
       </div>
-    )
-  }
+    );
+  };
 }
 
 // Snapshot with date replacement
 export function createSnapshotWithDates(element: HTMLElement): string {
   return element.outerHTML.replace(
     /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/g,
-    "DATE_PLACEHOLDER"
-  )
+    "DATE_PLACEHOLDER",
+  );
 }

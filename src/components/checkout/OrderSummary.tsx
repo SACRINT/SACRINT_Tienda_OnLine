@@ -53,9 +53,7 @@ export function OrderSummary({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-semibold text-primary">
-          Revisar Pedido
-        </h2>
+        <h2 className="text-xl font-semibold text-primary">Revisar Pedido</h2>
         <p className="mt-1 text-sm text-muted-foreground">
           Revisa todos los detalles antes de confirmar tu pedido
         </p>
@@ -90,7 +88,9 @@ export function OrderSummary({
                   {item.productName}
                 </h4>
                 {item.variantInfo && (
-                  <p className="text-sm text-muted-foreground">{item.variantInfo}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {item.variantInfo}
+                  </p>
                 )}
                 <p className="mt-1 text-sm text-muted-foreground">
                   Cantidad: {item.quantity}
@@ -167,7 +167,9 @@ export function OrderSummary({
         <div className="px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-medium text-foreground">{shippingMethod.name}</p>
+              <p className="font-medium text-foreground">
+                {shippingMethod.name}
+              </p>
               <p className="text-sm text-muted-foreground">
                 {shippingMethod.description}
               </p>
@@ -212,7 +214,9 @@ export function OrderSummary({
             <CreditCard className="h-8 w-8 text-muted-foreground" />
             <div>
               <p className="font-medium text-foreground">Tarjeta de Crédito</p>
-              <p className="text-sm text-muted-foreground">•••• •••• •••• 4242</p>
+              <p className="text-sm text-muted-foreground">
+                •••• •••• •••• 4242
+              </p>
             </div>
           </div>
         </div>
@@ -245,7 +249,9 @@ export function OrderSummary({
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">IVA (16%)</span>
-            <span className="font-medium text-foreground">{formatPrice(tax)}</span>
+            <span className="font-medium text-foreground">
+              {formatPrice(tax)}
+            </span>
           </div>
           {discount > 0 && (
             <div className="flex justify-between text-sm">

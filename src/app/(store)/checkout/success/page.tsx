@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import Link from "next/link"
+import * as React from "react";
+import Link from "next/link";
 import {
   CheckCircle2,
   Package,
@@ -14,10 +14,10 @@ import {
   CreditCard,
   Clock,
   Copy,
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 // Mock order data
 const orderData = {
@@ -53,16 +53,16 @@ const orderData = {
     last4: "4242",
     brand: "Visa",
   },
-}
+};
 
 export default function CheckoutSuccessPage() {
-  const [copied, setCopied] = React.useState(false)
+  const [copied, setCopied] = React.useState(false);
 
   const formatPrice = (price: number) =>
     new Intl.NumberFormat("es-MX", {
       style: "currency",
       currency: "MXN",
-    }).format(price)
+    }).format(price);
 
   const formatDate = (date: Date) =>
     new Intl.DateTimeFormat("es-MX", {
@@ -71,13 +71,13 @@ export default function CheckoutSuccessPage() {
       year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
-    }).format(date)
+    }).format(date);
 
   const copyOrderId = async () => {
-    await navigator.clipboard.writeText(orderData.orderId)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
+    await navigator.clipboard.writeText(orderData.orderId);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
     <div className="min-h-screen bg-muted/30 py-8">
@@ -100,7 +100,9 @@ export default function CheckoutSuccessPage() {
           <CardContent className="py-6">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="text-center sm:text-left">
-                <p className="text-sm text-muted-foreground">Número de Pedido</p>
+                <p className="text-sm text-muted-foreground">
+                  Número de Pedido
+                </p>
                 <div className="flex items-center gap-2">
                   <code className="text-2xl font-bold font-mono text-primary">
                     {orderData.orderId}
@@ -147,7 +149,10 @@ export default function CheckoutSuccessPage() {
             <div className="flex items-center justify-between">
               {["Confirmado", "Procesando", "Enviado", "Entregado"].map(
                 (step, index) => (
-                  <div key={step} className="flex flex-col items-center relative">
+                  <div
+                    key={step}
+                    className="flex flex-col items-center relative"
+                  >
                     <div
                       className={`w-10 h-10 rounded-full flex items-center justify-center ${
                         index === 0
@@ -169,7 +174,7 @@ export default function CheckoutSuccessPage() {
                       {step}
                     </span>
                   </div>
-                )
+                ),
               )}
             </div>
             <div className="mt-4 relative h-1 bg-muted rounded-full">
@@ -197,7 +202,8 @@ export default function CheckoutSuccessPage() {
                 {orderData.shippingAddress.neighborhood}
               </p>
               <p className="text-muted-foreground">
-                {orderData.shippingAddress.city}, {orderData.shippingAddress.state}{" "}
+                {orderData.shippingAddress.city},{" "}
+                {orderData.shippingAddress.state}{" "}
                 {orderData.shippingAddress.postalCode}
               </p>
               <p className="text-muted-foreground mt-2">
@@ -296,7 +302,9 @@ export default function CheckoutSuccessPage() {
               <Separator className="my-2" />
               <div className="flex justify-between text-lg font-bold">
                 <span>Total</span>
-                <span className="text-primary">{formatPrice(orderData.total)}</span>
+                <span className="text-primary">
+                  {formatPrice(orderData.total)}
+                </span>
               </div>
             </div>
           </CardContent>
@@ -341,5 +349,5 @@ export default function CheckoutSuccessPage() {
         </p>
       </div>
     </div>
-  )
+  );
 }

@@ -1,34 +1,38 @@
 // Coupon service and types
 
-export type CouponType = "percentage" | "fixed" | "free_shipping" | "buy_x_get_y"
+export type CouponType =
+  | "percentage"
+  | "fixed"
+  | "free_shipping"
+  | "buy_x_get_y";
 
-export type CouponStatus = "active" | "expired" | "used" | "inactive"
+export type CouponStatus = "active" | "expired" | "used" | "inactive";
 
 export interface Coupon {
-  id: string
-  code: string
-  type: CouponType
-  value: number // percentage or fixed amount
-  minPurchase?: number
-  maxDiscount?: number
-  usageLimit?: number
-  usageCount: number
-  validFrom: Date
-  validUntil: Date
-  status: CouponStatus
-  description?: string
-  applicableProducts?: string[]
-  applicableCategories?: string[]
-  excludedProducts?: string[]
-  firstPurchaseOnly?: boolean
-  onePerCustomer?: boolean
+  id: string;
+  code: string;
+  type: CouponType;
+  value: number; // percentage or fixed amount
+  minPurchase?: number;
+  maxDiscount?: number;
+  usageLimit?: number;
+  usageCount: number;
+  validFrom: Date;
+  validUntil: Date;
+  status: CouponStatus;
+  description?: string;
+  applicableProducts?: string[];
+  applicableCategories?: string[];
+  excludedProducts?: string[];
+  firstPurchaseOnly?: boolean;
+  onePerCustomer?: boolean;
 }
 
 export interface CouponValidationResult {
-  valid: boolean
-  coupon?: Coupon
-  discount?: number
-  message: string
+  valid: boolean;
+  coupon?: Coupon;
+  discount?: number;
+  message: string;
 }
 
 // Mock coupons (in production, fetch from database)
@@ -87,13 +91,11 @@ const mockCoupons: Coupon[] = [
     status: "used",
     description: "25% de descuento Black Friday (máximo $500)",
   },
-]
+];
 
 // Find coupon by code
 export function findCoupon(code: string): Coupon | undefined {
-  return mockCoupons.find(
-    (c) => c.code.toUpperCase() === code.toUpperCase()
-  )
+  return mockCoupons.find((c) => c.code.toUpperCase() === code.toUpperCase());
 }
 
 // Validate coupon
@@ -101,45 +103,46 @@ export function validateCoupon(
   code: string,
   cartTotal: number,
   options?: {
-    customerId?: string
-    isFirstPurchase?: boolean
-    productIds?: string[]
-    categoryIds?: string[]
-  }
+    customerId?: string;
+    isFirstPurchase?: boolean;
+    productIds?: string[];
+    categoryIds?: string[];
+  },
 ): CouponValidationResult {
-  const coupon = findCoupon(code)
+  const coupon = findCoupon(code);
 
   if (!coupon) {
     return {
       valid: false,
       message: "Cupón no encontrado",
-    }
+    };
   }
 
   // Check status
   if (coupon.status !== "active") {
     return {
       valid: false,
-      message: coupon.status === "expired"
-        ? "Este cupón ha expirado"
-        : "Este cupón no está disponible",
-    }
+      message:
+        coupon.status === "expired"
+          ? "Este cupón ha expirado"
+          : "Este cupón no está disponible",
+    };
   }
 
   // Check dates
-  const now = new Date()
+  const now = new Date();
   if (now < coupon.validFrom) {
     return {
       valid: false,
       message: "Este cupón aún no está activo",
-    }
+    };
   }
 
   if (now > coupon.validUntil) {
     return {
       valid: false,
       message: "Este cupón ha expirado",
-    }
+    };
   }
 
   // Check usage limit
@@ -147,7 +150,7 @@ export function validateCoupon(
     return {
       valid: false,
       message: "Este cupón ha alcanzado su límite de uso",
-    }
+    };
   }
 
   // Check minimum purchase
@@ -155,7 +158,7 @@ export function validateCoupon(
     return {
       valid: false,
       message: `Compra mínima de $${coupon.minPurchase} requerida`,
-    }
+    };
   }
 
   // Check first purchase only
@@ -163,26 +166,26 @@ export function validateCoupon(
     return {
       valid: false,
       message: "Este cupón es solo para primera compra",
-    }
+    };
   }
 
   // Calculate discount
-  let discount = 0
+  let discount = 0;
 
   switch (coupon.type) {
     case "percentage":
-      discount = (cartTotal * coupon.value) / 100
+      discount = (cartTotal * coupon.value) / 100;
       if (coupon.maxDiscount) {
-        discount = Math.min(discount, coupon.maxDiscount)
+        discount = Math.min(discount, coupon.maxDiscount);
       }
-      break
+      break;
     case "fixed":
-      discount = coupon.value
-      break
+      discount = coupon.value;
+      break;
     case "free_shipping":
       // Shipping cost would be applied separately
-      discount = 0
-      break
+      discount = 0;
+      break;
   }
 
   return {
@@ -190,20 +193,20 @@ export function validateCoupon(
     coupon,
     discount,
     message: getCouponSuccessMessage(coupon, discount),
-  }
+  };
 }
 
 // Get success message for coupon
 function getCouponSuccessMessage(coupon: Coupon, discount: number): string {
   switch (coupon.type) {
     case "percentage":
-      return `¡${coupon.value}% de descuento aplicado! Ahorras $${discount.toFixed(0)}`
+      return `¡${coupon.value}% de descuento aplicado! Ahorras $${discount.toFixed(0)}`;
     case "fixed":
-      return `¡Descuento de $${coupon.value} aplicado!`
+      return `¡Descuento de $${coupon.value} aplicado!`;
     case "free_shipping":
-      return "¡Envío gratis aplicado!"
+      return "¡Envío gratis aplicado!";
     default:
-      return "Cupón aplicado exitosamente"
+      return "Cupón aplicado exitosamente";
   }
 }
 
@@ -211,15 +214,15 @@ function getCouponSuccessMessage(coupon: Coupon, discount: number): string {
 export function formatCoupon(coupon: Coupon): string {
   switch (coupon.type) {
     case "percentage":
-      return `${coupon.value}% OFF`
+      return `${coupon.value}% OFF`;
     case "fixed":
-      return `-$${coupon.value}`
+      return `-$${coupon.value}`;
     case "free_shipping":
-      return "Envío Gratis"
+      return "Envío Gratis";
     case "buy_x_get_y":
-      return "Compra X lleva Y"
+      return "Compra X lleva Y";
     default:
-      return coupon.code
+      return coupon.code;
   }
 }
 
@@ -227,29 +230,29 @@ export function formatCoupon(coupon: Coupon): string {
 export function getCouponColor(type: CouponType): string {
   switch (type) {
     case "percentage":
-      return "bg-accent text-white"
+      return "bg-accent text-white";
     case "fixed":
-      return "bg-success text-white"
+      return "bg-success text-white";
     case "free_shipping":
-      return "bg-primary text-white"
+      return "bg-primary text-white";
     default:
-      return "bg-muted text-foreground"
+      return "bg-muted text-foreground";
   }
 }
 
 // Get all active coupons (for admin or promotions display)
 export function getActiveCoupons(): Coupon[] {
-  const now = new Date()
+  const now = new Date();
   return mockCoupons.filter(
     (c) =>
       c.status === "active" &&
       c.validFrom <= now &&
       c.validUntil >= now &&
-      (!c.usageLimit || c.usageCount < c.usageLimit)
-  )
+      (!c.usageLimit || c.usageCount < c.usageLimit),
+  );
 }
 
 // Check if coupon gives free shipping
 export function givesFreeShipping(coupon: Coupon): boolean {
-  return coupon.type === "free_shipping"
+  return coupon.type === "free_shipping";
 }

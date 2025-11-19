@@ -1,28 +1,54 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import Link from "next/link"
-import Image from "next/image"
-import { useParams } from "next/navigation"
-import { Heart, ShoppingCart, Share2, Truck, Shield, RefreshCw, ChevronLeft, ChevronRight, ZoomIn } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Separator } from "@/components/ui/separator"
-import { RatingStars } from "@/components/ui/rating-stars"
-import { QuantitySelector } from "@/components/ui/quantity-selector"
-import { ColorSelector, type ColorOption } from "@/components/ui/color-selector"
-import { SizeSelector, type SizeOption } from "@/components/ui/size-selector"
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { cn } from "@/lib/utils"
+import * as React from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { useParams } from "next/navigation";
+import {
+  Heart,
+  ShoppingCart,
+  Share2,
+  Truck,
+  Shield,
+  RefreshCw,
+  ChevronLeft,
+  ChevronRight,
+  ZoomIn,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
+import { RatingStars } from "@/components/ui/rating-stars";
+import { QuantitySelector } from "@/components/ui/quantity-selector";
+import {
+  ColorSelector,
+  type ColorOption,
+} from "@/components/ui/color-selector";
+import { SizeSelector, type SizeOption } from "@/components/ui/size-selector";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { cn } from "@/lib/utils";
 
 // Mock product data
 const mockProduct = {
   id: "1",
   name: "Auriculares Bluetooth Pro Max",
   slug: "auriculares-bluetooth-pro-max",
-  description: "Auriculares inalámbricos de alta fidelidad con cancelación activa de ruido, 40 horas de batería y carga rápida. Perfectos para trabajo, viajes y entretenimiento.",
+  description:
+    "Auriculares inalámbricos de alta fidelidad con cancelación activa de ruido, 40 horas de batería y carga rápida. Perfectos para trabajo, viajes y entretenimiento.",
   price: 2999,
   originalPrice: 3999,
   rating: 4.7,
@@ -60,41 +86,82 @@ const mockProduct = {
     "Plegables para fácil transporte",
     "Almohadillas de memory foam",
   ],
-}
+};
 
 // Mock reviews
 const mockReviews = [
-  { id: "1", user: "María G.", rating: 5, date: "2024-11-10", comment: "Excelente calidad de sonido y muy cómodos para uso prolongado.", helpful: 24 },
-  { id: "2", user: "Carlos R.", rating: 4, date: "2024-11-08", comment: "Muy buena cancelación de ruido, aunque la app podría mejorar.", helpful: 18 },
-  { id: "3", user: "Ana L.", rating: 5, date: "2024-11-05", comment: "La batería dura muchísimo, perfectos para viajes largos.", helpful: 31 },
-]
+  {
+    id: "1",
+    user: "María G.",
+    rating: 5,
+    date: "2024-11-10",
+    comment: "Excelente calidad de sonido y muy cómodos para uso prolongado.",
+    helpful: 24,
+  },
+  {
+    id: "2",
+    user: "Carlos R.",
+    rating: 4,
+    date: "2024-11-08",
+    comment: "Muy buena cancelación de ruido, aunque la app podría mejorar.",
+    helpful: 18,
+  },
+  {
+    id: "3",
+    user: "Ana L.",
+    rating: 5,
+    date: "2024-11-05",
+    comment: "La batería dura muchísimo, perfectos para viajes largos.",
+    helpful: 31,
+  },
+];
 
 // Mock related products
 const relatedProducts = [
-  { id: "2", name: "Case Premium", slug: "case-premium", price: 499, rating: 4.5 },
-  { id: "3", name: "Cable USB-C Extra", slug: "cable-usb-c", price: 299, rating: 4.2 },
-  { id: "4", name: "Almohadillas Repuesto", slug: "almohadillas-repuesto", price: 399, rating: 4.8 },
-]
+  {
+    id: "2",
+    name: "Case Premium",
+    slug: "case-premium",
+    price: 499,
+    rating: 4.5,
+  },
+  {
+    id: "3",
+    name: "Cable USB-C Extra",
+    slug: "cable-usb-c",
+    price: 299,
+    rating: 4.2,
+  },
+  {
+    id: "4",
+    name: "Almohadillas Repuesto",
+    slug: "almohadillas-repuesto",
+    price: 399,
+    rating: 4.8,
+  },
+];
 
 export default function ProductDetailPage() {
-  const params = useParams()
-  const slug = params.slug as string
+  const params = useParams();
+  const slug = params.slug as string;
 
-  const [selectedImage, setSelectedImage] = React.useState(0)
-  const [selectedColor, setSelectedColor] = React.useState(mockProduct.colors[0]?.value || "")
-  const [selectedSize, setSelectedSize] = React.useState("")
-  const [quantity, setQuantity] = React.useState(1)
-  const [isZoomed, setIsZoomed] = React.useState(false)
+  const [selectedImage, setSelectedImage] = React.useState(0);
+  const [selectedColor, setSelectedColor] = React.useState(
+    mockProduct.colors[0]?.value || "",
+  );
+  const [selectedSize, setSelectedSize] = React.useState("");
+  const [quantity, setQuantity] = React.useState(1);
+  const [isZoomed, setIsZoomed] = React.useState(false);
 
   const formatPrice = (price: number) =>
     new Intl.NumberFormat("es-MX", {
       style: "currency",
       currency: "MXN",
-    }).format(price)
+    }).format(price);
 
   const discount = mockProduct.originalPrice
     ? Math.round((1 - mockProduct.price / mockProduct.originalPrice) * 100)
-    : 0
+    : 0;
 
   const handleAddToCart = () => {
     console.log("Add to cart:", {
@@ -102,13 +169,13 @@ export default function ProductDetailPage() {
       color: selectedColor,
       size: selectedSize,
       quantity,
-    })
-  }
+    });
+  };
 
   const handleBuyNow = () => {
-    handleAddToCart()
+    handleAddToCart();
     // Redirect to checkout
-  }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -122,7 +189,9 @@ export default function ProductDetailPage() {
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbLink href={`/categories/${mockProduct.category.slug}`}>
+                <BreadcrumbLink
+                  href={`/categories/${mockProduct.category.slug}`}
+                >
                   {mockProduct.category.name}
                 </BreadcrumbLink>
               </BreadcrumbItem>
@@ -158,8 +227,12 @@ export default function ProductDetailPage() {
                 <>
                   <button
                     onClick={(e) => {
-                      e.stopPropagation()
-                      setSelectedImage((prev) => (prev - 1 + mockProduct.images.length) % mockProduct.images.length)
+                      e.stopPropagation();
+                      setSelectedImage(
+                        (prev) =>
+                          (prev - 1 + mockProduct.images.length) %
+                          mockProduct.images.length,
+                      );
                     }}
                     className="absolute left-4 top-1/2 -translate-y-1/2 p-2 bg-white/80 rounded-full shadow-md hover:bg-white transition-colors"
                   >
@@ -167,8 +240,10 @@ export default function ProductDetailPage() {
                   </button>
                   <button
                     onClick={(e) => {
-                      e.stopPropagation()
-                      setSelectedImage((prev) => (prev + 1) % mockProduct.images.length)
+                      e.stopPropagation();
+                      setSelectedImage(
+                        (prev) => (prev + 1) % mockProduct.images.length,
+                      );
                     }}
                     className="absolute right-4 top-1/2 -translate-y-1/2 p-2 bg-white/80 rounded-full shadow-md hover:bg-white transition-colors"
                   >
@@ -193,7 +268,9 @@ export default function ProductDetailPage() {
                   onClick={() => setSelectedImage(index)}
                   className={cn(
                     "shrink-0 w-20 h-20 rounded-md overflow-hidden border-2 transition-colors",
-                    selectedImage === index ? "border-primary" : "border-transparent hover:border-muted"
+                    selectedImage === index
+                      ? "border-primary"
+                      : "border-transparent hover:border-muted",
                   )}
                 >
                   <div className="w-full h-full bg-neutral-100 flex items-center justify-center text-2xl">
@@ -208,7 +285,9 @@ export default function ProductDetailPage() {
           <div className="space-y-6">
             {/* Title & Rating */}
             <div>
-              <h1 className="text-3xl font-bold text-primary">{mockProduct.name}</h1>
+              <h1 className="text-3xl font-bold text-primary">
+                {mockProduct.name}
+              </h1>
               <div className="mt-2 flex items-center gap-4">
                 <RatingStars rating={mockProduct.rating} showValue />
                 <span className="text-sm text-muted-foreground">
@@ -231,7 +310,8 @@ export default function ProductDetailPage() {
                     {formatPrice(mockProduct.originalPrice)}
                   </span>
                   <Badge variant="secondary" className="bg-error/10 text-error">
-                    Ahorras {formatPrice(mockProduct.originalPrice - mockProduct.price)}
+                    Ahorras{" "}
+                    {formatPrice(mockProduct.originalPrice - mockProduct.price)}
                   </Badge>
                 </>
               )}
@@ -245,7 +325,13 @@ export default function ProductDetailPage() {
             {/* Color Selection */}
             {mockProduct.colors.length > 0 && (
               <div>
-                <h3 className="font-semibold mb-3">Color: {mockProduct.colors.find(c => c.value === selectedColor)?.name}</h3>
+                <h3 className="font-semibold mb-3">
+                  Color:{" "}
+                  {
+                    mockProduct.colors.find((c) => c.value === selectedColor)
+                      ?.name
+                  }
+                </h3>
                 <ColorSelector
                   options={mockProduct.colors}
                   value={selectedColor}
@@ -289,11 +375,7 @@ export default function ProductDetailPage() {
 
             {/* Add to Cart & Buy Now */}
             <div className="flex flex-col sm:flex-row gap-3">
-              <Button
-                size="lg"
-                className="flex-1"
-                onClick={handleAddToCart}
-              >
+              <Button size="lg" className="flex-1" onClick={handleAddToCart}>
                 <ShoppingCart className="h-5 w-5 mr-2" />
                 Agregar al Carrito
               </Button>
@@ -325,15 +407,21 @@ export default function ProductDetailPage() {
             <div className="grid grid-cols-3 gap-4 text-center">
               <div className="flex flex-col items-center gap-2">
                 <Truck className="h-6 w-6 text-mint" />
-                <span className="text-xs text-muted-foreground">Envío Gratis</span>
+                <span className="text-xs text-muted-foreground">
+                  Envío Gratis
+                </span>
               </div>
               <div className="flex flex-col items-center gap-2">
                 <Shield className="h-6 w-6 text-mint" />
-                <span className="text-xs text-muted-foreground">Garantía 1 año</span>
+                <span className="text-xs text-muted-foreground">
+                  Garantía 1 año
+                </span>
               </div>
               <div className="flex flex-col items-center gap-2">
                 <RefreshCw className="h-6 w-6 text-mint" />
-                <span className="text-xs text-muted-foreground">30 días devolución</span>
+                <span className="text-xs text-muted-foreground">
+                  30 días devolución
+                </span>
               </div>
             </div>
           </div>
@@ -387,7 +475,7 @@ export default function ProductDetailPage() {
                     key={index}
                     className={cn(
                       "flex justify-between py-3 px-4 rounded-lg",
-                      index % 2 === 0 ? "bg-muted/50" : ""
+                      index % 2 === 0 ? "bg-muted/50" : "",
                     )}
                   >
                     <span className="font-medium">{spec.label}</span>
@@ -402,7 +490,9 @@ export default function ProductDetailPage() {
                 {/* Review Summary */}
                 <div className="flex items-center gap-6 p-6 bg-muted/50 rounded-lg">
                   <div className="text-center">
-                    <div className="text-5xl font-bold text-primary">{mockProduct.rating}</div>
+                    <div className="text-5xl font-bold text-primary">
+                      {mockProduct.rating}
+                    </div>
                     <RatingStars rating={mockProduct.rating} size="lg" />
                     <div className="text-sm text-muted-foreground mt-1">
                       {mockProduct.reviewCount} reseñas
@@ -419,7 +509,9 @@ export default function ProductDetailPage() {
                           <span className="font-medium">{review.user}</span>
                           <RatingStars rating={review.rating} size="sm" />
                         </div>
-                        <span className="text-sm text-muted-foreground">{review.date}</span>
+                        <span className="text-sm text-muted-foreground">
+                          {review.date}
+                        </span>
                       </div>
                       <p className="text-muted-foreground">{review.comment}</p>
                       <div className="mt-2 text-sm text-muted-foreground">
@@ -443,7 +535,9 @@ export default function ProductDetailPage() {
                     <ul className="space-y-2 text-muted-foreground">
                       <li>• Envío gratis en pedidos mayores a $999 MXN</li>
                       <li>• Envío estándar: 3-5 días hábiles</li>
-                      <li>• Envío express: 1-2 días hábiles (cargo adicional)</li>
+                      <li>
+                        • Envío express: 1-2 días hábiles (cargo adicional)
+                      </li>
                       <li>• Disponible para toda la República Mexicana</li>
                     </ul>
                   </AccordionContent>
@@ -477,7 +571,9 @@ export default function ProductDetailPage() {
 
         {/* Related Products */}
         <div className="mt-16">
-          <h2 className="text-2xl font-bold text-primary mb-6">Productos Relacionados</h2>
+          <h2 className="text-2xl font-bold text-primary mb-6">
+            Productos Relacionados
+          </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {relatedProducts.map((product) => (
               <Link
@@ -505,5 +601,5 @@ export default function ProductDetailPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

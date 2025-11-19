@@ -1,11 +1,11 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { cn } from "@/lib/utils"
+import * as React from "react";
+import { cn } from "@/lib/utils";
 
 interface LoadingSpinnerProps {
-  size?: "sm" | "md" | "lg" | "xl"
-  className?: string
+  size?: "sm" | "md" | "lg" | "xl";
+  className?: string;
 }
 
 const spinnerSizes = {
@@ -13,26 +13,29 @@ const spinnerSizes = {
   md: "h-6 w-6",
   lg: "h-8 w-8",
   xl: "h-12 w-12",
-}
+};
 
 const LoadingSpinner = React.forwardRef<HTMLDivElement, LoadingSpinnerProps>(
   ({ size = "md", className }, ref) => {
     return (
-      <div ref={ref} className={cn("flex items-center justify-center", className)}>
+      <div
+        ref={ref}
+        className={cn("flex items-center justify-center", className)}
+      >
         <div
           className={cn(
             spinnerSizes[size],
-            "animate-spin rounded-full border-2 border-current border-t-transparent text-primary"
+            "animate-spin rounded-full border-2 border-current border-t-transparent text-primary",
           )}
         />
       </div>
-    )
-  }
-)
-LoadingSpinner.displayName = "LoadingSpinner"
+    );
+  },
+);
+LoadingSpinner.displayName = "LoadingSpinner";
 
 interface LoadingDotsProps {
-  className?: string
+  className?: string;
 }
 
 const LoadingDots = React.forwardRef<HTMLDivElement, LoadingDotsProps>(
@@ -47,14 +50,14 @@ const LoadingDots = React.forwardRef<HTMLDivElement, LoadingDotsProps>(
           />
         ))}
       </div>
-    )
-  }
-)
-LoadingDots.displayName = "LoadingDots"
+    );
+  },
+);
+LoadingDots.displayName = "LoadingDots";
 
 interface LoadingOverlayProps {
-  message?: string
-  className?: string
+  message?: string;
+  className?: string;
 }
 
 const LoadingOverlay = React.forwardRef<HTMLDivElement, LoadingOverlayProps>(
@@ -64,19 +67,21 @@ const LoadingOverlay = React.forwardRef<HTMLDivElement, LoadingOverlayProps>(
         ref={ref}
         className={cn(
           "fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm",
-          className
+          className,
         )}
       >
         <div className="flex flex-col items-center gap-4">
           <LoadingSpinner size="lg" />
           {message && (
-            <p className="text-sm font-medium text-muted-foreground">{message}</p>
+            <p className="text-sm font-medium text-muted-foreground">
+              {message}
+            </p>
           )}
         </div>
       </div>
-    )
-  }
-)
-LoadingOverlay.displayName = "LoadingOverlay"
+    );
+  },
+);
+LoadingOverlay.displayName = "LoadingOverlay";
 
-export { LoadingSpinner, LoadingDots, LoadingOverlay }
+export { LoadingSpinner, LoadingDots, LoadingOverlay };

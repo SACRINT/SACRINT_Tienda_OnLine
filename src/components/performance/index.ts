@@ -12,6 +12,6 @@ export {
   CartItemSkeleton,
   PageHeaderSkeleton,
   PageLoadingSkeleton,
-} from "./LoadingSkeletons"
+} from "./LoadingSkeletons";
 
-export { ErrorBoundary, ErrorDisplay, useErrorHandler } from "./ErrorBoundary"
+export { ErrorBoundary, ErrorDisplay, useErrorHandler } from "./ErrorBoundary";

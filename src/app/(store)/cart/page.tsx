@@ -1,14 +1,14 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import Link from "next/link"
-import { Trash2, ShoppingBag, ArrowRight, Tag } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Separator } from "@/components/ui/separator"
-import { QuantitySelector } from "@/components/ui/quantity-selector"
-import { EmptyState } from "@/components/ui/empty-state"
-import { cn } from "@/lib/utils"
+import * as React from "react";
+import Link from "next/link";
+import { Trash2, ShoppingBag, ArrowRight, Tag } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+import { QuantitySelector } from "@/components/ui/quantity-selector";
+import { EmptyState } from "@/components/ui/empty-state";
+import { cn } from "@/lib/utils";
 
 // Mock cart data
 const initialCartItems = [
@@ -45,56 +45,56 @@ const initialCartItems = [
     image: null,
     stock: 8,
   },
-]
+];
 
 export default function CartPage() {
-  const [cartItems, setCartItems] = React.useState(initialCartItems)
-  const [couponCode, setCouponCode] = React.useState("")
-  const [appliedCoupon, setAppliedCoupon] = React.useState<string | null>(null)
-  const [couponDiscount, setCouponDiscount] = React.useState(0)
+  const [cartItems, setCartItems] = React.useState(initialCartItems);
+  const [couponCode, setCouponCode] = React.useState("");
+  const [appliedCoupon, setAppliedCoupon] = React.useState<string | null>(null);
+  const [couponDiscount, setCouponDiscount] = React.useState(0);
 
   const formatPrice = (price: number) =>
     new Intl.NumberFormat("es-MX", {
       style: "currency",
       currency: "MXN",
-    }).format(price)
+    }).format(price);
 
   const updateQuantity = (itemId: string, newQuantity: number) => {
     setCartItems((items) =>
       items.map((item) =>
-        item.id === itemId ? { ...item, quantity: newQuantity } : item
-      )
-    )
-  }
+        item.id === itemId ? { ...item, quantity: newQuantity } : item,
+      ),
+    );
+  };
 
   const removeItem = (itemId: string) => {
-    setCartItems((items) => items.filter((item) => item.id !== itemId))
-  }
+    setCartItems((items) => items.filter((item) => item.id !== itemId));
+  };
 
   const applyCoupon = () => {
     if (couponCode.toUpperCase() === "DESCUENTO10") {
-      setAppliedCoupon(couponCode.toUpperCase())
-      setCouponDiscount(10)
-      setCouponCode("")
+      setAppliedCoupon(couponCode.toUpperCase());
+      setCouponDiscount(10);
+      setCouponCode("");
     } else {
-      alert("Cupón inválido")
+      alert("Cupón inválido");
     }
-  }
+  };
 
   const removeCoupon = () => {
-    setAppliedCoupon(null)
-    setCouponDiscount(0)
-  }
+    setAppliedCoupon(null);
+    setCouponDiscount(0);
+  };
 
   // Calculations
   const subtotal = cartItems.reduce(
     (total, item) => total + item.price * item.quantity,
-    0
-  )
-  const discount = subtotal * (couponDiscount / 100)
-  const shipping = subtotal >= 999 ? 0 : 99
-  const tax = (subtotal - discount) * 0.16
-  const total = subtotal - discount + shipping + tax
+    0,
+  );
+  const discount = subtotal * (couponDiscount / 100);
+  const shipping = subtotal >= 999 ? 0 : 99;
+  const tax = (subtotal - discount) * 0.16;
+  const total = subtotal - discount + shipping + tax;
 
   if (cartItems.length === 0) {
     return (
@@ -111,7 +111,7 @@ export default function CartPage() {
           />
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -141,7 +141,9 @@ export default function CartPage() {
                       </h3>
                       <div className="mt-1 text-sm text-muted-foreground">
                         {item.color && <span>Color: {item.color}</span>}
-                        {item.size && <span className="ml-4">Talla: {item.size}</span>}
+                        {item.size && (
+                          <span className="ml-4">Talla: {item.size}</span>
+                        )}
                       </div>
                     </div>
                     <button
@@ -199,7 +201,9 @@ export default function CartPage() {
                   <div className="flex items-center justify-between p-3 bg-success/10 rounded-lg">
                     <div className="flex items-center gap-2">
                       <Tag className="h-4 w-4 text-success" />
-                      <span className="text-sm font-medium">{appliedCoupon}</span>
+                      <span className="text-sm font-medium">
+                        {appliedCoupon}
+                      </span>
                     </div>
                     <button
                       onClick={removeCoupon}
@@ -268,11 +272,7 @@ export default function CartPage() {
               </div>
 
               {/* Checkout Button */}
-              <Button
-                size="lg"
-                className="w-full mt-6"
-                asChild
-              >
+              <Button size="lg" className="w-full mt-6" asChild>
                 <Link href="/checkout">
                   Proceder al Checkout
                   <ArrowRight className="ml-2 h-4 w-4" />
@@ -290,5 +290,5 @@ export default function CartPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -100,7 +100,9 @@ export function OrderTimeline({
               <div
                 className={cn(
                   "w-10 h-10 rounded-full border-2 flex items-center justify-center",
-                  isCurrent ? config?.color : "text-muted-foreground bg-muted border-border"
+                  isCurrent
+                    ? config?.color
+                    : "text-muted-foreground bg-muted border-border",
                 )}
               >
                 <Icon className="h-5 w-5" />
@@ -162,7 +164,8 @@ const statusOrder = ["PENDING", "PAID", "PROCESSING", "SHIPPED", "DELIVERED"];
 
 export function OrderStatusProgress({ currentStatus }: StatusProgressProps) {
   const currentIndex = statusOrder.indexOf(currentStatus);
-  const isCancelled = currentStatus === "CANCELLED" || currentStatus === "FAILED";
+  const isCancelled =
+    currentStatus === "CANCELLED" || currentStatus === "FAILED";
 
   if (isCancelled) {
     return (
@@ -189,7 +192,7 @@ export function OrderStatusProgress({ currentStatus }: StatusProgressProps) {
               key={status}
               className={cn(
                 "flex flex-col items-center",
-                isCompleted ? "text-primary" : "text-muted-foreground"
+                isCompleted ? "text-primary" : "text-muted-foreground",
               )}
             >
               <div
@@ -199,7 +202,7 @@ export function OrderStatusProgress({ currentStatus }: StatusProgressProps) {
                     ? isCurrent
                       ? "bg-primary text-primary-foreground"
                       : "bg-primary/20 text-primary"
-                    : "bg-muted"
+                    : "bg-muted",
                 )}
               >
                 <Icon className="h-5 w-5" />

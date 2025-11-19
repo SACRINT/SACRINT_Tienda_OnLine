@@ -1,20 +1,20 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import Link from "next/link"
-import { X, ArrowRight, Tag, Zap, Clock } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
+import * as React from "react";
+import Link from "next/link";
+import { X, ArrowRight, Tag, Zap, Clock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface PromoBannerProps {
-  title: string
-  description?: string
-  ctaText?: string
-  ctaLink?: string
-  variant?: "default" | "accent" | "mint" | "gradient"
-  dismissible?: boolean
-  onDismiss?: () => void
-  className?: string
+  title: string;
+  description?: string;
+  ctaText?: string;
+  ctaLink?: string;
+  variant?: "default" | "accent" | "mint" | "gradient";
+  dismissible?: boolean;
+  onDismiss?: () => void;
+  className?: string;
 }
 
 export function PromoBanner({
@@ -27,29 +27,25 @@ export function PromoBanner({
   onDismiss,
   className,
 }: PromoBannerProps) {
-  const [dismissed, setDismissed] = React.useState(false)
+  const [dismissed, setDismissed] = React.useState(false);
 
-  if (dismissed) return null
+  if (dismissed) return null;
 
   const handleDismiss = () => {
-    setDismissed(true)
-    onDismiss?.()
-  }
+    setDismissed(true);
+    onDismiss?.();
+  };
 
   const variantStyles = {
     default: "bg-primary text-primary-foreground",
     accent: "bg-accent text-accent-foreground",
     mint: "bg-mint text-mint-foreground",
     gradient: "bg-gradient-to-r from-primary via-accent to-mint text-white",
-  }
+  };
 
   return (
     <div
-      className={cn(
-        "relative py-3 px-4",
-        variantStyles[variant],
-        className
-      )}
+      className={cn("relative py-3 px-4", variantStyles[variant], className)}
     >
       <div className="container mx-auto flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 flex-1">
@@ -88,16 +84,16 @@ export function PromoBanner({
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 // Countdown Banner variant
 interface CountdownBannerProps {
-  title: string
-  endDate: Date
-  ctaText?: string
-  ctaLink?: string
-  className?: string
+  title: string;
+  endDate: Date;
+  ctaText?: string;
+  ctaLink?: string;
+  className?: string;
 }
 
 export function CountdownBanner({
@@ -112,11 +108,11 @@ export function CountdownBanner({
     hours: 0,
     minutes: 0,
     seconds: 0,
-  })
+  });
 
   React.useEffect(() => {
     const calculateTimeLeft = () => {
-      const difference = endDate.getTime() - new Date().getTime()
+      const difference = endDate.getTime() - new Date().getTime();
 
       if (difference > 0) {
         setTimeLeft({
@@ -124,21 +120,21 @@ export function CountdownBanner({
           hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
           minutes: Math.floor((difference / 1000 / 60) % 60),
           seconds: Math.floor((difference / 1000) % 60),
-        })
+        });
       }
-    }
+    };
 
-    calculateTimeLeft()
-    const timer = setInterval(calculateTimeLeft, 1000)
+    calculateTimeLeft();
+    const timer = setInterval(calculateTimeLeft, 1000);
 
-    return () => clearInterval(timer)
-  }, [endDate])
+    return () => clearInterval(timer);
+  }, [endDate]);
 
   return (
     <div
       className={cn(
         "bg-gradient-to-r from-error to-accent py-4 px-4 text-white",
-        className
+        className,
       )}
     >
       <div className="container mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -176,15 +172,15 @@ export function CountdownBanner({
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 // Flash Sale Banner
 interface FlashSaleBannerProps {
-  discount: number
-  productCount?: number
-  ctaLink?: string
-  className?: string
+  discount: number;
+  productCount?: number;
+  ctaLink?: string;
+  className?: string;
 }
 
 export function FlashSaleBanner({
@@ -197,7 +193,7 @@ export function FlashSaleBanner({
     <div
       className={cn(
         "bg-error text-white py-3 px-4 overflow-hidden relative",
-        className
+        className,
       )}
     >
       {/* Animated background */}
@@ -230,5 +226,5 @@ export function FlashSaleBanner({
         </Link>
       </div>
     </div>
-  )
+  );
 }

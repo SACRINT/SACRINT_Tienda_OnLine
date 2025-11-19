@@ -1,16 +1,16 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Clock, AlertCircle } from "lucide-react"
-import { cn } from "@/lib/utils"
+import * as React from "react";
+import { Clock, AlertCircle } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface CountdownTimerProps {
-  endDate: Date
-  title?: string
-  variant?: "default" | "compact" | "card" | "inline"
-  showLabels?: boolean
-  onComplete?: () => void
-  className?: string
+  endDate: Date;
+  title?: string;
+  variant?: "default" | "compact" | "card" | "inline";
+  showLabels?: boolean;
+  onComplete?: () => void;
+  className?: string;
 }
 
 export function CountdownTimer({
@@ -26,17 +26,17 @@ export function CountdownTimer({
     hours: 0,
     minutes: 0,
     seconds: 0,
-  })
-  const [isExpired, setIsExpired] = React.useState(false)
+  });
+  const [isExpired, setIsExpired] = React.useState(false);
 
   React.useEffect(() => {
     const calculateTimeLeft = () => {
-      const difference = endDate.getTime() - new Date().getTime()
+      const difference = endDate.getTime() - new Date().getTime();
 
       if (difference <= 0) {
-        setIsExpired(true)
-        onComplete?.()
-        return
+        setIsExpired(true);
+        onComplete?.();
+        return;
       }
 
       setTimeLeft({
@@ -44,27 +44,27 @@ export function CountdownTimer({
         hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
         minutes: Math.floor((difference / 1000 / 60) % 60),
         seconds: Math.floor((difference / 1000) % 60),
-      })
-    }
+      });
+    };
 
-    calculateTimeLeft()
-    const timer = setInterval(calculateTimeLeft, 1000)
+    calculateTimeLeft();
+    const timer = setInterval(calculateTimeLeft, 1000);
 
-    return () => clearInterval(timer)
-  }, [endDate, onComplete])
+    return () => clearInterval(timer);
+  }, [endDate, onComplete]);
 
   if (isExpired) {
     return (
       <div
         className={cn(
           "flex items-center gap-2 text-muted-foreground",
-          className
+          className,
         )}
       >
         <AlertCircle className="h-4 w-4" />
         <span className="text-sm">Oferta finalizada</span>
       </div>
-    )
+    );
   }
 
   const timeUnits = [
@@ -72,7 +72,7 @@ export function CountdownTimer({
     { label: "Horas", shortLabel: "H", value: timeLeft.hours },
     { label: "Minutos", shortLabel: "M", value: timeLeft.minutes },
     { label: "Segundos", shortLabel: "S", value: timeLeft.seconds },
-  ]
+  ];
 
   // Compact inline variant
   if (variant === "compact") {
@@ -85,7 +85,7 @@ export function CountdownTimer({
           {String(timeLeft.seconds).padStart(2, "0")}
         </span>
       </div>
-    )
+    );
   }
 
   // Inline variant for product cards
@@ -94,7 +94,7 @@ export function CountdownTimer({
       <div
         className={cn(
           "flex items-center gap-2 bg-error/10 text-error px-2 py-1 rounded text-sm",
-          className
+          className,
         )}
       >
         <Clock className="h-3.5 w-3.5" />
@@ -105,17 +105,14 @@ export function CountdownTimer({
           {String(timeLeft.seconds).padStart(2, "0")}
         </span>
       </div>
-    )
+    );
   }
 
   // Card variant
   if (variant === "card") {
     return (
       <div
-        className={cn(
-          "bg-card border rounded-lg p-4 text-center",
-          className
-        )}
+        className={cn("bg-card border rounded-lg p-4 text-center", className)}
       >
         {title && (
           <div className="flex items-center justify-center gap-2 mb-3">
@@ -138,7 +135,7 @@ export function CountdownTimer({
           ))}
         </div>
       </div>
-    )
+    );
   }
 
   // Default variant
@@ -166,7 +163,7 @@ export function CountdownTimer({
         ))}
       </div>
     </div>
-  )
+  );
 }
 
 // Utility hook for countdown logic
@@ -178,11 +175,11 @@ export function useCountdown(endDate: Date) {
     seconds: 0,
     isExpired: false,
     totalSeconds: 0,
-  })
+  });
 
   React.useEffect(() => {
     const calculateTimeLeft = () => {
-      const difference = endDate.getTime() - new Date().getTime()
+      const difference = endDate.getTime() - new Date().getTime();
 
       if (difference <= 0) {
         setTimeLeft({
@@ -192,8 +189,8 @@ export function useCountdown(endDate: Date) {
           seconds: 0,
           isExpired: true,
           totalSeconds: 0,
-        })
-        return
+        });
+        return;
       }
 
       setTimeLeft({
@@ -203,14 +200,14 @@ export function useCountdown(endDate: Date) {
         seconds: Math.floor((difference / 1000) % 60),
         isExpired: false,
         totalSeconds: Math.floor(difference / 1000),
-      })
-    }
+      });
+    };
 
-    calculateTimeLeft()
-    const timer = setInterval(calculateTimeLeft, 1000)
+    calculateTimeLeft();
+    const timer = setInterval(calculateTimeLeft, 1000);
 
-    return () => clearInterval(timer)
-  }, [endDate])
+    return () => clearInterval(timer);
+  }, [endDate]);
 
-  return timeLeft
+  return timeLeft;
 }

@@ -1,16 +1,16 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import Link from "next/link"
-import Image from "next/image"
-import { cn } from "@/lib/utils"
+import * as React from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { cn } from "@/lib/utils";
 
 interface Category {
-  id: string
-  name: string
-  slug: string
-  image?: string
-  productCount?: number
+  id: string;
+  name: string;
+  slug: string;
+  image?: string;
+  productCount?: number;
 }
 
 const defaultCategories: Category[] = [
@@ -18,12 +18,12 @@ const defaultCategories: Category[] = [
   { id: "2", name: "Ropa", slug: "ropa", productCount: 320 },
   { id: "3", name: "Hogar", slug: "hogar", productCount: 85 },
   { id: "4", name: "Deportes", slug: "deportes", productCount: 120 },
-]
+];
 
 interface CategoriesSectionProps {
-  title?: string
-  subtitle?: string
-  categories?: Category[]
+  title?: string;
+  subtitle?: string;
+  categories?: Category[];
 }
 
 export function CategoriesSection({
@@ -91,7 +91,7 @@ export function CategoriesSection({
         </div>
       </div>
     </section>
-  )
+  );
 }
 
 function getCategoryEmoji(slug: string): string {
@@ -104,6 +104,6 @@ function getCategoryEmoji(slug: string): string {
     juguetes: "🎮",
     libros: "📚",
     alimentos: "🍎",
-  }
-  return emojis[slug] || "📦"
+  };
+  return emojis[slug] || "📦";
 }

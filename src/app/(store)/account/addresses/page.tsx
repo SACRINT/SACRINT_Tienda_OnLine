@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import * as React from "react";
 import {
   MapPin,
   Plus,
@@ -9,12 +9,12 @@ import {
   Home,
   Building,
   Check,
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -23,25 +23,25 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 
 interface Address {
-  id: string
-  name: string
-  street: string
-  city: string
-  state: string
-  postalCode: string
-  phone: string
-  isDefault: boolean
-  type: "home" | "work"
+  id: string;
+  name: string;
+  street: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  phone: string;
+  isDefault: boolean;
+  type: "home" | "work";
 }
 
 // Mock addresses
@@ -68,21 +68,49 @@ const initialAddresses: Address[] = [
     isDefault: false,
     type: "work",
   },
-]
+];
 
 const mexicanStates = [
-  "Aguascalientes", "Baja California", "Baja California Sur", "Campeche",
-  "Chiapas", "Chihuahua", "CDMX", "Coahuila", "Colima", "Durango",
-  "Guanajuato", "Guerrero", "Hidalgo", "Jalisco", "México", "Michoacán",
-  "Morelos", "Nayarit", "Nuevo León", "Oaxaca", "Puebla", "Querétaro",
-  "Quintana Roo", "San Luis Potosí", "Sinaloa", "Sonora", "Tabasco",
-  "Tamaulipas", "Tlaxcala", "Veracruz", "Yucatán", "Zacatecas",
-]
+  "Aguascalientes",
+  "Baja California",
+  "Baja California Sur",
+  "Campeche",
+  "Chiapas",
+  "Chihuahua",
+  "CDMX",
+  "Coahuila",
+  "Colima",
+  "Durango",
+  "Guanajuato",
+  "Guerrero",
+  "Hidalgo",
+  "Jalisco",
+  "México",
+  "Michoacán",
+  "Morelos",
+  "Nayarit",
+  "Nuevo León",
+  "Oaxaca",
+  "Puebla",
+  "Querétaro",
+  "Quintana Roo",
+  "San Luis Potosí",
+  "Sinaloa",
+  "Sonora",
+  "Tabasco",
+  "Tamaulipas",
+  "Tlaxcala",
+  "Veracruz",
+  "Yucatán",
+  "Zacatecas",
+];
 
 export default function AddressesPage() {
-  const [addresses, setAddresses] = React.useState(initialAddresses)
-  const [editingAddress, setEditingAddress] = React.useState<Address | null>(null)
-  const [dialogOpen, setDialogOpen] = React.useState(false)
+  const [addresses, setAddresses] = React.useState(initialAddresses);
+  const [editingAddress, setEditingAddress] = React.useState<Address | null>(
+    null,
+  );
+  const [dialogOpen, setDialogOpen] = React.useState(false);
   const [formData, setFormData] = React.useState({
     name: "",
     street: "",
@@ -91,17 +119,15 @@ export default function AddressesPage() {
     postalCode: "",
     phone: "",
     type: "home" as "home" | "work",
-  })
+  });
 
   const handleSave = () => {
     if (editingAddress) {
       setAddresses(
         addresses.map((addr) =>
-          addr.id === editingAddress.id
-            ? { ...addr, ...formData }
-            : addr
-        )
-      )
+          addr.id === editingAddress.id ? { ...addr, ...formData } : addr,
+        ),
+      );
     } else {
       setAddresses([
         ...addresses,
@@ -110,14 +136,14 @@ export default function AddressesPage() {
           ...formData,
           isDefault: addresses.length === 0,
         },
-      ])
+      ]);
     }
-    setDialogOpen(false)
-    resetForm()
-  }
+    setDialogOpen(false);
+    resetForm();
+  };
 
   const handleEdit = (address: Address) => {
-    setEditingAddress(address)
+    setEditingAddress(address);
     setFormData({
       name: address.name,
       street: address.street,
@@ -126,25 +152,25 @@ export default function AddressesPage() {
       postalCode: address.postalCode,
       phone: address.phone,
       type: address.type,
-    })
-    setDialogOpen(true)
-  }
+    });
+    setDialogOpen(true);
+  };
 
   const handleDelete = (id: string) => {
-    setAddresses(addresses.filter((addr) => addr.id !== id))
-  }
+    setAddresses(addresses.filter((addr) => addr.id !== id));
+  };
 
   const handleSetDefault = (id: string) => {
     setAddresses(
       addresses.map((addr) => ({
         ...addr,
         isDefault: addr.id === id,
-      }))
-    )
-  }
+      })),
+    );
+  };
 
   const resetForm = () => {
-    setEditingAddress(null)
+    setEditingAddress(null);
     setFormData({
       name: "",
       street: "",
@@ -153,13 +179,13 @@ export default function AddressesPage() {
       postalCode: "",
       phone: "",
       type: "home",
-    })
-  }
+    });
+  };
 
   const openNewDialog = () => {
-    resetForm()
-    setDialogOpen(true)
-  }
+    resetForm();
+    setDialogOpen(true);
+  };
 
   return (
     <div className="min-h-screen bg-background py-8">
@@ -271,9 +297,7 @@ export default function AddressesPage() {
                       type="button"
                       variant={formData.type === "home" ? "default" : "outline"}
                       size="sm"
-                      onClick={() =>
-                        setFormData({ ...formData, type: "home" })
-                      }
+                      onClick={() => setFormData({ ...formData, type: "home" })}
                     >
                       <Home className="h-4 w-4 mr-2" />
                       Casa
@@ -282,9 +306,7 @@ export default function AddressesPage() {
                       type="button"
                       variant={formData.type === "work" ? "default" : "outline"}
                       size="sm"
-                      onClick={() =>
-                        setFormData({ ...formData, type: "work" })
-                      }
+                      onClick={() => setFormData({ ...formData, type: "work" })}
                     >
                       <Building className="h-4 w-4 mr-2" />
                       Trabajo
@@ -333,7 +355,9 @@ export default function AddressesPage() {
                       ) : (
                         <Building className="h-4 w-4 text-muted-foreground" />
                       )}
-                      <CardTitle className="text-base">{address.name}</CardTitle>
+                      <CardTitle className="text-base">
+                        {address.name}
+                      </CardTitle>
                     </div>
                     {address.isDefault && (
                       <Badge variant="default" className="bg-primary">
@@ -387,5 +411,5 @@ export default function AddressesPage() {
         )}
       </div>
     </div>
-  )
+  );
 }

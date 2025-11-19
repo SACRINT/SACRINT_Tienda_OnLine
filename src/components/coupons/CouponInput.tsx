@@ -1,18 +1,18 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Tag, X, Check, AlertCircle, Loader2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { validateCoupon, type Coupon } from "@/lib/coupons"
-import { cn } from "@/lib/utils"
+import * as React from "react";
+import { Tag, X, Check, AlertCircle, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { validateCoupon, type Coupon } from "@/lib/coupons";
+import { cn } from "@/lib/utils";
 
 interface CouponInputProps {
-  subtotal: number
-  onApply: (coupon: Coupon, discount: number) => void
-  onRemove: () => void
-  appliedCoupon?: Coupon | null
-  className?: string
+  subtotal: number;
+  onApply: (coupon: Coupon, discount: number) => void;
+  onRemove: () => void;
+  appliedCoupon?: Coupon | null;
+  className?: string;
 }
 
 export function CouponInput({
@@ -22,46 +22,46 @@ export function CouponInput({
   appliedCoupon,
   className,
 }: CouponInputProps) {
-  const [code, setCode] = React.useState("")
-  const [loading, setLoading] = React.useState(false)
-  const [error, setError] = React.useState("")
-  const [success, setSuccess] = React.useState("")
+  const [code, setCode] = React.useState("");
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState("");
+  const [success, setSuccess] = React.useState("");
 
   const handleApply = async () => {
-    if (!code.trim()) return
+    if (!code.trim()) return;
 
-    setLoading(true)
-    setError("")
-    setSuccess("")
+    setLoading(true);
+    setError("");
+    setSuccess("");
 
     // Simulate API call delay
-    await new Promise((resolve) => setTimeout(resolve, 500))
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
-    const result = validateCoupon(code, subtotal)
+    const result = validateCoupon(code, subtotal);
 
     if (result.valid && result.coupon && result.discount !== undefined) {
-      setSuccess(result.message)
-      onApply(result.coupon, result.discount)
-      setCode("")
+      setSuccess(result.message);
+      onApply(result.coupon, result.discount);
+      setCode("");
     } else {
-      setError(result.message)
+      setError(result.message);
     }
 
-    setLoading(false)
-  }
+    setLoading(false);
+  };
 
   const handleRemove = () => {
-    onRemove()
-    setSuccess("")
-    setError("")
-  }
+    onRemove();
+    setSuccess("");
+    setError("");
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
-      e.preventDefault()
-      handleApply()
+      e.preventDefault();
+      handleApply();
     }
-  }
+  };
 
   if (appliedCoupon) {
     return (
@@ -94,7 +94,7 @@ export function CouponInput({
           </p>
         )}
       </div>
-    )
+    );
   }
 
   return (
@@ -106,8 +106,8 @@ export function CouponInput({
             placeholder="Código de cupón"
             value={code}
             onChange={(e) => {
-              setCode(e.target.value.toUpperCase())
-              setError("")
+              setCode(e.target.value.toUpperCase());
+              setError("");
             }}
             onKeyDown={handleKeyDown}
             className="pl-10"
@@ -119,11 +119,7 @@ export function CouponInput({
           disabled={!code.trim() || loading}
           variant="outline"
         >
-          {loading ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            "Aplicar"
-          )}
+          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Aplicar"}
         </Button>
       </div>
 
@@ -140,5 +136,5 @@ export function CouponInput({
         <code className="bg-muted px-1 rounded">ENVIOGRATIS</code>
       </div>
     </div>
-  )
+  );
 }

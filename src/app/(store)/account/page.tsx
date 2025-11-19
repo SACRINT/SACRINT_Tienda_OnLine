@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import Link from "next/link"
+import Link from "next/link";
 import {
   User,
   Package,
@@ -12,12 +12,12 @@ import {
   ShoppingBag,
   Calendar,
   TrendingUp,
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 
 // Mock user data
 const user = {
@@ -28,7 +28,7 @@ const user = {
   totalOrders: 12,
   totalSpent: 15680,
   wishlistCount: 5,
-}
+};
 
 // Mock recent orders
 const recentOrders = [
@@ -56,7 +56,7 @@ const recentOrders = [
     total: 4999,
     items: 1,
   },
-]
+];
 
 const statusConfig = {
   PENDING: { label: "Pendiente", color: "bg-warning/10 text-warning" },
@@ -65,21 +65,21 @@ const statusConfig = {
   SHIPPED: { label: "Enviado", color: "bg-accent/10 text-accent" },
   DELIVERED: { label: "Entregado", color: "bg-success/10 text-success" },
   CANCELLED: { label: "Cancelado", color: "bg-error/10 text-error" },
-}
+};
 
 export default function AccountPage() {
   const formatPrice = (price: number) =>
     new Intl.NumberFormat("es-MX", {
       style: "currency",
       currency: "MXN",
-    }).format(price)
+    }).format(price);
 
   const formatDate = (date: string) =>
     new Date(date).toLocaleDateString("es-MX", {
       day: "2-digit",
       month: "short",
       year: "numeric",
-    })
+    });
 
   return (
     <div className="min-h-screen bg-background py-8">
@@ -102,9 +102,7 @@ export default function AccountPage() {
             </div>
           </div>
           <Button variant="outline" asChild>
-            <Link href="/account/profile">
-              Editar Perfil
-            </Link>
+            <Link href="/account/profile">Editar Perfil</Link>
           </Button>
         </div>
 
@@ -128,7 +126,9 @@ export default function AccountPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Total Gastado</p>
-                  <p className="text-2xl font-bold">{formatPrice(user.totalSpent)}</p>
+                  <p className="text-2xl font-bold">
+                    {formatPrice(user.totalSpent)}
+                  </p>
                 </div>
                 <div className="p-3 bg-success/10 rounded-full">
                   <TrendingUp className="h-6 w-6 text-success" />
@@ -140,7 +140,9 @@ export default function AccountPage() {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Lista de Deseos</p>
+                  <p className="text-sm text-muted-foreground">
+                    Lista de Deseos
+                  </p>
                   <p className="text-2xl font-bold">{user.wishlistCount}</p>
                 </div>
                 <div className="p-3 bg-error/10 rounded-full">
@@ -201,9 +203,7 @@ export default function AccountPage() {
                     <ChevronRight className="h-4 w-4 text-muted-foreground" />
                   </Link>
                   <Separator />
-                  <button
-                    className="flex items-center gap-3 px-4 py-3 w-full hover:bg-muted transition-colors text-error"
-                  >
+                  <button className="flex items-center gap-3 px-4 py-3 w-full hover:bg-muted transition-colors text-error">
                     <LogOut className="h-5 w-5" />
                     <span>Cerrar Sesión</span>
                   </button>
@@ -235,7 +235,8 @@ export default function AccountPage() {
                 ) : (
                   <div className="space-y-4">
                     {recentOrders.map((order) => {
-                      const status = statusConfig[order.status as keyof typeof statusConfig]
+                      const status =
+                        statusConfig[order.status as keyof typeof statusConfig];
                       return (
                         <Link
                           key={order.id}
@@ -252,13 +253,15 @@ export default function AccountPage() {
                             </div>
                           </div>
                           <div className="text-right space-y-1">
-                            <p className="font-medium">{formatPrice(order.total)}</p>
+                            <p className="font-medium">
+                              {formatPrice(order.total)}
+                            </p>
                             <Badge variant="outline" className={status.color}>
                               {status.label}
                             </Badge>
                           </div>
                         </Link>
-                      )
+                      );
                     })}
                   </div>
                 )}
@@ -268,5 +271,5 @@ export default function AccountPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -1,23 +1,32 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import Link from "next/link"
-import { ArrowLeft, CreditCard, Lock } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Separator } from "@/components/ui/separator"
-import { CheckoutProgress, type CheckoutStep } from "@/components/ui/checkout-progress"
-import { cn } from "@/lib/utils"
+import * as React from "react";
+import Link from "next/link";
+import { ArrowLeft, CreditCard, Lock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import {
+  CheckoutProgress,
+  type CheckoutStep,
+} from "@/components/ui/checkout-progress";
+import { cn } from "@/lib/utils";
 
 const checkoutSteps: CheckoutStep[] = [
   { id: "shipping", label: "Envío" },
   { id: "payment", label: "Pago" },
   { id: "review", label: "Revisar" },
   { id: "confirm", label: "Confirmar" },
-]
+];
 
 // Mock cart summary
 const cartSummary = {
@@ -30,19 +39,45 @@ const cartSummary = {
   shipping: 0,
   tax: 1071.36,
   total: 7767.36,
-}
+};
 
 const mexicanStates = [
-  "Aguascalientes", "Baja California", "Baja California Sur", "Campeche",
-  "Chiapas", "Chihuahua", "Ciudad de México", "Coahuila", "Colima",
-  "Durango", "Estado de México", "Guanajuato", "Guerrero", "Hidalgo",
-  "Jalisco", "Michoacán", "Morelos", "Nayarit", "Nuevo León", "Oaxaca",
-  "Puebla", "Querétaro", "Quintana Roo", "San Luis Potosí", "Sinaloa",
-  "Sonora", "Tabasco", "Tamaulipas", "Tlaxcala", "Veracruz", "Yucatán", "Zacatecas"
-]
+  "Aguascalientes",
+  "Baja California",
+  "Baja California Sur",
+  "Campeche",
+  "Chiapas",
+  "Chihuahua",
+  "Ciudad de México",
+  "Coahuila",
+  "Colima",
+  "Durango",
+  "Estado de México",
+  "Guanajuato",
+  "Guerrero",
+  "Hidalgo",
+  "Jalisco",
+  "Michoacán",
+  "Morelos",
+  "Nayarit",
+  "Nuevo León",
+  "Oaxaca",
+  "Puebla",
+  "Querétaro",
+  "Quintana Roo",
+  "San Luis Potosí",
+  "Sinaloa",
+  "Sonora",
+  "Tabasco",
+  "Tamaulipas",
+  "Tlaxcala",
+  "Veracruz",
+  "Yucatán",
+  "Zacatecas",
+];
 
 export default function CheckoutPage() {
-  const [currentStep, setCurrentStep] = React.useState(1)
+  const [currentStep, setCurrentStep] = React.useState(1);
   const [formData, setFormData] = React.useState({
     email: "",
     phone: "",
@@ -54,26 +89,26 @@ export default function CheckoutPage() {
     state: "",
     postalCode: "",
     sameAsBilling: true,
-  })
+  });
 
   const formatPrice = (price: number) =>
     new Intl.NumberFormat("es-MX", {
       style: "currency",
       currency: "MXN",
-    }).format(price)
+    }).format(price);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     // Validate and proceed to next step
     if (currentStep < 4) {
-      setCurrentStep((prev) => prev + 1)
+      setCurrentStep((prev) => prev + 1);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-muted/30 py-8">
@@ -254,7 +289,10 @@ export default function CheckoutPage() {
                         }))
                       }
                     />
-                    <Label htmlFor="sameAsBilling" className="text-sm cursor-pointer">
+                    <Label
+                      htmlFor="sameAsBilling"
+                      className="text-sm cursor-pointer"
+                    >
                       Usar la misma dirección para facturación
                     </Label>
                   </div>
@@ -272,7 +310,9 @@ export default function CheckoutPage() {
                     <div className="p-4 border rounded-lg cursor-pointer hover:border-primary transition-colors">
                       <div className="flex items-center gap-3">
                         <CreditCard className="h-5 w-5" />
-                        <span className="font-medium">Tarjeta de Crédito/Débito</span>
+                        <span className="font-medium">
+                          Tarjeta de Crédito/Débito
+                        </span>
                       </div>
                     </div>
                     <p className="text-sm text-muted-foreground text-center">
@@ -304,16 +344,23 @@ export default function CheckoutPage() {
                     <div className="p-4 bg-muted/50 rounded-lg">
                       <h3 className="font-medium mb-2">Dirección de Envío</h3>
                       <p className="text-sm text-muted-foreground">
-                        {formData.firstName} {formData.lastName}<br />
-                        {formData.address}<br />
+                        {formData.firstName} {formData.lastName}
+                        <br />
+                        {formData.address}
+                        <br />
                         {formData.city}, {formData.state} {formData.postalCode}
                       </p>
                     </div>
                     <div className="p-4 bg-muted/50 rounded-lg">
                       <h3 className="font-medium mb-2">Productos</h3>
                       {cartSummary.items.map((item, index) => (
-                        <div key={index} className="flex justify-between text-sm py-1">
-                          <span>{item.name} x{item.quantity}</span>
+                        <div
+                          key={index}
+                          className="flex justify-between text-sm py-1"
+                        >
+                          <span>
+                            {item.name} x{item.quantity}
+                          </span>
                           <span>{formatPrice(item.price)}</span>
                         </div>
                       ))}
@@ -346,7 +393,8 @@ export default function CheckoutPage() {
                     ¡Pedido Confirmado!
                   </h2>
                   <p className="text-muted-foreground mb-6">
-                    Tu número de pedido es: <span className="font-mono font-bold">#ORD-2024-001</span>
+                    Tu número de pedido es:{" "}
+                    <span className="font-mono font-bold">#ORD-2024-001</span>
                   </p>
                   <p className="text-sm text-muted-foreground mb-8">
                     Te enviamos un correo de confirmación a {formData.email}
@@ -369,7 +417,8 @@ export default function CheckoutPage() {
                 {cartSummary.items.map((item, index) => (
                   <div key={index} className="flex justify-between text-sm">
                     <span className="text-muted-foreground">
-                      {item.name} <span className="text-xs">x{item.quantity}</span>
+                      {item.name}{" "}
+                      <span className="text-xs">x{item.quantity}</span>
                     </span>
                     <span>{formatPrice(item.price)}</span>
                   </div>
@@ -397,7 +446,9 @@ export default function CheckoutPage() {
 
                 <div className="flex justify-between text-lg font-bold">
                   <span>Total</span>
-                  <span className="text-primary">{formatPrice(cartSummary.total)}</span>
+                  <span className="text-primary">
+                    {formatPrice(cartSummary.total)}
+                  </span>
                 </div>
               </div>
 
@@ -411,5 +462,5 @@ export default function CheckoutPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

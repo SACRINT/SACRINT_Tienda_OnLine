@@ -1,46 +1,49 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Star } from "lucide-react"
-import { cn } from "@/lib/utils"
+import * as React from "react";
+import { Star } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface RatingStarsProps {
-  rating: number
-  maxRating?: number
-  size?: "sm" | "md" | "lg"
-  showValue?: boolean
-  interactive?: boolean
-  onRatingChange?: (rating: number) => void
-  className?: string
+  rating: number;
+  maxRating?: number;
+  size?: "sm" | "md" | "lg";
+  showValue?: boolean;
+  interactive?: boolean;
+  onRatingChange?: (rating: number) => void;
+  className?: string;
 }
 
 const sizeClasses = {
   sm: "h-3 w-3",
   md: "h-4 w-4",
   lg: "h-5 w-5",
-}
+};
 
 const RatingStars = React.forwardRef<HTMLDivElement, RatingStarsProps>(
-  ({
-    rating,
-    maxRating = 5,
-    size = "md",
-    showValue = false,
-    interactive = false,
-    onRatingChange,
-    className
-  }, ref) => {
-    const [hoverRating, setHoverRating] = React.useState<number | null>(null)
+  (
+    {
+      rating,
+      maxRating = 5,
+      size = "md",
+      showValue = false,
+      interactive = false,
+      onRatingChange,
+      className,
+    },
+    ref,
+  ) => {
+    const [hoverRating, setHoverRating] = React.useState<number | null>(null);
 
-    const displayRating = hoverRating !== null ? hoverRating : rating
+    const displayRating = hoverRating !== null ? hoverRating : rating;
 
     return (
       <div ref={ref} className={cn("flex items-center gap-1", className)}>
         <div className="flex items-center">
           {Array.from({ length: maxRating }).map((_, index) => {
-            const starValue = index + 1
-            const isFilled = starValue <= displayRating
-            const isHalf = !isFilled && starValue - 0.5 <= displayRating
+            const starValue = index + 1;
+            const isFilled = starValue <= displayRating;
+            const isHalf = !isFilled && starValue - 0.5 <= displayRating;
 
             return (
               <button
@@ -50,7 +53,7 @@ const RatingStars = React.forwardRef<HTMLDivElement, RatingStarsProps>(
                 className={cn(
                   "relative transition-colors",
                   interactive && "cursor-pointer hover:scale-110",
-                  !interactive && "cursor-default"
+                  !interactive && "cursor-default",
                 )}
                 onMouseEnter={() => interactive && setHoverRating(starValue)}
                 onMouseLeave={() => interactive && setHoverRating(null)}
@@ -63,11 +66,11 @@ const RatingStars = React.forwardRef<HTMLDivElement, RatingStarsProps>(
                       ? "fill-accent text-accent"
                       : isHalf
                         ? "fill-accent/50 text-accent"
-                        : "fill-muted text-muted-foreground"
+                        : "fill-muted text-muted-foreground",
                   )}
                 />
               </button>
-            )
+            );
           })}
         </div>
         {showValue && (
@@ -76,9 +79,9 @@ const RatingStars = React.forwardRef<HTMLDivElement, RatingStarsProps>(
           </span>
         )}
       </div>
-    )
-  }
-)
-RatingStars.displayName = "RatingStars"
+    );
+  },
+);
+RatingStars.displayName = "RatingStars";
 
-export { RatingStars }
+export { RatingStars };

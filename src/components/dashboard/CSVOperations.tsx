@@ -1,7 +1,14 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Upload, Download, FileText, AlertCircle, CheckCircle, X } from "lucide-react";
+import {
+  Upload,
+  Download,
+  FileText,
+  AlertCircle,
+  CheckCircle,
+  X,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -91,12 +98,15 @@ export function CSVOperations({
         .map((key) => {
           const value = item[key];
           // Escape commas and quotes
-          if (typeof value === "string" && (value.includes(",") || value.includes('"'))) {
+          if (
+            typeof value === "string" &&
+            (value.includes(",") || value.includes('"'))
+          ) {
             return `"${value.replace(/"/g, '""')}"`;
           }
           return value ?? "";
         })
-        .join(",")
+        .join(","),
     );
 
     return [headers.join(","), ...rows].join("\n");
@@ -186,7 +196,7 @@ export function CSVOperations({
       link.setAttribute("href", url);
       link.setAttribute(
         "download",
-        `${entityType}_${new Date().toISOString().split("T")[0]}.csv`
+        `${entityType}_${new Date().toISOString().split("T")[0]}.csv`,
       );
       link.style.visibility = "hidden";
       document.body.appendChild(link);
@@ -254,7 +264,8 @@ export function CSVOperations({
           <DialogHeader>
             <DialogTitle>Importar {entityLabels[entityType]}</DialogTitle>
             <DialogDescription>
-              Sube un archivo CSV para importar {entityLabels[entityType].toLowerCase()} masivamente
+              Sube un archivo CSV para importar{" "}
+              {entityLabels[entityType].toLowerCase()} masivamente
             </DialogDescription>
           </DialogHeader>
 
@@ -290,7 +301,11 @@ export function CSVOperations({
                       Descarga la plantilla con las columnas requeridas
                     </p>
                   </div>
-                  <Button variant="outline" size="sm" onClick={downloadTemplate}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={downloadTemplate}
+                  >
                     <Download className="h-4 w-4 mr-2" />
                     Plantilla
                   </Button>
@@ -298,7 +313,9 @@ export function CSVOperations({
 
                 {/* Required Columns */}
                 <div>
-                  <p className="text-sm font-medium mb-2">Columnas requeridas:</p>
+                  <p className="text-sm font-medium mb-2">
+                    Columnas requeridas:
+                  </p>
                   <div className="flex flex-wrap gap-2">
                     {columns
                       .filter((col) => col.required)
@@ -319,7 +336,9 @@ export function CSVOperations({
                   <div className="flex items-center gap-2">
                     <FileText className="h-4 w-4" />
                     <span className="font-medium">{selectedFile.name}</span>
-                    <Badge variant="secondary">{previewData.length}+ registros</Badge>
+                    <Badge variant="secondary">
+                      {previewData.length}+ registros
+                    </Badge>
                   </div>
                   <Button variant="ghost" size="sm" onClick={resetImport}>
                     <X className="h-4 w-4" />
@@ -333,7 +352,10 @@ export function CSVOperations({
                         <thead>
                           <tr className="border-b">
                             {Object.keys(previewData[0]).map((key) => (
-                              <th key={key} className="text-left p-2 font-medium">
+                              <th
+                                key={key}
+                                className="text-left p-2 font-medium"
+                              >
                                 {key}
                               </th>
                             ))}
@@ -343,7 +365,10 @@ export function CSVOperations({
                           {previewData.map((row, i) => (
                             <tr key={i} className="border-b">
                               {Object.values(row).map((value, j) => (
-                                <td key={j} className="p-2 truncate max-w-[150px]">
+                                <td
+                                  key={j}
+                                  className="p-2 truncate max-w-[150px]"
+                                >
                                   {value as string}
                                 </td>
                               ))}
@@ -362,7 +387,9 @@ export function CSVOperations({
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">Importando...</span>
-                  <span className="text-sm text-muted-foreground">{progress}%</span>
+                  <span className="text-sm text-muted-foreground">
+                    {progress}%
+                  </span>
                 </div>
                 <Progress value={progress} />
               </div>
@@ -422,7 +449,10 @@ export function CSVOperations({
           <DialogFooter>
             {!importResult ? (
               <>
-                <Button variant="outline" onClick={() => setImportDialogOpen(false)}>
+                <Button
+                  variant="outline"
+                  onClick={() => setImportDialogOpen(false)}
+                >
                   Cancelar
                 </Button>
                 <Button
@@ -433,9 +463,7 @@ export function CSVOperations({
                 </Button>
               </>
             ) : (
-              <Button onClick={() => setImportDialogOpen(false)}>
-                Cerrar
-              </Button>
+              <Button onClick={() => setImportDialogOpen(false)}>Cerrar</Button>
             )}
           </DialogFooter>
         </DialogContent>
@@ -453,7 +481,8 @@ export function CSVOperations({
           <DialogHeader>
             <DialogTitle>Exportar {entityLabels[entityType]}</DialogTitle>
             <DialogDescription>
-              Descarga todos los {entityLabels[entityType].toLowerCase()} en formato CSV
+              Descarga todos los {entityLabels[entityType].toLowerCase()} en
+              formato CSV
             </DialogDescription>
           </DialogHeader>
 
@@ -475,7 +504,9 @@ export function CSVOperations({
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">Exportando...</span>
-                  <span className="text-sm text-muted-foreground">{progress}%</span>
+                  <span className="text-sm text-muted-foreground">
+                    {progress}%
+                  </span>
                 </div>
                 <Progress value={progress} />
               </div>
@@ -483,7 +514,10 @@ export function CSVOperations({
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setExportDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setExportDialogOpen(false)}
+            >
               Cancelar
             </Button>
             <Button onClick={handleExport} disabled={exporting}>

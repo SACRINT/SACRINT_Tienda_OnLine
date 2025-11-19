@@ -76,9 +76,14 @@ export default async function CustomersPage({
   const newThisMonth = customers.filter((c: any) => {
     const date = new Date(c.createdAt);
     const now = new Date();
-    return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+    return (
+      date.getMonth() === now.getMonth() &&
+      date.getFullYear() === now.getFullYear()
+    );
   }).length;
-  const withOrders = customers.filter((c: any) => (c._count?.orders || 0) > 0).length;
+  const withOrders = customers.filter(
+    (c: any) => (c._count?.orders || 0) > 0,
+  ).length;
 
   return (
     <div className="space-y-6">
@@ -208,7 +213,9 @@ export default async function CustomersPage({
                 customers.map((customer: any) => {
                   const ordersCount = customer._count?.orders || 0;
                   const totalSpent = customer.totalSpent || 0;
-                  const initial = customer.name?.charAt(0).toUpperCase() || customer.email.charAt(0).toUpperCase();
+                  const initial =
+                    customer.name?.charAt(0).toUpperCase() ||
+                    customer.email.charAt(0).toUpperCase();
 
                   return (
                     <TableRow key={customer.id} className="hover:bg-muted/50">
@@ -259,13 +266,14 @@ export default async function CustomersPage({
                       </TableCell>
                       <TableCell>
                         {ordersCount > 0 ? (
-                          <Badge variant="default" className="bg-success/10 text-success border-success/20">
+                          <Badge
+                            variant="default"
+                            className="bg-success/10 text-success border-success/20"
+                          >
                             Activo
                           </Badge>
                         ) : (
-                          <Badge variant="secondary">
-                            Nuevo
-                          </Badge>
+                          <Badge variant="secondary">Nuevo</Badge>
                         )}
                       </TableCell>
                       <TableCell>
@@ -283,9 +291,7 @@ export default async function CustomersPage({
           {/* Pagination */}
           {customers.length > pageSize && (
             <div className="flex items-center justify-between mt-4 pt-4 border-t">
-              <p className="text-sm text-muted-foreground">
-                Página {page}
-              </p>
+              <p className="text-sm text-muted-foreground">Página {page}</p>
               <div className="flex gap-1">
                 {page > 1 && (
                   <Link href={`?page=${page - 1}`}>

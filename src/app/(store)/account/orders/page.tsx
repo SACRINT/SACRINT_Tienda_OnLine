@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import Link from "next/link"
+import * as React from "react";
+import Link from "next/link";
 import {
   Package,
   Eye,
@@ -15,19 +15,19 @@ import {
   Truck,
   CheckCircle,
   XCircle,
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { cn } from "@/lib/utils"
+} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 // Mock orders data
 const orders = [
@@ -37,9 +37,7 @@ const orders = [
     date: "2024-03-10",
     status: "DELIVERED",
     total: 2999,
-    items: [
-      { name: "Auriculares Bluetooth Pro", quantity: 1, price: 2999 },
-    ],
+    items: [{ name: "Auriculares Bluetooth Pro", quantity: 1, price: 2999 }],
   },
   {
     id: "2",
@@ -58,9 +56,7 @@ const orders = [
     date: "2024-02-28",
     status: "DELIVERED",
     total: 4999,
-    items: [
-      { name: "Reloj Inteligente Series 5", quantity: 1, price: 4999 },
-    ],
+    items: [{ name: "Reloj Inteligente Series 5", quantity: 1, price: 4999 }],
   },
   {
     id: "4",
@@ -68,9 +64,7 @@ const orders = [
     date: "2024-02-15",
     status: "DELIVERED",
     total: 1899,
-    items: [
-      { name: "Tenis Casual Street", quantity: 1, price: 1899 },
-    ],
+    items: [{ name: "Tenis Casual Street", quantity: 1, price: 1899 }],
   },
   {
     id: "5",
@@ -78,11 +72,9 @@ const orders = [
     date: "2024-02-01",
     status: "CANCELLED",
     total: 899,
-    items: [
-      { name: "Sudadera Hoodie Premium", quantity: 1, price: 899 },
-    ],
+    items: [{ name: "Sudadera Hoodie Premium", quantity: 1, price: 899 }],
   },
-]
+];
 
 const statusConfig = {
   PENDING: {
@@ -110,34 +102,34 @@ const statusConfig = {
     color: "bg-error/10 text-error border-error/20",
     icon: XCircle,
   },
-}
+};
 
 export default function OrdersPage() {
-  const [statusFilter, setStatusFilter] = React.useState("all")
-  const [searchQuery, setSearchQuery] = React.useState("")
+  const [statusFilter, setStatusFilter] = React.useState("all");
+  const [searchQuery, setSearchQuery] = React.useState("");
 
   const formatPrice = (price: number) =>
     new Intl.NumberFormat("es-MX", {
       style: "currency",
       currency: "MXN",
-    }).format(price)
+    }).format(price);
 
   const formatDate = (date: string) =>
     new Date(date).toLocaleDateString("es-MX", {
       day: "2-digit",
       month: "long",
       year: "numeric",
-    })
+    });
 
   const filteredOrders = orders.filter((order) => {
-    if (statusFilter !== "all" && order.status !== statusFilter) return false
+    if (statusFilter !== "all" && order.status !== statusFilter) return false;
     if (
       searchQuery &&
       !order.orderNumber.toLowerCase().includes(searchQuery.toLowerCase())
     )
-      return false
-    return true
-  })
+      return false;
+    return true;
+  });
 
   return (
     <div className="min-h-screen bg-background py-8">
@@ -200,8 +192,9 @@ export default function OrdersPage() {
             </Card>
           ) : (
             filteredOrders.map((order) => {
-              const status = statusConfig[order.status as keyof typeof statusConfig]
-              const StatusIcon = status.icon
+              const status =
+                statusConfig[order.status as keyof typeof statusConfig];
+              const StatusIcon = status.icon;
 
               return (
                 <Card key={order.id}>
@@ -249,7 +242,7 @@ export default function OrdersPage() {
                     </div>
                   </CardContent>
                 </Card>
-              )
+              );
             })
           )}
         </div>
@@ -272,5 +265,5 @@ export default function OrdersPage() {
         )}
       </div>
     </div>
-  )
+  );
 }

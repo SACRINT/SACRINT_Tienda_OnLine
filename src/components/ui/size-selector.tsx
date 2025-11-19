@@ -1,35 +1,29 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { cn } from "@/lib/utils"
+import * as React from "react";
+import { cn } from "@/lib/utils";
 
 interface SizeOption {
-  label: string
-  value: string
-  available?: boolean
+  label: string;
+  value: string;
+  available?: boolean;
 }
 
 interface SizeSelectorProps {
-  options: SizeOption[]
-  value?: string
-  onChange?: (value: string) => void
-  disabled?: boolean
-  className?: string
+  options: SizeOption[];
+  value?: string;
+  onChange?: (value: string) => void;
+  disabled?: boolean;
+  className?: string;
 }
 
 const SizeSelector = React.forwardRef<HTMLDivElement, SizeSelectorProps>(
-  ({
-    options,
-    value,
-    onChange,
-    disabled = false,
-    className
-  }, ref) => {
+  ({ options, value, onChange, disabled = false, className }, ref) => {
     return (
       <div ref={ref} className={cn("flex flex-wrap gap-2", className)}>
         {options.map((option) => {
-          const isSelected = value === option.value
-          const isAvailable = option.available !== false
+          const isSelected = value === option.value;
+          const isAvailable = option.available !== false;
 
           return (
             <button
@@ -44,17 +38,17 @@ const SizeSelector = React.forwardRef<HTMLDivElement, SizeSelectorProps>(
                   : isAvailable
                     ? "border-input bg-background text-foreground hover:border-primary hover:bg-primary/5"
                     : "border-muted bg-muted/50 text-muted-foreground line-through cursor-not-allowed",
-                disabled && "cursor-not-allowed opacity-50"
+                disabled && "cursor-not-allowed opacity-50",
               )}
             >
               {option.label}
             </button>
-          )
+          );
         })}
       </div>
-    )
-  }
-)
-SizeSelector.displayName = "SizeSelector"
+    );
+  },
+);
+SizeSelector.displayName = "SizeSelector";
 
-export { SizeSelector, type SizeOption }
+export { SizeSelector, type SizeOption };

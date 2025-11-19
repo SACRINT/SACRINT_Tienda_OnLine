@@ -222,7 +222,7 @@ export function getEnabledPaymentMethods(): PaymentMethod[] {
 // Check if amount is valid for payment method
 export function isAmountValidForMethod(
   amount: number,
-  methodId: string
+  methodId: string,
 ): boolean {
   const method = getPaymentMethod(methodId);
   if (!method) return false;

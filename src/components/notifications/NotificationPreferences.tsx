@@ -1,47 +1,53 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Bell, Mail, Smartphone, Monitor, Save } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Switch } from "@/components/ui/switch"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { cn } from "@/lib/utils"
+import * as React from "react";
+import { Bell, Mail, Smartphone, Monitor, Save } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import {
   getNotificationPreferences,
   saveNotificationPreferences,
   requestPushPermission,
   type NotificationPreferences as PreferencesType,
-} from "@/lib/notifications"
-import { useToast } from "./Toast"
+} from "@/lib/notifications";
+import { useToast } from "./Toast";
 
 interface NotificationPreferencesProps {
-  className?: string
+  className?: string;
 }
 
 export function NotificationPreferences({
   className,
 }: NotificationPreferencesProps) {
-  const { success, error } = useToast()
+  const { success, error } = useToast();
   const [preferences, setPreferences] = React.useState<PreferencesType>(
-    getNotificationPreferences()
-  )
+    getNotificationPreferences(),
+  );
   const [pushPermission, setPushPermission] = React.useState<
     NotificationPermission | "unsupported"
-  >("default")
-  const [saving, setSaving] = React.useState(false)
+  >("default");
+  const [saving, setSaving] = React.useState(false);
 
   React.useEffect(() => {
     if ("Notification" in window) {
-      setPushPermission(Notification.permission)
+      setPushPermission(Notification.permission);
     } else {
-      setPushPermission("unsupported")
+      setPushPermission("unsupported");
     }
-  }, [])
+  }, []);
 
   const handleToggle = (
     channel: "email" | "push" | "inApp",
     key: string,
-    value: boolean
+    value: boolean,
   ) => {
     setPreferences((prev) => ({
       ...prev,
@@ -49,30 +55,33 @@ export function NotificationPreferences({
         ...prev[channel],
         [key]: value,
       },
-    }))
-  }
+    }));
+  };
 
   const handleRequestPush = async () => {
-    const granted = await requestPushPermission()
-    setPushPermission(granted ? "granted" : "denied")
+    const granted = await requestPushPermission();
+    setPushPermission(granted ? "granted" : "denied");
     if (granted) {
-      success("Notificaciones push activadas")
+      success("Notificaciones push activadas");
     } else {
-      error("Permiso denegado", "Puedes habilitarlo desde la configuración del navegador")
+      error(
+        "Permiso denegado",
+        "Puedes habilitarlo desde la configuración del navegador",
+      );
     }
-  }
+  };
 
   const handleSave = async () => {
-    setSaving(true)
+    setSaving(true);
     try {
-      saveNotificationPreferences(preferences)
-      success("Preferencias guardadas")
+      saveNotificationPreferences(preferences);
+      success("Preferencias guardadas");
     } catch {
-      error("Error al guardar")
+      error("Error al guardar");
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
   const preferenceGroups = [
     {
@@ -110,7 +119,7 @@ export function NotificationPreferences({
         { key: "system", label: "Avisos del sistema" },
       ],
     },
-  ]
+  ];
 
   return (
     <div className={cn("space-y-6", className)}>
@@ -121,7 +130,9 @@ export function NotificationPreferences({
             <div className="flex items-center gap-3">
               <Bell className="h-5 w-5 text-accent" />
               <div>
-                <p className="font-medium text-sm">Activa las notificaciones push</p>
+                <p className="font-medium text-sm">
+                  Activa las notificaciones push
+                </p>
                 <p className="text-xs text-muted-foreground">
                   Recibe alertas instantáneas de tus pedidos
                 </p>
@@ -152,9 +163,9 @@ export function NotificationPreferences({
 
       {/* Preference groups */}
       {preferenceGroups.map((group) => {
-        const Icon = group.icon
+        const Icon = group.icon;
         const isPushDisabled =
-          group.channel === "push" && pushPermission !== "granted"
+          group.channel === "push" && pushPermission !== "granted";
 
         return (
           <Card key={group.channel}>
@@ -179,7 +190,7 @@ export function NotificationPreferences({
                     htmlFor={`${group.channel}-${option.key}`}
                     className={cn(
                       "text-sm",
-                      isPushDisabled && "text-muted-foreground"
+                      isPushDisabled && "text-muted-foreground",
                     )}
                   >
                     {option.label}
@@ -200,7 +211,7 @@ export function NotificationPreferences({
               ))}
             </CardContent>
           </Card>
-        )
+        );
       })}
 
       {/* Save button */}
@@ -211,37 +222,33 @@ export function NotificationPreferences({
         </Button>
       </div>
     </div>
-  )
+  );
 }
 
 // Quick toggle for all notifications
-export function NotificationQuickToggle({
-  className,
-}: {
-  className?: string
-}) {
-  const [enabled, setEnabled] = React.useState(true)
+export function NotificationQuickToggle({ className }: { className?: string }) {
+  const [enabled, setEnabled] = React.useState(true);
 
   const handleToggle = (value: boolean) => {
-    setEnabled(value)
+    setEnabled(value);
     // Update all preferences
-    const preferences = getNotificationPreferences()
+    const preferences = getNotificationPreferences();
     const updated = {
       email: Object.keys(preferences.email).reduce(
         (acc, key) => ({ ...acc, [key]: value }),
-        {} as typeof preferences.email
+        {} as typeof preferences.email,
       ),
       push: Object.keys(preferences.push).reduce(
         (acc, key) => ({ ...acc, [key]: value }),
-        {} as typeof preferences.push
+        {} as typeof preferences.push,
       ),
       inApp: Object.keys(preferences.inApp).reduce(
         (acc, key) => ({ ...acc, [key]: value }),
-        {} as typeof preferences.inApp
+        {} as typeof preferences.inApp,
       ),
-    }
-    saveNotificationPreferences(updated)
-  }
+    };
+    saveNotificationPreferences(updated);
+  };
 
   return (
     <div className={cn("flex items-center justify-between", className)}>
@@ -251,5 +258,5 @@ export function NotificationQuickToggle({
       </div>
       <Switch checked={enabled} onCheckedChange={handleToggle} />
     </div>
-  )
+  );
 }

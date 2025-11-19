@@ -7,48 +7,48 @@ export type NotificationType =
   | "info"
   | "order"
   | "promo"
-  | "system"
+  | "system";
 
-export type NotificationPriority = "low" | "medium" | "high" | "urgent"
+export type NotificationPriority = "low" | "medium" | "high" | "urgent";
 
 export interface Notification {
-  id: string
-  type: NotificationType
-  title: string
-  message: string
-  priority?: NotificationPriority
-  read: boolean
-  createdAt: Date
-  link?: string
+  id: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  priority?: NotificationPriority;
+  read: boolean;
+  createdAt: Date;
+  link?: string;
   action?: {
-    label: string
-    onClick: () => void
-  }
+    label: string;
+    onClick: () => void;
+  };
   meta?: {
-    orderId?: string
-    productId?: string
-    couponCode?: string
-  }
+    orderId?: string;
+    productId?: string;
+    couponCode?: string;
+  };
 }
 
 export interface NotificationPreferences {
   email: {
-    orders: boolean
-    promotions: boolean
-    newsletter: boolean
-    priceAlerts: boolean
-    stockAlerts: boolean
-  }
+    orders: boolean;
+    promotions: boolean;
+    newsletter: boolean;
+    priceAlerts: boolean;
+    stockAlerts: boolean;
+  };
   push: {
-    orders: boolean
-    promotions: boolean
-    priceAlerts: boolean
-  }
+    orders: boolean;
+    promotions: boolean;
+    priceAlerts: boolean;
+  };
   inApp: {
-    orders: boolean
-    promotions: boolean
-    system: boolean
-  }
+    orders: boolean;
+    promotions: boolean;
+    system: boolean;
+  };
 }
 
 // Default preferences
@@ -70,122 +70,122 @@ export const defaultPreferences: NotificationPreferences = {
     promotions: true,
     system: true,
   },
-}
+};
 
 // Storage key
-const NOTIFICATIONS_KEY = "sacrint-notifications"
-const PREFERENCES_KEY = "sacrint-notification-preferences"
+const NOTIFICATIONS_KEY = "sacrint-notifications";
+const PREFERENCES_KEY = "sacrint-notification-preferences";
 
 // Generate unique ID
 function generateId(): string {
-  return `notif-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+  return `notif-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }
 
 // Get all notifications
 export function getNotifications(): Notification[] {
-  if (typeof window === "undefined") return []
+  if (typeof window === "undefined") return [];
 
-  const stored = localStorage.getItem(NOTIFICATIONS_KEY)
-  if (!stored) return []
+  const stored = localStorage.getItem(NOTIFICATIONS_KEY);
+  if (!stored) return [];
 
   try {
-    const notifications = JSON.parse(stored)
+    const notifications = JSON.parse(stored);
     return notifications.map((n: Notification) => ({
       ...n,
       createdAt: new Date(n.createdAt),
-    }))
+    }));
   } catch {
-    return []
+    return [];
   }
 }
 
 // Get unread count
 export function getUnreadCount(): number {
-  const notifications = getNotifications()
-  return notifications.filter((n) => !n.read).length
+  const notifications = getNotifications();
+  return notifications.filter((n) => !n.read).length;
 }
 
 // Add notification
 export function addNotification(
-  notification: Omit<Notification, "id" | "read" | "createdAt">
+  notification: Omit<Notification, "id" | "read" | "createdAt">,
 ): Notification {
-  const notifications = getNotifications()
+  const notifications = getNotifications();
 
   const newNotification: Notification = {
     ...notification,
     id: generateId(),
     read: false,
     createdAt: new Date(),
-  }
+  };
 
-  const updated = [newNotification, ...notifications].slice(0, 50) // Keep max 50
-  localStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(updated))
+  const updated = [newNotification, ...notifications].slice(0, 50); // Keep max 50
+  localStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(updated));
 
   // Dispatch event for UI updates
   window.dispatchEvent(
     new CustomEvent("notification-added", {
       detail: newNotification,
-    })
-  )
+    }),
+  );
 
-  return newNotification
+  return newNotification;
 }
 
 // Mark as read
 export function markAsRead(id: string): void {
-  const notifications = getNotifications()
+  const notifications = getNotifications();
   const updated = notifications.map((n) =>
-    n.id === id ? { ...n, read: true } : n
-  )
+    n.id === id ? { ...n, read: true } : n,
+  );
 
-  localStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(updated))
-  window.dispatchEvent(new CustomEvent("notifications-updated"))
+  localStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(updated));
+  window.dispatchEvent(new CustomEvent("notifications-updated"));
 }
 
 // Mark all as read
 export function markAllAsRead(): void {
-  const notifications = getNotifications()
-  const updated = notifications.map((n) => ({ ...n, read: true }))
+  const notifications = getNotifications();
+  const updated = notifications.map((n) => ({ ...n, read: true }));
 
-  localStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(updated))
-  window.dispatchEvent(new CustomEvent("notifications-updated"))
+  localStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(updated));
+  window.dispatchEvent(new CustomEvent("notifications-updated"));
 }
 
 // Delete notification
 export function deleteNotification(id: string): void {
-  const notifications = getNotifications()
-  const updated = notifications.filter((n) => n.id !== id)
+  const notifications = getNotifications();
+  const updated = notifications.filter((n) => n.id !== id);
 
-  localStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(updated))
-  window.dispatchEvent(new CustomEvent("notifications-updated"))
+  localStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(updated));
+  window.dispatchEvent(new CustomEvent("notifications-updated"));
 }
 
 // Clear all notifications
 export function clearAllNotifications(): void {
-  localStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify([]))
-  window.dispatchEvent(new CustomEvent("notifications-updated"))
+  localStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify([]));
+  window.dispatchEvent(new CustomEvent("notifications-updated"));
 }
 
 // Get preferences
 export function getNotificationPreferences(): NotificationPreferences {
-  if (typeof window === "undefined") return defaultPreferences
+  if (typeof window === "undefined") return defaultPreferences;
 
-  const stored = localStorage.getItem(PREFERENCES_KEY)
-  if (!stored) return defaultPreferences
+  const stored = localStorage.getItem(PREFERENCES_KEY);
+  if (!stored) return defaultPreferences;
 
   try {
-    return JSON.parse(stored)
+    return JSON.parse(stored);
   } catch {
-    return defaultPreferences
+    return defaultPreferences;
   }
 }
 
 // Save preferences
 export function saveNotificationPreferences(
-  preferences: NotificationPreferences
+  preferences: NotificationPreferences,
 ): void {
-  localStorage.setItem(PREFERENCES_KEY, JSON.stringify(preferences))
-  window.dispatchEvent(new CustomEvent("preferences-updated"))
+  localStorage.setItem(PREFERENCES_KEY, JSON.stringify(preferences));
+  window.dispatchEvent(new CustomEvent("preferences-updated"));
 }
 
 // Notification templates
@@ -247,7 +247,8 @@ export const notificationTemplates = {
   welcomeBonus: () => ({
     type: "promo" as NotificationType,
     title: "¡Bienvenido!",
-    message: "Usa el código BIENVENIDO para 10% de descuento en tu primera compra.",
+    message:
+      "Usa el código BIENVENIDO para 10% de descuento en tu primera compra.",
     priority: "high" as NotificationPriority,
     link: "/productos",
     meta: { couponCode: "BIENVENIDO" },
@@ -259,56 +260,56 @@ export const notificationTemplates = {
     message: `El sistema estará en mantenimiento el ${date}. Disculpa las molestias.`,
     priority: "low" as NotificationPriority,
   }),
-}
+};
 
 // Request push notification permission
 export async function requestPushPermission(): Promise<boolean> {
   if (!("Notification" in window)) {
-    console.warn("This browser does not support notifications")
-    return false
+    console.warn("This browser does not support notifications");
+    return false;
   }
 
   if (Notification.permission === "granted") {
-    return true
+    return true;
   }
 
   if (Notification.permission !== "denied") {
-    const permission = await Notification.requestPermission()
-    return permission === "granted"
+    const permission = await Notification.requestPermission();
+    return permission === "granted";
   }
 
-  return false
+  return false;
 }
 
 // Show browser notification
 export function showBrowserNotification(
   title: string,
-  options?: NotificationOptions
+  options?: NotificationOptions,
 ): void {
   if (Notification.permission === "granted") {
     new Notification(title, {
       icon: "/icon-192.png",
       badge: "/icon-72.png",
       ...options,
-    })
+    });
   }
 }
 
 // Format notification time
 export function formatNotificationTime(date: Date): string {
-  const now = new Date()
-  const diff = now.getTime() - date.getTime()
-  const minutes = Math.floor(diff / 60000)
-  const hours = Math.floor(diff / 3600000)
-  const days = Math.floor(diff / 86400000)
+  const now = new Date();
+  const diff = now.getTime() - date.getTime();
+  const minutes = Math.floor(diff / 60000);
+  const hours = Math.floor(diff / 3600000);
+  const days = Math.floor(diff / 86400000);
 
-  if (minutes < 1) return "Ahora"
-  if (minutes < 60) return `Hace ${minutes} min`
-  if (hours < 24) return `Hace ${hours}h`
-  if (days < 7) return `Hace ${days}d`
+  if (minutes < 1) return "Ahora";
+  if (minutes < 60) return `Hace ${minutes} min`;
+  if (hours < 24) return `Hace ${hours}h`;
+  if (days < 7) return `Hace ${days}d`;
 
   return date.toLocaleDateString("es-MX", {
     day: "numeric",
     month: "short",
-  })
+  });
 }

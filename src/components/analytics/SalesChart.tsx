@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import * as React from "react";
 import {
   LineChart,
   Line,
@@ -10,22 +10,22 @@ import {
   Tooltip,
   ResponsiveContainer,
   Legend,
-} from "recharts"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { TrendingUp, TrendingDown, DollarSign } from "lucide-react"
-import { cn } from "@/lib/utils"
+} from "recharts";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { TrendingUp, TrendingDown, DollarSign } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface SalesData {
-  date: string
-  ventas: number
-  ordenes: number
+  date: string;
+  ventas: number;
+  ordenes: number;
 }
 
 interface SalesChartProps {
-  data?: SalesData[]
-  title?: string
-  className?: string
+  data?: SalesData[];
+  title?: string;
+  className?: string;
 }
 
 // Mock data
@@ -37,30 +37,30 @@ const defaultData: SalesData[] = [
   { date: "Vie", ventas: 28500, ordenes: 95 },
   { date: "Sab", ventas: 35200, ordenes: 112 },
   { date: "Dom", ventas: 24800, ordenes: 82 },
-]
+];
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat("es-MX", {
     style: "currency",
     currency: "MXN",
     minimumFractionDigits: 0,
-  }).format(value)
+  }).format(value);
 
 export function SalesChart({
   data = defaultData,
   title = "Ventas de la Semana",
   className,
 }: SalesChartProps) {
-  const [period, setPeriod] = React.useState<"week" | "month" | "year">("week")
+  const [period, setPeriod] = React.useState<"week" | "month" | "year">("week");
 
   // Calculate totals and trends
-  const totalSales = data.reduce((sum, d) => sum + d.ventas, 0)
-  const totalOrders = data.reduce((sum, d) => sum + d.ordenes, 0)
-  const avgOrderValue = totalSales / totalOrders
+  const totalSales = data.reduce((sum, d) => sum + d.ventas, 0);
+  const totalOrders = data.reduce((sum, d) => sum + d.ordenes, 0);
+  const avgOrderValue = totalSales / totalOrders;
 
   // Simulate trend (in real app, compare with previous period)
-  const salesTrend = 12.5
-  const ordersTrend = 8.3
+  const salesTrend = 12.5;
+  const ordersTrend = 8.3;
 
   return (
     <Card className={className}>
@@ -96,7 +96,7 @@ export function SalesChart({
               <span
                 className={cn(
                   "text-xs font-medium flex items-center",
-                  salesTrend >= 0 ? "text-success" : "text-error"
+                  salesTrend >= 0 ? "text-success" : "text-error",
                 )}
               >
                 {salesTrend >= 0 ? (
@@ -115,7 +115,7 @@ export function SalesChart({
               <span
                 className={cn(
                   "text-xs font-medium flex items-center",
-                  ordersTrend >= 0 ? "text-success" : "text-error"
+                  ordersTrend >= 0 ? "text-success" : "text-error",
                 )}
               >
                 {ordersTrend >= 0 ? (
@@ -131,7 +131,9 @@ export function SalesChart({
             <p className="text-2xl font-bold text-primary">
               {formatCurrency(avgOrderValue)}
             </p>
-            <p className="text-sm text-muted-foreground mt-1">Ticket Promedio</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Ticket Promedio
+            </p>
           </div>
         </div>
 
@@ -181,5 +183,5 @@ export function SalesChart({
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

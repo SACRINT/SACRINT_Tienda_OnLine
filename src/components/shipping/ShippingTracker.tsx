@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import * as React from "react";
 import {
   Package,
   Truck,
@@ -9,27 +9,32 @@ import {
   Clock,
   ExternalLink,
   Copy,
-  RefreshCw
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { cn } from "@/lib/utils"
+  RefreshCw,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 interface TrackingEvent {
-  id: string
-  status: string
-  location: string
-  timestamp: Date
-  description: string
+  id: string;
+  status: string;
+  location: string;
+  timestamp: Date;
+  description: string;
 }
 
 interface ShippingTrackerProps {
-  trackingNumber: string
-  carrier: string
-  estimatedDelivery?: string
-  currentStatus: "pending" | "picked_up" | "in_transit" | "out_for_delivery" | "delivered"
-  events?: TrackingEvent[]
+  trackingNumber: string;
+  carrier: string;
+  estimatedDelivery?: string;
+  currentStatus:
+    | "pending"
+    | "picked_up"
+    | "in_transit"
+    | "out_for_delivery"
+    | "delivered";
+  events?: TrackingEvent[];
 }
 
 const statusConfig = {
@@ -63,7 +68,7 @@ const statusConfig = {
     color: "text-success bg-success/10",
     step: 4,
   },
-}
+};
 
 const steps = [
   { key: "pending", label: "Pendiente" },
@@ -71,7 +76,7 @@ const steps = [
   { key: "in_transit", label: "En Tránsito" },
   { key: "out_for_delivery", label: "En Camino" },
   { key: "delivered", label: "Entregado" },
-]
+];
 
 // Mock tracking events
 const getMockEvents = (status: string): TrackingEvent[] => {
@@ -90,16 +95,20 @@ const getMockEvents = (status: string): TrackingEvent[] => {
       timestamp: new Date(Date.now() - 2.5 * 24 * 60 * 60 * 1000),
       description: "El paquete ha sido recolectado por el transportista",
     },
-  ]
+  ];
 
-  if (status === "in_transit" || status === "out_for_delivery" || status === "delivered") {
+  if (
+    status === "in_transit" ||
+    status === "out_for_delivery" ||
+    status === "delivered"
+  ) {
     events.push({
       id: "3",
       status: "En tránsito",
       location: "Hub Querétaro",
       timestamp: new Date(Date.now() - 1.5 * 24 * 60 * 60 * 1000),
       description: "El paquete está en camino a la ciudad de destino",
-    })
+    });
   }
 
   if (status === "out_for_delivery" || status === "delivered") {
@@ -109,7 +118,7 @@ const getMockEvents = (status: string): TrackingEvent[] => {
       location: "Centro de Distribución Local",
       timestamp: new Date(Date.now() - 0.5 * 24 * 60 * 60 * 1000),
       description: "El paquete está en la última milla de entrega",
-    })
+    });
   }
 
   if (status === "delivered") {
@@ -119,11 +128,11 @@ const getMockEvents = (status: string): TrackingEvent[] => {
       location: "Dirección del cliente",
       timestamp: new Date(),
       description: "El paquete ha sido entregado exitosamente",
-    })
+    });
   }
 
-  return events.reverse()
-}
+  return events.reverse();
+};
 
 export function ShippingTracker({
   trackingNumber,
@@ -132,26 +141,26 @@ export function ShippingTracker({
   currentStatus,
   events: propEvents,
 }: ShippingTrackerProps) {
-  const [copied, setCopied] = React.useState(false)
-  const [refreshing, setRefreshing] = React.useState(false)
+  const [copied, setCopied] = React.useState(false);
+  const [refreshing, setRefreshing] = React.useState(false);
 
-  const config = statusConfig[currentStatus]
-  const StatusIcon = config.icon
-  const currentStep = config.step
-  const events = propEvents || getMockEvents(currentStatus)
+  const config = statusConfig[currentStatus];
+  const StatusIcon = config.icon;
+  const currentStep = config.step;
+  const events = propEvents || getMockEvents(currentStatus);
 
   const copyTrackingNumber = async () => {
-    await navigator.clipboard.writeText(trackingNumber)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
+    await navigator.clipboard.writeText(trackingNumber);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const refreshTracking = async () => {
-    setRefreshing(true)
+    setRefreshing(true);
     // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-    setRefreshing(false)
-  }
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    setRefreshing(false);
+  };
 
   const getCarrierTrackingUrl = (carrier: string, tracking: string) => {
     const urls: Record<string, string> = {
@@ -159,9 +168,9 @@ export function ShippingTracker({
       FedEx: `https://www.fedex.com/fedextrack/?trknbr=${tracking}`,
       "99 Minutos": `https://99minutos.com/tracking/${tracking}`,
       DHL: `https://www.dhl.com/mx-es/home/tracking.html?tracking-id=${tracking}`,
-    }
-    return urls[carrier] || "#"
-  }
+    };
+    return urls[carrier] || "#";
+  };
 
   const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat("es-MX", {
@@ -169,8 +178,8 @@ export function ShippingTracker({
       month: "short",
       hour: "2-digit",
       minute: "2-digit",
-    }).format(date)
-  }
+    }).format(date);
+  };
 
   return (
     <Card>
@@ -186,7 +195,9 @@ export function ShippingTracker({
             onClick={refreshTracking}
             disabled={refreshing}
           >
-            <RefreshCw className={cn("h-4 w-4", refreshing && "animate-spin")} />
+            <RefreshCw
+              className={cn("h-4 w-4", refreshing && "animate-spin")}
+            />
           </Button>
         </div>
       </CardHeader>
@@ -196,7 +207,9 @@ export function ShippingTracker({
           <div>
             <p className="text-sm text-muted-foreground">Número de Guía</p>
             <div className="flex items-center gap-2">
-              <code className="text-lg font-mono font-medium">{trackingNumber}</code>
+              <code className="text-lg font-mono font-medium">
+                {trackingNumber}
+              </code>
               <Button
                 variant="ghost"
                 size="icon"
@@ -248,8 +261,8 @@ export function ShippingTracker({
         <div className="relative">
           <div className="flex justify-between">
             {steps.map((step, index) => {
-              const isCompleted = index <= currentStep
-              const isCurrent = index === currentStep
+              const isCompleted = index <= currentStep;
+              const isCurrent = index === currentStep;
 
               return (
                 <div
@@ -262,7 +275,7 @@ export function ShippingTracker({
                       isCompleted
                         ? "bg-success text-white"
                         : "bg-muted text-muted-foreground",
-                      isCurrent && "ring-2 ring-success ring-offset-2"
+                      isCurrent && "ring-2 ring-success ring-offset-2",
                     )}
                   >
                     {isCompleted ? (
@@ -276,13 +289,13 @@ export function ShippingTracker({
                       "text-xs mt-2 text-center",
                       isCompleted
                         ? "text-foreground font-medium"
-                        : "text-muted-foreground"
+                        : "text-muted-foreground",
                     )}
                   >
                     {step.label}
                   </span>
                 </div>
-              )
+              );
             })}
           </div>
           {/* Progress Line */}
@@ -306,7 +319,7 @@ export function ShippingTracker({
                   <div
                     className={cn(
                       "w-3 h-3 rounded-full",
-                      index === 0 ? "bg-success" : "bg-muted-foreground/30"
+                      index === 0 ? "bg-success" : "bg-muted-foreground/30",
                     )}
                   />
                   {index < events.length - 1 && (
@@ -335,5 +348,5 @@ export function ShippingTracker({
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

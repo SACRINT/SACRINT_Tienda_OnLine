@@ -1,5 +1,5 @@
 // Schema.org Structured Data generators
-import { siteConfig } from "./metadata"
+import { siteConfig } from "./metadata";
 
 // Organization schema
 export function generateOrganizationSchema() {
@@ -20,7 +20,7 @@ export function generateOrganizationSchema() {
       contactType: "customer service",
       availableLanguage: ["Spanish"],
     },
-  }
+  };
 }
 
 // Website schema
@@ -38,23 +38,23 @@ export function generateWebsiteSchema() {
       },
       "query-input": "required name=search_term_string",
     },
-  }
+  };
 }
 
 // Product schema
 export function generateProductSchema(product: {
-  name: string
-  description: string
-  sku: string
-  price: number
-  compareAtPrice?: number
-  images: string[]
-  brand?: string
-  category?: string
-  inStock: boolean
-  rating?: number
-  reviewCount?: number
-  url: string
+  name: string;
+  description: string;
+  sku: string;
+  price: number;
+  compareAtPrice?: number;
+  images: string[];
+  brand?: string;
+  category?: string;
+  inStock: boolean;
+  rating?: number;
+  reviewCount?: number;
+  url: string;
 }) {
   const schema: any = {
     "@context": "https://schema.org",
@@ -76,19 +76,21 @@ export function generateProductSchema(product: {
         name: siteConfig.name,
       },
     },
-  }
+  };
 
   if (product.brand) {
     schema.brand = {
       "@type": "Brand",
       name: product.brand,
-    }
+    };
   }
 
   if (product.compareAtPrice && product.compareAtPrice > product.price) {
     schema.offers.priceValidUntil = new Date(
-      Date.now() + 30 * 24 * 60 * 60 * 1000
-    ).toISOString().split("T")[0]
+      Date.now() + 30 * 24 * 60 * 60 * 1000,
+    )
+      .toISOString()
+      .split("T")[0];
   }
 
   if (product.rating && product.reviewCount) {
@@ -96,15 +98,15 @@ export function generateProductSchema(product: {
       "@type": "AggregateRating",
       ratingValue: product.rating,
       reviewCount: product.reviewCount,
-    }
+    };
   }
 
-  return schema
+  return schema;
 }
 
 // Breadcrumb schema
 export function generateBreadcrumbSchema(
-  items: Array<{ name: string; url: string }>
+  items: Array<{ name: string; url: string }>,
 ) {
   return {
     "@context": "https://schema.org",
@@ -115,12 +117,12 @@ export function generateBreadcrumbSchema(
       name: item.name,
       item: item.url,
     })),
-  }
+  };
 }
 
 // FAQ schema
 export function generateFAQSchema(
-  faqs: Array<{ question: string; answer: string }>
+  faqs: Array<{ question: string; answer: string }>,
 ) {
   return {
     "@context": "https://schema.org",
@@ -133,22 +135,22 @@ export function generateFAQSchema(
         text: faq.answer,
       },
     })),
-  }
+  };
 }
 
 // Local business schema (for physical stores)
 export function generateLocalBusinessSchema(store: {
-  name: string
+  name: string;
   address: {
-    street: string
-    city: string
-    state: string
-    postalCode: string
-    country: string
-  }
-  phone: string
-  hours: string[]
-  geo?: { lat: number; lng: number }
+    street: string;
+    city: string;
+    state: string;
+    postalCode: string;
+    country: string;
+  };
+  phone: string;
+  hours: string[];
+  geo?: { lat: number; lng: number };
 }) {
   return {
     "@context": "https://schema.org",
@@ -171,18 +173,18 @@ export function generateLocalBusinessSchema(store: {
         longitude: store.geo.lng,
       },
     }),
-  }
+  };
 }
 
 // Article/Blog schema
 export function generateArticleSchema(article: {
-  title: string
-  description: string
-  author: string
-  publishedAt: Date
-  modifiedAt?: Date
-  image: string
-  url: string
+  title: string;
+  description: string;
+  author: string;
+  publishedAt: Date;
+  modifiedAt?: Date;
+  image: string;
+  url: string;
 }) {
   return {
     "@context": "https://schema.org",
@@ -208,16 +210,16 @@ export function generateArticleSchema(article: {
       "@type": "WebPage",
       "@id": article.url,
     },
-  }
+  };
 }
 
 // Review schema
 export function generateReviewSchema(review: {
-  author: string
-  rating: number
-  reviewBody: string
-  datePublished: Date
-  productName: string
+  author: string;
+  rating: number;
+  reviewBody: string;
+  datePublished: Date;
+  productName: string;
 }) {
   return {
     "@context": "https://schema.org",
@@ -237,5 +239,5 @@ export function generateReviewSchema(review: {
       "@type": "Product",
       name: review.productName,
     },
-  }
+  };
 }

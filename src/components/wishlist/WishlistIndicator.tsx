@@ -1,41 +1,36 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import Link from "next/link"
-import { Heart } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { getWishlistCount } from "@/lib/wishlist"
+import * as React from "react";
+import Link from "next/link";
+import { Heart } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { getWishlistCount } from "@/lib/wishlist";
 
 interface WishlistIndicatorProps {
-  className?: string
+  className?: string;
 }
 
 export function WishlistIndicator({ className }: WishlistIndicatorProps) {
-  const [count, setCount] = React.useState(0)
+  const [count, setCount] = React.useState(0);
 
   // Load initial count
   React.useEffect(() => {
-    setCount(getWishlistCount())
-  }, [])
+    setCount(getWishlistCount());
+  }, []);
 
   // Listen for wishlist updates
   React.useEffect(() => {
     const handleUpdate = () => {
-      setCount(getWishlistCount())
-    }
+      setCount(getWishlistCount());
+    };
 
-    window.addEventListener("wishlist-updated", handleUpdate)
-    return () => window.removeEventListener("wishlist-updated", handleUpdate)
-  }, [])
+    window.addEventListener("wishlist-updated", handleUpdate);
+    return () => window.removeEventListener("wishlist-updated", handleUpdate);
+  }, []);
 
   return (
-    <Button
-      variant="ghost"
-      size="icon"
-      className={className}
-      asChild
-    >
+    <Button variant="ghost" size="icon" className={className} asChild>
       <Link href="/account/wishlist" className="relative">
         <Heart className="h-5 w-5" />
         {count > 0 && (
@@ -51,5 +46,5 @@ export function WishlistIndicator({ className }: WishlistIndicatorProps) {
         </span>
       </Link>
     </Button>
-  )
+  );
 }

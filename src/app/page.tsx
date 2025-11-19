@@ -1,8 +1,8 @@
-import { HeroSection } from "@/components/home/HeroSection"
-import { CategoriesSection } from "@/components/home/CategoriesSection"
-import { FeaturedProducts } from "@/components/home/FeaturedProducts"
-import { ValueProposition } from "@/components/home/ValueProposition"
-import { Newsletter } from "@/components/home/Newsletter"
+import { HeroSection } from "@/components/home/HeroSection";
+import { CategoriesSection } from "@/components/home/CategoriesSection";
+import { FeaturedProducts } from "@/components/home/FeaturedProducts";
+import { ValueProposition } from "@/components/home/ValueProposition";
+import { Newsletter } from "@/components/home/Newsletter";
 
 export default function HomePage() {
   return (
@@ -43,5 +43,5 @@ export default function HomePage() {
       {/* Newsletter Subscription */}
       <Newsletter />
     </main>
-  )
+  );
 }

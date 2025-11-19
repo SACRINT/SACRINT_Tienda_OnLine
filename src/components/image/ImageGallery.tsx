@@ -1,61 +1,61 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import Image from "next/image"
-import { ChevronLeft, ChevronRight, X, ZoomIn } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
+import * as React from "react";
+import Image from "next/image";
+import { ChevronLeft, ChevronRight, X, ZoomIn } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface ImageGalleryProps {
   images: Array<{
-    src: string
-    alt: string
-  }>
-  className?: string
+    src: string;
+    alt: string;
+  }>;
+  className?: string;
 }
 
 export function ImageGallery({ images, className }: ImageGalleryProps) {
-  const [selectedIndex, setSelectedIndex] = React.useState(0)
-  const [isLightboxOpen, setIsLightboxOpen] = React.useState(false)
+  const [selectedIndex, setSelectedIndex] = React.useState(0);
+  const [isLightboxOpen, setIsLightboxOpen] = React.useState(false);
 
-  const selectedImage = images[selectedIndex]
+  const selectedImage = images[selectedIndex];
 
   const handlePrevious = () => {
-    setSelectedIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1))
-  }
+    setSelectedIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+  };
 
   const handleNext = () => {
-    setSelectedIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1))
-  }
+    setSelectedIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+  };
 
   // Keyboard navigation
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (!isLightboxOpen) return
+      if (!isLightboxOpen) return;
 
       switch (e.key) {
         case "ArrowLeft":
-          handlePrevious()
-          break
+          handlePrevious();
+          break;
         case "ArrowRight":
-          handleNext()
-          break
+          handleNext();
+          break;
         case "Escape":
-          setIsLightboxOpen(false)
-          break
+          setIsLightboxOpen(false);
+          break;
       }
-    }
+    };
 
-    window.addEventListener("keydown", handleKeyDown)
-    return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [isLightboxOpen])
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isLightboxOpen]);
 
   if (images.length === 0) {
     return (
       <div className="aspect-square bg-muted flex items-center justify-center rounded-lg">
         <span className="text-muted-foreground">Sin imágenes</span>
       </div>
-    )
+    );
   }
 
   return (
@@ -109,7 +109,7 @@ export function ImageGallery({ images, className }: ImageGalleryProps) {
                 "relative w-16 h-16 flex-shrink-0 rounded-md overflow-hidden border-2 transition-colors",
                 selectedIndex === index
                   ? "border-primary"
-                  : "border-transparent hover:border-primary/50"
+                  : "border-transparent hover:border-primary/50",
               )}
             >
               <Image
@@ -172,5 +172,5 @@ export function ImageGallery({ images, className }: ImageGalleryProps) {
         </div>
       )}
     </div>
-  )
+  );
 }

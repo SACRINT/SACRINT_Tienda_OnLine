@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import Link from "next/link"
+import * as React from "react";
+import Link from "next/link";
 import {
   Bell,
   Check,
@@ -13,15 +13,15 @@ import {
   AlertCircle,
   Settings,
   X,
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { cn } from "@/lib/utils"
+} from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
 import {
   getNotifications,
   markAsRead,
@@ -31,71 +31,71 @@ import {
   formatNotificationTime,
   type Notification,
   type NotificationType,
-} from "@/lib/notifications"
+} from "@/lib/notifications";
 
 interface NotificationCenterProps {
-  className?: string
+  className?: string;
 }
 
 export function NotificationCenter({ className }: NotificationCenterProps) {
-  const [notifications, setNotifications] = React.useState<Notification[]>([])
-  const [isOpen, setIsOpen] = React.useState(false)
+  const [notifications, setNotifications] = React.useState<Notification[]>([]);
+  const [isOpen, setIsOpen] = React.useState(false);
 
   const loadNotifications = React.useCallback(() => {
-    setNotifications(getNotifications())
-  }, [])
+    setNotifications(getNotifications());
+  }, []);
 
   React.useEffect(() => {
-    loadNotifications()
+    loadNotifications();
 
-    const handleUpdate = () => loadNotifications()
-    window.addEventListener("notifications-updated", handleUpdate)
-    window.addEventListener("notification-added", handleUpdate)
+    const handleUpdate = () => loadNotifications();
+    window.addEventListener("notifications-updated", handleUpdate);
+    window.addEventListener("notification-added", handleUpdate);
 
     return () => {
-      window.removeEventListener("notifications-updated", handleUpdate)
-      window.removeEventListener("notification-added", handleUpdate)
-    }
-  }, [loadNotifications])
+      window.removeEventListener("notifications-updated", handleUpdate);
+      window.removeEventListener("notification-added", handleUpdate);
+    };
+  }, [loadNotifications]);
 
-  const unreadCount = notifications.filter((n) => !n.read).length
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
   const handleMarkAsRead = (id: string) => {
-    markAsRead(id)
-    loadNotifications()
-  }
+    markAsRead(id);
+    loadNotifications();
+  };
 
   const handleMarkAllAsRead = () => {
-    markAllAsRead()
-    loadNotifications()
-  }
+    markAllAsRead();
+    loadNotifications();
+  };
 
   const handleDelete = (id: string) => {
-    deleteNotification(id)
-    loadNotifications()
-  }
+    deleteNotification(id);
+    loadNotifications();
+  };
 
   const handleClearAll = () => {
-    clearAllNotifications()
-    loadNotifications()
-  }
+    clearAllNotifications();
+    loadNotifications();
+  };
 
   const getNotificationIcon = (type: NotificationType) => {
     switch (type) {
       case "order":
-        return <Package className="h-4 w-4 text-primary" />
+        return <Package className="h-4 w-4 text-primary" />;
       case "promo":
-        return <Tag className="h-4 w-4 text-accent" />
+        return <Tag className="h-4 w-4 text-accent" />;
       case "success":
-        return <Check className="h-4 w-4 text-success" />
+        return <Check className="h-4 w-4 text-success" />;
       case "warning":
-        return <AlertCircle className="h-4 w-4 text-warning" />
+        return <AlertCircle className="h-4 w-4 text-warning" />;
       case "error":
-        return <AlertCircle className="h-4 w-4 text-error" />
+        return <AlertCircle className="h-4 w-4 text-error" />;
       default:
-        return <Info className="h-4 w-4 text-muted-foreground" />
+        return <Info className="h-4 w-4 text-muted-foreground" />;
     }
-  }
+  };
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -154,7 +154,7 @@ export function NotificationCenter({ className }: NotificationCenterProps) {
                     key={notification.id}
                     className={cn(
                       "p-3 hover:bg-muted/50 transition-colors relative group",
-                      !notification.read && "bg-primary/5"
+                      !notification.read && "bg-primary/5",
                     )}
                   >
                     <div className="flex gap-3">
@@ -166,8 +166,8 @@ export function NotificationCenter({ className }: NotificationCenterProps) {
                           <Link
                             href={notification.link}
                             onClick={() => {
-                              handleMarkAsRead(notification.id)
-                              setIsOpen(false)
+                              handleMarkAsRead(notification.id);
+                              setIsOpen(false);
                             }}
                             className="block"
                           >
@@ -232,40 +232,40 @@ export function NotificationCenter({ className }: NotificationCenterProps) {
         )}
       </PopoverContent>
     </Popover>
-  )
+  );
 }
 
 // Notification Badge (simple indicator)
 export function NotificationBadge({ className }: { className?: string }) {
-  const [count, setCount] = React.useState(0)
+  const [count, setCount] = React.useState(0);
 
   React.useEffect(() => {
     const updateCount = () => {
-      const notifications = getNotifications()
-      setCount(notifications.filter((n) => !n.read).length)
-    }
+      const notifications = getNotifications();
+      setCount(notifications.filter((n) => !n.read).length);
+    };
 
-    updateCount()
+    updateCount();
 
-    window.addEventListener("notifications-updated", updateCount)
-    window.addEventListener("notification-added", updateCount)
+    window.addEventListener("notifications-updated", updateCount);
+    window.addEventListener("notification-added", updateCount);
 
     return () => {
-      window.removeEventListener("notifications-updated", updateCount)
-      window.removeEventListener("notification-added", updateCount)
-    }
-  }, [])
+      window.removeEventListener("notifications-updated", updateCount);
+      window.removeEventListener("notification-added", updateCount);
+    };
+  }, []);
 
-  if (count === 0) return null
+  if (count === 0) return null;
 
   return (
     <span
       className={cn(
         "h-5 w-5 rounded-full bg-error text-error-foreground text-xs flex items-center justify-center font-medium",
-        className
+        className,
       )}
     >
       {count > 9 ? "9+" : count}
     </span>
-  )
+  );
 }

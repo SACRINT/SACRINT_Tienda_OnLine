@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { createPortal } from "react-dom"
+import * as React from "react";
+import { createPortal } from "react-dom";
 import {
   Check,
   X,
@@ -9,25 +9,25 @@ import {
   Info,
   AlertTriangle,
   Loader2,
-} from "lucide-react"
-import { cn } from "@/lib/utils"
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
-export type ToastType = "success" | "error" | "warning" | "info" | "loading"
+export type ToastType = "success" | "error" | "warning" | "info" | "loading";
 
 export interface ToastData {
-  id: string
-  type: ToastType
-  title: string
-  message?: string
-  duration?: number
+  id: string;
+  type: ToastType;
+  title: string;
+  message?: string;
+  duration?: number;
   action?: {
-    label: string
-    onClick: () => void
-  }
+    label: string;
+    onClick: () => void;
+  };
 }
 
 interface ToastProps extends ToastData {
-  onClose: (id: string) => void
+  onClose: (id: string) => void;
 }
 
 function Toast({ id, type, title, message, action, onClose }: ToastProps) {
@@ -37,7 +37,7 @@ function Toast({ id, type, title, message, action, onClose }: ToastProps) {
     warning: <AlertTriangle className="h-5 w-5 text-warning" />,
     info: <Info className="h-5 w-5 text-primary" />,
     loading: <Loader2 className="h-5 w-5 text-primary animate-spin" />,
-  }
+  };
 
   const bgColors = {
     success: "bg-success/10 border-success/20",
@@ -45,14 +45,14 @@ function Toast({ id, type, title, message, action, onClose }: ToastProps) {
     warning: "bg-warning/10 border-warning/20",
     info: "bg-primary/10 border-primary/20",
     loading: "bg-primary/10 border-primary/20",
-  }
+  };
 
   return (
     <div
       className={cn(
         "relative flex items-start gap-3 p-4 rounded-lg border shadow-lg",
         "animate-in slide-in-from-right-full fade-in duration-200",
-        bgColors[type]
+        bgColors[type],
       )}
       role="alert"
     >
@@ -80,91 +80,88 @@ function Toast({ id, type, title, message, action, onClose }: ToastProps) {
         </button>
       )}
     </div>
-  )
+  );
 }
 
 // Toast Container with Context
 interface ToastContextType {
-  toasts: ToastData[]
-  addToast: (toast: Omit<ToastData, "id">) => string
-  removeToast: (id: string) => void
-  success: (title: string, message?: string) => void
-  error: (title: string, message?: string) => void
-  warning: (title: string, message?: string) => void
-  info: (title: string, message?: string) => void
-  loading: (title: string, message?: string) => string
-  dismiss: (id: string) => void
+  toasts: ToastData[];
+  addToast: (toast: Omit<ToastData, "id">) => string;
+  removeToast: (id: string) => void;
+  success: (title: string, message?: string) => void;
+  error: (title: string, message?: string) => void;
+  warning: (title: string, message?: string) => void;
+  info: (title: string, message?: string) => void;
+  loading: (title: string, message?: string) => string;
+  dismiss: (id: string) => void;
 }
 
 const ToastContext = React.createContext<ToastContextType | undefined>(
-  undefined
-)
+  undefined,
+);
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
-  const [toasts, setToasts] = React.useState<ToastData[]>([])
-  const [mounted, setMounted] = React.useState(false)
+  const [toasts, setToasts] = React.useState<ToastData[]>([]);
+  const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => {
-    setMounted(true)
-  }, [])
+    setMounted(true);
+  }, []);
 
-  const addToast = React.useCallback(
-    (toast: Omit<ToastData, "id">): string => {
-      const id = `toast-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
-      const newToast: ToastData = { ...toast, id }
+  const addToast = React.useCallback((toast: Omit<ToastData, "id">): string => {
+    const id = `toast-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const newToast: ToastData = { ...toast, id };
 
-      setToasts((prev) => [...prev, newToast])
+    setToasts((prev) => [...prev, newToast]);
 
-      // Auto-dismiss
-      if (toast.type !== "loading" && toast.duration !== 0) {
-        setTimeout(() => {
-          setToasts((prev) => prev.filter((t) => t.id !== id))
-        }, toast.duration || 5000)
-      }
+    // Auto-dismiss
+    if (toast.type !== "loading" && toast.duration !== 0) {
+      setTimeout(() => {
+        setToasts((prev) => prev.filter((t) => t.id !== id));
+      }, toast.duration || 5000);
+    }
 
-      return id
-    },
-    []
-  )
+    return id;
+  }, []);
 
   const removeToast = React.useCallback((id: string) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id))
-  }, [])
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  }, []);
 
   const success = React.useCallback(
     (title: string, message?: string) => {
-      addToast({ type: "success", title, message })
+      addToast({ type: "success", title, message });
     },
-    [addToast]
-  )
+    [addToast],
+  );
 
   const error = React.useCallback(
     (title: string, message?: string) => {
-      addToast({ type: "error", title, message })
+      addToast({ type: "error", title, message });
     },
-    [addToast]
-  )
+    [addToast],
+  );
 
   const warning = React.useCallback(
     (title: string, message?: string) => {
-      addToast({ type: "warning", title, message })
+      addToast({ type: "warning", title, message });
     },
-    [addToast]
-  )
+    [addToast],
+  );
 
   const info = React.useCallback(
     (title: string, message?: string) => {
-      addToast({ type: "info", title, message })
+      addToast({ type: "info", title, message });
     },
-    [addToast]
-  )
+    [addToast],
+  );
 
   const loading = React.useCallback(
     (title: string, message?: string): string => {
-      return addToast({ type: "loading", title, message, duration: 0 })
+      return addToast({ type: "loading", title, message, duration: 0 });
     },
-    [addToast]
-  )
+    [addToast],
+  );
 
   const value = {
     toasts,
@@ -176,7 +173,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     info,
     loading,
     dismiss: removeToast,
-  }
+  };
 
   return (
     <ToastContext.Provider value={value}>
@@ -188,44 +185,44 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
               <Toast key={toast.id} {...toast} onClose={removeToast} />
             ))}
           </div>,
-          document.body
+          document.body,
         )}
     </ToastContext.Provider>
-  )
+  );
 }
 
 export function useToast() {
-  const context = React.useContext(ToastContext)
+  const context = React.useContext(ToastContext);
   if (!context) {
-    throw new Error("useToast must be used within a ToastProvider")
+    throw new Error("useToast must be used within a ToastProvider");
   }
-  return context
+  return context;
 }
 
 // Standalone toast function (for use outside React components)
-let toastRef: ToastContextType | null = null
+let toastRef: ToastContextType | null = null;
 
 export function setToastRef(ref: ToastContextType) {
-  toastRef = ref
+  toastRef = ref;
 }
 
 export const toast = {
   success: (title: string, message?: string) => {
-    toastRef?.success(title, message)
+    toastRef?.success(title, message);
   },
   error: (title: string, message?: string) => {
-    toastRef?.error(title, message)
+    toastRef?.error(title, message);
   },
   warning: (title: string, message?: string) => {
-    toastRef?.warning(title, message)
+    toastRef?.warning(title, message);
   },
   info: (title: string, message?: string) => {
-    toastRef?.info(title, message)
+    toastRef?.info(title, message);
   },
   loading: (title: string, message?: string) => {
-    return toastRef?.loading(title, message) || ""
+    return toastRef?.loading(title, message) || "";
   },
   dismiss: (id: string) => {
-    toastRef?.dismiss(id)
+    toastRef?.dismiss(id);
   },
-}
+};

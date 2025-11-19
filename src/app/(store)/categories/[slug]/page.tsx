@@ -1,79 +1,184 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import Link from "next/link"
-import Image from "next/image"
-import { useParams } from "next/navigation"
-import { Filter, Grid3X3, LayoutGrid, SlidersHorizontal, X, Heart, ShoppingCart } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import { Separator } from "@/components/ui/separator"
-import { PriceRange } from "@/components/ui/price-range"
-import { RatingStars } from "@/components/ui/rating-stars"
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
-import { cn } from "@/lib/utils"
+import * as React from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { useParams } from "next/navigation";
+import {
+  Filter,
+  Grid3X3,
+  LayoutGrid,
+  SlidersHorizontal,
+  X,
+  Heart,
+  ShoppingCart,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { Separator } from "@/components/ui/separator";
+import { PriceRange } from "@/components/ui/price-range";
+import { RatingStars } from "@/components/ui/rating-stars";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { cn } from "@/lib/utils";
 
 // Mock data
 const mockProducts = [
-  { id: "1", name: "Auriculares Bluetooth Pro", slug: "auriculares-bluetooth-pro", price: 1499, originalPrice: 1999, rating: 4.5, reviewCount: 128, isSale: true, category: "electronicos" },
-  { id: "2", name: "Camiseta Premium Algodón", slug: "camiseta-premium-algodon", price: 599, rating: 4.8, reviewCount: 256, isNew: true, category: "ropa" },
-  { id: "3", name: "Lámpara LED Inteligente", slug: "lampara-led-inteligente", price: 899, originalPrice: 1199, rating: 4.2, reviewCount: 89, isSale: true, category: "hogar" },
-  { id: "4", name: "Zapatillas Running Ultra", slug: "zapatillas-running-ultra", price: 2499, rating: 4.7, reviewCount: 312, isNew: true, category: "deportes" },
-  { id: "5", name: "Smartwatch Fitness", slug: "smartwatch-fitness", price: 3299, rating: 4.6, reviewCount: 198, category: "electronicos" },
-  { id: "6", name: "Pantalón Casual", slug: "pantalon-casual", price: 899, rating: 4.4, reviewCount: 145, category: "ropa" },
-  { id: "7", name: "Cafetera Automática", slug: "cafetera-automatica", price: 2899, originalPrice: 3499, rating: 4.9, reviewCount: 412, isSale: true, category: "hogar" },
-  { id: "8", name: "Mochila Deportiva", slug: "mochila-deportiva", price: 799, rating: 4.3, reviewCount: 87, isNew: true, category: "deportes" },
-]
+  {
+    id: "1",
+    name: "Auriculares Bluetooth Pro",
+    slug: "auriculares-bluetooth-pro",
+    price: 1499,
+    originalPrice: 1999,
+    rating: 4.5,
+    reviewCount: 128,
+    isSale: true,
+    category: "electronicos",
+  },
+  {
+    id: "2",
+    name: "Camiseta Premium Algodón",
+    slug: "camiseta-premium-algodon",
+    price: 599,
+    rating: 4.8,
+    reviewCount: 256,
+    isNew: true,
+    category: "ropa",
+  },
+  {
+    id: "3",
+    name: "Lámpara LED Inteligente",
+    slug: "lampara-led-inteligente",
+    price: 899,
+    originalPrice: 1199,
+    rating: 4.2,
+    reviewCount: 89,
+    isSale: true,
+    category: "hogar",
+  },
+  {
+    id: "4",
+    name: "Zapatillas Running Ultra",
+    slug: "zapatillas-running-ultra",
+    price: 2499,
+    rating: 4.7,
+    reviewCount: 312,
+    isNew: true,
+    category: "deportes",
+  },
+  {
+    id: "5",
+    name: "Smartwatch Fitness",
+    slug: "smartwatch-fitness",
+    price: 3299,
+    rating: 4.6,
+    reviewCount: 198,
+    category: "electronicos",
+  },
+  {
+    id: "6",
+    name: "Pantalón Casual",
+    slug: "pantalon-casual",
+    price: 899,
+    rating: 4.4,
+    reviewCount: 145,
+    category: "ropa",
+  },
+  {
+    id: "7",
+    name: "Cafetera Automática",
+    slug: "cafetera-automatica",
+    price: 2899,
+    originalPrice: 3499,
+    rating: 4.9,
+    reviewCount: 412,
+    isSale: true,
+    category: "hogar",
+  },
+  {
+    id: "8",
+    name: "Mochila Deportiva",
+    slug: "mochila-deportiva",
+    price: 799,
+    rating: 4.3,
+    reviewCount: 87,
+    isNew: true,
+    category: "deportes",
+  },
+];
 
 const categories: Record<string, string> = {
   electronicos: "Electrónicos",
   ropa: "Ropa",
   hogar: "Hogar",
   deportes: "Deportes",
-}
+};
 
 export default function CategoryPage() {
-  const params = useParams()
-  const slug = params.slug as string
-  const categoryName = categories[slug] || "Categoría"
+  const params = useParams();
+  const slug = params.slug as string;
+  const categoryName = categories[slug] || "Categoría";
 
-  const [sortBy, setSortBy] = React.useState("relevance")
-  const [gridCols, setGridCols] = React.useState<2 | 3 | 4>(3)
-  const [priceRange, setPriceRange] = React.useState<[number, number]>([0, 5000])
-  const [selectedBrands, setSelectedBrands] = React.useState<string[]>([])
-  const [selectedRating, setSelectedRating] = React.useState<number | null>(null)
+  const [sortBy, setSortBy] = React.useState("relevance");
+  const [gridCols, setGridCols] = React.useState<2 | 3 | 4>(3);
+  const [priceRange, setPriceRange] = React.useState<[number, number]>([
+    0, 5000,
+  ]);
+  const [selectedBrands, setSelectedBrands] = React.useState<string[]>([]);
+  const [selectedRating, setSelectedRating] = React.useState<number | null>(
+    null,
+  );
 
   // Filter products
   const filteredProducts = mockProducts.filter((product) => {
-    const matchesPrice = product.price >= priceRange[0] && product.price <= priceRange[1]
-    return matchesPrice
-  })
+    const matchesPrice =
+      product.price >= priceRange[0] && product.price <= priceRange[1];
+    return matchesPrice;
+  });
 
   // Sort products
   const sortedProducts = [...filteredProducts].sort((a, b) => {
     switch (sortBy) {
       case "price-asc":
-        return a.price - b.price
+        return a.price - b.price;
       case "price-desc":
-        return b.price - a.price
+        return b.price - a.price;
       case "rating":
-        return (b.rating || 0) - (a.rating || 0)
+        return (b.rating || 0) - (a.rating || 0);
       case "newest":
-        return a.isNew ? -1 : 1
+        return a.isNew ? -1 : 1;
       default:
-        return 0
+        return 0;
     }
-  })
+  });
 
   const formatPrice = (price: number) =>
     new Intl.NumberFormat("es-MX", {
       style: "currency",
       currency: "MXN",
-    }).format(price)
+    }).format(price);
 
   const FilterSidebar = () => (
     <div className="space-y-6">
@@ -101,13 +206,18 @@ export default function CategoryPage() {
                 checked={selectedBrands.includes(brand)}
                 onCheckedChange={(checked) => {
                   if (checked) {
-                    setSelectedBrands([...selectedBrands, brand])
+                    setSelectedBrands([...selectedBrands, brand]);
                   } else {
-                    setSelectedBrands(selectedBrands.filter((b) => b !== brand))
+                    setSelectedBrands(
+                      selectedBrands.filter((b) => b !== brand),
+                    );
                   }
                 }}
               />
-              <Label htmlFor={`brand-${brand}`} className="text-sm cursor-pointer">
+              <Label
+                htmlFor={`brand-${brand}`}
+                className="text-sm cursor-pointer"
+              >
                 {brand}
               </Label>
             </div>
@@ -124,10 +234,12 @@ export default function CategoryPage() {
           {[4, 3, 2, 1].map((rating) => (
             <button
               key={rating}
-              onClick={() => setSelectedRating(selectedRating === rating ? null : rating)}
+              onClick={() =>
+                setSelectedRating(selectedRating === rating ? null : rating)
+              }
               className={cn(
                 "flex items-center gap-2 w-full p-2 rounded-md transition-colors",
-                selectedRating === rating ? "bg-primary/10" : "hover:bg-muted"
+                selectedRating === rating ? "bg-primary/10" : "hover:bg-muted",
               )}
             >
               <RatingStars rating={rating} size="sm" />
@@ -144,15 +256,15 @@ export default function CategoryPage() {
         variant="outline"
         className="w-full"
         onClick={() => {
-          setPriceRange([0, 5000])
-          setSelectedBrands([])
-          setSelectedRating(null)
+          setPriceRange([0, 5000]);
+          setSelectedBrands([]);
+          setSelectedRating(null);
         }}
       >
         Limpiar Filtros
       </Button>
     </div>
-  )
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -214,7 +326,9 @@ export default function CategoryPage() {
               <SelectContent>
                 <SelectItem value="relevance">Relevancia</SelectItem>
                 <SelectItem value="price-asc">Precio: Menor a Mayor</SelectItem>
-                <SelectItem value="price-desc">Precio: Mayor a Menor</SelectItem>
+                <SelectItem value="price-desc">
+                  Precio: Mayor a Menor
+                </SelectItem>
                 <SelectItem value="rating">Mejor Calificación</SelectItem>
                 <SelectItem value="newest">Más Nuevos</SelectItem>
               </SelectContent>
@@ -226,7 +340,7 @@ export default function CategoryPage() {
                 onClick={() => setGridCols(2)}
                 className={cn(
                   "p-2 transition-colors",
-                  gridCols === 2 ? "bg-muted" : "hover:bg-muted/50"
+                  gridCols === 2 ? "bg-muted" : "hover:bg-muted/50",
                 )}
               >
                 <LayoutGrid className="h-4 w-4" />
@@ -235,7 +349,7 @@ export default function CategoryPage() {
                 onClick={() => setGridCols(3)}
                 className={cn(
                   "p-2 transition-colors",
-                  gridCols === 3 ? "bg-muted" : "hover:bg-muted/50"
+                  gridCols === 3 ? "bg-muted" : "hover:bg-muted/50",
                 )}
               >
                 <Grid3X3 className="h-4 w-4" />
@@ -244,7 +358,7 @@ export default function CategoryPage() {
                 onClick={() => setGridCols(4)}
                 className={cn(
                   "p-2 transition-colors",
-                  gridCols === 4 ? "bg-muted" : "hover:bg-muted/50"
+                  gridCols === 4 ? "bg-muted" : "hover:bg-muted/50",
                 )}
               >
                 <SlidersHorizontal className="h-4 w-4" />
@@ -268,7 +382,7 @@ export default function CategoryPage() {
                 "grid gap-6",
                 gridCols === 2 && "grid-cols-1 sm:grid-cols-2",
                 gridCols === 3 && "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
-                gridCols === 4 && "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"
+                gridCols === 4 && "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4",
               )}
             >
               {sortedProducts.map((product) => (
@@ -284,10 +398,14 @@ export default function CategoryPage() {
                     {/* Badges */}
                     <div className="absolute top-2 left-2 flex flex-col gap-1">
                       {product.isNew && (
-                        <Badge className="bg-mint text-mint-foreground">Nuevo</Badge>
+                        <Badge className="bg-mint text-mint-foreground">
+                          Nuevo
+                        </Badge>
                       )}
                       {product.isSale && (
-                        <Badge className="bg-error text-error-foreground">Oferta</Badge>
+                        <Badge className="bg-error text-error-foreground">
+                          Oferta
+                        </Badge>
                       )}
                     </div>
 
@@ -352,7 +470,11 @@ export default function CategoryPage() {
                 <Button variant="outline" size="sm" disabled>
                   Anterior
                 </Button>
-                <Button variant="outline" size="sm" className="bg-primary text-primary-foreground">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="bg-primary text-primary-foreground"
+                >
                   1
                 </Button>
                 <Button variant="outline" size="sm">
@@ -370,5 +492,5 @@ export default function CategoryPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -1,47 +1,53 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { User, Mail, Phone, Lock, Camera, Save } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Separator } from "@/components/ui/separator"
+import * as React from "react";
+import { User, Mail, Phone, Lock, Camera, Save } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
 
 export default function ProfilePage() {
-  const [loading, setLoading] = React.useState(false)
+  const [loading, setLoading] = React.useState(false);
   const [profileData, setProfileData] = React.useState({
     name: "Juan Pérez",
     email: "juan@email.com",
     phone: "55 1234 5678",
-  })
+  });
   const [passwordData, setPasswordData] = React.useState({
     current: "",
     new: "",
     confirm: "",
-  })
+  });
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
+    e.preventDefault();
+    setLoading(true);
     // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    setLoading(false)
-  }
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    setLoading(false);
+  };
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (passwordData.new !== passwordData.confirm) {
-      alert("Las contraseñas no coinciden")
-      return
+      alert("Las contraseñas no coinciden");
+      return;
     }
-    setLoading(true)
+    setLoading(true);
     // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    setLoading(false)
-    setPasswordData({ current: "", new: "", confirm: "" })
-  }
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    setLoading(false);
+    setPasswordData({ current: "", new: "", confirm: "" });
+  };
 
   return (
     <div className="min-h-screen bg-background py-8">
@@ -71,7 +77,9 @@ export default function ProfilePage() {
               </div>
               <div>
                 <p className="font-medium">{profileData.name}</p>
-                <p className="text-sm text-muted-foreground">{profileData.email}</p>
+                <p className="text-sm text-muted-foreground">
+                  {profileData.email}
+                </p>
                 <Button variant="outline" size="sm" className="mt-2">
                   Cambiar Foto
                 </Button>
@@ -149,9 +157,7 @@ export default function ProfilePage() {
               <Lock className="h-5 w-5" />
               Cambiar Contraseña
             </CardTitle>
-            <CardDescription>
-              Actualiza tu contraseña de acceso
-            </CardDescription>
+            <CardDescription>Actualiza tu contraseña de acceso</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handlePasswordSubmit} className="space-y-4">
@@ -162,7 +168,10 @@ export default function ProfilePage() {
                   type="password"
                   value={passwordData.current}
                   onChange={(e) =>
-                    setPasswordData({ ...passwordData, current: e.target.value })
+                    setPasswordData({
+                      ...passwordData,
+                      current: e.target.value,
+                    })
                   }
                   className="mt-1"
                 />
@@ -187,7 +196,10 @@ export default function ProfilePage() {
                   type="password"
                   value={passwordData.confirm}
                   onChange={(e) =>
-                    setPasswordData({ ...passwordData, confirm: e.target.value })
+                    setPasswordData({
+                      ...passwordData,
+                      confirm: e.target.value,
+                    })
                   }
                   className="mt-1"
                 />
@@ -219,5 +231,5 @@ export default function ProfilePage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }

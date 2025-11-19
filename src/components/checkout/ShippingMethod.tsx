@@ -51,9 +51,7 @@ export function ShippingMethod({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-semibold text-primary">
-          Método de Envío
-        </h2>
+        <h2 className="text-xl font-semibold text-primary">Método de Envío</h2>
         <p className="mt-1 text-sm text-muted-foreground">
           Selecciona cómo deseas recibir tu pedido
         </p>
@@ -71,7 +69,8 @@ export function ShippingMethod({
         <div className="p-3 bg-muted rounded-lg flex items-center gap-2">
           <Info className="h-5 w-5 text-muted-foreground" />
           <span className="text-sm text-muted-foreground">
-            Agrega {formatPrice(freeShippingThreshold - subtotal)} más para envío gratis
+            Agrega {formatPrice(freeShippingThreshold - subtotal)} más para
+            envío gratis
           </span>
         </div>
       )}
@@ -81,7 +80,9 @@ export function ShippingMethod({
         {options.map((option) => {
           const Icon = ICON_MAP[option.icon] || Package;
           const isSelected = selectedMethodId === option.id;
-          const isFree = option.price === 0 || (qualifiesForFreeShipping && option.id === "standard");
+          const isFree =
+            option.price === 0 ||
+            (qualifiesForFreeShipping && option.id === "standard");
           const finalPrice = isFree ? 0 : option.price;
 
           return (
@@ -92,7 +93,7 @@ export function ShippingMethod({
                 "relative w-full rounded-lg border-2 p-4 text-left transition-all",
                 isSelected
                   ? "border-primary bg-primary/5"
-                  : "border-border bg-background hover:border-primary/50 hover:shadow-soft"
+                  : "border-border bg-background hover:border-primary/50 hover:shadow-soft",
               )}
             >
               {/* Selected Checkmark */}
@@ -109,7 +110,9 @@ export function ShippingMethod({
                 <div
                   className={cn(
                     "flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg",
-                    isSelected ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                    isSelected
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground",
                   )}
                 >
                   <Icon className="h-6 w-6" />
@@ -174,7 +177,10 @@ export function ShippingMethod({
               Información de Envío
             </h4>
             <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
-              <li>• Envío gratis en pedidos mayores a {formatPrice(freeShippingThreshold)}</li>
+              <li>
+                • Envío gratis en pedidos mayores a{" "}
+                {formatPrice(freeShippingThreshold)}
+              </li>
               <li>• Los tiempos de entrega son estimados</li>
               <li>• Recibirás un número de rastreo para seguir tu pedido</li>
               <li>• Envíos a toda la República Mexicana</li>

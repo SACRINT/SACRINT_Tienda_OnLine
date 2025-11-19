@@ -1,18 +1,18 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Minus, Plus } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import * as React from "react";
+import { Minus, Plus } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 interface QuantitySelectorProps {
-  value: number
-  min?: number
-  max?: number
-  onChange?: (value: number) => void
-  disabled?: boolean
-  size?: "sm" | "md" | "lg"
-  className?: string
+  value: number;
+  min?: number;
+  max?: number;
+  onChange?: (value: number) => void;
+  disabled?: boolean;
+  size?: "sm" | "md" | "lg";
+  className?: string;
 }
 
 const sizeClasses = {
@@ -31,36 +31,42 @@ const sizeClasses = {
     icon: "h-5 w-5",
     input: "h-10 w-14 text-base",
   },
-}
+};
 
-const QuantitySelector = React.forwardRef<HTMLDivElement, QuantitySelectorProps>(
-  ({
-    value,
-    min = 1,
-    max = 99,
-    onChange,
-    disabled = false,
-    size = "md",
-    className
-  }, ref) => {
+const QuantitySelector = React.forwardRef<
+  HTMLDivElement,
+  QuantitySelectorProps
+>(
+  (
+    {
+      value,
+      min = 1,
+      max = 99,
+      onChange,
+      disabled = false,
+      size = "md",
+      className,
+    },
+    ref,
+  ) => {
     const handleDecrement = () => {
       if (value > min && !disabled) {
-        onChange?.(value - 1)
+        onChange?.(value - 1);
       }
-    }
+    };
 
     const handleIncrement = () => {
       if (value < max && !disabled) {
-        onChange?.(value + 1)
+        onChange?.(value + 1);
       }
-    }
+    };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const newValue = parseInt(e.target.value, 10)
+      const newValue = parseInt(e.target.value, 10);
       if (!isNaN(newValue) && newValue >= min && newValue <= max) {
-        onChange?.(newValue)
+        onChange?.(newValue);
       }
-    }
+    };
 
     return (
       <div
@@ -87,7 +93,7 @@ const QuantitySelector = React.forwardRef<HTMLDivElement, QuantitySelectorProps>
           disabled={disabled}
           className={cn(
             sizeClasses[size].input,
-            "border-0 bg-transparent text-center font-medium focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+            "border-0 bg-transparent text-center font-medium focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none",
           )}
         />
         <Button
@@ -102,9 +108,9 @@ const QuantitySelector = React.forwardRef<HTMLDivElement, QuantitySelectorProps>
           <span className="sr-only">Increase quantity</span>
         </Button>
       </div>
-    )
-  }
-)
-QuantitySelector.displayName = "QuantitySelector"
+    );
+  },
+);
+QuantitySelector.displayName = "QuantitySelector";
 
-export { QuantitySelector }
+export { QuantitySelector };

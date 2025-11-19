@@ -1,16 +1,16 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Mail } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { cn } from "@/lib/utils"
+import * as React from "react";
+import { Mail } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 interface NewsletterProps {
-  title?: string
-  subtitle?: string
-  buttonText?: string
-  className?: string
+  title?: string;
+  subtitle?: string;
+  buttonText?: string;
+  className?: string;
 }
 
 export function Newsletter({
@@ -19,24 +19,26 @@ export function Newsletter({
   buttonText = "Suscribirse",
   className,
 }: NewsletterProps) {
-  const [email, setEmail] = React.useState("")
-  const [status, setStatus] = React.useState<"idle" | "loading" | "success" | "error">("idle")
+  const [email, setEmail] = React.useState("");
+  const [status, setStatus] = React.useState<
+    "idle" | "loading" | "success" | "error"
+  >("idle");
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!email) return
+    e.preventDefault();
+    if (!email) return;
 
-    setStatus("loading")
+    setStatus("loading");
 
     // Simular llamada a API
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    setStatus("success")
-    setEmail("")
+    setStatus("success");
+    setEmail("");
 
     // Reset después de 3 segundos
-    setTimeout(() => setStatus("idle"), 3000)
-  }
+    setTimeout(() => setStatus("idle"), 3000);
+  };
 
   return (
     <section className={cn("py-16 bg-accent/10", className)}>
@@ -49,7 +51,10 @@ export function Newsletter({
           <p className="text-muted-foreground">{subtitle}</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto"
+        >
           <Input
             type="email"
             placeholder="tu@email.com"
@@ -64,7 +69,11 @@ export function Newsletter({
             className="bg-accent text-accent-foreground hover:bg-accent/90"
             disabled={status === "loading" || status === "success"}
           >
-            {status === "loading" ? "Enviando..." : status === "success" ? "¡Suscrito!" : buttonText}
+            {status === "loading"
+              ? "Enviando..."
+              : status === "success"
+                ? "¡Suscrito!"
+                : buttonText}
           </Button>
         </form>
 
@@ -75,9 +84,10 @@ export function Newsletter({
         )}
 
         <p className="mt-4 text-xs text-muted-foreground">
-          Al suscribirte, aceptas recibir correos de marketing. Puedes darte de baja en cualquier momento.
+          Al suscribirte, aceptas recibir correos de marketing. Puedes darte de
+          baja en cualquier momento.
         </p>
       </div>
     </section>
-  )
+  );
 }

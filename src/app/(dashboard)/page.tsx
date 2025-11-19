@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import Link from "next/link"
+import * as React from "react";
+import Link from "next/link";
 import {
   DollarSign,
   ShoppingCart,
@@ -17,24 +17,24 @@ import {
   Repeat,
   Eye,
   Calendar,
-} from "lucide-react"
+} from "lucide-react";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import {
   LineChart,
   Line,
@@ -49,7 +49,7 @@ import {
   Tooltip,
   ResponsiveContainer,
   Legend,
-} from "recharts"
+} from "recharts";
 
 // Mock data
 const kpiData = {
@@ -61,7 +61,7 @@ const kpiData = {
   conversionRate: { value: 3.2, change: 0.5, trend: "up" },
   repeatCustomers: { value: 28, change: 4.2, trend: "up" },
   cartAbandonment: { value: 68, change: -5.1, trend: "down" },
-}
+};
 
 const revenueData = [
   { name: "Ene", revenue: 45000, orders: 120 },
@@ -75,14 +75,14 @@ const revenueData = [
   { name: "Sep", revenue: 81000, orders: 220 },
   { name: "Oct", revenue: 93000, orders: 256 },
   { name: "Nov", revenue: 158750, orders: 342 },
-]
+];
 
 const orderStatusData = [
   { name: "Completadas", value: 245, color: "#22c55e" },
   { name: "En Proceso", value: 67, color: "#3b82f6" },
   { name: "Pendientes", value: 18, color: "#f59e0b" },
   { name: "Canceladas", value: 12, color: "#ef4444" },
-]
+];
 
 const topProductsData = [
   { name: "Auriculares BT Pro", sales: 89, revenue: 133411 },
@@ -90,42 +90,72 @@ const topProductsData = [
   { name: "Zapatillas Ultra", sales: 67, revenue: 167433 },
   { name: "Smartwatch Fit", sales: 45, revenue: 148455 },
   { name: "Lámpara LED", sales: 78, revenue: 70122 },
-]
+];
 
 const recentOrders = [
-  { id: "ORD-001", customer: "María García", total: 2999, status: "completed", date: "Hace 5 min" },
-  { id: "ORD-002", customer: "Carlos López", total: 1598, status: "processing", date: "Hace 15 min" },
-  { id: "ORD-003", customer: "Ana Martínez", total: 4497, status: "pending", date: "Hace 32 min" },
-  { id: "ORD-004", customer: "José Rodríguez", total: 899, status: "completed", date: "Hace 1 hora" },
-  { id: "ORD-005", customer: "Laura Sánchez", total: 3298, status: "completed", date: "Hace 2 horas" },
-]
+  {
+    id: "ORD-001",
+    customer: "María García",
+    total: 2999,
+    status: "completed",
+    date: "Hace 5 min",
+  },
+  {
+    id: "ORD-002",
+    customer: "Carlos López",
+    total: 1598,
+    status: "processing",
+    date: "Hace 15 min",
+  },
+  {
+    id: "ORD-003",
+    customer: "Ana Martínez",
+    total: 4497,
+    status: "pending",
+    date: "Hace 32 min",
+  },
+  {
+    id: "ORD-004",
+    customer: "José Rodríguez",
+    total: 899,
+    status: "completed",
+    date: "Hace 1 hora",
+  },
+  {
+    id: "ORD-005",
+    customer: "Laura Sánchez",
+    total: 3298,
+    status: "completed",
+    date: "Hace 2 horas",
+  },
+];
 
 const statusColors: Record<string, string> = {
   completed: "bg-success/10 text-success",
   processing: "bg-info/10 text-info",
   pending: "bg-warning/10 text-warning",
   cancelled: "bg-error/10 text-error",
-}
+};
 
 const statusLabels: Record<string, string> = {
   completed: "Completada",
   processing: "En Proceso",
   pending: "Pendiente",
   cancelled: "Cancelada",
-}
+};
 
 export default function DashboardPage() {
-  const [dateRange, setDateRange] = React.useState("30d")
+  const [dateRange, setDateRange] = React.useState("30d");
 
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat("es-MX", {
       style: "currency",
       currency: "MXN",
       minimumFractionDigits: 0,
-    }).format(value)
+    }).format(value);
 
   const formatNumber = (value: number) =>
-    new Intl.NumberFormat("es-MX").format(value)
+    new Intl.NumberFormat("es-MX").format(value);
 
   return (
     <div className="space-y-8">
@@ -165,17 +195,25 @@ export default function DashboardPage() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(kpiData.revenue.value)}</div>
+            <div className="text-2xl font-bold">
+              {formatCurrency(kpiData.revenue.value)}
+            </div>
             <div className="flex items-center text-xs mt-1">
               {kpiData.revenue.trend === "up" ? (
                 <ArrowUpRight className="h-4 w-4 text-success mr-1" />
               ) : (
                 <ArrowDownRight className="h-4 w-4 text-error mr-1" />
               )}
-              <span className={kpiData.revenue.trend === "up" ? "text-success" : "text-error"}>
+              <span
+                className={
+                  kpiData.revenue.trend === "up" ? "text-success" : "text-error"
+                }
+              >
                 {kpiData.revenue.change}%
               </span>
-              <span className="text-muted-foreground ml-1">vs mes anterior</span>
+              <span className="text-muted-foreground ml-1">
+                vs mes anterior
+              </span>
             </div>
           </CardContent>
         </Card>
@@ -187,11 +225,15 @@ export default function DashboardPage() {
             <ShoppingCart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatNumber(kpiData.orders.value)}</div>
+            <div className="text-2xl font-bold">
+              {formatNumber(kpiData.orders.value)}
+            </div>
             <div className="flex items-center text-xs mt-1">
               <ArrowUpRight className="h-4 w-4 text-success mr-1" />
               <span className="text-success">{kpiData.orders.change}%</span>
-              <span className="text-muted-foreground ml-1">vs mes anterior</span>
+              <span className="text-muted-foreground ml-1">
+                vs mes anterior
+              </span>
             </div>
           </CardContent>
         </Card>
@@ -203,10 +245,14 @@ export default function DashboardPage() {
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatNumber(kpiData.products.value)}</div>
+            <div className="text-2xl font-bold">
+              {formatNumber(kpiData.products.value)}
+            </div>
             <div className="flex items-center text-xs mt-1">
               <ArrowDownRight className="h-4 w-4 text-error mr-1" />
-              <span className="text-error">{Math.abs(kpiData.products.change)}%</span>
+              <span className="text-error">
+                {Math.abs(kpiData.products.change)}%
+              </span>
               <span className="text-muted-foreground ml-1">stock bajo</span>
             </div>
           </CardContent>
@@ -219,7 +265,9 @@ export default function DashboardPage() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatNumber(kpiData.customers.value)}</div>
+            <div className="text-2xl font-bold">
+              {formatNumber(kpiData.customers.value)}
+            </div>
             <div className="flex items-center text-xs mt-1">
               <ArrowUpRight className="h-4 w-4 text-success mr-1" />
               <span className="text-success">{kpiData.customers.change}%</span>
@@ -234,14 +282,20 @@ export default function DashboardPage() {
         {/* AOV */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Valor Promedio</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Valor Promedio
+            </CardTitle>
             <CreditCard className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(kpiData.avgOrderValue.value)}</div>
+            <div className="text-2xl font-bold">
+              {formatCurrency(kpiData.avgOrderValue.value)}
+            </div>
             <div className="flex items-center text-xs mt-1">
               <ArrowUpRight className="h-4 w-4 text-success mr-1" />
-              <span className="text-success">{kpiData.avgOrderValue.change}%</span>
+              <span className="text-success">
+                {kpiData.avgOrderValue.change}%
+              </span>
             </div>
           </CardContent>
         </Card>
@@ -249,14 +303,20 @@ export default function DashboardPage() {
         {/* Conversion Rate */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Tasa Conversión</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Tasa Conversión
+            </CardTitle>
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{kpiData.conversionRate.value}%</div>
+            <div className="text-2xl font-bold">
+              {kpiData.conversionRate.value}%
+            </div>
             <div className="flex items-center text-xs mt-1">
               <ArrowUpRight className="h-4 w-4 text-success mr-1" />
-              <span className="text-success">+{kpiData.conversionRate.change}%</span>
+              <span className="text-success">
+                +{kpiData.conversionRate.change}%
+              </span>
             </div>
           </CardContent>
         </Card>
@@ -264,14 +324,20 @@ export default function DashboardPage() {
         {/* Repeat Customers */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Clientes Recurrentes</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Clientes Recurrentes
+            </CardTitle>
             <Repeat className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{kpiData.repeatCustomers.value}%</div>
+            <div className="text-2xl font-bold">
+              {kpiData.repeatCustomers.value}%
+            </div>
             <div className="flex items-center text-xs mt-1">
               <ArrowUpRight className="h-4 w-4 text-success mr-1" />
-              <span className="text-success">{kpiData.repeatCustomers.change}%</span>
+              <span className="text-success">
+                {kpiData.repeatCustomers.change}%
+              </span>
             </div>
           </CardContent>
         </Card>
@@ -279,14 +345,20 @@ export default function DashboardPage() {
         {/* Cart Abandonment */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Abandono Carrito</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Abandono Carrito
+            </CardTitle>
             <Eye className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{kpiData.cartAbandonment.value}%</div>
+            <div className="text-2xl font-bold">
+              {kpiData.cartAbandonment.value}%
+            </div>
             <div className="flex items-center text-xs mt-1">
               <ArrowDownRight className="h-4 w-4 text-success mr-1" />
-              <span className="text-success">{Math.abs(kpiData.cartAbandonment.change)}%</span>
+              <span className="text-success">
+                {Math.abs(kpiData.cartAbandonment.change)}%
+              </span>
               <span className="text-muted-foreground ml-1">mejor</span>
             </div>
           </CardContent>
@@ -306,10 +378,16 @@ export default function DashboardPage() {
               <LineChart data={revenueData}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                 <XAxis dataKey="name" className="text-xs" />
-                <YAxis className="text-xs" tickFormatter={(value) => `$${value / 1000}k`} />
+                <YAxis
+                  className="text-xs"
+                  tickFormatter={(value) => `$${value / 1000}k`}
+                />
                 <Tooltip
                   formatter={(value: number) => formatCurrency(value)}
-                  contentStyle={{ backgroundColor: "hsl(var(--background))", border: "1px solid hsl(var(--border))" }}
+                  contentStyle={{
+                    backgroundColor: "hsl(var(--background))",
+                    border: "1px solid hsl(var(--border))",
+                  }}
                 />
                 <Line
                   type="monotone"
@@ -346,7 +424,10 @@ export default function DashboardPage() {
                   ))}
                 </Pie>
                 <Tooltip
-                  contentStyle={{ backgroundColor: "hsl(var(--background))", border: "1px solid hsl(var(--border))" }}
+                  contentStyle={{
+                    backgroundColor: "hsl(var(--background))",
+                    border: "1px solid hsl(var(--border))",
+                  }}
                 />
                 <Legend />
               </PieChart>
@@ -371,7 +452,9 @@ export default function DashboardPage() {
                     #{index + 1}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{product.name}</p>
+                    <p className="text-sm font-medium truncate">
+                      {product.name}
+                    </p>
                     <p className="text-xs text-muted-foreground">
                       {product.sales} ventas
                     </p>
@@ -399,15 +482,23 @@ export default function DashboardPage() {
           <CardContent>
             <div className="space-y-4">
               {recentOrders.map((order) => (
-                <div key={order.id} className="flex items-center justify-between">
+                <div
+                  key={order.id}
+                  className="flex items-center justify-between"
+                >
                   <div className="flex items-center gap-3">
                     <div>
                       <p className="text-sm font-medium">{order.customer}</p>
-                      <p className="text-xs text-muted-foreground">{order.id} · {order.date}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {order.id} · {order.date}
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <Badge variant="secondary" className={statusColors[order.status]}>
+                    <Badge
+                      variant="secondary"
+                      className={statusColors[order.status]}
+                    >
                       {statusLabels[order.status]}
                     </Badge>
                     <span className="text-sm font-medium">
@@ -421,5 +512,5 @@ export default function DashboardPage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }

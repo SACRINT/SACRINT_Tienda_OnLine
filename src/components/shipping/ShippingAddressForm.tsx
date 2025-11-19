@@ -1,43 +1,43 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { MapPin, Building2, User, Phone, Mail } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import * as React from "react";
+import { MapPin, Building2, User, Phone, Mail } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Checkbox } from "@/components/ui/checkbox"
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export interface ShippingAddress {
-  id?: string
-  fullName: string
-  phone: string
-  email: string
-  street: string
-  exteriorNumber: string
-  interiorNumber?: string
-  neighborhood: string
-  city: string
-  state: string
-  postalCode: string
-  country: string
-  references?: string
-  isDefault?: boolean
+  id?: string;
+  fullName: string;
+  phone: string;
+  email: string;
+  street: string;
+  exteriorNumber: string;
+  interiorNumber?: string;
+  neighborhood: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+  references?: string;
+  isDefault?: boolean;
 }
 
 interface ShippingAddressFormProps {
-  initialData?: Partial<ShippingAddress>
-  onSubmit: (address: ShippingAddress) => void
-  onCancel?: () => void
-  loading?: boolean
-  showSaveOption?: boolean
+  initialData?: Partial<ShippingAddress>;
+  onSubmit: (address: ShippingAddress) => void;
+  onCancel?: () => void;
+  loading?: boolean;
+  showSaveOption?: boolean;
 }
 
 const mexicanStates = [
@@ -73,7 +73,7 @@ const mexicanStates = [
   "Veracruz",
   "Yucatán",
   "Zacatecas",
-]
+];
 
 export function ShippingAddressForm({
   initialData,
@@ -96,72 +96,75 @@ export function ShippingAddressForm({
     country: initialData?.country || "México",
     references: initialData?.references || "",
     isDefault: initialData?.isDefault || false,
-  })
+  });
 
-  const [saveAddress, setSaveAddress] = React.useState(false)
-  const [errors, setErrors] = React.useState<Record<string, string>>({})
+  const [saveAddress, setSaveAddress] = React.useState(false);
+  const [errors, setErrors] = React.useState<Record<string, string>>({});
 
   const validateForm = (): boolean => {
-    const newErrors: Record<string, string> = {}
+    const newErrors: Record<string, string> = {};
 
     if (!formData.fullName.trim()) {
-      newErrors.fullName = "El nombre es requerido"
+      newErrors.fullName = "El nombre es requerido";
     }
     if (!formData.phone.trim()) {
-      newErrors.phone = "El teléfono es requerido"
+      newErrors.phone = "El teléfono es requerido";
     } else if (!/^\d{10}$/.test(formData.phone.replace(/\s/g, ""))) {
-      newErrors.phone = "Ingresa un teléfono válido de 10 dígitos"
+      newErrors.phone = "Ingresa un teléfono válido de 10 dígitos";
     }
     if (!formData.email.trim()) {
-      newErrors.email = "El email es requerido"
+      newErrors.email = "El email es requerido";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Ingresa un email válido"
+      newErrors.email = "Ingresa un email válido";
     }
     if (!formData.street.trim()) {
-      newErrors.street = "La calle es requerida"
+      newErrors.street = "La calle es requerida";
     }
     if (!formData.exteriorNumber.trim()) {
-      newErrors.exteriorNumber = "El número exterior es requerido"
+      newErrors.exteriorNumber = "El número exterior es requerido";
     }
     if (!formData.neighborhood.trim()) {
-      newErrors.neighborhood = "La colonia es requerida"
+      newErrors.neighborhood = "La colonia es requerida";
     }
     if (!formData.city.trim()) {
-      newErrors.city = "La ciudad es requerida"
+      newErrors.city = "La ciudad es requerida";
     }
     if (!formData.state) {
-      newErrors.state = "El estado es requerido"
+      newErrors.state = "El estado es requerido";
     }
     if (!formData.postalCode.trim()) {
-      newErrors.postalCode = "El código postal es requerido"
+      newErrors.postalCode = "El código postal es requerido";
     } else if (!/^\d{5}$/.test(formData.postalCode)) {
-      newErrors.postalCode = "El código postal debe tener 5 dígitos"
+      newErrors.postalCode = "El código postal debe tener 5 dígitos";
     }
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (validateForm()) {
       onSubmit({
         ...formData,
         isDefault: saveAddress ? formData.isDefault : undefined,
-      })
+      });
     }
-  }
+  };
 
-  const handleChange = (field: keyof ShippingAddress, value: string | boolean) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
+  const handleChange = (
+    field: keyof ShippingAddress,
+    value: string | boolean,
+  ) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors((prev) => {
-        const newErrors = { ...prev }
-        delete newErrors[field]
-        return newErrors
-      })
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
     }
-  }
+  };
 
   return (
     <Card>
@@ -199,7 +202,10 @@ export function ShippingAddressForm({
                   id="phone"
                   value={formData.phone}
                   onChange={(e) =>
-                    handleChange("phone", e.target.value.replace(/\D/g, "").slice(0, 10))
+                    handleChange(
+                      "phone",
+                      e.target.value.replace(/\D/g, "").slice(0, 10),
+                    )
                   }
                   className="pl-10"
                   placeholder="55 1234 5678"
@@ -255,7 +261,9 @@ export function ShippingAddressForm({
                 placeholder="123"
               />
               {errors.exteriorNumber && (
-                <p className="text-sm text-error mt-1">{errors.exteriorNumber}</p>
+                <p className="text-sm text-error mt-1">
+                  {errors.exteriorNumber}
+                </p>
               )}
             </div>
             <div>
@@ -328,7 +336,10 @@ export function ShippingAddressForm({
                 id="postalCode"
                 value={formData.postalCode}
                 onChange={(e) =>
-                  handleChange("postalCode", e.target.value.replace(/\D/g, "").slice(0, 5))
+                  handleChange(
+                    "postalCode",
+                    e.target.value.replace(/\D/g, "").slice(0, 5),
+                  )
                 }
                 className="mt-1"
                 placeholder="06600"
@@ -358,7 +369,9 @@ export function ShippingAddressForm({
                 <Checkbox
                   id="saveAddress"
                   checked={saveAddress}
-                  onCheckedChange={(checked) => setSaveAddress(checked as boolean)}
+                  onCheckedChange={(checked) =>
+                    setSaveAddress(checked as boolean)
+                  }
                 />
                 <Label htmlFor="saveAddress" className="text-sm font-normal">
                   Guardar esta dirección para futuras compras
@@ -395,5 +408,5 @@ export function ShippingAddressForm({
         </form>
       </CardContent>
     </Card>
-  )
+  );
 }

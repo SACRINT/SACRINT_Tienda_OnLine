@@ -98,9 +98,7 @@ export default async function SettingsPage() {
                 <Globe className="h-5 w-5" />
                 Configuración Regional
               </CardTitle>
-              <CardDescription>
-                Idioma, moneda y zona horaria
-              </CardDescription>
+              <CardDescription>Idioma, moneda y zona horaria</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -245,9 +243,7 @@ export default async function SettingsPage() {
           <Card>
             <CardHeader>
               <CardTitle>Métodos de Pago Adicionales</CardTitle>
-              <CardDescription>
-                Configura otros métodos de pago
-              </CardDescription>
+              <CardDescription>Configura otros métodos de pago</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between p-4 border rounded-lg">
@@ -307,11 +303,7 @@ export default async function SettingsPage() {
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Input
-                    type="number"
-                    defaultValue="999"
-                    className="w-24"
-                  />
+                  <Input type="number" defaultValue="999" className="w-24" />
                   <span className="text-sm text-muted-foreground">MXN</span>
                 </div>
               </div>
@@ -385,7 +377,9 @@ export default async function SettingsPage() {
                   </div>
                   <span className="font-medium">SkyDropx</span>
                 </div>
-                <Button variant="outline" size="sm">Conectar</Button>
+                <Button variant="outline" size="sm">
+                  Conectar
+                </Button>
               </div>
               <div className="flex items-center justify-between p-3 border rounded-lg">
                 <div className="flex items-center gap-3">
@@ -394,7 +388,9 @@ export default async function SettingsPage() {
                   </div>
                   <span className="font-medium">99 Minutos</span>
                 </div>
-                <Button variant="outline" size="sm">Conectar</Button>
+                <Button variant="outline" size="sm">
+                  Conectar
+                </Button>
               </div>
             </CardContent>
           </Card>

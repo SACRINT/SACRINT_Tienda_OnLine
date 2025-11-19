@@ -15,11 +15,20 @@ import {
 import { auth } from "@/lib/auth/auth";
 import { getOrderById } from "@/lib/db/orders";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { OrderStatusUpdater } from "@/components/dashboard/OrderStatusUpdater";
-import { OrderStatusProgress, OrderTimeline } from "@/components/dashboard/OrderTimeline";
+import {
+  OrderStatusProgress,
+  OrderTimeline,
+} from "@/components/dashboard/OrderTimeline";
 
 export default async function OrderDetailPage({
   params,
@@ -71,10 +80,10 @@ export default async function OrderDetailPage({
               order.status === "PROCESSING"
                 ? "Pedido en preparación"
                 : order.status === "SHIPPED"
-                ? "Pedido enviado"
-                : order.status === "DELIVERED"
-                ? "Pedido entregado"
-                : "Estado actualizado",
+                  ? "Pedido enviado"
+                  : order.status === "DELIVERED"
+                    ? "Pedido entregado"
+                    : "Estado actualizado",
           },
         ]
       : []),
@@ -157,7 +166,9 @@ export default async function OrderDetailPage({
                         )}
                       </div>
                       <div>
-                        <p className="font-medium">{item.product?.name || "Producto"}</p>
+                        <p className="font-medium">
+                          {item.product?.name || "Producto"}
+                        </p>
                         <p className="text-sm text-muted-foreground">
                           Cantidad: {item.quantity}
                         </p>

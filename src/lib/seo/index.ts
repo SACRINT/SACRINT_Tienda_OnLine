@@ -7,7 +7,7 @@ export {
   generateSearchMetadata,
   getCanonicalUrl,
   getAlternateUrls,
-} from "./metadata"
+} from "./metadata";
 
 export {
   generateOrganizationSchema,
@@ -18,4 +18,4 @@ export {
   generateLocalBusinessSchema,
   generateArticleSchema,
   generateReviewSchema,
-} from "./structured-data"
+} from "./structured-data";

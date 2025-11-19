@@ -1,45 +1,48 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { AlertTriangle, RefreshCw, Home } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import Link from "next/link"
+import * as React from "react";
+import { AlertTriangle, RefreshCw, Home } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import Link from "next/link";
 
 interface ErrorBoundaryProps {
-  children: React.ReactNode
-  fallback?: React.ReactNode
-  onError?: (error: Error, errorInfo: React.ErrorInfo) => void
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+  onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
 }
 
 interface ErrorBoundaryState {
-  hasError: boolean
-  error: Error | null
+  hasError: boolean;
+  error: Error | null;
 }
 
-export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+export class ErrorBoundary extends React.Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
   constructor(props: ErrorBoundaryProps) {
-    super(props)
-    this.state = { hasError: false, error: null }
+    super(props);
+    this.state = { hasError: false, error: null };
   }
 
   static getDerivedStateFromError(error: Error): ErrorBoundaryState {
-    return { hasError: true, error }
+    return { hasError: true, error };
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error("ErrorBoundary caught an error:", error, errorInfo)
-    this.props.onError?.(error, errorInfo)
+    console.error("ErrorBoundary caught an error:", error, errorInfo);
+    this.props.onError?.(error, errorInfo);
   }
 
   handleRetry = () => {
-    this.setState({ hasError: false, error: null })
-  }
+    this.setState({ hasError: false, error: null });
+  };
 
   render() {
     if (this.state.hasError) {
       if (this.props.fallback) {
-        return this.props.fallback
+        return this.props.fallback;
       }
 
       return (
@@ -73,33 +76,33 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
             </div>
           </CardContent>
         </Card>
-      )
+      );
     }
 
-    return this.props.children
+    return this.props.children;
   }
 }
 
 // Hook-based error handler for functional components
 export function useErrorHandler() {
-  const [error, setError] = React.useState<Error | null>(null)
+  const [error, setError] = React.useState<Error | null>(null);
 
   const handleError = React.useCallback((error: Error) => {
-    setError(error)
-    console.error("Error caught:", error)
-  }, [])
+    setError(error);
+    console.error("Error caught:", error);
+  }, []);
 
   const clearError = React.useCallback(() => {
-    setError(null)
-  }, [])
+    setError(null);
+  }, []);
 
   React.useEffect(() => {
     if (error) {
-      throw error
+      throw error;
     }
-  }, [error])
+  }, [error]);
 
-  return { handleError, clearError }
+  return { handleError, clearError };
 }
 
 // Simple error display component
@@ -107,10 +110,10 @@ export function ErrorDisplay({
   error,
   onRetry,
 }: {
-  error: Error | string
-  onRetry?: () => void
+  error: Error | string;
+  onRetry?: () => void;
 }) {
-  const errorMessage = typeof error === "string" ? error : error.message
+  const errorMessage = typeof error === "string" ? error : error.message;
 
   return (
     <div className="text-center py-8">
@@ -124,5 +127,5 @@ export function ErrorDisplay({
         </Button>
       )}
     </div>
-  )
+  );
 }

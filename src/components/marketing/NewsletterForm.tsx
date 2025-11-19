@@ -1,17 +1,17 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Mail, Send, Check, Loader2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { cn } from "@/lib/utils"
+import * as React from "react";
+import { Mail, Send, Check, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 interface NewsletterFormProps {
-  variant?: "inline" | "card" | "footer"
-  title?: string
-  description?: string
-  className?: string
-  onSubscribe?: (email: string) => Promise<void>
+  variant?: "inline" | "card" | "footer";
+  title?: string;
+  description?: string;
+  className?: string;
+  onSubscribe?: (email: string) => Promise<void>;
 }
 
 export function NewsletterForm({
@@ -21,37 +21,37 @@ export function NewsletterForm({
   className,
   onSubscribe,
 }: NewsletterFormProps) {
-  const [email, setEmail] = React.useState("")
-  const [loading, setLoading] = React.useState(false)
-  const [success, setSuccess] = React.useState(false)
-  const [error, setError] = React.useState("")
+  const [email, setEmail] = React.useState("");
+  const [loading, setLoading] = React.useState(false);
+  const [success, setSuccess] = React.useState(false);
+  const [error, setError] = React.useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!email || !email.includes("@")) {
-      setError("Por favor ingresa un email válido")
-      return
+      setError("Por favor ingresa un email válido");
+      return;
     }
 
-    setLoading(true)
-    setError("")
+    setLoading(true);
+    setError("");
 
     try {
       if (onSubscribe) {
-        await onSubscribe(email)
+        await onSubscribe(email);
       } else {
         // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 1000))
+        await new Promise((resolve) => setTimeout(resolve, 1000));
       }
-      setSuccess(true)
-      setEmail("")
+      setSuccess(true);
+      setEmail("");
     } catch {
-      setError("Error al suscribirse. Intenta de nuevo.")
+      setError("Error al suscribirse. Intenta de nuevo.");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   if (success) {
     return (
@@ -59,7 +59,7 @@ export function NewsletterForm({
         className={cn(
           "text-center p-4",
           variant === "card" && "bg-success/10 rounded-lg",
-          className
+          className,
         )}
       >
         <Check className="h-8 w-8 text-success mx-auto mb-2" />
@@ -68,7 +68,7 @@ export function NewsletterForm({
           Pronto recibirás nuestras ofertas exclusivas
         </p>
       </div>
-    )
+    );
   }
 
   if (variant === "inline") {
@@ -96,7 +96,7 @@ export function NewsletterForm({
         </div>
         {error && <p className="text-sm text-error">{error}</p>}
       </form>
-    )
+    );
   }
 
   if (variant === "card") {
@@ -127,7 +127,7 @@ export function NewsletterForm({
           {error && <p className="text-sm text-error">{error}</p>}
         </form>
       </div>
-    )
+    );
   }
 
   // Footer variant
@@ -150,5 +150,5 @@ export function NewsletterForm({
       </form>
       {error && <p className="text-sm text-error mt-1">{error}</p>}
     </div>
-  )
+  );
 }

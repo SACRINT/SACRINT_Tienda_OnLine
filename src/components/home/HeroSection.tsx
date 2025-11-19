@@ -1,21 +1,21 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import Link from "next/link"
-import { ChevronLeft, ChevronRight } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
+import * as React from "react";
+import Link from "next/link";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface HeroSlide {
-  id: string
-  title: string
-  subtitle: string
+  id: string;
+  title: string;
+  subtitle: string;
   cta: {
-    text: string
-    href: string
-  }
-  bgColor?: string
-  image?: string
+    text: string;
+    href: string;
+  };
+  bgColor?: string;
+  image?: string;
 }
 
 const defaultSlides: HeroSlide[] = [
@@ -40,52 +40,52 @@ const defaultSlides: HeroSlide[] = [
     cta: { text: "Comprar Ahora", href: "/shop" },
     bgColor: "from-mint-600 to-mint-700",
   },
-]
+];
 
 interface HeroSectionProps {
-  slides?: HeroSlide[]
-  autoPlayInterval?: number
+  slides?: HeroSlide[];
+  autoPlayInterval?: number;
 }
 
 export function HeroSection({
   slides = defaultSlides,
   autoPlayInterval = 5000,
 }: HeroSectionProps) {
-  const [currentSlide, setCurrentSlide] = React.useState(0)
-  const [isAutoPlaying, setIsAutoPlaying] = React.useState(true)
+  const [currentSlide, setCurrentSlide] = React.useState(0);
+  const [isAutoPlaying, setIsAutoPlaying] = React.useState(true);
 
   React.useEffect(() => {
-    if (!isAutoPlaying) return
+    if (!isAutoPlaying) return;
 
     const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length)
-    }, autoPlayInterval)
+      setCurrentSlide((prev) => (prev + 1) % slides.length);
+    }, autoPlayInterval);
 
-    return () => clearInterval(interval)
-  }, [isAutoPlaying, slides.length, autoPlayInterval])
+    return () => clearInterval(interval);
+  }, [isAutoPlaying, slides.length, autoPlayInterval]);
 
   const goToSlide = (index: number) => {
-    setCurrentSlide(index)
-    setIsAutoPlaying(false)
-    setTimeout(() => setIsAutoPlaying(true), 10000)
-  }
+    setCurrentSlide(index);
+    setIsAutoPlaying(false);
+    setTimeout(() => setIsAutoPlaying(true), 10000);
+  };
 
   const goToPrev = () => {
-    goToSlide((currentSlide - 1 + slides.length) % slides.length)
-  }
+    goToSlide((currentSlide - 1 + slides.length) % slides.length);
+  };
 
   const goToNext = () => {
-    goToSlide((currentSlide + 1) % slides.length)
-  }
+    goToSlide((currentSlide + 1) % slides.length);
+  };
 
-  const slide = slides[currentSlide]
+  const slide = slides[currentSlide];
 
   return (
     <section className="relative overflow-hidden">
       <div
         className={cn(
           "min-h-[500px] md:min-h-[600px] flex items-center justify-center bg-gradient-to-r transition-all duration-500",
-          slide.bgColor || "from-primary to-primary-700"
+          slide.bgColor || "from-primary to-primary-700",
         )}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
@@ -130,12 +130,12 @@ export function HeroSection({
             onClick={() => goToSlide(index)}
             className={cn(
               "h-2 rounded-full transition-all",
-              index === currentSlide ? "w-8 bg-white" : "w-2 bg-white/50"
+              index === currentSlide ? "w-8 bg-white" : "w-2 bg-white/50",
             )}
             aria-label={`Ir a slide ${index + 1}`}
           />
         ))}
       </div>
     </section>
-  )
+  );
 }
