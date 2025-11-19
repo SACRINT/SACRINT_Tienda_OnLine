@@ -1,0 +1,359 @@
+═══════════════════════════════════════════════════════════════════════════════
+🚀 TAREA 6.2: PRODUCT MANAGEMENT INTERFACE
+═══════════════════════════════════════════════════════════════════════════════
+
+ESTADO ANTERIOR:
+✅ Tarea 6.1 (12 horas) - COMPLETADA
+   ├─ DashboardSidebar.tsx
+   ├─ DashboardHeader.tsx
+   └─ Dashboard layout.tsx
+
+AHORA: Tarea 6.2 (14 horas) - PRODUCT MANAGEMENT INTERFACE
+Branch: feature/sprint-6-product-management (NUEVA, LIMPIA)
+
+═══════════════════════════════════════════════════════════════════════════════
+📋 QUÉ DEBES HACER
+═══════════════════════════════════════════════════════════════════════════════
+
+PASO 1: Verifica que estés en la rama correcta
+  git status
+  >>> Debe decir: "On branch feature/sprint-6-product-management"
+
+PASO 2: Crea el directorio para las páginas del dashboard
+  mkdir -p src/app/\(dashboard\)/products
+
+PASO 3: Implementa las 3 páginas de productos:
+
+═══════════════════════════════════════════════════════════════════════════════
+📝 ARCHIVO 1: Product List Page
+═══════════════════════════════════════════════════════════════════════════════
+
+Ubicación: src/app/(dashboard)/products/page.tsx
+Tiempo: 5 horas
+
+COMPONENTE: ProductList
+┌─ Header section (título "Productos")
+├─ Botón "Agregar Producto" (links a /dashboard/products/new)
+├─ Barra de búsqueda y filtros
+│  ├─ Search input (buscar por nombre, SKU)
+│  ├─ Category filter (dropdown)
+│  └─ Status filter (dropdown: Active, Draft, Inactive)
+├─ Tabla de productos con columnas:
+│  ├─ Checkbox (select multiple)
+│  ├─ Nombre del producto
+│  ├─ SKU
+│  ├─ Precio
+│  ├─ Stock
+│  ├─ Status (Active, Draft, Inactive)
+│  ├─ Acciones (Edit, Delete, Preview)
+│  └─ Expand row para ver detalles
+├─ Pagination (10 items per page)
+├─ Sorting (click en headers para ordenar)
+└─ Bulk actions (Delete selected)
+
+FUNCIONALIDADES:
+✓ GET /api/products?tenantId=X&page=1&limit=10&search=termo&status=active
+✓ Mostrar spinner mientras carga
+✓ Manejo de errores con toast notifications
+✓ Refetch en background cada 30 segundos
+✓ Debounce en search (500ms)
+✓ Guardar filtros en URL params
+✓ Modal de confirmación para delete
+
+API ENDPOINT: GET /api/products
+Response:
+{
+  "products": [
+    {
+      "id": "uuid",
+      "name": "Laptop Pro",
+      "sku": "LAPTOP-001",
+      "price": 999.99,
+      "stock": 15,
+      "status": "active",
+      "category": "Electronics",
+      "image": "https://..."
+    }
+  ],
+  "total": 45,
+  "page": 1,
+  "limit": 10
+}
+
+═══════════════════════════════════════════════════════════════════════════════
+✏️ ARCHIVO 2: Product Detail/Edit Page
+═══════════════════════════════════════════════════════════════════════════════
+
+Ubicación: src/app/(dashboard)/products/[id]/page.tsx
+Tiempo: 5 horas
+
+COMPONENTE: ProductEditor
+┌─ Header con breadcrumb (Dashboard > Productos > [Nombre])
+├─ Form con secciones:
+│  ├─ BASIC INFO
+│  │  ├─ Nombre (required, max 200)
+│  │  ├─ Descripción (textarea, max 2000)
+│  │  ├─ SKU (required, unique)
+│  │  ├─ Categoría (select, required)
+│  │  └─ Subcategoría (select, conditional)
+│  │
+│  ├─ PRICING
+│  │  ├─ Precio base (number, required, min 0)
+│  │  ├─ Descuento % (number, 0-100)
+│  │  ├─ Precio final (calculated, read-only)
+│  │  └─ Impuesto % (read-only)
+│  │
+│  ├─ INVENTORY
+│  │  ├─ Stock actual (number)
+│  │  ├─ Stock mínimo (number)
+│  │  ├─ Ubicación en almacén (text)
+│  │  └─ Referencia de proveedor (text)
+│  │
+│  ├─ IMAGES
+│  │  ├─ Upload dropzone
+│  │  ├─ Galería de imágenes (thumbnails)
+│  │  ├─ Reorden con drag-drop
+│  │  └─ Eliminar botones per imagen
+│  │
+│  └─ STATUS
+│     ├─ Publicado? (toggle)
+│     ├─ Destacado? (toggle)
+│     ├─ Visible en búsqueda? (toggle)
+│     └─ Fecha de creación (read-only)
+│
+├─ Botones de acción:
+│  ├─ Guardar (PUT /api/products/[id])
+│  ├─ Preview (link a /shop/products/[id])
+│  ├─ Duplicar (copia el producto)
+│  └─ Eliminar (modal de confirmación)
+│
+└─ Toast notifications (success/error)
+
+VALIDACIONES (Zod):
+✓ name: string.min(3).max(200)
+✓ description: string.max(2000)
+✓ sku: string.min(1).max(50)
+✓ price: number.positive()
+✓ stock: number.nonnegative()
+✓ categoryId: string.uuid()
+✓ images: array.max(10)
+
+API ENDPOINTS:
+GET /api/products/[id] - Obtener producto
+PUT /api/products/[id] - Actualizar producto
+DELETE /api/products/[id] - Eliminar producto
+POST /api/products/[id]/images - Upload de imágenes
+
+═══════════════════════════════════════════════════════════════════════════════
+➕ ARCHIVO 3: Product Create Page
+═══════════════════════════════════════════════════════════════════════════════
+
+Ubicación: src/app/(dashboard)/products/new/page.tsx
+Tiempo: 4 horas
+
+COMPONENTE: ProductCreator
+┌─ Reutiliza el mismo form del Product Editor
+├─ Mode: "create" en lugar de "edit"
+├─ Valores iniciales vacíos
+├─ Stock inicial: 0
+├─ Status: "draft" por defecto
+├─ Campos adicionales:
+│  ├─ Tipo de producto (Simple, Variable)
+│  └─ Si Variable: agregar opción para variantes (colores, tallas)
+└─ Botón: "Crear Producto" (POST /api/products)
+
+FLUJO:
+1. Usuario llena form
+2. Click "Crear Producto"
+3. POST /api/products con validaciones
+4. Si success: redirect a /dashboard/products/[id]
+5. Si error: mostrar toast con error
+
+═══════════════════════════════════════════════════════════════════════════════
+🛠️ TECH STACK
+═══════════════════════════════════════════════════════════════════════════════
+
+Components:
+├─ shadcn/ui: Button, Input, Select, Textarea, Table, Dialog, Toast
+├─ lucide-react: Icons (Edit, Trash2, Plus, Search, Filter)
+└─ React Hook Form: Form management
+└─ Zod: Validation
+
+Hooks:
+├─ useRouter (navigation)
+├─ useSearchParams (filters in URL)
+├─ useCallback (debounce search)
+├─ useState (form state)
+└─ useEffect (data fetching)
+
+Utilities:
+├─ React Query useQuery/useMutation (fetch data)
+├─ Debounce para search
+├─ Toast notifications
+└─ Error handling
+
+═══════════════════════════════════════════════════════════════════════════════
+✅ CHECKLIST DE COMPLETITUD
+═══════════════════════════════════════════════════════════════════════════════
+
+PÁGINA DE LISTADO (product/page.tsx):
+☐ Tabla con 8+ columnas
+☐ Búsqueda por nombre/SKU
+☐ Filtro por categoría
+☐ Filtro por status
+☐ Pagination (10 items)
+☐ Sorting en headers
+☐ Botón "Agregar Producto"
+☐ Botón edit per fila
+☐ Botón delete per fila
+☐ Modal de confirmación delete
+☐ Toast notifications (success/error)
+☐ Loading spinner
+☐ Empty state (cuando no hay productos)
+☐ Responsive design
+
+PÁGINA DE EDICIÓN (products/[id]/page.tsx):
+☐ Form con todos los campos
+☐ Cargar datos del producto
+☐ Validaciones Zod
+☐ Upload de imágenes
+☐ Galería de imágenes
+☐ Reorden de imágenes
+☐ Botón Guardar
+☐ Botón Preview
+☐ Botón Duplicar
+☐ Botón Eliminar
+☐ Toast notifications
+☐ Redirección después de guardar
+☐ Breadcrumb
+
+PÁGINA DE CREACIÓN (products/new/page.tsx):
+☐ Form vacío
+☐ Validaciones
+☐ Botón "Crear Producto"
+☐ Redirección a detalle después de crear
+☐ Toast notifications
+☐ Tipo de producto (Simple/Variable)
+
+GENERAL:
+☐ TypeScript strict mode
+☐ No ESLint warnings
+☐ Tests para componentes principales
+☐ Error boundaries
+☐ Manejo de estado con React Query
+
+═══════════════════════════════════════════════════════════════════════════════
+📞 APIS DISPONIBLES
+═══════════════════════════════════════════════════════════════════════════════
+
+✓ GET /api/products - List with pagination
+✓ POST /api/products - Create
+✓ GET /api/products/[id] - Get single
+✓ PUT /api/products/[id] - Update
+✓ DELETE /api/products/[id] - Delete
+✓ POST /api/products/[id]/images - Upload images
+✓ GET /api/categories - Get categories for dropdown
+
+Documentación: docs/API_DOCUMENTATION.md
+
+═══════════════════════════════════════════════════════════════════════════════
+🎨 DISEÑO REFERENCE
+═══════════════════════════════════════════════════════════════════════════════
+
+Usa los mismos estilos que DashboardSidebar y DashboardHeader:
+- Colores: bg-slate-950, text-white, accent-blue-500
+- Espaciado: Tailwind default (4px units)
+- Bordes: rounded-lg, border-slate-700
+- Sombras: shadow-lg para cards
+- Transiciones: transition-all duration-200
+
+═══════════════════════════════════════════════════════════════════════════════
+📝 GIT WORKFLOW
+═══════════════════════════════════════════════════════════════════════════════
+
+Branch: feature/sprint-6-product-management
+
+Commits (sugeridos):
+├─ feat(dashboard): Create product list page with table and filters
+├─ feat(dashboard): Create product detail/edit page with form
+├─ feat(dashboard): Create product create page
+├─ feat(dashboard): Add image upload and gallery management
+├─ test(dashboard): Add tests for product pages
+└─ style(dashboard): Polish responsive design and accessibility
+
+Patrón de commit:
+  git add src/app/\(dashboard\)/products/
+  git commit -m "feat(dashboard): Create product list page with table and filters
+
+  - Table with name, SKU, price, stock, status columns
+  - Search by name/SKU with debounce
+  - Filters for category and status
+  - Pagination (10 items per page)
+  - Sorting by clicking headers
+  - Edit, Delete, Preview actions per row
+  - Toast notifications for user feedback
+
+  🚀 Generated with Claude Code"
+
+Push diario:
+  git push origin feature/sprint-6-product-management
+
+═══════════════════════════════════════════════════════════════════════════════
+⏰ TIMELINE (14 HORAS)
+═══════════════════════════════════════════════════════════════════════════════
+
+Día 1-2 (9 horas):
+├─ Producto list page (5h)
+└─ Producto detail/edit page (4h)
+
+Día 3 (3 horas):
+├─ Producto create page (2h)
+└─ Tests y refinements (1h)
+
+Día 4 (2 horas):
+├─ Responsive polish
+└─ Final testing
+
+═══════════════════════════════════════════════════════════════════════════════
+✨ NEXT STEP DESPUÉS DE COMPLETAR
+═══════════════════════════════════════════════════════════════════════════════
+
+Una vez completes Tarea 6.2, el proyecto tendrá:
+✅ Dashboard Layout (Tarea 6.1)
+✅ Product Management UI (Tarea 6.2) ← AQUÍ
+⏳ Order Management UI (Tarea 6.3 - próximo)
+
+Tarea 6.3 será muy similar pero para órdenes.
+
+═══════════════════════════════════════════════════════════════════════════════
+❓ PREGUNTAS FRECUENTES
+═══════════════════════════════════════════════════════════════════════════════
+
+Q: ¿Cómo conecto con la API?
+A: Usa fetch o React Query useQuery/useMutation
+   const { data } = useQuery(['products'], () =>
+     fetch('/api/products').then(r => r.json())
+   )
+
+Q: ¿Cómo valido el form?
+A: React Hook Form + Zod
+   const form = useForm({ resolver: zodResolver(schema) })
+
+Q: ¿Cómo subo imágenes?
+A: POST /api/products/[id]/images con FormData
+   const formData = new FormData()
+   formData.append('file', file)
+   fetch(`/api/products/${id}/images`, { method: 'POST', body: formData })
+
+Q: ¿Cómo manejo errores?
+A: Toast notifications + error logging
+   if (error) {
+     toast.error(error.message)
+   }
+
+═══════════════════════════════════════════════════════════════════════════════
+
+¡A trabajar! Tienes 14 horas para completar esto.
+Commit diario. Feedback en slack si bloqueas.
+
+═══════════════════════════════════════════════════════════════════════════════
