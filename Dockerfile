@@ -3,7 +3,7 @@
 # Multi-stage Dockerfile for Next.js application
 
 # Base image with pnpm
-FROM node:20-alpine AS base
+FROM node:25-alpine AS base
 RUN corepack enable && corepack prepare pnpm@8 --activate
 WORKDIR /app
 
@@ -27,7 +27,7 @@ ENV SKIP_ENV_VALIDATION=1
 RUN pnpm build
 
 # Production stage
-FROM node:20-alpine AS runner
+FROM node:25-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
