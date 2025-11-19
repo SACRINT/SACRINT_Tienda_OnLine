@@ -6,3 +6,4 @@ export * from "@prisma/client";
 export * from "./optimization";
 export * from "./optimized-queries";
 export * from "./connection";
+export * from "./cleanup";
