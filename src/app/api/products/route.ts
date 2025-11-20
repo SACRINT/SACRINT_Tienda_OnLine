@@ -15,6 +15,7 @@ import {
   CreateProductSchema,
 } from "@/lib/security/schemas/product-schemas";
 import { USER_ROLES } from "@/lib/types/user-role";
+import { applyRateLimit, RATE_LIMITS } from "@/lib/security/rate-limiter";
 
 // Force dynamic rendering for this API route
 export const dynamic = "force-dynamic";
@@ -142,6 +143,19 @@ export async function POST(req: NextRequest) {
 
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Apply rate limiting - 20 product creations per hour for store owners
+    const rateLimitResult = applyRateLimit(req, {
+      userId: session.user.id,
+      config: {
+        interval: 60 * 60 * 1000, // 1 hour
+        limit: 20, // 20 products per hour
+      },
+    });
+
+    if (!rateLimitResult.allowed) {
+      return rateLimitResult.response;
     }
 
     const { role, tenantId } = session.user;
