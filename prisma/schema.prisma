@@ -151,6 +151,7 @@ model Category {
   @@unique([tenantId, slug])
   @@index([tenantId])
   @@index([parentId])
+  @@index([tenantId, parentId]) // Optimiza listado de subcategorías por tenant
 }
 
 model Product {
@@ -204,10 +205,16 @@ model Product {
   updatedAt             DateTime @updatedAt
 
   @@unique([tenantId, sku])
+  @@unique([tenantId, slug]) // Búsqueda única de productos por slug
   @@index([tenantId])
   @@index([categoryId])
   @@index([published])
   @@index([featured])
+  @@index([tenantId, published]) // Listar productos publicados por tenant
+  @@index([tenantId, categoryId, published]) // Filtrar por categoría y estado
+  @@index([tenantId, featured, published]) // Productos destacados publicados
+  @@index([tenantId, createdAt]) // Ordenar productos por fecha de creación
+  @@index([stock]) // Detectar productos con bajo stock
 }
 
 model ProductVariant {
@@ -351,6 +358,12 @@ model Order {
   @@index([status])
   @@index([paymentStatus])
   @@index([createdAt])
+  @@index([tenantId, status]) // Filtrar órdenes por tenant y estado
+  @@index([tenantId, createdAt]) // Ordenar órdenes por fecha por tenant
+  @@index([userId, status]) // Órdenes de usuario por estado
+  @@index([tenantId, status, createdAt]) // Combinado: filtrar y ordenar
+  @@index([tenantId, paymentStatus]) // Filtrar por estado de pago
+  @@index([paymentMethod]) // Reportes por método de pago
 }
 
 model OrderItem {
@@ -446,6 +459,9 @@ model Review {
   @@index([productId])
   @@index([userId])
   @@index([status])
+  @@index([productId, status]) // Reviews aprobadas de un producto
+  @@index([productId, rating]) // Ordenar reviews por calificación
+  @@index([productId, createdAt]) // Reviews más recientes primero
 }
 
 enum ReviewStatus {
@@ -494,6 +510,8 @@ model Coupon {
   @@unique([tenantId, code])
   @@index([tenantId])
   @@index([expiresAt])
+  @@index([tenantId, expiresAt]) // Cupones activos por tenant
+  @@index([startDate, expiresAt]) // Validación de vigencia
 }
 
 enum CouponType {
