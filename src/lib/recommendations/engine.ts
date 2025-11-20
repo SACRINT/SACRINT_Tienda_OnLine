@@ -20,7 +20,7 @@ export interface RecommendedProduct {
   id: string;
   name: string;
   slug: string;
-  price: number;
+  basePrice: number;
   imageUrl: string | null;
   score: number;
   reason?: string;
@@ -52,7 +52,7 @@ export async function getFrequentlyBoughtTogether(
         productId,
         order: {
           tenantId,
-          status: "PAID",
+          status: "PROCESSING",
         },
       },
       select: {
@@ -101,7 +101,7 @@ export async function getFrequentlyBoughtTogether(
         id: true,
         name: true,
         slug: true,
-        price: true,
+        basePrice: true,
         images: {
           select: { url: true },
           orderBy: { order: "asc" },
@@ -119,7 +119,7 @@ export async function getFrequentlyBoughtTogether(
       id: p.id,
       name: p.name,
       slug: p.slug,
-      price: Number(p.price),
+      basePrice: Number(p.basePrice),
       imageUrl: p.images[0]?.url || null,
       score: Number((countMap.get(p.id) || 0)) / orderIds.length,
       reason: "Comprado frecuentemente juntos",
@@ -162,7 +162,7 @@ export async function getSimilarProducts(
       where: { id: productId, tenantId },
       select: {
         categoryId: true,
-        price: true,
+        basePrice: true,
         name: true,
       },
     });
@@ -180,16 +180,16 @@ export async function getSimilarProducts(
         published: true,
         stock: { gt: 0 },
         // Price range: ±30%
-        price: {
-          gte: Number(sourceProduct.price) * 0.7,
-          lte: Number(sourceProduct.price) * 1.3,
+        basePrice: {
+          gte: Number(sourceProduct.basePrice) * 0.7,
+          lte: Number(sourceProduct.basePrice) * 1.3,
         },
       },
       select: {
         id: true,
         name: true,
         slug: true,
-        price: true,
+        basePrice: true,
         images: {
           select: { url: true },
           orderBy: { order: "asc" },
@@ -206,9 +206,9 @@ export async function getSimilarProducts(
     // Calculate similarity scores based on price and name
     const recommendations: RecommendedProduct[] = similar.map((p: any) => {
       const priceDiff = Math.abs(
-        Number(p.price) - Number(sourceProduct.price),
+        Number(p.basePrice) - Number(sourceProduct.basePrice),
       );
-      const priceScore = 1 - priceDiff / Number(sourceProduct.price);
+      const priceScore = 1 - priceDiff / Number(sourceProduct.basePrice);
 
       // Simple name similarity (shared words)
       const sourceWords = new Set(
@@ -224,7 +224,7 @@ export async function getSimilarProducts(
         id: p.id,
         name: p.name,
         slug: p.slug,
-        price: Number(p.price),
+        basePrice: Number(p.basePrice),
         imageUrl: p.images[0]?.url || null,
         score,
         reason: "Producto similar",
@@ -274,7 +274,7 @@ export async function getTrendingProducts(
       where: {
         order: {
           tenantId,
-          status: "PAID",
+          status: "PROCESSING",
           createdAt: { gte: thirtyDaysAgo },
         },
         product: {
@@ -308,7 +308,7 @@ export async function getTrendingProducts(
         id: true,
         name: true,
         slug: true,
-        price: true,
+        basePrice: true,
         images: {
           select: { url: true },
           orderBy: { order: "asc" },
@@ -331,7 +331,7 @@ export async function getTrendingProducts(
       id: p.id,
       name: p.name,
       slug: p.slug,
-      price: Number(p.price),
+      basePrice: Number(p.basePrice),
       imageUrl: p.images[0]?.url || null,
       score: Number((countMap.get(p.id) || 0)) / totalOrders,
       reason: "Producto popular",
@@ -373,7 +373,7 @@ export async function getPersonalizedRecommendations(
       where: {
         userId,
         tenantId,
-        status: "PAID",
+        status: "PROCESSING",
       },
       include: {
         items: {
@@ -433,7 +433,7 @@ export async function getPersonalizedRecommendations(
         id: true,
         name: true,
         slug: true,
-        price: true,
+        basePrice: true,
         featured: true,
         categoryId: true,
         images: {
@@ -460,7 +460,7 @@ export async function getPersonalizedRecommendations(
         id: p.id,
         name: p.name,
         slug: p.slug,
-        price: Number(p.price),
+        basePrice: Number(p.basePrice),
         imageUrl: p.images[0]?.url || null,
         score: categoryScore + featuredBonus,
         reason: "Recomendado para ti",

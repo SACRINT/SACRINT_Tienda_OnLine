@@ -225,7 +225,7 @@ export async function POST(req: NextRequest) {
       await db.order.update({
         where: { id: orderId },
         data: {
-          paymentIntentId: preference.id,
+          paymentId: preference.id,
         },
       });
 

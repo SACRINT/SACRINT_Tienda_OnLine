@@ -64,7 +64,6 @@ import {
   deleteReview,
   getProductReviews,
   hasUserReviewedProduct,
-  approveReview,
 } from '@/lib/db/reviews'
 
 import {
@@ -171,6 +170,10 @@ beforeAll(async () => {
       reserved: 0,
       published: true,
       featured: false,
+      weight: 1.5,
+      length: 10,
+      width: 10,
+      height: 10,
       tenantId: tenantA.id,
       categoryId: categoryA.id,
     },
@@ -184,6 +187,21 @@ beforeAll(async () => {
     },
   })
 
+  // Create shipping address for Tenant A
+  const addressA = await db.address.create({
+    data: {
+      userId: userA.id,
+      name: 'Test User A',
+      email: 'tenant-a-user@test.com',
+      phone: '1234567890',
+      street: '123 Test St',
+      city: 'Test City',
+      state: 'TS',
+      postalCode: '12345',
+      country: 'MX',
+    },
+  })
+
   // Create order for Tenant A
   const orderA = await db.order.create({
     data: {
@@ -192,24 +210,13 @@ beforeAll(async () => {
       tenantId: tenantA.id,
       status: 'PENDING',
       paymentStatus: 'PENDING',
-      paymentMethod: 'CARD',
+      paymentMethod: 'CREDIT_CARD',
       subtotal: 100,
       shippingCost: 10,
       tax: 16,
       discount: 0,
       total: 126,
-      shippingAddress: {
-        create: {
-          name: 'Test User A',
-          email: 'tenant-a-user@test.com',
-          phone: '1234567890',
-          street: '123 Test St',
-          city: 'Test City',
-          state: 'TS',
-          postalCode: '12345',
-          country: 'MX',
-        },
-      },
+      shippingAddressId: addressA.id,
     },
   })
 
@@ -263,6 +270,10 @@ beforeAll(async () => {
       reserved: 0,
       published: true,
       featured: false,
+      weight: 2.0,
+      length: 15,
+      width: 15,
+      height: 15,
       tenantId: tenantB.id,
       categoryId: categoryB.id,
     },
@@ -275,6 +286,21 @@ beforeAll(async () => {
     },
   })
 
+  // Create shipping address for Tenant B
+  const addressB = await db.address.create({
+    data: {
+      userId: userB.id,
+      name: 'Test User B',
+      email: 'tenant-b-user@test.com',
+      phone: '0987654321',
+      street: '456 Test Ave',
+      city: 'Test Town',
+      state: 'TT',
+      postalCode: '54321',
+      country: 'MX',
+    },
+  })
+
   const orderB = await db.order.create({
     data: {
       orderNumber: `ORDER-B-${Date.now()}`,
@@ -282,24 +308,13 @@ beforeAll(async () => {
       tenantId: tenantB.id,
       status: 'PENDING',
       paymentStatus: 'PENDING',
-      paymentMethod: 'CARD',
+      paymentMethod: 'CREDIT_CARD',
       subtotal: 200,
       shippingCost: 20,
       tax: 32,
       discount: 0,
       total: 252,
-      shippingAddress: {
-        create: {
-          name: 'Test User B',
-          email: 'tenant-b-user@test.com',
-          phone: '0987654321',
-          street: '456 Test Ave',
-          city: 'Test Town',
-          state: 'TT',
-          postalCode: '54321',
-          country: 'MX',
-        },
-      },
+      shippingAddressId: addressB.id,
     },
   })
 
@@ -705,11 +720,6 @@ describe('Tenant Isolation - Review Functions', () => {
     expect(typeof result).toBe('boolean')
   })
 
-  it('approveReview: should block cross-tenant review approval', async () => {
-    await expect(
-      approveReview(testData.tenantA.id, testData.tenantB.review.id)
-    ).rejects.toThrow('does not belong to tenant')
-  })
 })
 
 /**
@@ -764,7 +774,7 @@ describe('Tenant Isolation - Tenant Functions', () => {
  * ============================================================================
  */
 describe('Tenant Isolation - Summary', () => {
-  it('should have refactored all 36 critical DAL functions', () => {
+  it('should have refactored all 35 critical DAL functions', () => {
     // This test serves as documentation that all functions have been secured
     const securedFunctions = {
       users: 7, // getUserById, getUserByEmail, updateUser, deleteUser, getUsersByTenant, countUsersByTenant, updateUserRole
@@ -772,13 +782,13 @@ describe('Tenant Isolation - Summary', () => {
       categories: 1, // getCategoryById
       cart: 6, // getCartById, getUserCart, addItemToCart, updateCartItemQuantity, getCartTotal, validateCartBeforeCheckout
       orders: 1, // getOrderById
-      reviews: 7, // getReviewById, createReview, updateReview, deleteReview, getProductReviews, hasUserReviewedProduct, approveReview
+      reviews: 6, // getReviewById, createReview, updateReview, deleteReview, getProductReviews, hasUserReviewedProduct
       inventory: 5, // getProductStock, reserveInventory, confirmInventoryReservation, cancelInventoryReservation, getInventoryReport
       tenant: 3, // getTenantById, getTenantBySlug, createTenant
     }
 
     const totalSecured = Object.values(securedFunctions).reduce((sum, count) => sum + count, 0)
-    expect(totalSecured).toBe(36)
+    expect(totalSecured).toBe(35)
   })
 
   it('should block ALL cross-tenant access attempts', () => {

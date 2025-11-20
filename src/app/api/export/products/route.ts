@@ -69,7 +69,18 @@ export async function GET(req: NextRequest) {
     });
 
     if (format === "csv") {
-      const csvContent = exportProductsToCSV(products);
+      // Convert Decimal fields to numbers for CSV export
+      const productsForExport = products.map(product => ({
+        ...product,
+        basePrice: Number(product.basePrice),
+        salePrice: product.salePrice ? Number(product.salePrice) : null,
+        weight: Number(product.weight),
+        length: Number(product.length),
+        width: Number(product.width),
+        height: Number(product.height),
+      }));
+
+      const csvContent = exportProductsToCSV(productsForExport);
       const filename = `products-${new Date().toISOString().split("T")[0]}.csv`;
 
       logger.info("Products exported to CSV", {

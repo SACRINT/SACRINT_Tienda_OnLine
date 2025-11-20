@@ -70,7 +70,17 @@ export async function GET(req: NextRequest) {
     });
 
     if (format === "csv") {
-      const csvContent = exportOrdersToCSV(orders);
+      // Convert Decimal fields to numbers for CSV export
+      const ordersForExport = orders.map(order => ({
+        ...order,
+        subtotal: Number(order.subtotal),
+        shippingCost: Number(order.shippingCost),
+        tax: Number(order.tax),
+        discount: Number(order.discount),
+        total: Number(order.total),
+      }));
+
+      const csvContent = exportOrdersToCSV(ordersForExport);
       const filename = `orders-${new Date().toISOString().split("T")[0]}.csv`;
 
       logger.info("Orders exported to CSV", {

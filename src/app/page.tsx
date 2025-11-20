@@ -103,7 +103,7 @@ async function getCategories() {
       id: cat.id,
       name: cat.name,
       slug: cat.slug,
-      image: cat.image,
+      image: cat.image ?? undefined,
       productCount: cat._count.products,
     }));
   } catch (error) {
