@@ -1,9 +1,11 @@
-// Middleware - Route Protection and Security Headers
-// Protects routes and adds security headers to all responses
+// Middleware - Internationalization, Route Protection, and Security Headers
+// Handles i18n locale routing, protects routes, and adds security headers
 
 import { auth } from "@/lib/auth/auth";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import createIntlMiddleware from "next-intl/middleware";
+import { locales, defaultLocale } from "./i18n/request";
 
 // CSP Header
 const CSP_HEADER = `
@@ -22,12 +24,33 @@ const CSP_HEADER = `
   .replace(/\s{2,}/g, " ")
   .trim();
 
+// Create i18n middleware
+const intlMiddleware = createIntlMiddleware({
+  locales,
+  defaultLocale,
+  localePrefix: "as-needed",
+  localeDetection: true,
+});
+
 export default auth((req) => {
   const { pathname } = req.nextUrl;
   const isLoggedIn = !!req.auth?.user;
 
-  // Create response
-  const response = NextResponse.next();
+  // Skip i18n for API routes, static files, and Next.js internals
+  const shouldApplyIntl =
+    !pathname.startsWith("/api") &&
+    !pathname.startsWith("/_next") &&
+    !pathname.startsWith("/_vercel") &&
+    !pathname.match(/\.(ico|png|jpg|jpeg|svg|webp|gif|css|js|json|xml|txt)$/);
+
+  // Apply i18n middleware first if applicable
+  let response: NextResponse;
+
+  if (shouldApplyIntl) {
+    response = intlMiddleware(req as unknown as NextRequest);
+  } else {
+    response = NextResponse.next();
+  }
 
   // Add security headers to all responses
   response.headers.set("Content-Security-Policy", CSP_HEADER);
@@ -46,24 +69,30 @@ export default auth((req) => {
     "/login",
     "/signup",
     "/shop",
+    "/forgot-password",
+    "/reset-password",
+    "/verify-email",
     "/api/health",
     "/api/auth",
   ];
 
-  // Check if path is public
+  // Check if path is public (considering locale prefixes)
+  const pathnameWithoutLocale = pathname.replace(/^\/(en|es)/, "") || "/";
   const isPublicPath = publicPaths.some(
-    (path) => pathname === path || pathname.startsWith(`${path}/`),
+    (path) =>
+      pathnameWithoutLocale === path ||
+      pathnameWithoutLocale.startsWith(`${path}/`),
   );
 
   // Protect dashboard routes
-  if (pathname.startsWith("/dashboard") && !isLoggedIn) {
+  if (pathnameWithoutLocale.startsWith("/dashboard") && !isLoggedIn) {
     const loginUrl = new URL("/login", req.url);
     loginUrl.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
   // Protect admin routes (STORE_OWNER only)
-  if (pathname.startsWith("/admin")) {
+  if (pathnameWithoutLocale.startsWith("/admin")) {
     if (!isLoggedIn) {
       const loginUrl = new URL("/login", req.url);
       loginUrl.searchParams.set("callbackUrl", pathname);
@@ -81,7 +110,8 @@ export default auth((req) => {
   if (
     pathname.startsWith("/api") &&
     !pathname.startsWith("/api/auth") &&
-    !pathname.startsWith("/api/health")
+    !pathname.startsWith("/api/health") &&
+    !pathname.startsWith("/api/webhooks")
   ) {
     if (!isLoggedIn) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
