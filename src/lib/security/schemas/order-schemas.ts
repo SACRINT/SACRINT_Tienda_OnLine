@@ -48,6 +48,11 @@ export const CheckoutSchema = z.object({
     .toUpperCase()
     .optional(),
   notes: z.string().max(500, "Notes must not exceed 500 characters").optional(),
+  country: z
+    .string()
+    .length(2, "Country must be 2-letter ISO code")
+    .toUpperCase()
+    .optional(), // For Mercado Pago currency determination
 });
 
 // ============ ORDER SCHEMAS ============
