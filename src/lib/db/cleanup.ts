@@ -88,7 +88,7 @@ export async function cleanupOldNotifications(
       where: { tenantId },
       select: { id: true },
     });
-    userIds = users.map((u) => u.id);
+    userIds = users.map((u: { id: string }) => u.id);
   }
 
   const where = {

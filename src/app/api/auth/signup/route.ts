@@ -7,6 +7,7 @@ import { db } from "@/lib/db/client";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { USER_ROLES } from "@/lib/types/user-role";
+import { applyRateLimit, RATE_LIMITS } from "@/lib/security/rate-limiter";
 
 // Validation schema
 const SignupSchema = z.object({
@@ -29,9 +30,17 @@ const SignupSchema = z.object({
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
+  // Apply rate limiting - 10 attempts per minute for anonymous users
+  const rateLimitResult = applyRateLimit(req, {
+    config: RATE_LIMITS.ANONYMOUS,
+  });
+
+  if (!rateLimitResult.allowed) {
+    return rateLimitResult.response;
+  }
+
   try {
     const body = await req.json();
-    console.log("[SIGNUP] Attempt for email:", body.email);
 
     // Validate input
     const validation = SignupSchema.safeParse(body);

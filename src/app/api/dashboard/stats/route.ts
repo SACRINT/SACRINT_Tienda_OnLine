@@ -99,15 +99,15 @@ export async function GET() {
     ]);
 
     // Get product names for top products
-    const productIds = topProducts.map((p) => p.productId);
+    const productIds = topProducts.map((p: typeof topProducts[number]) => p.productId);
     const products = await db.product.findMany({
       where: { id: { in: productIds } },
       select: { id: true, name: true },
     });
 
-    const productMap = new Map(products.map((p) => [p.id, p.name]));
+    const productMap = new Map(products.map((p: { id: string; name: string }) => [p.id, p.name]));
 
-    const topProductsWithNames = topProducts.map((p) => ({
+    const topProductsWithNames = topProducts.map((p: typeof topProducts[number]) => ({
       name: productMap.get(p.productId) || "Unknown",
       sales: p._sum.quantity || 0,
       revenue: Number(p._sum.priceAtPurchase) || 0,
@@ -118,7 +118,7 @@ export async function GET() {
       totalOrders > 0 ? Number(totalRevenue._sum.total || 0) / totalOrders : 0;
 
     // Format recent orders
-    const formattedRecentOrders = recentOrders.map((order) => ({
+    const formattedRecentOrders = recentOrders.map((order: typeof recentOrders[number]) => ({
       id: order.orderNumber,
       customer: order.user.name || order.user.email || "Cliente",
       total: Number(order.total),
@@ -127,28 +127,29 @@ export async function GET() {
     }));
 
     // Format order status data
+    type OrderStatusGroup = typeof ordersByStatus[number];
     const orderStatusData = [
       {
         name: "Completadas",
         value:
-          ordersByStatus.find((o) => o.status === "DELIVERED")?._count || 0,
+          ordersByStatus.find((o: OrderStatusGroup) => o.status === "DELIVERED")?._count || 0,
         color: "#22c55e",
       },
       {
         name: "En Proceso",
         value:
-          ordersByStatus.find((o) => o.status === "PROCESSING")?._count || 0,
+          ordersByStatus.find((o: OrderStatusGroup) => o.status === "PROCESSING")?._count || 0,
         color: "#3b82f6",
       },
       {
         name: "Pendientes",
-        value: ordersByStatus.find((o) => o.status === "PENDING")?._count || 0,
+        value: ordersByStatus.find((o: OrderStatusGroup) => o.status === "PENDING")?._count || 0,
         color: "#f59e0b",
       },
       {
         name: "Canceladas",
         value:
-          ordersByStatus.find((o) => o.status === "CANCELLED")?._count || 0,
+          ordersByStatus.find((o: OrderStatusGroup) => o.status === "CANCELLED")?._count || 0,
         color: "#ef4444",
       },
     ];

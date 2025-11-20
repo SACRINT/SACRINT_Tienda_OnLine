@@ -17,6 +17,7 @@ import {
   reserveInventory,
   confirmInventoryReservation,
 } from "@/lib/db/inventory";
+import { applyRateLimit, RATE_LIMITS } from "@/lib/security/rate-limiter";
 
 // Force dynamic rendering for this API route
 export const dynamic = "force-dynamic";
@@ -35,6 +36,16 @@ export async function POST(req: NextRequest) {
 
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Apply rate limiting - 10 checkout attempts per hour
+    const rateLimitResult = applyRateLimit(req, {
+      userId: session.user.id,
+      config: { interval: 60 * 60 * 1000, limit: 10 }, // 10 per hour
+    });
+
+    if (!rateLimitResult.allowed) {
+      return rateLimitResult.response;
     }
 
     const { tenantId } = session.user;

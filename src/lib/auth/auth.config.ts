@@ -9,6 +9,7 @@ import { db } from "@/lib/db/client";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { USER_ROLES, type UserRole } from "@/lib/types/user-role";
+import { logger } from "@/lib/monitoring/logger";
 
 // Validation schemas
 const LoginSchema = z.object({
@@ -31,7 +32,7 @@ export const authConfig = {
         },
       },
       profile: async (profile) => {
-        console.log("[AUTH] Google profile:", profile.email);
+        logger.debug("Google profile received", { email: profile.email });
 
         // Check if user already exists
         let user = await db.user.findFirst({
@@ -56,7 +57,7 @@ export const authConfig = {
           });
 
           tenantId = tenant.id;
-          console.log("[AUTH] Created new tenant:", tenant.id);
+          logger.info("Created new tenant for Google user", { tenantId: tenant.id, email: profile.email });
         } else {
           tenantId = user.tenantId;
         }
@@ -79,12 +80,12 @@ export const authConfig = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        console.log("[AUTH] Credentials login attempt:", credentials?.email);
+        logger.debug("Credentials login attempt", { email: credentials?.email });
 
         const validation = LoginSchema.safeParse(credentials);
 
         if (!validation.success) {
-          console.error("[AUTH] Validation failed:", validation.error.issues);
+          logger.warn("Auth validation failed", { issues: validation.error.issues });
           return null;
         }
 
@@ -95,23 +96,23 @@ export const authConfig = {
         });
 
         if (!user) {
-          console.error("[AUTH] User not found:", email);
+          logger.warn("User not found during login", { email });
           return null;
         }
 
         if (!user.password) {
-          console.error("[AUTH] No password set for user:", email);
+          logger.warn("No password set for user", { email });
           return null;
         }
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
 
         if (!isPasswordValid) {
-          console.error("[AUTH] Invalid password for user:", email);
+          logger.warn("Invalid password attempt", { email });
           return null;
         }
 
-        console.log("[AUTH] Login successful:", email);
+        logger.info("Login successful", { email, userId: user.id });
 
         return {
           id: user.id,
@@ -169,18 +170,15 @@ export const authConfig = {
   },
   events: {
     async signIn({ user, isNewUser }: any) {
-      console.log(`[AUTH] User signed in: ${user.email}, new: ${isNewUser}`);
+      logger.audit("User signed in", { email: user.email, isNewUser, userId: user.id });
 
       if (isNewUser) {
         // TODO: Send welcome email
-        console.log("[AUTH] New user - welcome email would be sent");
+        logger.info("New user registered - welcome email to be sent", { email: user.email });
       }
     },
     async signOut({ session, token }: any) {
-      console.log(
-        "[AUTH] User signed out:",
-        session?.user?.email || token?.email,
-      );
+      logger.audit("User signed out", { email: session?.user?.email || token?.email });
     },
   },
   session: {

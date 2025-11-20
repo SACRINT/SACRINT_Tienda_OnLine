@@ -238,7 +238,7 @@ export function ShopPageClient({ products, categories }: ShopPageClientProps) {
                       image={product.image}
                       price={product.price}
                       salePrice={product.salePrice}
-                      rating={product.rating}
+                      rating={product.rating ?? 0}
                       reviewCount={product.reviewCount}
                       inStock={product.inStock}
                       category={product.category}
