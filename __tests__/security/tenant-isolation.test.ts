@@ -480,7 +480,7 @@ describe('Tenant Isolation - User Functions', () => {
   it('getUsersByTenant: should only return users from specified tenant', async () => {
     const result = await getUsersByTenant(testData.tenantA.id)
     expect(result.length).toBeGreaterThan(0)
-    expect(result.every((user) => user.id === testData.tenantA.user.id)).toBe(true)
+    expect(result.every((user: any) => user.id === testData.tenantA.user.id)).toBe(true)
   })
 
   it('countUsersByTenant: should only count users from specified tenant', async () => {
@@ -693,7 +693,7 @@ describe('Tenant Isolation - Review Functions', () => {
 
   it('getProductReviews: should only return reviews from specified tenant', async () => {
     const result = await getProductReviews(testData.tenantA.id, testData.tenantA.product.id, 1, 10)
-    expect(result.reviews.every((r) => r.productId === testData.tenantA.product.id)).toBe(true)
+    expect(result.reviews.every((r: any) => r.productId === testData.tenantA.product.id)).toBe(true)
   })
 
   it('hasUserReviewedProduct: should correctly check within tenant boundaries', async () => {

@@ -415,3 +415,53 @@ export async function hasUserReviewedProduct(
 
   return review !== null;
 }
+
+/**
+ * Approves a review with tenant validation
+ * @param tenantId - Tenant ID to validate access
+ * @param reviewId - Review ID
+ * @returns Updated review
+ */
+export async function approveReview(tenantId: string, reviewId: string) {
+  await ensureTenantAccess(tenantId);
+
+  // Get existing review with product
+  const review = await db.review.findUnique({
+    where: { id: reviewId },
+    include: {
+      product: {
+        select: {
+          tenantId: true,
+        },
+      },
+    },
+  });
+
+  if (!review) {
+    throw new Error("Review not found");
+  }
+
+  // Verify review's product belongs to tenant
+  if (review.product.tenantId !== tenantId) {
+    throw new Error("Review does not belong to tenant");
+  }
+
+  // Update review status to APPROVED
+  const updated = await db.review.update({
+    where: { id: reviewId },
+    data: {
+      status: "APPROVED",
+    },
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          image: true,
+        },
+      },
+    },
+  });
+
+  return updated;
+}
