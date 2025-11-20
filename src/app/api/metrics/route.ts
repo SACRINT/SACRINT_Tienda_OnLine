@@ -4,6 +4,8 @@
 import { NextResponse } from "next/server";
 import { metricsRegistry } from "@/lib/monitoring";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const format = url.searchParams.get("format") || "prometheus";
