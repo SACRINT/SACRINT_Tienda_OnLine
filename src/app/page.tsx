@@ -6,6 +6,9 @@ import { ValueProposition } from "@/components/home/ValueProposition";
 import { Newsletter } from "@/components/home/Newsletter";
 import { db } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 60; // ISR: revalidate every 60 seconds
+
 export const metadata: Metadata = {
   title: "SACRINT Demo Store - Tu Tienda Online",
   description:
