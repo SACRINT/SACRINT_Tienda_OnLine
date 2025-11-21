@@ -1,6 +1,7 @@
-const createNextIntlPlugin = require("next-intl/plugin");
-
-const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
+// TEMPORARY: next-intl disabled for diagnostic purposes
+// TODO: Re-enable after fixing folder structure with [locale]/
+// const createNextIntlPlugin = require("next-intl/plugin");
+// const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -128,4 +129,7 @@ const nextConfig = {
   },
 };
 
-module.exports = withNextIntl(nextConfig);
+// TEMPORARY: Export without next-intl wrapper for diagnostic
+module.exports = nextConfig;
+// TODO: Re-enable after folder structure fix
+// module.exports = withNextIntl(nextConfig);
