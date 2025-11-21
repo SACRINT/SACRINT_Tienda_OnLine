@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -11,9 +12,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, Lock, CheckCircle, AlertTriangle } from "lucide-react";
-
-// Force dynamic rendering for this page (uses useSearchParams)
-export const dynamic = "force-dynamic";
 
 const resetPasswordSchema = z
   .object({
@@ -32,7 +30,7 @@ const resetPasswordSchema = z
 
 type ResetPasswordForm = z.infer<typeof resetPasswordSchema>;
 
-export default function ResetPasswordPage() {
+function ResetPasswordContent() {
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -224,5 +222,26 @@ export default function ResetPasswordPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg text-center">
+        <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+          <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+        </div>
+        <h2 className="mt-6 text-2xl font-bold text-gray-900">Cargando...</h2>
+      </div>
+    </div>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <ResetPasswordContent />
+    </Suspense>
   );
 }
