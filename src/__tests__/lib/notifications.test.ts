@@ -62,7 +62,7 @@ describe("Notification Service", () => {
         },
       ];
       localStorageMock.setItem(
-        "sacrint-notifications",
+        "notifications",
         JSON.stringify(notifications),
       );
 
@@ -176,7 +176,7 @@ describe("Notification Service", () => {
 
     it("should format minutes ago", () => {
       const date = new Date(Date.now() - 5 * 60 * 1000);
-      expect(formatNotificationTime(date)).toBe("Hace 5 min");
+      expect(formatNotificationTime(date)).toBe("Hace 5m");
     });
 
     it("should format hours ago", () => {

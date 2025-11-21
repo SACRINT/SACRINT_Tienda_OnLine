@@ -1,9 +1,9 @@
 // Middleware - Internationalization, Route Protection, and Security Headers
 // Handles i18n locale routing, protects routes, and adds security headers
 
-import { auth } from "@/lib/auth/auth";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { getToken } from "next-auth/jwt";
 import createIntlMiddleware from "next-intl/middleware";
 import { locales, defaultLocale } from "./i18n/request";
 
@@ -32,9 +32,15 @@ const intlMiddleware = createIntlMiddleware({
   localeDetection: true,
 });
 
-export default auth((req) => {
+export default async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  const isLoggedIn = !!req.auth?.user;
+
+  // Get user token for authentication (edge-compatible)
+  const token = await getToken({
+    req,
+    secret: process.env.NEXTAUTH_SECRET
+  });
+  const isLoggedIn = !!token;
 
   // Handle security headers FIRST
   const addSecurityHeaders = (response: NextResponse) => {
@@ -96,7 +102,7 @@ export default auth((req) => {
       return addSecurityHeaders(NextResponse.redirect(loginUrl));
     }
 
-    const userRole = req.auth?.user?.role;
+    const userRole = token?.role as string | undefined;
 
     if (userRole !== "STORE_OWNER" && userRole !== "SUPER_ADMIN") {
       return addSecurityHeaders(NextResponse.redirect(new URL("/", req.url)));
@@ -126,7 +132,7 @@ export default auth((req) => {
   // For now, routes are working without i18n routing
 
   return addSecurityHeaders(response);
-});
+}
 
 // Configure which routes to run middleware on
 export const config = {

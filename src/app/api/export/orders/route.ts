@@ -71,7 +71,7 @@ export async function GET(req: NextRequest) {
 
     if (format === "csv") {
       // Convert Decimal fields to numbers for CSV export
-      const ordersForExport = orders.map(order => ({
+      const ordersForExport = orders.map((order: any) => ({
         ...order,
         subtotal: Number(order.subtotal),
         shippingCost: Number(order.shippingCost),
