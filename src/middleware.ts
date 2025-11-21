@@ -1,8 +1,8 @@
-// Middleware - Route Protection and Security Headers
-// Handles authentication, route protection, and security headers
+// Middleware - i18n + Route Protection + Security Headers
+// Combines next-intl locale routing with authentication and security
 
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import createMiddleware from "next-intl/middleware";
+import { NextRequest, NextResponse } from "next/server";
 
 // CSP Header
 const CSP_HEADER = `
@@ -21,33 +21,39 @@ const CSP_HEADER = `
   .replace(/\s{2,}/g, " ")
   .trim();
 
+// Create next-intl middleware
+const intlMiddleware = createMiddleware({
+  locales: ["en", "es"],
+  defaultLocale: "es",
+  localePrefix: "as-needed", // Don't add /es prefix for default locale
+});
+
+// Helper to add security headers
+function addSecurityHeaders(response: NextResponse) {
+  response.headers.set("Content-Security-Policy", CSP_HEADER);
+  response.headers.set("X-Content-Type-Options", "nosniff");
+  response.headers.set("X-Frame-Options", "DENY");
+  response.headers.set("X-XSS-Protection", "1; mode=block");
+  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  response.headers.set(
+    "Permissions-Policy",
+    "geolocation=(), microphone=(), camera=()",
+  );
+  return response;
+}
+
 export default async function middleware(req: NextRequest) {
   try {
     const { pathname } = req.nextUrl;
 
-    // Handle security headers
-    const addSecurityHeaders = (response: NextResponse) => {
-      response.headers.set("Content-Security-Policy", CSP_HEADER);
-      response.headers.set("X-Content-Type-Options", "nosniff");
-      response.headers.set("X-Frame-Options", "DENY");
-      response.headers.set("X-XSS-Protection", "1; mode=block");
-      response.headers.set(
-        "Referrer-Policy",
-        "strict-origin-when-cross-origin",
-      );
-      response.headers.set(
-        "Permissions-Policy",
-        "geolocation=(), microphone=(), camera=()",
-      );
-      return response;
-    };
+    // First, handle i18n routing with next-intl
+    const intlResponse = intlMiddleware(req);
 
-    // Get auth token with error handling
+    // Check authentication status
     let isLoggedIn = false;
     let userRole: string | undefined;
 
     try {
-      // Only try to get token if NEXTAUTH_SECRET is available
       if (process.env.NEXTAUTH_SECRET) {
         const { getToken } = await import("next-auth/jwt");
         const token = await getToken({
@@ -58,7 +64,6 @@ export default async function middleware(req: NextRequest) {
         userRole = token?.role as string | undefined;
       }
     } catch (error) {
-      // Silently fail auth check - allow public access but block protected routes
       console.error("Auth token error:", error);
     }
 
@@ -127,14 +132,13 @@ export default async function middleware(req: NextRequest) {
       }
     }
 
-    // Allow request to proceed
-    const response = NextResponse.next();
-    return addSecurityHeaders(response);
+    // Add security headers to the i18n response
+    return addSecurityHeaders(intlResponse);
   } catch (error) {
     // Critical error handler - always return a valid response
     console.error("Middleware critical error:", error);
     const response = NextResponse.next();
-    return response;
+    return addSecurityHeaders(response);
   }
 }
 
@@ -144,10 +148,10 @@ export const config = {
   matcher: [
     /*
      * Match all request paths except:
-     * - api routes
+     * - api routes (handled separately above)
      * - _next (Next.js internals)
      * - _vercel (Vercel internals) ← CRITICAL
-     * - Files with extensions
+     * - Files with extensions (images, css, js, etc.)
      */
     "/((?!api|_next|_vercel|.*\\..*).*)",
   ],
