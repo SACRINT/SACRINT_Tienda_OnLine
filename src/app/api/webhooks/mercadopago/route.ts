@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Handle payment approved
-    if (orderStatus === "PAID" && order.status !== "PAID") {
+    if (mpStatus === "approved" && order.status !== "PROCESSING") {
       logger.info("Mercado Pago payment approved, confirming order", {
         orderId,
         paymentId,
@@ -104,9 +104,9 @@ export async function POST(req: NextRequest) {
       await db.order.update({
         where: { id: orderId },
         data: {
-          status: "PAID",
-          paidAt: new Date(),
-          paymentIntentId: paymentId || order.paymentIntentId,
+          status: "PROCESSING",
+          paymentStatus: "COMPLETED",
+          paymentId: paymentId || order.paymentId,
         },
       });
 
@@ -114,7 +114,7 @@ export async function POST(req: NextRequest) {
       const reservation = await db.inventoryReservation.findFirst({
         where: {
           orderId,
-          status: "ACTIVE",
+          status: "RESERVED",
         },
       });
 
@@ -139,7 +139,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Handle payment failed
-    if (orderStatus === "FAILED" && order.status === "PENDING") {
+    if ((mpStatus === "rejected" || mpStatus === "failed") && order.status === "PENDING") {
       logger.warn("Mercado Pago payment failed", {
         orderId,
         paymentId,
@@ -156,7 +156,7 @@ export async function POST(req: NextRequest) {
       const reservation = await db.inventoryReservation.findFirst({
         where: {
           orderId,
-          status: "ACTIVE",
+          status: "RESERVED",
         },
       });
 
@@ -174,7 +174,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Handle payment pending (waiting for customer action)
-    if (orderStatus === "PENDING" && order.status === "PENDING") {
+    if (mpStatus === "pending" && order.status === "PENDING") {
       logger.info("Mercado Pago payment still pending", {
         orderId,
         paymentId,
@@ -184,7 +184,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Handle refund
-    if (orderStatus === "REFUNDED" && order.status === "PAID") {
+    if (mpStatus === "refunded" && order.status === "PROCESSING") {
       logger.info("Mercado Pago payment refunded", {
         orderId,
         paymentId,

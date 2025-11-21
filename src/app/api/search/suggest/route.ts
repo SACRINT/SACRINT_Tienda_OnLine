@@ -8,6 +8,8 @@ import {
 } from "@/lib/search";
 import { z } from "zod";
 
+export const dynamic = "force-dynamic";
+
 const suggestSchema = z.object({
   q: z.string().min(1),
   tenantId: z.string().uuid(),

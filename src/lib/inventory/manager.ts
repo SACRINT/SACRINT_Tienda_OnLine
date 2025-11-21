@@ -27,17 +27,14 @@ export interface InventoryReservation {
   reservedAt: Date;
   expiresAt: Date;
   orderId?: string;
-  status: "ACTIVE" | "CONFIRMED" | "EXPIRED" | "CANCELLED";
+  status: "RESERVED" | "CONFIRMED" | "CANCELLED";
 }
 
-export interface InventoryMovement {
+export interface InventoryLog {
   id: string;
   productId: string;
   variantId?: string;
-  type: InventoryMovementType;
-  quantity: number;
-  previousStock: number;
-  newStock: number;
+  adjustment: number;
   reason?: string;
   userId?: string;
   orderId?: string;
@@ -97,7 +94,7 @@ export async function reserveInventory(
             reservedBy,
             expiresAt,
             orderId,
-            status: "ACTIVE",
+            status: "RESERVED",
             tenantId,
           },
         });
@@ -136,7 +133,7 @@ export async function confirmInventoryReservation(
 ): Promise<void> {
   try {
     await db.$transaction(async (tx: any) => {
-      const reservation = await tx.inventoryReservation.findUnique({
+      const reservation = await tx.inventoryReservation.findFirst({
         where: { id: reservationId, tenantId },
         include: {
           product: true,
@@ -148,8 +145,8 @@ export async function confirmInventoryReservation(
         throw new Error(`Reservation ${reservationId} not found`);
       }
 
-      if (reservation.status !== "ACTIVE") {
-        throw new Error(`Reservation ${reservationId} is not active`);
+      if (reservation.status !== "RESERVED") {
+        throw new Error(`Reservation ${reservationId} is not reserved`);
       }
 
       // Deduct from stock
@@ -164,16 +161,12 @@ export async function confirmInventoryReservation(
         });
 
         // Create movement record
-        await tx.inventoryMovement.create({
+        await tx.inventoryLog.create({
           data: {
             productId: reservation.productId,
-            variantId: reservation.variantId,
-            type: "SALE",
-            quantity: -reservation.quantity,
-            previousStock: variant.stock + reservation.quantity,
-            newStock: variant.stock,
+            adjustment: -reservation.quantity,
+            reason: "SALE",
             orderId: reservation.orderId,
-            tenantId,
           },
         });
 
@@ -188,7 +181,7 @@ export async function confirmInventoryReservation(
         }
       } else {
         const product = await tx.product.update({
-          where: { id: reservation.productId, tenantId },
+          where: { id: reservation.productId },
           data: {
             stock: {
               decrement: reservation.quantity,
@@ -197,15 +190,12 @@ export async function confirmInventoryReservation(
         });
 
         // Create movement record
-        await tx.inventoryMovement.create({
+        await tx.inventoryLog.create({
           data: {
             productId: reservation.productId,
-            type: "SALE",
-            quantity: -reservation.quantity,
-            previousStock: product.stock + reservation.quantity,
-            newStock: product.stock,
+            adjustment: -reservation.quantity,
+            reason: "SALE",
             orderId: reservation.orderId,
-            tenantId,
           },
         });
 
@@ -252,8 +242,8 @@ export async function releaseInventoryReservation(
   reservationId: string,
 ): Promise<void> {
   try {
-    await db.inventoryReservation.update({
-      where: { id: reservationId, tenantId },
+    await db.inventoryReservation.updateMany({
+      where: { id: reservationId },
       data: { status: "CANCELLED" },
     });
 
@@ -276,14 +266,11 @@ export async function expireOldReservations(tenantId?: string): Promise<number> 
   try {
     const result = await db.inventoryReservation.updateMany({
       where: {
-        ...(tenantId && { tenantId }),
-        status: "ACTIVE",
-        expiresAt: {
-          lt: new Date(),
-        },
+        status: "RESERVED",
+        order: tenantId ? { tenantId } : undefined,
       },
       data: {
-        status: "EXPIRED",
+        status: "CANCELLED",
       },
     });
 
@@ -328,22 +315,16 @@ export async function adjustInventory(
           data: { stock: newStock },
         });
 
-        await tx.inventoryMovement.create({
+        await tx.inventoryLog.create({
           data: {
             productId,
-            variantId,
-            type: "ADJUSTMENT",
-            quantity,
-            previousStock,
-            newStock,
+            adjustment: quantity,
             reason,
-            userId,
-            tenantId,
           },
         });
       } else {
         const product = await tx.product.findUnique({
-          where: { id: productId, tenantId },
+          where: { id: productId },
         });
 
         if (!product) {
@@ -358,16 +339,11 @@ export async function adjustInventory(
           data: { stock: newStock },
         });
 
-        await tx.inventoryMovement.create({
+        await tx.inventoryLog.create({
           data: {
             productId,
-            type: "ADJUSTMENT",
-            quantity,
-            previousStock,
-            newStock,
+            adjustment: quantity,
             reason,
-            userId,
-            tenantId,
           },
         });
       }
@@ -401,39 +377,24 @@ export async function getInventoryMovements(
   productId?: string,
   limit: number = 50,
   offset: number = 0,
-): Promise<{ movements: InventoryMovement[]; total: number }> {
+): Promise<{ movements: InventoryLog[]; total: number }> {
   try {
     const where = {
-      tenantId,
       ...(productId && { productId }),
     };
 
     const [movements, total] = await Promise.all([
-      db.inventoryMovement.findMany({
+      db.inventoryLog.findMany({
         where,
         orderBy: { createdAt: "desc" },
         take: limit,
         skip: offset,
-        include: {
-          product: {
-            select: {
-              name: true,
-              sku: true,
-            },
-          },
-          variant: {
-            select: {
-              sku: true,
-              name: true,
-            },
-          },
-        },
       }),
-      db.inventoryMovement.count({ where }),
+      db.inventoryLog.count({ where }),
     ]);
 
     return {
-      movements: movements as InventoryMovement[],
+      movements: movements as InventoryLog[],
       total,
     };
   } catch (error) {
@@ -456,9 +417,6 @@ export async function getLowStockProducts(
       where: {
         tenantId,
         published: true,
-        stock: {
-          lte: db.product.fields.lowStockThreshold,
-        },
       },
       select: {
         id: true,
@@ -468,7 +426,12 @@ export async function getLowStockProducts(
       },
     });
 
-    return products.map((p: any) => ({
+    // Filter products with low stock in memory
+    const lowStockProducts = products.filter(
+      (p: any) => p.stock <= (p.lowStockThreshold || 10),
+    );
+
+    return lowStockProducts.map((p: any) => ({
       id: p.id,
       name: p.name,
       stock: p.stock,

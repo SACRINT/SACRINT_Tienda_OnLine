@@ -36,32 +36,19 @@ export default auth((req) => {
   const { pathname } = req.nextUrl;
   const isLoggedIn = !!req.auth?.user;
 
-  // Skip i18n for API routes, static files, and Next.js internals
-  const shouldApplyIntl =
-    !pathname.startsWith("/api") &&
-    !pathname.startsWith("/_next") &&
-    !pathname.startsWith("/_vercel") &&
-    !pathname.match(/\.(ico|png|jpg|jpeg|svg|webp|gif|css|js|json|xml|txt)$/);
-
-  // Apply i18n middleware first if applicable
-  let response: NextResponse;
-
-  if (shouldApplyIntl) {
-    response = intlMiddleware(req as unknown as NextRequest);
-  } else {
-    response = NextResponse.next();
-  }
-
-  // Add security headers to all responses
-  response.headers.set("Content-Security-Policy", CSP_HEADER);
-  response.headers.set("X-Content-Type-Options", "nosniff");
-  response.headers.set("X-Frame-Options", "DENY");
-  response.headers.set("X-XSS-Protection", "1; mode=block");
-  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
-  response.headers.set(
-    "Permissions-Policy",
-    "geolocation=(), microphone=(), camera=()",
-  );
+  // Handle security headers FIRST
+  const addSecurityHeaders = (response: NextResponse) => {
+    response.headers.set("Content-Security-Policy", CSP_HEADER);
+    response.headers.set("X-Content-Type-Options", "nosniff");
+    response.headers.set("X-Frame-Options", "DENY");
+    response.headers.set("X-XSS-Protection", "1; mode=block");
+    response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+    response.headers.set(
+      "Permissions-Policy",
+      "geolocation=(), microphone=(), camera=()",
+    );
+    return response;
+  };
 
   // Define public paths that don't require authentication
   const publicPaths = [
@@ -84,11 +71,21 @@ export default auth((req) => {
       pathnameWithoutLocale.startsWith(`${path}/`),
   );
 
+  // Skip i18n for API routes, static files, and Next.js internals
+  const shouldApplyIntl =
+    !pathname.startsWith("/api") &&
+    !pathname.startsWith("/_next") &&
+    !pathname.startsWith("/_vercel") &&
+    !pathname.startsWith("/.well-known") &&
+    !pathname.match(/\.(ico|png|jpg|jpeg|svg|webp|gif|css|js|json|xml|txt)$/);
+
+  // ===== ROUTE PROTECTION CHECKS =====
+
   // Protect dashboard routes
   if (pathnameWithoutLocale.startsWith("/dashboard") && !isLoggedIn) {
     const loginUrl = new URL("/login", req.url);
     loginUrl.searchParams.set("callbackUrl", pathname);
-    return NextResponse.redirect(loginUrl);
+    return addSecurityHeaders(NextResponse.redirect(loginUrl));
   }
 
   // Protect admin routes (STORE_OWNER only)
@@ -96,13 +93,13 @@ export default auth((req) => {
     if (!isLoggedIn) {
       const loginUrl = new URL("/login", req.url);
       loginUrl.searchParams.set("callbackUrl", pathname);
-      return NextResponse.redirect(loginUrl);
+      return addSecurityHeaders(NextResponse.redirect(loginUrl));
     }
 
     const userRole = req.auth?.user?.role;
 
     if (userRole !== "STORE_OWNER" && userRole !== "SUPER_ADMIN") {
-      return NextResponse.redirect(new URL("/", req.url));
+      return addSecurityHeaders(NextResponse.redirect(new URL("/", req.url)));
     }
   }
 
@@ -114,11 +111,21 @@ export default auth((req) => {
     !pathname.startsWith("/api/webhooks")
   ) {
     if (!isLoggedIn) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return addSecurityHeaders(
+        NextResponse.json({ error: "Unauthorized" }, { status: 401 }),
+      );
     }
   }
 
-  return response;
+  // ===== I18N MIDDLEWARE =====
+  // TEMPORARY: Disable intlMiddleware to diagnose root cause
+  // The middleware is causing 404 errors, so we'll skip it for now
+  let response = NextResponse.next();
+
+  // TODO: Re-enable intlMiddleware once we fix the root cause
+  // For now, routes are working without i18n routing
+
+  return addSecurityHeaders(response);
 });
 
 // Configure which routes to run middleware on
@@ -130,7 +137,8 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - public folder
+     * - .well-known (for SSL/security)
      */
-    "/((?!_next/static|_next/image|favicon.ico|public).*)",
+    "/((?!_next/static|_next/image|favicon|public|\\.well-known).*)",
   ],
 };
