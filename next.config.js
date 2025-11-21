@@ -1,6 +1,7 @@
-const createNextIntlPlugin = require("next-intl/plugin");
-
-const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
+// DISABLED: next-intl plugin requires [locale]/ folder structure which this project doesn't have
+// This plugin was causing 404 errors on ALL routes in Vercel production
+// const createNextIntlPlugin = require("next-intl/plugin");
+// const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -128,4 +129,6 @@ const nextConfig = {
   },
 };
 
-module.exports = withNextIntl(nextConfig);
+// DISABLED: Export without next-intl wrapper
+module.exports = nextConfig;
+// module.exports = withNextIntl(nextConfig);
