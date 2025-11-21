@@ -1,31 +1,33 @@
-// Middleware - TEMPORARY MINIMAL VERSION
-// TODO: Re-enable authentication and route protection once 404 issue is resolved
+// Middleware - Security Headers and Route Protection
+// Compatible with Vercel deployment and next-intl
 
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export default function middleware(req: NextRequest) {
-  // Just pass through - no authentication, no redirects, no nothing
-  // This ensures the app loads while we debug the 404 issue
+  // Allow request to proceed
   const response = NextResponse.next();
 
-  // Add basic security headers
+  // Add security headers
   response.headers.set("X-Content-Type-Options", "nosniff");
   response.headers.set("X-Frame-Options", "DENY");
   response.headers.set("X-XSS-Protection", "1; mode=block");
+  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
 
   return response;
 }
 
-// Minimal matcher - only run on HTML pages
+// CRITICAL: Matcher must exclude _vercel for Vercel deployment to work
+// Reference: https://next-intl.dev/docs/routing/middleware
 export const config = {
   matcher: [
     /*
-     * Match all paths except:
-     * - API routes (let them handle their own auth)
-     * - Static files
-     * - Next.js internals
+     * Match all request paths except:
+     * - api routes
+     * - _next (Next.js internals)
+     * - _vercel (Vercel internals) ← CRITICAL for deployment
+     * - Files with extensions (images, css, js, etc.)
      */
-    "/((?!api|_next/static|_next/image|favicon|public).*)",
+    "/((?!api|_next|_vercel|.*\\..*).*)",
   ],
 };
