@@ -10,7 +10,7 @@ import { z } from "zod";
  */
 export function parseCSV<T>(
   csvContent: string,
-  delimiter = ","
+  delimiter = ",",
 ): Array<Record<string, string>> {
   const lines = csvContent.trim().split("\n");
 
@@ -30,7 +30,9 @@ export function parseCSV<T>(
     const values = parseCSVLine(lines[i], delimiter);
 
     if (values.length !== headers.length) {
-      console.warn(`Row ${i + 1} has ${values.length} columns, expected ${headers.length}`);
+      console.warn(
+        `Row ${i + 1} has ${values.length} columns, expected ${headers.length}`,
+      );
     }
 
     const row: Record<string, string> = {};
@@ -89,13 +91,34 @@ export const ProductImportSchema = z.object({
   description: z.string().default(""),
   category: z.string().optional(),
   basePrice: z.string().transform((val) => parseFloat(val)),
-  salePrice: z.string().optional().transform((val) => val ? parseFloat(val) : undefined),
-  stock: z.string().default("0").transform((val) => parseInt(val, 10)),
-  published: z.string().default("false").transform((val) => val.toLowerCase() === "true" || val === "1"),
-  weight: z.string().default("0").transform((val) => parseFloat(val)),
-  length: z.string().default("0").transform((val) => parseFloat(val)),
-  width: z.string().default("0").transform((val) => parseFloat(val)),
-  height: z.string().default("0").transform((val) => parseFloat(val)),
+  salePrice: z
+    .string()
+    .optional()
+    .transform((val) => (val ? parseFloat(val) : undefined)),
+  stock: z
+    .string()
+    .default("0")
+    .transform((val) => parseInt(val, 10)),
+  published: z
+    .string()
+    .default("false")
+    .transform((val) => val.toLowerCase() === "true" || val === "1"),
+  weight: z
+    .string()
+    .default("0")
+    .transform((val) => parseFloat(val)),
+  length: z
+    .string()
+    .default("0")
+    .transform((val) => parseFloat(val)),
+  width: z
+    .string()
+    .default("0")
+    .transform((val) => parseFloat(val)),
+  height: z
+    .string()
+    .default("0")
+    .transform((val) => parseFloat(val)),
 });
 
 export type ProductImportData = z.infer<typeof ProductImportSchema>;
@@ -103,14 +126,20 @@ export type ProductImportData = z.infer<typeof ProductImportSchema>;
 /**
  * Validate and transform product import data
  */
-export function validateProductImport(
-  data: Array<Record<string, string>>
-): {
+export function validateProductImport(data: Array<Record<string, string>>): {
   valid: ProductImportData[];
-  invalid: Array<{ row: number; errors: string[]; data: Record<string, string> }>;
+  invalid: Array<{
+    row: number;
+    errors: string[];
+    data: Record<string, string>;
+  }>;
 } {
   const valid: ProductImportData[] = [];
-  const invalid: Array<{ row: number; errors: string[]; data: Record<string, string> }> = [];
+  const invalid: Array<{
+    row: number;
+    errors: string[];
+    data: Record<string, string>;
+  }> = [];
 
   data.forEach((row, index) => {
     try {
@@ -120,7 +149,9 @@ export function validateProductImport(
       if (error instanceof z.ZodError) {
         invalid.push({
           row: index + 2, // +2 because CSV is 1-indexed and has header
-          errors: error.issues.map((err) => `${err.path.map(String).join(".")}: ${err.message}`),
+          errors: error.issues.map(
+            (err) => `${err.path.map(String).join(".")}: ${err.message}`,
+          ),
           data: row,
         });
       }

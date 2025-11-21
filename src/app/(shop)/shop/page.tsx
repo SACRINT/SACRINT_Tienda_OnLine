@@ -38,11 +38,13 @@ async function getProducts() {
       orderBy: { createdAt: "desc" },
     });
 
-    return products.map((product: typeof products[number]) => {
+    return products.map((product: (typeof products)[number]) => {
       const avgRating =
         product.reviews.length > 0
-          ? product.reviews.reduce((sum: number, r: { rating: number }) => sum + r.rating, 0) /
-            product.reviews.length
+          ? product.reviews.reduce(
+              (sum: number, r: { rating: number }) => sum + r.rating,
+              0,
+            ) / product.reviews.length
           : undefined;
 
       return {
@@ -87,7 +89,7 @@ async function getCategories() {
       },
     });
 
-    return categories.map((cat: typeof categories[number]) => ({
+    return categories.map((cat: (typeof categories)[number]) => ({
       id: cat.id,
       name: cat.name,
       slug: cat.slug,

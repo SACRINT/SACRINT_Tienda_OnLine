@@ -38,7 +38,7 @@ export default async function middleware(req: NextRequest) {
   // Get user token for authentication (edge-compatible)
   const token = await getToken({
     req,
-    secret: process.env.NEXTAUTH_SECRET
+    secret: process.env.NEXTAUTH_SECRET,
   });
   const isLoggedIn = !!token;
 

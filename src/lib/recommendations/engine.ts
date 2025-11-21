@@ -121,7 +121,7 @@ export async function getFrequentlyBoughtTogether(
       slug: p.slug,
       basePrice: Number(p.basePrice),
       imageUrl: p.images[0]?.url || null,
-      score: Number((countMap.get(p.id) || 0)) / orderIds.length,
+      score: Number(countMap.get(p.id) || 0) / orderIds.length,
       reason: "Comprado frecuentemente juntos",
     }));
 
@@ -197,10 +197,7 @@ export async function getSimilarProducts(
         },
       },
       take: limit,
-      orderBy: [
-        { featured: "desc" },
-        { createdAt: "desc" },
-      ],
+      orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
     });
 
     // Calculate similarity scores based on price and name
@@ -215,7 +212,9 @@ export async function getSimilarProducts(
         sourceProduct.name.toLowerCase().split(/\s+/),
       );
       const targetWords = p.name.toLowerCase().split(/\s+/);
-      const commonWords = targetWords.filter((w: string) => sourceWords.has(w)).length;
+      const commonWords = targetWords.filter((w: string) =>
+        sourceWords.has(w),
+      ).length;
       const nameScore = commonWords / sourceWords.size;
 
       const score = priceScore * 0.3 + nameScore * 0.7;
@@ -333,7 +332,7 @@ export async function getTrendingProducts(
       slug: p.slug,
       basePrice: Number(p.basePrice),
       imageUrl: p.images[0]?.url || null,
-      score: Number((countMap.get(p.id) || 0)) / totalOrders,
+      score: Number(countMap.get(p.id) || 0) / totalOrders,
       reason: "Producto popular",
     }));
 
@@ -443,17 +442,13 @@ export async function getPersonalizedRecommendations(
         },
       },
       take: limit * 2,
-      orderBy: [
-        { featured: "desc" },
-        { createdAt: "desc" },
-      ],
+      orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
     });
 
     // Score based on category preference
     const result: RecommendedProduct[] = recommendations.map((p: any) => {
       const categoryScore =
-        (categoryFrequency.get(p.categoryId || "") || 0) /
-        userOrders.length;
+        (categoryFrequency.get(p.categoryId || "") || 0) / userOrders.length;
       const featuredBonus = p.featured ? 0.2 : 0;
 
       return {
@@ -476,11 +471,10 @@ export async function getPersonalizedRecommendations(
 
     return limited;
   } catch (error) {
-    logger.error(
-      "Failed to get personalized recommendations",
-      error as Error,
-      { tenantId, userId },
-    );
+    logger.error("Failed to get personalized recommendations", error as Error, {
+      tenantId,
+      userId,
+    });
     return [];
   }
 }

@@ -61,10 +61,7 @@ describe("Notification Service", () => {
           createdAt: new Date().toISOString(),
         },
       ];
-      localStorageMock.setItem(
-        "notifications",
-        JSON.stringify(notifications),
-      );
+      localStorageMock.setItem("notifications", JSON.stringify(notifications));
 
       const result = getNotifications();
       expect(result).toHaveLength(1);

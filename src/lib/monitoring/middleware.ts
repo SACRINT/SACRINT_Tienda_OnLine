@@ -10,15 +10,25 @@ import { logger, createRequestContext, PerfTimer } from "./logger";
  * Wrap API route handler with logging middleware
  */
 export function withLogging<T = any>(
-  handler: (req: NextRequest, context?: any) => Promise<NextResponse<T> | Response>,
+  handler: (
+    req: NextRequest,
+    context?: any,
+  ) => Promise<NextResponse<T> | Response>,
   options?: {
     skipPaths?: string[];
     logBody?: boolean;
     logHeaders?: boolean;
   },
 ) {
-  return async (req: NextRequest, context?: any): Promise<NextResponse<T> | Response> => {
-    const { skipPaths = [], logBody = false, logHeaders = false } = options || {};
+  return async (
+    req: NextRequest,
+    context?: any,
+  ): Promise<NextResponse<T> | Response> => {
+    const {
+      skipPaths = [],
+      logBody = false,
+      logHeaders = false,
+    } = options || {};
 
     // Skip logging for certain paths
     if (skipPaths.some((path) => req.nextUrl.pathname.startsWith(path))) {
@@ -38,7 +48,10 @@ export function withLogging<T = any>(
       ...(logHeaders && { headers: Object.fromEntries(req.headers) }),
     };
 
-    logger.info(`[REQUEST] ${req.method} ${req.nextUrl.pathname}`, requestContext);
+    logger.info(
+      `[REQUEST] ${req.method} ${req.nextUrl.pathname}`,
+      requestContext,
+    );
 
     // Log request body if enabled (only for non-GET requests)
     if (logBody && req.method !== "GET") {
@@ -128,7 +141,10 @@ export function createLoggingMiddleware() {
  * Error boundary wrapper for API routes
  */
 export function withErrorHandler<T = any>(
-  handler: (req: NextRequest, context?: any) => Promise<NextResponse<T> | Response>,
+  handler: (
+    req: NextRequest,
+    context?: any,
+  ) => Promise<NextResponse<T> | Response>,
 ) {
   return async (req: NextRequest, context?: any): Promise<NextResponse> => {
     try {
@@ -137,7 +153,11 @@ export function withErrorHandler<T = any>(
     } catch (error) {
       const requestContext = createRequestContext(req);
 
-      logger.error("Unhandled error in API route", error as Error, requestContext);
+      logger.error(
+        "Unhandled error in API route",
+        error as Error,
+        requestContext,
+      );
 
       return NextResponse.json(
         {
@@ -160,11 +180,25 @@ export function withErrorHandler<T = any>(
 export function compose<T = any>(
   ...middlewares: Array<
     (
-      handler: (req: NextRequest, context?: any) => Promise<NextResponse<T> | Response>,
-    ) => (req: NextRequest, context?: any) => Promise<NextResponse<T> | Response>
+      handler: (
+        req: NextRequest,
+        context?: any,
+      ) => Promise<NextResponse<T> | Response>,
+    ) => (
+      req: NextRequest,
+      context?: any,
+    ) => Promise<NextResponse<T> | Response>
   >
 ) {
-  return (handler: (req: NextRequest, context?: any) => Promise<NextResponse<T> | Response>) => {
-    return middlewares.reduceRight((acc, middleware) => middleware(acc), handler);
+  return (
+    handler: (
+      req: NextRequest,
+      context?: any,
+    ) => Promise<NextResponse<T> | Response>,
+  ) => {
+    return middlewares.reduceRight(
+      (acc, middleware) => middleware(acc),
+      handler,
+    );
   };
 }

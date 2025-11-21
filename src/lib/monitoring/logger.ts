@@ -231,7 +231,11 @@ class AdvancedLogger {
     };
 
     if (statusCode >= 500) {
-      this.error(`[HTTP] ${method} ${url} ${statusCode}`, undefined, requestContext);
+      this.error(
+        `[HTTP] ${method} ${url} ${statusCode}`,
+        undefined,
+        requestContext,
+      );
     } else if (statusCode >= 400) {
       this.warn(`[HTTP] ${method} ${url} ${statusCode}`, requestContext);
     } else {
@@ -242,7 +246,11 @@ class AdvancedLogger {
   /**
    * Cache hit/miss logging
    */
-  cache(operation: "hit" | "miss" | "set" | "del", key: string, context?: LogContext): void {
+  cache(
+    operation: "hit" | "miss" | "set" | "del",
+    key: string,
+    context?: LogContext,
+  ): void {
     this.debug(`[CACHE] ${operation.toUpperCase()} ${key}`, {
       ...context,
       cacheOperation: operation,

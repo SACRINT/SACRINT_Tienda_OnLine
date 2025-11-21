@@ -303,15 +303,12 @@ export const CacheKeys = {
  * Clean up expired memory cache entries periodically
  */
 if (!getRedisClient()) {
-  setInterval(
-    () => {
-      const now = Date.now();
-      for (const [key, value] of memoryCache.entries()) {
-        if (value.expiry <= now) {
-          memoryCache.delete(key);
-        }
+  setInterval(() => {
+    const now = Date.now();
+    for (const [key, value] of memoryCache.entries()) {
+      if (value.expiry <= now) {
+        memoryCache.delete(key);
       }
-    },
-    60 * 1000,
-  ); // Clean up every minute
+    }
+  }, 60 * 1000); // Clean up every minute
 }

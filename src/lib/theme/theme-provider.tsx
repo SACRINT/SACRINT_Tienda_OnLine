@@ -66,7 +66,7 @@ export function ThemeProvider({
     if (metaThemeColor) {
       metaThemeColor.setAttribute(
         "content",
-        resolved === "dark" ? "#0A1128" : "#ffffff"
+        resolved === "dark" ? "#0A1128" : "#ffffff",
       );
     }
   }, [theme, mounted]);

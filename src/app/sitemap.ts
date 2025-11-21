@@ -80,20 +80,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
 
     // Product pages
-    const productPages: MetadataRoute.Sitemap = products.map((product: { slug: string; updatedAt: Date }) => ({
-      url: `${BASE_URL}/shop/products/${product.slug}`,
-      lastModified: product.updatedAt,
-      changeFrequency: "weekly" as const,
-      priority: 0.8,
-    }));
+    const productPages: MetadataRoute.Sitemap = products.map(
+      (product: { slug: string; updatedAt: Date }) => ({
+        url: `${BASE_URL}/shop/products/${product.slug}`,
+        lastModified: product.updatedAt,
+        changeFrequency: "weekly" as const,
+        priority: 0.8,
+      }),
+    );
 
     // Category pages
-    const categoryPages: MetadataRoute.Sitemap = categories.map((category: { slug: string; updatedAt: Date }) => ({
-      url: `${BASE_URL}/categories/${category.slug}`,
-      lastModified: category.updatedAt,
-      changeFrequency: "weekly" as const,
-      priority: 0.7,
-    }));
+    const categoryPages: MetadataRoute.Sitemap = categories.map(
+      (category: { slug: string; updatedAt: Date }) => ({
+        url: `${BASE_URL}/categories/${category.slug}`,
+        lastModified: category.updatedAt,
+        changeFrequency: "weekly" as const,
+        priority: 0.7,
+      }),
+    );
 
     return [...staticPages, ...categoryPages, ...productPages];
   } catch (error) {

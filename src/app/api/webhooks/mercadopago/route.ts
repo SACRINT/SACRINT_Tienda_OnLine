@@ -86,11 +86,11 @@ export async function POST(req: NextRequest) {
     });
 
     if (!order) {
-      logger.error(`Order not found for Mercado Pago webhook: ${orderId}`, new Error("Order not found"));
-      return NextResponse.json(
-        { error: "Order not found" },
-        { status: 404 },
+      logger.error(
+        `Order not found for Mercado Pago webhook: ${orderId}`,
+        new Error("Order not found"),
       );
+      return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
     // Handle payment approved
@@ -139,7 +139,10 @@ export async function POST(req: NextRequest) {
     }
 
     // Handle payment failed
-    if ((mpStatus === "rejected" || mpStatus === "failed") && order.status === "PENDING") {
+    if (
+      (mpStatus === "rejected" || mpStatus === "failed") &&
+      order.status === "PENDING"
+    ) {
       logger.warn("Mercado Pago payment failed", {
         orderId,
         paymentId,

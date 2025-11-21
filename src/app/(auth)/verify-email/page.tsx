@@ -10,7 +10,9 @@ import { Loader2, CheckCircle, AlertTriangle, Mail } from "lucide-react";
 export default function VerifyEmailPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
+  const [status, setStatus] = useState<"loading" | "success" | "error">(
+    "loading",
+  );
   const [message, setMessage] = useState("");
   const [resending, setResending] = useState(false);
 
@@ -31,7 +33,7 @@ export default function VerifyEmailPage() {
     try {
       const response = await fetch(
         `/api/auth/verify-email?token=${token}&email=${encodeURIComponent(email || "")}`,
-        { method: "GET" }
+        { method: "GET" },
       );
 
       const data = await response.json();

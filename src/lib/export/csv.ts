@@ -14,7 +14,7 @@ export interface CSVExportOptions {
  */
 export function arrayToCSV<T extends Record<string, any>>(
   data: T[],
-  options: CSVExportOptions = {}
+  options: CSVExportOptions = {},
 ): string {
   if (!data || data.length === 0) {
     return "";
@@ -48,9 +48,7 @@ export function arrayToCSV<T extends Record<string, any>>(
 
   // Create CSV data rows
   const dataRows = data.map((row) => {
-    return headers
-      .map((header) => escapeValue(row[header]))
-      .join(delimiter);
+    return headers.map((header) => escapeValue(row[header])).join(delimiter);
   });
 
   return [headerRow, ...dataRows].join("\n");
@@ -78,7 +76,10 @@ export function downloadCSV(csvContent: string, filename: string): void {
 /**
  * Create CSV Response for API
  */
-export function createCSVResponse(csvContent: string, filename: string): Response {
+export function createCSVResponse(
+  csvContent: string,
+  filename: string,
+): Response {
   return new Response(csvContent, {
     headers: {
       "Content-Type": "text/csv;charset=utf-8;",
@@ -98,7 +99,7 @@ export function exportOrdersToCSV(
     status: string;
     paymentStatus: string;
     user?: { name?: string | null; email: string };
-  }>
+  }>,
 ): string {
   const data = orders.map((order) => ({
     "Order Number": order.orderNumber,
@@ -123,7 +124,7 @@ export function exportProductsToCSV(
     stock: number;
     published: boolean;
     category?: { name: string };
-  }>
+  }>,
 ): string {
   const data = products.map((product) => ({
     Name: product.name,
@@ -146,7 +147,7 @@ export function exportCustomersToCSV(
     email: string;
     createdAt: Date;
     role: string;
-  }>
+  }>,
 ): string {
   const data = customers.map((customer) => ({
     Name: customer.name || "N/A",

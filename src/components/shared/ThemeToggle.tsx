@@ -70,7 +70,9 @@ export function ThemeToggleSimple() {
         <Moon className="h-4 w-4" />
       )}
       <span className="sr-only">
-        {resolvedTheme === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
+        {resolvedTheme === "dark"
+          ? "Cambiar a modo claro"
+          : "Cambiar a modo oscuro"}
       </span>
     </Button>
   );

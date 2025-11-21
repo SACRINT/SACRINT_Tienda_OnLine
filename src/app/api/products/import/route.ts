@@ -22,7 +22,10 @@ export async function POST(req: NextRequest) {
     }
 
     // Only STORE_OWNER and SUPER_ADMIN can import
-    if (session.user.role !== USER_ROLES.STORE_OWNER && session.user.role !== USER_ROLES.SUPER_ADMIN) {
+    if (
+      session.user.role !== USER_ROLES.STORE_OWNER &&
+      session.user.role !== USER_ROLES.SUPER_ADMIN
+    ) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -31,7 +34,7 @@ export async function POST(req: NextRequest) {
     if (!tenantId) {
       return NextResponse.json(
         { error: "User has no tenant assigned" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -57,7 +60,7 @@ export async function POST(req: NextRequest) {
           error: "No valid products found",
           invalid,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -125,7 +128,8 @@ export async function POST(req: NextRequest) {
       } catch (error) {
         errors.push({
           sku: product.sku,
-          error: error instanceof Error ? error.message : "Failed to create product",
+          error:
+            error instanceof Error ? error.message : "Failed to create product",
         });
       }
     }
@@ -149,7 +153,7 @@ export async function POST(req: NextRequest) {
     logger.error("Bulk import failed", error as Error);
     return NextResponse.json(
       { error: "Failed to import products" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

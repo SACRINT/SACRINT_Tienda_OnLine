@@ -22,7 +22,10 @@ export async function GET(req: NextRequest) {
     }
 
     // Only STORE_OWNER and SUPER_ADMIN can export
-    if (session.user.role !== USER_ROLES.STORE_OWNER && session.user.role !== USER_ROLES.SUPER_ADMIN) {
+    if (
+      session.user.role !== USER_ROLES.STORE_OWNER &&
+      session.user.role !== USER_ROLES.SUPER_ADMIN
+    ) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -31,7 +34,7 @@ export async function GET(req: NextRequest) {
     if (!tenantId && session.user.role !== USER_ROLES.SUPER_ADMIN) {
       return NextResponse.json(
         { error: "User has no tenant assigned" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -94,13 +97,13 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(
       { error: "Only CSV format is supported" },
-      { status: 400 }
+      { status: 400 },
     );
   } catch (error) {
     logger.error("Export products failed", error as Error);
     return NextResponse.json(
       { error: "Failed to export products" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

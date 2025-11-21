@@ -262,7 +262,9 @@ export async function releaseInventoryReservation(
 /**
  * Expire old reservations (cleanup job)
  */
-export async function expireOldReservations(tenantId?: string): Promise<number> {
+export async function expireOldReservations(
+  tenantId?: string,
+): Promise<number> {
   try {
     const result = await db.inventoryReservation.updateMany({
       where: {
@@ -280,7 +282,9 @@ export async function expireOldReservations(tenantId?: string): Promise<number> 
 
     return result.count;
   } catch (error) {
-    logger.error("Failed to expire old reservations", error as Error, { tenantId });
+    logger.error("Failed to expire old reservations", error as Error, {
+      tenantId,
+    });
     return 0;
   }
 }
@@ -411,7 +415,9 @@ export async function getInventoryMovements(
  */
 export async function getLowStockProducts(
   tenantId: string,
-): Promise<Array<{ id: string; name: string; stock: number; threshold: number }>> {
+): Promise<
+  Array<{ id: string; name: string; stock: number; threshold: number }>
+> {
   try {
     const products = await db.product.findMany({
       where: {
@@ -438,7 +444,9 @@ export async function getLowStockProducts(
       threshold: p.lowStockThreshold || 10,
     }));
   } catch (error) {
-    logger.error("Failed to get low stock products", error as Error, { tenantId });
+    logger.error("Failed to get low stock products", error as Error, {
+      tenantId,
+    });
     throw error;
   }
 }

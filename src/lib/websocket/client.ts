@@ -6,10 +6,7 @@
 "use client";
 
 import { io, Socket } from "socket.io-client";
-import type {
-  ServerToClientEvents,
-  ClientToServerEvents,
-} from "./server";
+import type { ServerToClientEvents, ClientToServerEvents } from "./server";
 
 let socket: Socket<ServerToClientEvents, ClientToServerEvents> | null = null;
 
@@ -54,9 +51,10 @@ export function initializeWebSocketClient(): Socket<
 /**
  * Get current WebSocket client instance
  */
-export function getWebSocketClient():
-  | Socket<ServerToClientEvents, ClientToServerEvents>
-  | null {
+export function getWebSocketClient(): Socket<
+  ServerToClientEvents,
+  ClientToServerEvents
+> | null {
   return socket;
 }
 

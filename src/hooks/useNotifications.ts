@@ -109,24 +109,22 @@ export function useNotifications({
     };
   }, [tenantId, maxNotifications, autoConnect]);
 
-  const addNotification = useCallback((notification: Notification) => {
-    setNotifications((prev) => {
-      const updated = [notification, ...prev];
-      return updated.slice(0, maxNotifications);
-    });
-  }, [maxNotifications]);
-
-  const markNotificationAsRead = useCallback(
-    (notificationId: string) => {
-      setNotifications((prev) =>
-        prev.map((n) =>
-          n.id === notificationId ? { ...n, read: true } : n,
-        ),
-      );
-      markAsRead(notificationId);
+  const addNotification = useCallback(
+    (notification: Notification) => {
+      setNotifications((prev) => {
+        const updated = [notification, ...prev];
+        return updated.slice(0, maxNotifications);
+      });
     },
-    [],
+    [maxNotifications],
   );
+
+  const markNotificationAsRead = useCallback((notificationId: string) => {
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === notificationId ? { ...n, read: true } : n)),
+    );
+    markAsRead(notificationId);
+  }, []);
 
   const markAllNotificationsAsRead = useCallback(() => {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));

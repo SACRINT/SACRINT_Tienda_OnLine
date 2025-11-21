@@ -16,18 +16,10 @@ if (SENTRY_DSN) {
     // Performance Monitoring
     enabled: process.env.NODE_ENV === "production",
 
-    integrations: [
-      Sentry.httpIntegration(),
-      Sentry.prismaIntegration(),
-    ],
+    integrations: [Sentry.httpIntegration(), Sentry.prismaIntegration()],
 
     // Ignore common errors
-    ignoreErrors: [
-      "ECONNREFUSED",
-      "ETIMEDOUT",
-      "ENOTFOUND",
-      "AbortError",
-    ],
+    ignoreErrors: ["ECONNREFUSED", "ETIMEDOUT", "ENOTFOUND", "AbortError"],
 
     beforeSend(event) {
       // Filter out PII data
