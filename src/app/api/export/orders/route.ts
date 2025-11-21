@@ -22,7 +22,10 @@ export async function GET(req: NextRequest) {
     }
 
     // Only STORE_OWNER and SUPER_ADMIN can export
-    if (session.user.role !== USER_ROLES.STORE_OWNER && session.user.role !== USER_ROLES.SUPER_ADMIN) {
+    if (
+      session.user.role !== USER_ROLES.STORE_OWNER &&
+      session.user.role !== USER_ROLES.SUPER_ADMIN
+    ) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -31,7 +34,7 @@ export async function GET(req: NextRequest) {
     if (!tenantId && session.user.role !== USER_ROLES.SUPER_ADMIN) {
       return NextResponse.json(
         { error: "User has no tenant assigned" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -71,7 +74,7 @@ export async function GET(req: NextRequest) {
 
     if (format === "csv") {
       // Convert Decimal fields to numbers for CSV export
-      const ordersForExport = orders.map(order => ({
+      const ordersForExport = orders.map((order: any) => ({
         ...order,
         subtotal: Number(order.subtotal),
         shippingCost: Number(order.shippingCost),
@@ -95,13 +98,13 @@ export async function GET(req: NextRequest) {
     // PDF format not yet implemented
     return NextResponse.json(
       { error: "PDF export not yet implemented" },
-      { status: 501 }
+      { status: 501 },
     );
   } catch (error) {
     logger.error("Export orders failed", error as Error);
     return NextResponse.json(
       { error: "Failed to export orders" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

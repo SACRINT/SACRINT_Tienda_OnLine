@@ -157,7 +157,9 @@ export function emitToTenant(tenantId: string, notification: Notification) {
   }
 
   io.to(`tenant:${tenantId}`).emit("notification", notification);
-  logger.info(`Notification emitted to tenant ${tenantId}: ${notification.type}`);
+  logger.info(
+    `Notification emitted to tenant ${tenantId}: ${notification.type}`,
+  );
 }
 
 /**

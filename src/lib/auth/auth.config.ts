@@ -57,7 +57,10 @@ export const authConfig = {
           });
 
           tenantId = tenant.id;
-          logger.info("Created new tenant for Google user", { tenantId: tenant.id, email: profile.email });
+          logger.info("Created new tenant for Google user", {
+            tenantId: tenant.id,
+            email: profile.email,
+          });
         } else {
           tenantId = user.tenantId;
         }
@@ -80,12 +83,16 @@ export const authConfig = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        logger.debug("Credentials login attempt", { email: credentials?.email });
+        logger.debug("Credentials login attempt", {
+          email: credentials?.email,
+        });
 
         const validation = LoginSchema.safeParse(credentials);
 
         if (!validation.success) {
-          logger.warn("Auth validation failed", { issues: validation.error.issues });
+          logger.warn("Auth validation failed", {
+            issues: validation.error.issues,
+          });
           return null;
         }
 
@@ -170,15 +177,23 @@ export const authConfig = {
   },
   events: {
     async signIn({ user, isNewUser }: any) {
-      logger.audit("User signed in", { email: user.email, isNewUser, userId: user.id });
+      logger.audit("User signed in", {
+        email: user.email,
+        isNewUser,
+        userId: user.id,
+      });
 
       if (isNewUser) {
         // TODO: Send welcome email
-        logger.info("New user registered - welcome email to be sent", { email: user.email });
+        logger.info("New user registered - welcome email to be sent", {
+          email: user.email,
+        });
       }
     },
     async signOut({ session, token }: any) {
-      logger.audit("User signed out", { email: session?.user?.email || token?.email });
+      logger.audit("User signed out", {
+        email: session?.user?.email || token?.email,
+      });
     },
   },
   session: {

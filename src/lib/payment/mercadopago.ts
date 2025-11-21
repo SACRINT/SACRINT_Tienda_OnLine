@@ -4,7 +4,12 @@
  * Supports Argentina, Brazil, Chile, Colombia, Mexico, Peru, Uruguay, and more
  */
 
-import { MercadoPagoConfig, Preference, Payment, PaymentRefund } from "mercadopago";
+import {
+  MercadoPagoConfig,
+  Preference,
+  Payment,
+  PaymentRefund,
+} from "mercadopago";
 import { logger } from "@/lib/monitoring/logger";
 
 // Initialize Mercado Pago client
@@ -110,7 +115,9 @@ export async function createPaymentPreference(
       },
       auto_return: data.auto_return || "approved",
       external_reference: data.external_reference,
-      notification_url: data.notification_url || `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/mercadopago`,
+      notification_url:
+        data.notification_url ||
+        `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/mercadopago`,
       statement_descriptor: data.statement_descriptor || "TIENDA_ONLINE",
       expires: data.expires !== undefined ? data.expires : true,
     };

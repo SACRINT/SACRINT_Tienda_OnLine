@@ -15,29 +15,27 @@ export interface PDFExportOptions {
  * Generate PDF invoice (simplified version)
  * In production, use jsPDF library
  */
-export async function generateInvoicePDF(
-  order: {
-    orderNumber: string;
-    createdAt: Date;
-    total: number;
-    subtotal: number;
-    tax: number;
-    shipping: number;
-    user: { name?: string | null; email: string };
-    shippingAddress?: {
-      line1: string;
-      city: string;
-      state: string;
-      postalCode: string;
-      country: string;
-    };
-    items: Array<{
-      name: string;
-      quantity: number;
-      priceAtPurchase: number;
-    }>;
-  }
-): Promise<string> {
+export async function generateInvoicePDF(order: {
+  orderNumber: string;
+  createdAt: Date;
+  total: number;
+  subtotal: number;
+  tax: number;
+  shipping: number;
+  user: { name?: string | null; email: string };
+  shippingAddress?: {
+    line1: string;
+    city: string;
+    state: string;
+    postalCode: string;
+    country: string;
+  };
+  items: Array<{
+    name: string;
+    quantity: number;
+    priceAtPurchase: number;
+  }>;
+}): Promise<string> {
   // This is a placeholder. In production, use jsPDF:
   /*
   const { jsPDF } = await import('jspdf');
@@ -150,14 +148,18 @@ function generateHTMLInvoice(order: {
       <p>${order.user.name || order.user.email}</p>
     </div>
 
-    ${order.shippingAddress ? `
+    ${
+      order.shippingAddress
+        ? `
     <div class="info-section">
       <h3>Ship To:</h3>
       <p>${order.shippingAddress.line1}</p>
       <p>${order.shippingAddress.city}, ${order.shippingAddress.state} ${order.shippingAddress.postalCode}</p>
       <p>${order.shippingAddress.country}</p>
     </div>
-    ` : ''}
+    `
+        : ""
+    }
   </div>
 
   <table>
@@ -170,14 +172,18 @@ function generateHTMLInvoice(order: {
       </tr>
     </thead>
     <tbody>
-      ${order.items.map(item => `
+      ${order.items
+        .map(
+          (item) => `
         <tr>
           <td>${item.name}</td>
           <td>${item.quantity}</td>
           <td>$${Number(item.priceAtPurchase).toFixed(2)}</td>
           <td>$${(item.quantity * Number(item.priceAtPurchase)).toFixed(2)}</td>
         </tr>
-      `).join('')}
+      `,
+        )
+        .join("")}
     </tbody>
   </table>
 
@@ -206,7 +212,10 @@ export function downloadPDF(pdfData: string, filename: string): void {
  * Create PDF Response for API
  * For server-side, use puppeteer or similar to convert HTML to PDF
  */
-export function createPDFResponse(htmlContent: string, filename: string): Response {
+export function createPDFResponse(
+  htmlContent: string,
+  filename: string,
+): Response {
   // This would require server-side HTML-to-PDF conversion
   // For now, return HTML that can be printed
   return new Response(htmlContent, {

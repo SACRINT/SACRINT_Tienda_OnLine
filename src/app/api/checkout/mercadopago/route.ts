@@ -18,9 +18,7 @@ import {
 } from "@/lib/payment/mercadopago";
 import { CheckoutSchema } from "@/lib/security/schemas/order-schemas";
 import { db } from "@/lib/db/client";
-import {
-  reserveInventory,
-} from "@/lib/db/inventory";
+import { reserveInventory } from "@/lib/db/inventory";
 import { applyRateLimit } from "@/lib/security/rate-limiter";
 import { logger } from "@/lib/monitoring/logger";
 
@@ -105,10 +103,7 @@ export async function POST(req: NextRequest) {
     // Get cart and totals
     const cart = await getCartById(tenantId, cartId);
     if (!cart) {
-      return NextResponse.json(
-        { error: "Cart not found" },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: "Cart not found" }, { status: 404 });
     }
 
     const totals = await getCartTotal(tenantId, cartId, 99, 0.16);
@@ -249,7 +244,9 @@ export async function POST(req: NextRequest) {
       if (orderId) {
         try {
           await db.order.delete({ where: { id: orderId } });
-          logger.info("Rolled back order due to Mercado Pago error", { orderId });
+          logger.info("Rolled back order due to Mercado Pago error", {
+            orderId,
+          });
         } catch (deleteError) {
           logger.error("Failed to rollback order", deleteError as Error);
         }

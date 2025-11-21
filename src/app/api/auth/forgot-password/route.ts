@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
           error: "Invalid email",
           issues: validation.error.issues,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -100,7 +100,8 @@ export async function POST(req: NextRequest) {
     logger.info("Password reset token generated", {
       email,
       userId: user.id,
-      resetUrl: process.env.NODE_ENV === "development" ? resetUrl : "[REDACTED]"
+      resetUrl:
+        process.env.NODE_ENV === "development" ? resetUrl : "[REDACTED]",
     });
 
     // In production, send email:
@@ -113,7 +114,7 @@ export async function POST(req: NextRequest) {
     logger.error("Password reset request failed", error as Error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

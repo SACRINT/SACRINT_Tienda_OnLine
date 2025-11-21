@@ -19,20 +19,22 @@ const RESET_PASSWORD_LIMIT = {
 };
 
 // Validation schema
-const ResetPasswordSchema = z.object({
-  email: z.string().email("Invalid email format"),
-  token: z.string().min(1, "Token is required"),
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters")
-    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
-    .regex(/[0-9]/, "Password must contain at least one number"),
-  confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords do not match",
-  path: ["confirmPassword"],
-});
+const ResetPasswordSchema = z
+  .object({
+    email: z.string().email("Invalid email format"),
+    token: z.string().min(1, "Token is required"),
+    password: z
+      .string()
+      .min(8, "Password must be at least 8 characters")
+      .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+      .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+      .regex(/[0-9]/, "Password must contain at least one number"),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
 
 export const dynamic = "force-dynamic";
 
@@ -56,7 +58,7 @@ export async function POST(req: NextRequest) {
           error: "Invalid data",
           issues: validation.error.issues,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -77,7 +79,7 @@ export async function POST(req: NextRequest) {
       logger.warn("Invalid password reset token", { email });
       return NextResponse.json(
         { error: "Invalid or expired reset token" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -96,7 +98,7 @@ export async function POST(req: NextRequest) {
       logger.warn("Expired password reset token used", { email });
       return NextResponse.json(
         { error: "Reset token has expired. Please request a new one." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -107,10 +109,7 @@ export async function POST(req: NextRequest) {
 
     if (!user) {
       logger.warn("User not found during password reset", { email });
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Hash new password
@@ -143,13 +142,14 @@ export async function POST(req: NextRequest) {
     // await sendPasswordChangedEmail(email, user.name);
 
     return NextResponse.json({
-      message: "Password has been reset successfully. You can now log in with your new password.",
+      message:
+        "Password has been reset successfully. You can now log in with your new password.",
     });
   } catch (error) {
     logger.error("Password reset failed", error as Error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

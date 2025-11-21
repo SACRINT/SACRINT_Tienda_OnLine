@@ -195,7 +195,7 @@ export async function getSearchSuggestions(
     take: limit,
   });
 
-  return products.map((p: typeof products[number]) => ({
+  return products.map((p: (typeof products)[number]) => ({
     id: p.id,
     name: p.name,
     slug: p.slug,

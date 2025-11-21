@@ -82,10 +82,7 @@ export async function getCachedProduct(tenantId: string, productId: string) {
 /**
  * Get product by slug with caching
  */
-export async function getCachedProductBySlug(
-  tenantId: string,
-  slug: string,
-) {
+export async function getCachedProductBySlug(tenantId: string, slug: string) {
   const cacheKey = `product:slug:${tenantId}:${slug}`;
 
   try {
