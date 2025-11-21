@@ -7,6 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, CheckCircle, AlertTriangle, Mail } from "lucide-react";
 
+// Force dynamic rendering for this page (uses useSearchParams)
+export const dynamic = "force-dynamic";
+
 export default function VerifyEmailPage() {
   const searchParams = useSearchParams();
   const router = useRouter();

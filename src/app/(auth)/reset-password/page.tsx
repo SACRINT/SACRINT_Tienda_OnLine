@@ -12,6 +12,9 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, Lock, CheckCircle, AlertTriangle } from "lucide-react";
 
+// Force dynamic rendering for this page (uses useSearchParams)
+export const dynamic = "force-dynamic";
+
 const resetPasswordSchema = z
   .object({
     password: z
