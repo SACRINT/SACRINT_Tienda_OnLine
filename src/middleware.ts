@@ -41,14 +41,21 @@ export default auth((req) => {
     !pathname.startsWith("/api") &&
     !pathname.startsWith("/_next") &&
     !pathname.startsWith("/_vercel") &&
+    !pathname.startsWith("/.well-known") &&
     !pathname.match(/\.(ico|png|jpg|jpeg|svg|webp|gif|css|js|json|xml|txt)$/);
 
   // Apply i18n middleware first if applicable
   let response: NextResponse;
 
-  if (shouldApplyIntl) {
-    response = intlMiddleware(req as unknown as NextRequest);
-  } else {
+  try {
+    if (shouldApplyIntl) {
+      response = intlMiddleware(req as unknown as NextRequest);
+    } else {
+      response = NextResponse.next();
+    }
+  } catch (error) {
+    // If middleware fails, allow the request through
+    console.error("Middleware error:", error);
     response = NextResponse.next();
   }
 
@@ -130,9 +137,8 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - public folder
-     *
-     * Excluding root path temporarily to debug 404 issue
+     * - .well-known (for SSL/security)
      */
-    "/((?!_next/static|_next/image|favicon.ico|public|^$).*)",
+    "/((?!_next/static|_next/image|favicon|public|\\.well-known).*)",
   ],
 };
