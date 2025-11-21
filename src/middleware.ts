@@ -118,24 +118,12 @@ export default auth((req) => {
   }
 
   // ===== I18N MIDDLEWARE =====
-  let response: NextResponse;
+  // TEMPORARY: Disable intlMiddleware to diagnose root cause
+  // The middleware is causing 404 errors, so we'll skip it for now
+  let response = NextResponse.next();
 
-  try {
-    if (shouldApplyIntl) {
-      response = intlMiddleware(req as unknown as NextRequest);
-    } else {
-      response = NextResponse.next();
-    }
-  } catch (error) {
-    console.error("Middleware i18n error:", error);
-    // CRITICAL: Always return NextResponse.next() to prevent 404
-    response = NextResponse.next();
-  }
-
-  // Ensure response is valid before adding headers
-  if (!response) {
-    response = NextResponse.next();
-  }
+  // TODO: Re-enable intlMiddleware once we fix the root cause
+  // For now, routes are working without i18n routing
 
   return addSecurityHeaders(response);
 });
