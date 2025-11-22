@@ -1,174 +1,157 @@
-// Rate Limiter
-// Week 21-22: Prevent abuse and DDoS attacks
-
-import { LRUCache } from "lru-cache";
-
-export interface RateLimitConfig {
-  interval: number; // Time window in milliseconds
-  maxRequests: number; // Max requests allowed in window
-}
-
-export interface RateLimitResult {
-  success: boolean;
-  limit: number;
-  remaining: number;
-  reset: number; // Timestamp when limit resets
-}
-
 /**
- * Token bucket rate limiter with sliding window
+ * Rate Limiter
+ * Sistema de rate limiting para APIs
  */
-class RateLimiter {
-  private cache: LRUCache<string, { count: number; resetTime: number }>;
-  private config: RateLimitConfig;
 
-  constructor(config: RateLimitConfig) {
-    this.config = config;
-    this.cache = new LRUCache({
-      max: 10000, // Max number of IPs to track
-      ttl: config.interval, // Auto-expire after interval
-    });
+import { logger } from "../monitoring/logger";
+import { trackError } from "../monitoring/metrics";
+
+interface RateLimitConfig {
+  windowMs: number; // Ventana de tiempo en ms
+  maxRequests: number; // Máximo de requests por ventana
+  skipSuccessfulRequests?: boolean;
+  skipFailedRequests?: boolean;
+}
+
+interface RateLimitEntry {
+  count: number;
+  resetTime: number;
+  blocked: boolean;
+}
+
+export class RateLimiter {
+  private store = new Map<string, RateLimitEntry>();
+  private cleanupInterval: NodeJS.Timeout;
+
+  constructor(private config: RateLimitConfig) {
+    // Cleanup automático cada minuto
+    this.cleanupInterval = setInterval(() => this.cleanup(), 60000);
   }
 
   /**
-   * Check if request is allowed
+   * Verificar si un cliente ha excedido el límite
    */
-  check(identifier: string): RateLimitResult {
+  async checkLimit(identifier: string): Promise<{
+    allowed: boolean;
+    remaining: number;
+    resetTime: number;
+  }> {
     const now = Date.now();
-    const record = this.cache.get(identifier);
+    let entry = this.store.get(identifier);
 
-    if (!record || now > record.resetTime) {
-      // First request or window expired
-      this.cache.set(identifier, {
-        count: 1,
-        resetTime: now + this.config.interval,
-      });
-
-      return {
-        success: true,
-        limit: this.config.maxRequests,
-        remaining: this.config.maxRequests - 1,
-        reset: now + this.config.interval,
+    // Crear nueva entrada si no existe o si la ventana expiró
+    if (!entry || now >= entry.resetTime) {
+      entry = {
+        count: 0,
+        resetTime: now + this.config.windowMs,
+        blocked: false,
       };
+      this.store.set(identifier, entry);
     }
 
-    if (record.count >= this.config.maxRequests) {
-      // Limit exceeded
-      return {
-        success: false,
-        limit: this.config.maxRequests,
-        remaining: 0,
-        reset: record.resetTime,
-      };
-    }
+    // Incrementar contador
+    entry.count++;
 
-    // Increment count
-    record.count += 1;
-    this.cache.set(identifier, record);
+    const allowed = entry.count <= this.config.maxRequests;
+    const remaining = Math.max(0, this.config.maxRequests - entry.count);
+
+    if (!allowed && !entry.blocked) {
+      entry.blocked = true;
+      logger.warn(
+        {
+          type: "rate_limit_exceeded",
+          identifier,
+          count: entry.count,
+          limit: this.config.maxRequests,
+        },
+        `Rate limit exceeded for ${identifier}`,
+      );
+    }
 
     return {
-      success: true,
-      limit: this.config.maxRequests,
-      remaining: this.config.maxRequests - record.count,
-      reset: record.resetTime,
+      allowed,
+      remaining,
+      resetTime: entry.resetTime,
     };
   }
 
   /**
-   * Reset rate limit for identifier
+   * Resetear límite para un identificador
    */
   reset(identifier: string): void {
-    this.cache.delete(identifier);
+    this.store.delete(identifier);
   }
 
   /**
-   * Get current status without incrementing
+   * Limpiar entradas expiradas
    */
-  status(identifier: string): RateLimitResult {
+  private cleanup(): void {
     const now = Date.now();
-    const record = this.cache.get(identifier);
+    let cleaned = 0;
 
-    if (!record || now > record.resetTime) {
-      return {
-        success: true,
-        limit: this.config.maxRequests,
-        remaining: this.config.maxRequests,
-        reset: now + this.config.interval,
-      };
+    for (const [identifier, entry] of this.store.entries()) {
+      if (now >= entry.resetTime) {
+        this.store.delete(identifier);
+        cleaned++;
+      }
     }
 
-    return {
-      success: record.count < this.config.maxRequests,
-      limit: this.config.maxRequests,
-      remaining: Math.max(0, this.config.maxRequests - record.count),
-      reset: record.resetTime,
-    };
+    if (cleaned > 0) {
+      logger.debug(
+        { type: "rate_limiter_cleanup", cleaned },
+        `Cleaned ${cleaned} expired rate limit entries`,
+      );
+    }
+  }
+
+  /**
+   * Destructor
+   */
+  destroy(): void {
+    clearInterval(this.cleanupInterval);
+    this.store.clear();
   }
 }
 
-/**
- * Pre-configured rate limiters for different endpoints
- */
-export const rateLimiters = {
-  // Strict limits for authentication
-  auth: new RateLimiter({
-    interval: 15 * 60 * 1000, // 15 minutes
-    maxRequests: 5, // 5 attempts
-  }),
+// Instancias predefinidas para diferentes endpoints
+export const apiRateLimiter = new RateLimiter({
+  windowMs: 60 * 1000, // 1 minuto
+  maxRequests: 100,
+});
 
-  // Moderate limits for API calls
-  api: new RateLimiter({
-    interval: 60 * 1000, // 1 minute
-    maxRequests: 60, // 60 requests per minute
-  }),
+export const authRateLimiter = new RateLimiter({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  maxRequests: 5,
+});
 
-  // Strict limits for checkout
-  checkout: new RateLimiter({
-    interval: 60 * 1000, // 1 minute
-    maxRequests: 10, // 10 checkouts per minute
-  }),
-
-  // Lenient limits for search
-  search: new RateLimiter({
-    interval: 60 * 1000, // 1 minute
-    maxRequests: 120, // 120 searches per minute
-  }),
-
-  // Very strict for password reset
-  passwordReset: new RateLimiter({
-    interval: 60 * 60 * 1000, // 1 hour
-    maxRequests: 3, // 3 attempts per hour
-  }),
-
-  // Strict for email sending
-  email: new RateLimiter({
-    interval: 60 * 1000, // 1 minute
-    maxRequests: 5, // 5 emails per minute
-  }),
-};
+export const checkoutRateLimiter = new RateLimiter({
+  windowMs: 60 * 60 * 1000, // 1 hora
+  maxRequests: 10,
+});
 
 /**
- * Get identifier from request (IP + optional user ID)
+ * Middleware helper para Next.js
  */
-export function getIdentifier(
-  request: Request,
-  userId?: string,
-): string {
-  // Get IP from various headers (Vercel, Cloudflare, etc.)
-  const forwarded = request.headers.get("x-forwarded-for");
-  const realIp = request.headers.get("x-real-ip");
-  const ip = forwarded?.split(",")[0] || realIp || "unknown";
+export async function withRateLimit(
+  identifier: string,
+  limiter: RateLimiter = apiRateLimiter,
+): Promise<{ allowed: boolean; headers: Record<string, string> }> {
+  try {
+    const { allowed, remaining, resetTime } = await limiter.checkLimit(identifier);
 
-  return userId ? `${ip}:${userId}` : ip;
+    const headers = {
+      "X-RateLimit-Limit": limiter["config"].maxRequests.toString(),
+      "X-RateLimit-Remaining": remaining.toString(),
+      "X-RateLimit-Reset": new Date(resetTime).toISOString(),
+    };
+
+    return { allowed, headers };
+  } catch (error) {
+    trackError("rate_limiter_error", error instanceof Error ? error.message : "Unknown");
+    logger.error({ error }, "Rate limiter error");
+    // En caso de error, permitir request
+    return { allowed: true, headers: {} };
+  }
 }
 
-/**
- * Create rate limit response headers
- */
-export function createRateLimitHeaders(result: RateLimitResult): HeadersInit {
-  return {
-    "X-RateLimit-Limit": result.limit.toString(),
-    "X-RateLimit-Remaining": result.remaining.toString(),
-    "X-RateLimit-Reset": new Date(result.reset).toISOString(),
-  };
-}
+export default RateLimiter;
