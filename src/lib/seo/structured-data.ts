@@ -26,14 +26,16 @@ export function generateProductSchema(product: Product, url: string) {
       "@type": "Offer",
       price: product.price,
       priceCurrency: product.currency,
-      availability: \`https://schema.org/\${product.availability}\`,
+      availability: `https://schema.org/${product.availability}`,
       url,
     },
-    aggregateRating: product.rating ? {
-      "@type": "AggregateRating",
-      ratingValue: product.rating.value,
-      reviewCount: product.rating.count,
-    } : undefined,
+    aggregateRating: product.rating
+      ? {
+          "@type": "AggregateRating",
+          ratingValue: product.rating.value,
+          reviewCount: product.rating.count,
+        }
+      : undefined,
   };
 }
 

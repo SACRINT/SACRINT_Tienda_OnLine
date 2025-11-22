@@ -22,11 +22,8 @@ export async function GET(req: NextRequest) {
     const limit = parseInt(searchParams.get("limit") || "5");
     const tenantId = searchParams.get("tenantId") || undefined;
 
-    if (\!query) {
-      return NextResponse.json(
-        { error: "Query parameter 'q' is required" },
-        { status: 400 },
-      );
+    if (!query) {
+      return NextResponse.json({ error: "Query parameter 'q' is required" }, { status: 400 });
     }
 
     const suggestions = await getSearchSuggestions(query, tenantId, limit);
@@ -34,9 +31,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ suggestions });
   } catch (error) {
     console.error("Suggestions error:", error);
-    return NextResponse.json(
-      { error: "Failed to get suggestions" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Failed to get suggestions" }, { status: 500 });
   }
 }

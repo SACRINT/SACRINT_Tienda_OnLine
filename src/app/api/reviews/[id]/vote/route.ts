@@ -15,7 +15,7 @@ const voteSchema = z.object({
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await auth();
-    if (\!session?.user) {
+    if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
     // Check if review exists
     const review = await db.review.findUnique({ where: { id: reviewId } });
-    if (\!review) {
+    if (!review) {
       return NextResponse.json({ error: "Review not found" }, { status: 404 });
     }
 
@@ -41,7 +41,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
     if (existing) {
       // Update vote if different
-      if (existing.vote \!== data.vote) {
+      if (existing.vote !== data.vote) {
         await db.reviewHelpfulVote.update({
           where: { id: existing.id },
           data: { vote: data.vote },

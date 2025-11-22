@@ -14,13 +14,10 @@ const updateReviewSchema = z.object({
   sellerResponse: z.string().max(1000).optional(),
 });
 
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } },
-) {
+export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await auth();
-    if (\!session?.user) {
+    if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -33,7 +30,7 @@ export async function PATCH(
       include: { product: { select: { tenantId: true } } },
     });
 
-    if (\!review) {
+    if (!review) {
       return NextResponse.json({ error: "Review not found" }, { status: 404 });
     }
 
@@ -45,13 +42,13 @@ export async function PATCH(
     const isStoreOwner = user?.role === "STORE_OWNER" && user.tenantId === review.product.tenantId;
     const isAdmin = user?.role === "SUPER_ADMIN";
 
-    if (\!isStoreOwner && \!isAdmin) {
+    if (!isStoreOwner && !isAdmin) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const updateData: any = {};
     if (data.status) updateData.status = data.status;
-    if (data.sellerResponse \!== undefined) {
+    if (data.sellerResponse !== undefined) {
       updateData.sellerResponse = data.sellerResponse;
       updateData.sellerResponseAt = new Date();
     }
@@ -72,14 +69,14 @@ export async function PATCH(
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await auth();
-    if (\!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const review = await db.review.findUnique({
       where: { id: params.id },
       include: { product: { select: { tenantId: true } } },
     });
 
-    if (\!review) return NextResponse.json({ error: "Review not found" }, { status: 404 });
+    if (!review) return NextResponse.json({ error: "Review not found" }, { status: 404 });
 
     const user = await db.user.findUnique({
       where: { id: session.user.id },
@@ -90,7 +87,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     const isStoreOwner = user?.role === "STORE_OWNER" && user.tenantId === review.product.tenantId;
     const isAdmin = user?.role === "SUPER_ADMIN";
 
-    if (\!isOwner && \!isStoreOwner && \!isAdmin) {
+    if (!isOwner && !isStoreOwner && !isAdmin) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 

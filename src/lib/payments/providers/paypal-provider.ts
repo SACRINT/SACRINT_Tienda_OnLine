@@ -21,9 +21,7 @@ export class PayPalPaymentProvider implements IPaymentProvider {
   }
 
   get isConfigured(): boolean {
-    return \!\!(
-      process.env.PAYPAL_CLIENT_ID && process.env.PAYPAL_CLIENT_SECRET
-    );
+    return !!(process.env.PAYPAL_CLIENT_ID && process.env.PAYPAL_CLIENT_SECRET);
   }
 
   async createPaymentIntent(params: {
@@ -55,10 +53,7 @@ export class PayPalPaymentProvider implements IPaymentProvider {
     throw new Error("PayPal integration not yet implemented");
   }
 
-  async createCustomer(params: {
-    email: string;
-    name?: string;
-  }): Promise<PaymentCustomer> {
+  async createCustomer(params: { email: string; name?: string }): Promise<PaymentCustomer> {
     // PayPal doesn't have a customer concept like Stripe
     // Return a simple object
     return {
@@ -68,11 +63,7 @@ export class PayPalPaymentProvider implements IPaymentProvider {
     };
   }
 
-  verifyWebhookSignature(
-    payload: string | Buffer,
-    signature: string,
-    secret: string,
-  ): boolean {
+  verifyWebhookSignature(payload: string | Buffer, signature: string, secret: string): boolean {
     // TODO: Implement PayPal webhook verification
     return false;
   }
@@ -88,11 +79,7 @@ export class PayPalPaymentProvider implements IPaymentProvider {
   }
 
   getSupportedPaymentMethods(): PaymentMethod[] {
-    return [
-      PaymentMethod.DIGITAL_WALLET,
-      PaymentMethod.CARD,
-      PaymentMethod.BANK_TRANSFER,
-    ];
+    return [PaymentMethod.DIGITAL_WALLET, PaymentMethod.CARD, PaymentMethod.BANK_TRANSFER];
   }
 
   getConfig() {
@@ -105,4 +92,3 @@ export class PayPalPaymentProvider implements IPaymentProvider {
     };
   }
 }
-
