@@ -5,18 +5,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/auth";
 import { createOrder } from "@/lib/db/orders";
-import {
-  validateCartBeforeCheckout,
-  getCartTotal,
-  getCartById,
-} from "@/lib/db/cart";
+import { validateCartBeforeCheckout, getCartTotal, getCartById } from "@/lib/db/cart";
 import { createPaymentIntent } from "@/lib/payment/stripe";
 import { CheckoutSchema } from "@/lib/security/schemas/order-schemas";
 import { db } from "@/lib/db/client";
-import {
-  reserveInventory,
-  confirmInventoryReservation,
-} from "@/lib/db/inventory";
+import { reserveInventory, confirmInventoryReservation } from "@/lib/db/inventory";
 import { applyRateLimit, RATE_LIMITS } from "@/lib/security/rate-limiter";
 
 // Force dynamic rendering for this API route
@@ -39,7 +32,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Apply rate limiting - 10 checkout attempts per hour
-    const rateLimitResult = applyRateLimit(req, {
+    const rateLimitResult = await applyRateLimit(req, {
       userId: session.user.id,
       config: { interval: 60 * 60 * 1000, limit: 10 }, // 10 per hour
     });
@@ -51,10 +44,7 @@ export async function POST(req: NextRequest) {
     const { tenantId } = session.user;
 
     if (!tenantId) {
-      return NextResponse.json(
-        { error: "User has no tenant assigned" },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: "User has no tenant assigned" }, { status: 404 });
     }
 
     const body = await req.json();
@@ -70,14 +60,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const {
-      cartId,
-      shippingAddressId,
-      billingAddressId,
-      paymentMethod,
-      couponCode,
-      notes,
-    } = validation.data;
+    const { cartId, shippingAddressId, billingAddressId, paymentMethod, couponCode, notes } =
+      validation.data;
 
     // Validate cart before checkout
     const validationResult = await validateCartBeforeCheckout(tenantId, cartId);
@@ -120,9 +104,7 @@ export async function POST(req: NextRequest) {
           throw new Error("Failed to create order");
         }
 
-        console.log(
-          `[CHECKOUT] Order created: ${orderId}, reserving inventory...`,
-        );
+        console.log(`[CHECKOUT] Order created: ${orderId}, reserving inventory...`);
 
         // Step 2: Get cart items for reservation
         const cart = await getCartById(tenantId, cartId);
@@ -137,15 +119,9 @@ export async function POST(req: NextRequest) {
         }));
 
         // Step 3: Reserve inventory
-        reservationId = await reserveInventory(
-          tenantId,
-          orderId,
-          reservationItems,
-        );
+        reservationId = await reserveInventory(tenantId, orderId, reservationItems);
 
-        console.log(
-          `[CHECKOUT] Inventory reserved: ${reservationId} for order ${orderId}`,
-        );
+        console.log(`[CHECKOUT] Inventory reserved: ${reservationId} for order ${orderId}`);
 
         // Step 4: Create Stripe Payment Intent
         const paymentIntent = await createPaymentIntent(
@@ -168,8 +144,7 @@ export async function POST(req: NextRequest) {
           clientSecret: paymentIntent.clientSecret,
           paymentIntentId: paymentIntent.paymentIntentId,
           amount: totals.total,
-          message:
-            "Order created, inventory reserved. Complete payment on frontend.",
+          message: "Order created, inventory reserved. Complete payment on frontend.",
         });
       } catch (error) {
         console.error("[CHECKOUT] Stripe checkout error:", error);
@@ -180,18 +155,12 @@ export async function POST(req: NextRequest) {
             await db.order.delete({ where: { id: orderId } });
             console.log(`[CHECKOUT] Rolled back order ${orderId} due to error`);
           } catch (deleteError) {
-            console.error(
-              `[CHECKOUT] Failed to rollback order ${orderId}:`,
-              deleteError,
-            );
+            console.error(`[CHECKOUT] Failed to rollback order ${orderId}:`, deleteError);
           }
         }
 
         // Handle specific errors
-        if (
-          error instanceof Error &&
-          error.message.includes("Insufficient stock")
-        ) {
+        if (error instanceof Error && error.message.includes("Insufficient stock")) {
           return NextResponse.json(
             {
               error: "Insufficient stock",
@@ -235,9 +204,7 @@ export async function POST(req: NextRequest) {
         throw new Error("Failed to create order");
       }
 
-      console.log(
-        `[CHECKOUT] Order created: ${orderId}, reserving inventory...`,
-      );
+      console.log(`[CHECKOUT] Order created: ${orderId}, reserving inventory...`);
 
       // Step 2: Get cart items for reservation
       const cart = await getCartById(tenantId, cartId);
@@ -252,15 +219,9 @@ export async function POST(req: NextRequest) {
       }));
 
       // Step 3: Reserve inventory
-      reservationId = await reserveInventory(
-        tenantId,
-        orderId,
-        reservationItems,
-      );
+      reservationId = await reserveInventory(tenantId, orderId, reservationItems);
 
-      console.log(
-        `[CHECKOUT] Inventory reserved: ${reservationId} for order ${orderId}`,
-      );
+      console.log(`[CHECKOUT] Inventory reserved: ${reservationId} for order ${orderId}`);
 
       // Step 4: Immediately confirm reservation (for non-Stripe payments)
       // This deducts the actual stock
@@ -268,9 +229,7 @@ export async function POST(req: NextRequest) {
         await confirmInventoryReservation(tenantId, reservationId);
       }
 
-      console.log(
-        `[CHECKOUT] Inventory confirmed for order ${orderId} (non-Stripe payment)`,
-      );
+      console.log(`[CHECKOUT] Inventory confirmed for order ${orderId} (non-Stripe payment)`);
 
       return NextResponse.json({
         success: true,
@@ -288,18 +247,12 @@ export async function POST(req: NextRequest) {
           await db.order.delete({ where: { id: orderId } });
           console.log(`[CHECKOUT] Rolled back order ${orderId} due to error`);
         } catch (deleteError) {
-          console.error(
-            `[CHECKOUT] Failed to rollback order ${orderId}:`,
-            deleteError,
-          );
+          console.error(`[CHECKOUT] Failed to rollback order ${orderId}:`, deleteError);
         }
       }
 
       // Handle specific errors
-      if (
-        error instanceof Error &&
-        error.message.includes("Insufficient stock")
-      ) {
+      if (error instanceof Error && error.message.includes("Insufficient stock")) {
         return NextResponse.json(
           {
             error: "Insufficient stock",
@@ -320,9 +273,6 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error("[CHECKOUT] POST error:", error);
 
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

@@ -26,7 +26,7 @@ export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   // Apply strict rate limiting
-  const rateLimitResult = applyRateLimit(req, {
+  const rateLimitResult = await applyRateLimit(req, {
     config: PASSWORD_RESET_LIMIT,
   });
 
@@ -100,8 +100,7 @@ export async function POST(req: NextRequest) {
     logger.info("Password reset token generated", {
       email,
       userId: user.id,
-      resetUrl:
-        process.env.NODE_ENV === "development" ? resetUrl : "[REDACTED]",
+      resetUrl: process.env.NODE_ENV === "development" ? resetUrl : "[REDACTED]",
     });
 
     // In production, send email:
@@ -112,9 +111,6 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     logger.error("Password reset request failed", error as Error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

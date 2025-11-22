@@ -7,15 +7,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/auth";
 import { createOrder } from "@/lib/db/orders";
-import {
-  validateCartBeforeCheckout,
-  getCartTotal,
-  getCartById,
-} from "@/lib/db/cart";
-import {
-  createPaymentPreference,
-  getCurrencyForCountry,
-} from "@/lib/payment/mercadopago";
+import { validateCartBeforeCheckout, getCartTotal, getCartById } from "@/lib/db/cart";
+import { createPaymentPreference, getCurrencyForCountry } from "@/lib/payment/mercadopago";
 import { CheckoutSchema } from "@/lib/security/schemas/order-schemas";
 import { db } from "@/lib/db/client";
 import { reserveInventory } from "@/lib/db/inventory";
@@ -37,7 +30,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Apply rate limiting - 10 checkout attempts per hour
-    const rateLimitResult = applyRateLimit(req, {
+    const rateLimitResult = await applyRateLimit(req, {
       userId: session.user.id,
       config: { interval: 60 * 60 * 1000, limit: 10 },
     });
@@ -49,10 +42,7 @@ export async function POST(req: NextRequest) {
     const { tenantId } = session.user;
 
     if (!tenantId) {
-      return NextResponse.json(
-        { error: "User has no tenant assigned" },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: "User has no tenant assigned" }, { status: 404 });
     }
 
     const body = await req.json();
@@ -143,11 +133,7 @@ export async function POST(req: NextRequest) {
         quantity: item.quantity,
       }));
 
-      reservationId = await reserveInventory(
-        tenantId,
-        orderId,
-        reservationItems,
-      );
+      reservationId = await reserveInventory(tenantId, orderId, reservationItems);
 
       logger.info("Inventory reserved for Mercado Pago order", {
         orderId,
@@ -253,10 +239,7 @@ export async function POST(req: NextRequest) {
       }
 
       // Handle specific errors
-      if (
-        error instanceof Error &&
-        error.message.includes("Insufficient stock")
-      ) {
+      if (error instanceof Error && error.message.includes("Insufficient stock")) {
         return NextResponse.json(
           {
             error: "Insufficient stock",
@@ -277,9 +260,6 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     logger.error("Mercado Pago checkout API error", error as Error);
 
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

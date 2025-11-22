@@ -4,16 +4,9 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/auth";
-import {
-  getProducts,
-  createProduct,
-  isProductSkuAvailable,
-} from "@/lib/db/products";
+import { getProducts, createProduct, isProductSkuAvailable } from "@/lib/db/products";
 import { getCategoryById } from "@/lib/db/categories";
-import {
-  ProductFilterSchema,
-  CreateProductSchema,
-} from "@/lib/security/schemas/product-schemas";
+import { ProductFilterSchema, CreateProductSchema } from "@/lib/security/schemas/product-schemas";
 import { USER_ROLES } from "@/lib/types/user-role";
 import { applyRateLimit, RATE_LIMITS } from "@/lib/security/rate-limiter";
 
@@ -48,10 +41,7 @@ export async function GET(req: NextRequest) {
     const { tenantId } = session.user;
 
     if (!tenantId) {
-      return NextResponse.json(
-        { error: "User has no tenant assigned" },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: "User has no tenant assigned" }, { status: 404 });
     }
 
     // Parse and validate query parameters
@@ -125,10 +115,7 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     console.error("[PRODUCTS] GET error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
@@ -146,7 +133,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Apply rate limiting - 20 product creations per hour for store owners
-    const rateLimitResult = applyRateLimit(req, {
+    const rateLimitResult = await applyRateLimit(req, {
       userId: session.user.id,
       config: {
         interval: 60 * 60 * 1000, // 1 hour
@@ -161,18 +148,14 @@ export async function POST(req: NextRequest) {
     const { role, tenantId } = session.user;
 
     if (!tenantId) {
-      return NextResponse.json(
-        { error: "User has no tenant assigned" },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: "User has no tenant assigned" }, { status: 404 });
     }
 
     // Check if user has permission to create products
     if (role !== USER_ROLES.STORE_OWNER && role !== USER_ROLES.SUPER_ADMIN) {
       return NextResponse.json(
         {
-          error:
-            "Forbidden - Only STORE_OWNER or SUPER_ADMIN can create products",
+          error: "Forbidden - Only STORE_OWNER or SUPER_ADMIN can create products",
         },
         { status: 403 },
       );
@@ -229,8 +212,7 @@ export async function POST(req: NextRequest) {
     if (!skuAvailable) {
       return NextResponse.json(
         {
-          error:
-            "SKU already exists within your store. Please choose a different SKU.",
+          error: "SKU already exists within your store. Please choose a different SKU.",
         },
         { status: 409 },
       );
@@ -262,12 +244,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    console.log(
-      "[PRODUCTS] Created new product:",
-      product.id,
-      "by user:",
-      session.user.id,
-    );
+    console.log("[PRODUCTS] Created new product:", product.id, "by user:", session.user.id);
 
     return NextResponse.json(
       {
@@ -307,9 +284,6 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

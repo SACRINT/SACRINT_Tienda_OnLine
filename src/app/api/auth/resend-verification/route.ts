@@ -24,7 +24,7 @@ export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   // Apply rate limiting
-  const rateLimitResult = applyRateLimit(req, {
+  const rateLimitResult = await applyRateLimit(req, {
     config: RESEND_LIMIT,
   });
 
@@ -59,8 +59,7 @@ export async function POST(req: NextRequest) {
         email,
       });
       return NextResponse.json({
-        message:
-          "If the email exists and is not verified, a verification link has been sent.",
+        message: "If the email exists and is not verified, a verification link has been sent.",
       });
     }
 
@@ -101,22 +100,17 @@ export async function POST(req: NextRequest) {
     logger.info("Email verification token generated", {
       email,
       userId: user.id,
-      verifyUrl:
-        process.env.NODE_ENV === "development" ? verifyUrl : "[REDACTED]",
+      verifyUrl: process.env.NODE_ENV === "development" ? verifyUrl : "[REDACTED]",
     });
 
     // TODO: Send verification email
     // await sendVerificationEmail(email, verifyUrl, user.name);
 
     return NextResponse.json({
-      message:
-        "If the email exists and is not verified, a verification link has been sent.",
+      message: "If the email exists and is not verified, a verification link has been sent.",
     });
   } catch (error) {
     logger.error("Resend verification failed", error as Error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

@@ -40,7 +40,7 @@ export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   // Apply rate limiting
-  const rateLimitResult = applyRateLimit(req, {
+  const rateLimitResult = await applyRateLimit(req, {
     config: RESET_PASSWORD_LIMIT,
   });
 
@@ -77,10 +77,7 @@ export async function POST(req: NextRequest) {
 
     if (!verificationToken) {
       logger.warn("Invalid password reset token", { email });
-      return NextResponse.json(
-        { error: "Invalid or expired reset token" },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: "Invalid or expired reset token" }, { status: 400 });
     }
 
     // Check if token is expired
@@ -142,14 +139,10 @@ export async function POST(req: NextRequest) {
     // await sendPasswordChangedEmail(email, user.name);
 
     return NextResponse.json({
-      message:
-        "Password has been reset successfully. You can now log in with your new password.",
+      message: "Password has been reset successfully. You can now log in with your new password.",
     });
   } catch (error) {
     logger.error("Password reset failed", error as Error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

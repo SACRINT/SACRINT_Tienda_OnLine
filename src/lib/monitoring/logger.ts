@@ -293,4 +293,38 @@ export function logPerformance(perf: {
   );
 }
 
+/**
+ * Audit logger for security-critical events
+ */
+logger.audit = function (obj: Record<string, any>, msg?: string) {
+  logger.info({ ...obj, audit: true }, msg || "Audit event");
+};
+
+/**
+ * Performance timer utility
+ */
+export class PerfTimer {
+  private startTime: number;
+  private operation: string;
+
+  constructor(operation: string) {
+    this.operation = operation;
+    this.startTime = Date.now();
+  }
+
+  end(metadata?: Record<string, unknown>): number {
+    const duration = Date.now() - this.startTime;
+    logPerformance({
+      operation: this.operation,
+      duration,
+      metadata,
+    });
+    return duration;
+  }
+
+  getDuration(): number {
+    return Date.now() - this.startTime;
+  }
+}
+
 export default logger;

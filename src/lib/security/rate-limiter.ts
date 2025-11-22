@@ -6,11 +6,17 @@
 import { logger } from "../monitoring/logger";
 import { trackError } from "../monitoring/metrics";
 
-interface RateLimitConfig {
+export interface RateLimitConfig {
   windowMs: number; // Ventana de tiempo en ms
   maxRequests: number; // Máximo de requests por ventana
   skipSuccessfulRequests?: boolean;
   skipFailedRequests?: boolean;
+}
+
+export interface RateLimitResult {
+  allowed: boolean;
+  remaining: number;
+  resetTime: number;
 }
 
 interface RateLimitEntry {
@@ -151,6 +157,115 @@ export async function withRateLimit(
     logger.error({ error }, "Rate limiter error");
     // En caso de error, permitir request
     return { allowed: true, headers: {} };
+  }
+}
+
+// Anonymous/guest rate limiter (more restrictive)
+export const anonymousRateLimiter = new RateLimiter({
+  windowMs: 60 * 1000, // 1 minuto
+  maxRequests: 20, // Más restrictivo para usuarios no autenticados
+});
+
+// Rate limit presets
+export const RATE_LIMITS = {
+  auth: authRateLimiter,
+  api: apiRateLimiter,
+  checkout: checkoutRateLimiter,
+  ANONYMOUS: anonymousRateLimiter,
+} as const;
+
+// Collection of all rate limiters
+export const rateLimiters = {
+  auth: authRateLimiter,
+  api: apiRateLimiter,
+  checkout: checkoutRateLimiter,
+};
+
+/**
+ * Get identifier from request (IP or user ID)
+ */
+export function getIdentifier(req: Request, userId?: string): string {
+  if (userId) return userId;
+
+  // Try to get IP from headers
+  const forwarded = req.headers.get("x-forwarded-for");
+  const ip = forwarded ? forwarded.split(",")[0].trim() : "unknown";
+
+  return ip;
+}
+
+/**
+ * Create rate limit headers
+ */
+export function createRateLimitHeaders(
+  result: RateLimitResult,
+  limit: number,
+): Record<string, string> {
+  return {
+    "X-RateLimit-Limit": limit.toString(),
+    "X-RateLimit-Remaining": result.remaining.toString(),
+    "X-RateLimit-Reset": new Date(result.resetTime).toISOString(),
+  };
+}
+
+/**
+ * Apply rate limit to a request (used in API routes)
+ * Returns result with allowed flag and optional response
+ */
+export async function applyRateLimit(
+  req: Request,
+  options?: {
+    config?: { interval?: number; limit?: number };
+    limiter?: RateLimiter;
+    userId?: string;
+  },
+): Promise<{ allowed: boolean; response?: Response }> {
+  try {
+    // Use provided limiter or create one based on config
+    let rateLimiter = options?.limiter || apiRateLimiter;
+
+    if (options?.config) {
+      // Create temporary rate limiter with custom config
+      rateLimiter = new RateLimiter({
+        windowMs: options.config.interval || 60 * 1000,
+        maxRequests: options.config.limit || 100,
+      });
+    }
+
+    const identifier = getIdentifier(req, options?.userId);
+    const { allowed, remaining, resetTime } = await rateLimiter.checkLimit(identifier);
+
+    if (!allowed) {
+      const retryAfter = Math.ceil((resetTime - Date.now()) / 1000);
+
+      return {
+        allowed: false,
+        response: new Response(
+          JSON.stringify({
+            error: "Too many requests",
+            message: "Please try again later",
+            retryAfter,
+          }),
+          {
+            status: 429,
+            headers: {
+              "Content-Type": "application/json",
+              "X-RateLimit-Limit": rateLimiter["config"].maxRequests.toString(),
+              "X-RateLimit-Remaining": "0",
+              "X-RateLimit-Reset": new Date(resetTime).toISOString(),
+              "Retry-After": retryAfter.toString(),
+            },
+          },
+        ),
+      };
+    }
+
+    return { allowed: true };
+  } catch (error) {
+    trackError("rate_limiter_error", error instanceof Error ? error.message : "Unknown");
+    logger.error({ error }, "Rate limiter error");
+    // En caso de error, permitir request
+    return { allowed: true };
   }
 }
 
