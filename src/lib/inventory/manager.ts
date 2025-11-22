@@ -65,9 +65,7 @@ export async function reserveInventory(
         const product = await tx.product.findUnique({
           where: { id: item.productId, tenantId },
           include: {
-            variants: item.variantId
-              ? { where: { id: item.variantId } }
-              : undefined,
+            variants: item.variantId ? { where: { id: item.variantId } } : undefined,
           },
         });
 
@@ -75,9 +73,7 @@ export async function reserveInventory(
           throw new Error(`Product ${item.productId} not found`);
         }
 
-        const currentStock = item.variantId
-          ? product.variants[0]?.stock || 0
-          : product.stock;
+        const currentStock = item.variantId ? product.variants[0]?.stock || 0 : product.stock;
 
         if (currentStock < item.quantity) {
           throw new Error(
@@ -101,13 +97,16 @@ export async function reserveInventory(
 
         reservations.push(reservation as InventoryReservation);
 
-        logger.info(`Inventory reserved for product ${item.productId}`, {
-          tenantId,
-          productId: item.productId,
-          variantId: item.variantId,
-          quantity: item.quantity,
-          reservationId: reservation.id,
-        });
+        logger.info(
+          {
+            tenantId,
+            productId: item.productId,
+            variantId: item.variantId,
+            quantity: item.quantity,
+            reservationId: reservation.id,
+          },
+          `Inventory reserved for product ${item.productId}`,
+        );
       }
     });
 
@@ -116,10 +115,7 @@ export async function reserveInventory(
 
     return reservations;
   } catch (error) {
-    logger.error("Failed to reserve inventory", error as Error, {
-      tenantId,
-      items,
-    });
+    logger.error({ error: error, tenantId, items }, "Failed to reserve inventory");
     throw error;
   }
 }
@@ -201,12 +197,7 @@ export async function confirmInventoryReservation(
 
         // Check low stock
         if (product.stock <= (product.lowStockThreshold || 10)) {
-          emitLowInventory(
-            tenantId,
-            reservation.productId,
-            product.name,
-            product.stock,
-          );
+          emitLowInventory(tenantId, reservation.productId, product.name, product.stock);
         }
       }
 
@@ -216,20 +207,21 @@ export async function confirmInventoryReservation(
         data: { status: "CONFIRMED" },
       });
 
-      logger.info(`Inventory reservation confirmed: ${reservationId}`, {
-        tenantId,
-        productId: reservation.productId,
-        quantity: reservation.quantity,
-      });
+      logger.info(
+        {
+          tenantId,
+          productId: reservation.productId,
+          quantity: reservation.quantity,
+          reservationId,
+        },
+        `Inventory reservation confirmed: ${reservationId}`,
+      );
     });
 
     // Invalidate cache
     await cache.delPattern(`product:*`);
   } catch (error) {
-    logger.error("Failed to confirm reservation", error as Error, {
-      tenantId,
-      reservationId,
-    });
+    logger.error({ error: error, tenantId, reservationId }, "Failed to confirm reservation");
     throw error;
   }
 }
@@ -247,14 +239,9 @@ export async function releaseInventoryReservation(
       data: { status: "CANCELLED" },
     });
 
-    logger.info(`Inventory reservation released: ${reservationId}`, {
-      tenantId,
-    });
+    logger.info({ tenantId, reservationId }, `Inventory reservation released: ${reservationId}`);
   } catch (error) {
-    logger.error("Failed to release reservation", error as Error, {
-      tenantId,
-      reservationId,
-    });
+    logger.error({ error, tenantId, reservationId }, "Failed to release reservation");
     throw error;
   }
 }
@@ -262,9 +249,7 @@ export async function releaseInventoryReservation(
 /**
  * Expire old reservations (cleanup job)
  */
-export async function expireOldReservations(
-  tenantId?: string,
-): Promise<number> {
+export async function expireOldReservations(tenantId?: string): Promise<number> {
   try {
     const result = await db.inventoryReservation.updateMany({
       where: {
@@ -277,14 +262,12 @@ export async function expireOldReservations(
     });
 
     if (result.count > 0) {
-      logger.info(`Expired ${result.count} old reservations`, { tenantId });
+      logger.info({ tenantId, count: result.count }, `Expired ${result.count} old reservations`);
     }
 
     return result.count;
   } catch (error) {
-    logger.error("Failed to expire old reservations", error as Error, {
-      tenantId,
-    });
+    logger.error({ error, tenantId }, "Failed to expire old reservations");
     return 0;
   }
 }
@@ -352,23 +335,16 @@ export async function adjustInventory(
         });
       }
 
-      logger.audit("Inventory adjusted", {
-        tenantId,
-        productId,
-        variantId,
-        quantity,
-        reason,
-        userId,
-      });
+      logger.audit(
+        { tenantId, productId, variantId, quantity, reason, userId },
+        "Inventory adjusted",
+      );
     });
 
     // Invalidate cache
     await cache.delPattern(`product:*`);
   } catch (error) {
-    logger.error("Failed to adjust inventory", error as Error, {
-      tenantId,
-      productId,
-    });
+    logger.error({ error: error, tenantId, productId }, "Failed to adjust inventory");
     throw error;
   }
 }
@@ -402,10 +378,7 @@ export async function getInventoryMovements(
       total,
     };
   } catch (error) {
-    logger.error("Failed to get inventory movements", error as Error, {
-      tenantId,
-      productId,
-    });
+    logger.error({ error: error, tenantId, productId }, "Failed to get inventory movements");
     throw error;
   }
 }
@@ -415,9 +388,7 @@ export async function getInventoryMovements(
  */
 export async function getLowStockProducts(
   tenantId: string,
-): Promise<
-  Array<{ id: string; name: string; stock: number; threshold: number }>
-> {
+): Promise<Array<{ id: string; name: string; stock: number; threshold: number }>> {
   try {
     const products = await db.product.findMany({
       where: {
@@ -433,9 +404,7 @@ export async function getLowStockProducts(
     });
 
     // Filter products with low stock in memory
-    const lowStockProducts = products.filter(
-      (p: any) => p.stock <= (p.lowStockThreshold || 10),
-    );
+    const lowStockProducts = products.filter((p: any) => p.stock <= (p.lowStockThreshold || 10));
 
     return lowStockProducts.map((p: any) => ({
       id: p.id,
@@ -444,9 +413,7 @@ export async function getLowStockProducts(
       threshold: p.lowStockThreshold || 10,
     }));
   } catch (error) {
-    logger.error("Failed to get low stock products", error as Error, {
-      tenantId,
-    });
+    logger.error({ error: error, tenantId }, "Failed to get low stock products");
     throw error;
   }
 }

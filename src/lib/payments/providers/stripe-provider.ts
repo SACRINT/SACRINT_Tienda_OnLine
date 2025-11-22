@@ -27,7 +27,7 @@ export class StripePaymentProvider implements IPaymentProvider {
     }
 
     this.stripe = new Stripe(apiKey || "", {
-      apiVersion: "2024-11-20.acacia",
+      apiVersion: "2025-10-29.clover",
     });
   }
 
@@ -79,7 +79,7 @@ export class StripePaymentProvider implements IPaymentProvider {
 
     return {
       id: refund.id,
-      status: refund.status,
+      status: refund.status || "pending",
       amount: refund.amount / 100,
     };
   }
@@ -106,11 +106,7 @@ export class StripePaymentProvider implements IPaymentProvider {
     };
   }
 
-  verifyWebhookSignature(
-    payload: string | Buffer,
-    signature: string,
-    secret: string,
-  ): boolean {
+  verifyWebhookSignature(payload: string | Buffer, signature: string, secret: string): boolean {
     try {
       this.stripe.webhooks.constructEvent(payload, signature, secret);
       return true;
@@ -131,11 +127,7 @@ export class StripePaymentProvider implements IPaymentProvider {
   }
 
   getSupportedPaymentMethods(): PaymentMethod[] {
-    return [
-      PaymentMethod.CARD,
-      PaymentMethod.BANK_TRANSFER,
-      PaymentMethod.DIGITAL_WALLET,
-    ];
+    return [PaymentMethod.CARD, PaymentMethod.BANK_TRANSFER, PaymentMethod.DIGITAL_WALLET];
   }
 
   getConfig() {
