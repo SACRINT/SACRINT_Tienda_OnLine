@@ -141,7 +141,7 @@ export async function POST(req: NextRequest) {
         where: {
           id: data.orderId,
           userId: session.user.id,
-          status: { in: ["COMPLETED", "DELIVERED"] },
+          status: { in: ["DELIVERED"] },
           items: {
             some: {
               productId: data.productId,

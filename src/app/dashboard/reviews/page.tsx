@@ -41,7 +41,11 @@ async function getReviewsData(tenantId: string, status?: string) {
             id: true,
             name: true,
             slug: true,
-            images: true,
+            images: {
+              select: {
+                url: true,
+              },
+            },
           },
         },
       },
@@ -100,7 +104,7 @@ export default async function ReviewsModerationPage({
 
   return (
     <ReviewsModerationClient
-      initialReviews={reviews}
+      initialReviews={reviews as any}
       statusCounts={statusCounts}
       initialStatus={searchParams.status || "ALL"}
     />
