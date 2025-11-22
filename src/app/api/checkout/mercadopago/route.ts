@@ -246,7 +246,7 @@ export async function POST(req: NextRequest) {
             "Rolled back order due to Mercado Pago error",
           );
         } catch (deleteError) {
-          logger.error("Failed to rollback order", deleteError as Error);
+          logger.error({ error: deleteError }, "Failed to rollback order");
         }
       }
 

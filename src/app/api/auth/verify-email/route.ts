@@ -82,7 +82,7 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    logger.audit("Email verified successfully", { email, userId: user.id });
+    logger.audit({ email, userId: user.id }, "Email verified successfully");
 
     return NextResponse.json({
       message: "Email verified successfully! You can now log in.",

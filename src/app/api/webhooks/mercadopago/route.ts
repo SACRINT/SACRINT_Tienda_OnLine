@@ -87,8 +87,8 @@ export async function POST(req: NextRequest) {
 
     if (!order) {
       logger.error(
+        { error: new Error("Order not found"), orderId },
         `Order not found for Mercado Pago webhook: ${orderId}`,
-        new Error("Order not found"),
       );
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }

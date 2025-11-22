@@ -32,7 +32,7 @@ export const authConfig = {
         },
       },
       profile: async (profile) => {
-        logger.debug("Google profile received", { email: profile.email });
+        logger.debug({ email: profile.email }, "Google profile received");
 
         // Check if user already exists
         let user = await db.user.findFirst({
@@ -86,9 +86,7 @@ export const authConfig = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        logger.debug("Credentials login attempt", {
-          email: credentials?.email,
-        });
+        logger.debug({ email: credentials?.email }, "Credentials login attempt");
 
         const validation = LoginSchema.safeParse(credentials);
 
@@ -183,11 +181,7 @@ export const authConfig = {
   },
   events: {
     async signIn({ user, isNewUser }: any) {
-      logger.audit("User signed in", {
-        email: user.email,
-        isNewUser,
-        userId: user.id,
-      });
+      logger.audit({ email: user.email, isNewUser, userId: user.id }, "User signed in");
 
       if (isNewUser) {
         // TODO: Send welcome email
@@ -200,9 +194,7 @@ export const authConfig = {
       }
     },
     async signOut({ session, token }: any) {
-      logger.audit("User signed out", {
-        email: session?.user?.email || token?.email,
-      });
+      logger.audit({ email: session?.user?.email || token?.email }, "User signed out");
     },
   },
   session: {

@@ -130,10 +130,7 @@ export async function getFrequentlyBoughtTogether(
 
     return recommendations;
   } catch (error) {
-    logger.error("Failed to get frequently bought together", error as Error, {
-      tenantId,
-      productId,
-    });
+    logger.error({ error, tenantId, productId }, "Failed to get frequently bought together");
     return [];
   }
 }
@@ -232,10 +229,7 @@ export async function getSimilarProducts(
 
     return recommendations;
   } catch (error) {
-    logger.error("Failed to get similar products", error as Error, {
-      tenantId,
-      productId,
-    });
+    logger.error({ error, tenantId, productId }, "Failed to get similar products");
     return [];
   }
 }
@@ -330,9 +324,7 @@ export async function getTrendingProducts(
 
     return recommendations;
   } catch (error) {
-    logger.error("Failed to get trending products", error as Error, {
-      tenantId,
-    });
+    logger.error({ error, tenantId }, "Failed to get trending products");
     return [];
   }
 }
@@ -456,10 +448,7 @@ export async function getPersonalizedRecommendations(
 
     return limited;
   } catch (error) {
-    logger.error("Failed to get personalized recommendations", error as Error, {
-      tenantId,
-      userId,
-    });
+    logger.error({ error, tenantId, userId }, "Failed to get personalized recommendations");
     return [];
   }
 }
@@ -553,11 +542,7 @@ export async function getCombinedRecommendations(
 
     return finalRecommendations;
   } catch (error) {
-    logger.error("Failed to get combined recommendations", error as Error, {
-      tenantId,
-      userId,
-      productId,
-    });
+    logger.error({ error, tenantId, userId, productId }, "Failed to get combined recommendations");
     return [];
   }
 }

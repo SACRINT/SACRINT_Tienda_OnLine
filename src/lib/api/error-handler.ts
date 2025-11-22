@@ -185,10 +185,7 @@ export function createErrorResponse(error: unknown, statusCode?: number): NextRe
 
   // Log error
   if (error instanceof APIError && error.statusCode >= 500) {
-    logger.error("API Error", error as Error, {
-      code: error.code,
-      statusCode: error.statusCode,
-    });
+    logger.error({ error, code: error.code, statusCode: error.statusCode }, "API Error");
   } else if (!(error instanceof APIError)) {
     logger.error({ error: error }, "Unexpected Error");
   }

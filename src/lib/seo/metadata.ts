@@ -40,7 +40,14 @@ export function generateMetadata(config: SEOConfig): Metadata {
   } = config;
 
   const fullUrl = url ? `${DEFAULT_URL}${url}` : DEFAULT_URL;
-  const imageUrl = image ? (image.startsWith("http") ? image : `${DEFAULT_URL}${image}`) : `${DEFAULT_URL}/og-image.png`;
+  const imageUrl = image
+    ? image.startsWith("http")
+      ? image
+      : `${DEFAULT_URL}${image}`
+    : `${DEFAULT_URL}/og-image.png`;
+
+  // Map to valid OpenGraph types (Next.js only supports "website" and "article")
+  const ogType: "website" | "article" = type === "article" ? "article" : "website";
 
   return {
     title,
@@ -76,7 +83,7 @@ export function generateMetadata(config: SEOConfig): Metadata {
         },
       ],
       locale,
-      type,
+      type: ogType,
       publishedTime,
       modifiedTime,
     },

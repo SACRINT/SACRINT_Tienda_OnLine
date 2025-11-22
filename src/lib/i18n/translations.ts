@@ -3,7 +3,7 @@
  * Sistema de traducciones multi-idioma
  */
 
-export type Locale = "es" | "en" | "pt" | "fr";
+import type { Locale } from "./config";
 
 export interface TranslationKey {
   es: string;
@@ -107,6 +107,7 @@ export function formatCurrency(amount: number, locale: Locale = "es"): string {
     en: "en-US",
     pt: "pt-BR",
     fr: "fr-FR",
+    de: "de-DE",
   };
 
   const currencyMap: Record<Locale, string> = {
@@ -114,6 +115,7 @@ export function formatCurrency(amount: number, locale: Locale = "es"): string {
     en: "USD",
     pt: "BRL",
     fr: "EUR",
+    de: "EUR",
   };
 
   return new Intl.NumberFormat(localeMap[locale], {
@@ -131,6 +133,7 @@ export function formatDate(date: Date, locale: Locale = "es"): string {
     en: "en-US",
     pt: "pt-BR",
     fr: "fr-FR",
+    de: "de-DE",
   };
 
   return new Intl.DateTimeFormat(localeMap[locale], {
@@ -149,6 +152,7 @@ export function formatNumber(num: number, locale: Locale = "es"): string {
     en: "en-US",
     pt: "pt-BR",
     fr: "fr-FR",
+    de: "de-DE",
   };
 
   return new Intl.NumberFormat(localeMap[locale]).format(num);

@@ -94,7 +94,7 @@ export class CacheService {
       }
       return null;
     } catch (error) {
-      logger.error(`Cache get error for key: ${key}`, error as Error);
+      logger.error({ error, key }, `Cache get error for key: ${key}`);
       return null;
     }
   }
@@ -117,7 +117,7 @@ export class CacheService {
       }
       return true;
     } catch (error) {
-      logger.error(`Cache set error for key: ${key}`, error as Error);
+      logger.error({ error, key }, `Cache set error for key: ${key}`);
       return false;
     }
   }
@@ -134,7 +134,7 @@ export class CacheService {
       }
       return true;
     } catch (error) {
-      logger.error(`Cache delete error for key: ${key}`, error as Error);
+      logger.error({ error, key }, `Cache delete error for key: ${key}`);
       return false;
     }
   }
@@ -164,7 +164,7 @@ export class CacheService {
       }
       return 0;
     } catch (error) {
-      logger.error(`Cache delete pattern error: ${pattern}`, error as Error);
+      logger.error({ error, pattern }, `Cache delete pattern error: ${pattern}`);
       return 0;
     }
   }
@@ -187,7 +187,7 @@ export class CacheService {
         return false;
       }
     } catch (error) {
-      logger.error(`Cache exists error for key: ${key}`, error as Error);
+      logger.error({ error, key }, `Cache exists error for key: ${key}`);
       return false;
     }
   }
@@ -210,7 +210,7 @@ export class CacheService {
         return newValue;
       }
     } catch (error) {
-      logger.error(`Cache incr error for key: ${key}`, error as Error);
+      logger.error({ error, key }, `Cache incr error for key: ${key}`);
       return 0;
     }
   }
@@ -232,7 +232,7 @@ export class CacheService {
         return false;
       }
     } catch (error) {
-      logger.error(`Cache expire error for key: ${key}`, error as Error);
+      logger.error({ error, key }, `Cache expire error for key: ${key}`);
       return false;
     }
   }
@@ -253,7 +253,7 @@ export class CacheService {
         return -2; // Key doesn't exist
       }
     } catch (error) {
-      logger.error(`Cache ttl error for key: ${key}`, error as Error);
+      logger.error({ error, key }, `Cache ttl error for key: ${key}`);
       return -1;
     }
   }

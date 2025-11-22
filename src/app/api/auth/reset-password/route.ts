@@ -133,7 +133,7 @@ export async function POST(req: NextRequest) {
       where: { identifier: email },
     });
 
-    logger.audit("Password reset successful", { email, userId: user.id });
+    logger.audit({ email, userId: user.id }, "Password reset successful");
 
     // TODO: Send confirmation email
     // await sendPasswordChangedEmail(email, user.name);

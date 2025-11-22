@@ -14,7 +14,7 @@ const campaignSchema = z.object({
   htmlContent: z.string().min(1, "HTML content is required"),
   textContent: z.string().optional(),
   scheduledFor: z.string().datetime().optional(),
-  segmentRules: z.record(z.any()).optional(),
+  segmentRules: z.record(z.string(), z.any()).optional(),
   subjectVariants: z.array(z.string()).optional(),
 });
 

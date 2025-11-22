@@ -25,10 +25,7 @@ const reviewSchema = z.object({
     .string()
     .min(10, "La reseña debe tener al menos 10 caracteres")
     .max(5000, "La reseña debe tener máximo 5000 caracteres"),
-  images: z
-    .array(z.string().url())
-    .max(5, "Máximo 5 imágenes permitidas")
-    .default([]),
+  images: z.array(z.string().url()).max(5, "Máximo 5 imágenes permitidas"),
 });
 
 type ReviewFormData = z.infer<typeof reviewSchema>;
@@ -41,13 +38,7 @@ interface ReviewFormProps {
   className?: string;
 }
 
-export function ReviewForm({
-  productId,
-  orderId,
-  onSubmit,
-  onCancel,
-  className,
-}: ReviewFormProps) {
+export function ReviewForm({ productId, orderId, onSubmit, onCancel, className }: ReviewFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [imageUploadError, setImageUploadError] = useState<string | null>(null);
@@ -145,19 +136,13 @@ export function ReviewForm({
       onSubmit={handleSubmit(onSubmitForm)}
       className={cn("space-y-6 rounded-lg border border-gray-200 bg-white p-6", className)}
     >
-      <h3 className="text-lg font-semibold text-gray-900">
-        Escribe una reseña
-      </h3>
+      <h3 className="text-lg font-semibold text-gray-900">Escribe una reseña</h3>
 
       {/* Rating */}
       <div className="space-y-2">
-        <Label className="text-sm font-medium text-gray-700">
-          Calificación *
-        </Label>
+        <Label className="text-sm font-medium text-gray-700">Calificación *</Label>
         <RatingPicker value={rating} onChange={handleRatingChange} />
-        {errors.rating && (
-          <p className="text-sm text-red-600">{errors.rating.message}</p>
-        )}
+        {errors.rating && <p className="text-sm text-red-600">{errors.rating.message}</p>}
       </div>
 
       {/* Title */}
@@ -172,9 +157,7 @@ export function ReviewForm({
           maxLength={200}
           className={cn(errors.title && "border-red-500")}
         />
-        {errors.title && (
-          <p className="text-sm text-red-600">{errors.title.message}</p>
-        )}
+        {errors.title && <p className="text-sm text-red-600">{errors.title.message}</p>}
       </div>
 
       {/* Content */}
@@ -194,16 +177,12 @@ export function ReviewForm({
           <span>Mínimo 10 caracteres</span>
           <span>{watch("content")?.length || 0} / 5000</span>
         </div>
-        {errors.content && (
-          <p className="text-sm text-red-600">{errors.content.message}</p>
-        )}
+        {errors.content && <p className="text-sm text-red-600">{errors.content.message}</p>}
       </div>
 
       {/* Image upload */}
       <div className="space-y-2">
-        <Label className="text-sm font-medium text-gray-700">
-          Fotos (opcional)
-        </Label>
+        <Label className="text-sm font-medium text-gray-700">Fotos (opcional)</Label>
         <div className="space-y-3">
           {/* Image preview */}
           {imageUrls.length > 0 && (
@@ -246,16 +225,12 @@ export function ReviewForm({
                 className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 px-4 py-8 text-sm text-gray-600 hover:border-gray-400 hover:bg-gray-100"
               >
                 <Upload className="h-5 w-5" />
-                <span>
-                  Sube hasta {5 - imageUrls.length} foto(s) más (máx 5MB c/u)
-                </span>
+                <span>Sube hasta {5 - imageUrls.length} foto(s) más (máx 5MB c/u)</span>
               </Label>
             </div>
           )}
 
-          {imageUploadError && (
-            <p className="text-sm text-red-600">{imageUploadError}</p>
-          )}
+          {imageUploadError && <p className="text-sm text-red-600">{imageUploadError}</p>}
           <p className="text-xs text-gray-500">
             Las fotos ayudan a otros compradores. Formatos: JPG, PNG
           </p>
@@ -264,19 +239,12 @@ export function ReviewForm({
 
       {/* Disclaimer */}
       <div className="rounded-lg bg-blue-50 p-4 text-sm text-blue-800">
-        <p>
-          Tu reseña será revisada antes de publicarse. Por favor, sé honesto y
-          respetuoso.
-        </p>
+        <p>Tu reseña será revisada antes de publicarse. Por favor, sé honesto y respetuoso.</p>
       </div>
 
       {/* Actions */}
       <div className="flex gap-3">
-        <Button
-          type="submit"
-          disabled={isSubmitting}
-          className="flex-1"
-        >
+        <Button type="submit" disabled={isSubmitting} className="flex-1">
           {isSubmitting ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -287,12 +255,7 @@ export function ReviewForm({
           )}
         </Button>
         {onCancel && (
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onCancel}
-            disabled={isSubmitting}
-          >
+          <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
             Cancelar
           </Button>
         )}

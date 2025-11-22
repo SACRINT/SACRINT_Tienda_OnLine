@@ -136,7 +136,7 @@ export async function runFullCleanup(tenantId?: string): Promise<CleanupResult[]
       "Full cleanup completed",
     );
   } catch (error) {
-    logger.error("Cleanup failed", error as Error, { tenantId });
+    logger.error({ error, tenantId }, "Cleanup failed");
     throw error;
   }
 

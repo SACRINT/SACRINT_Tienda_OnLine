@@ -8,6 +8,12 @@ import pino from "pino";
 const isDevelopment = process.env.NODE_ENV === "development";
 const isProduction = process.env.NODE_ENV === "production";
 
+// Extend pino logger type to include audit and cache methods
+type LoggerWithAudit = pino.Logger & {
+  audit: (obj: Record<string, any>, msg?: string) => void;
+  cache: (status: "hit" | "miss", key: string) => void;
+};
+
 // Create logger instance
 export const logger = pino({
   level: process.env.LOG_LEVEL || (isDevelopment ? "debug" : "info"),
@@ -74,7 +80,7 @@ export const logger = pino({
     err: pino.stdSerializers.err,
     error: pino.stdSerializers.err,
   },
-});
+}) as LoggerWithAudit;
 
 /**
  * Log levels:
@@ -298,6 +304,13 @@ export function logPerformance(perf: {
  */
 logger.audit = function (obj: Record<string, any>, msg?: string) {
   logger.info({ ...obj, audit: true }, msg || "Audit event");
+};
+
+/**
+ * Cache hit/miss logger
+ */
+logger.cache = function (status: "hit" | "miss", key: string) {
+  logger.debug({ type: "cache", status, key }, `Cache ${status}: ${key}`);
 };
 
 /**
