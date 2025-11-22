@@ -182,10 +182,10 @@ export async function getPayment(paymentId: string): Promise<any> {
 
     const response = await payment.get({ id: paymentId });
 
-    logger.debug("Retrieved Mercado Pago payment", {
-      payment_id: paymentId,
-      status: response.status,
-    });
+    logger.debug(
+      { payment_id: paymentId, status: response.status },
+      "Retrieved Mercado Pago payment",
+    );
 
     return {
       id: response.id,

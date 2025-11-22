@@ -46,6 +46,9 @@ export function generateMetadata(config: SEOConfig): Metadata {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://example.com";
   const siteName = process.env.NEXT_PUBLIC_SITE_NAME || "Tienda Online";
 
+  // Map to valid OpenGraph types (Next.js only supports "website" and "article")
+  const validOgType: "website" | "article" = ogType === "article" ? "article" : "website";
+
   const metadata: Metadata = {
     title,
     description,
@@ -60,7 +63,7 @@ export function generateMetadata(config: SEOConfig): Metadata {
       },
     },
     openGraph: {
-      type: ogType,
+      type: validOgType,
       title,
       description,
       url: canonical || baseUrl,

@@ -54,15 +54,16 @@ export async function sendEmail(options: SendEmailOptions): Promise<EmailResult>
   } = options;
 
   try {
-    // Get the React Email component for this template
-    const EmailComponent = await getEmailTemplate(template, data);
+    // Get the Email template
+    const emailTemplate = await getEmailTemplate(template, data);
 
     // Send email via Resend
     const result = await resend.emails.send({
       from,
       to: Array.isArray(to) ? to : [to],
-      subject,
-      react: EmailComponent,
+      subject: subject || emailTemplate.subject,
+      html: emailTemplate.html,
+      text: emailTemplate.text,
       replyTo,
       cc: cc ? (Array.isArray(cc) ? cc : [cc]) : undefined,
       bcc: bcc ? (Array.isArray(bcc) ? bcc : [bcc]) : undefined,

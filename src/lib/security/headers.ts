@@ -85,8 +85,13 @@ export function generatePermissionsPolicy(): string {
 export function getSecurityHeaders(config?: SecurityHeadersConfig): Record<string, string> {
   const headers: Record<string, string> = {};
 
-  if (config?.contentSecurityPolicy !== false) {
-    headers["Content-Security-Policy"] = config?.contentSecurityPolicy || generateCSP();
+  if (config?.contentSecurityPolicy !== false && config?.contentSecurityPolicy !== undefined) {
+    headers["Content-Security-Policy"] =
+      typeof config.contentSecurityPolicy === "string"
+        ? config.contentSecurityPolicy
+        : generateCSP();
+  } else if (config?.contentSecurityPolicy === undefined) {
+    headers["Content-Security-Policy"] = generateCSP();
   }
 
   headers["X-Frame-Options"] = config?.frameOptions || "DENY";
