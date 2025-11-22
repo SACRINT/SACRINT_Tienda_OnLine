@@ -15,6 +15,8 @@ import {
 import { PieChart } from "@/components/analytics/charts/PieChart";
 import { BarChart } from "@/components/analytics/charts/BarChart";
 import { DateRangePicker } from "@/components/analytics/filters/DateRangePicker";
+import { RFMSegmentation } from "@/components/analytics/RFMSegmentation";
+import { CohortRetentionChart } from "@/components/analytics/CohortRetentionChart";
 import {
   CustomerMetrics,
   AnalyticsResponse,
@@ -357,6 +359,37 @@ export default function CustomerAnalyticsPage() {
               </tbody>
             </table>
           </div>
+        </div>
+      )}
+
+      {/* RFM Segmentation */}
+      {session?.user?.tenantId && (
+        <div className="space-y-4">
+          <div className="border-t border-gray-200 pt-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              RFM Customer Segmentation
+            </h2>
+            <p className="text-gray-600 mb-6">
+              Advanced customer segmentation based on Recency, Frequency, and
+              Monetary value analysis
+            </p>
+          </div>
+          <RFMSegmentation tenantId={session.user.tenantId} />
+        </div>
+      )}
+
+      {/* Cohort Retention Analysis */}
+      {session?.user?.tenantId && (
+        <div className="space-y-4">
+          <div className="border-t border-gray-200 pt-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              Cohort Retention Analysis
+            </h2>
+            <p className="text-gray-600 mb-6">
+              Track customer retention and revenue by acquisition cohort
+            </p>
+          </div>
+          <CohortRetentionChart tenantId={session.user.tenantId} months={6} />
         </div>
       )}
     </div>
