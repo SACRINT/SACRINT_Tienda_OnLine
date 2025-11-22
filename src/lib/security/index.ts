@@ -1,21 +1,60 @@
-// Security Utilities Index
+// Security Module - Barrel Export
+// Week 21-22: Centralized security utilities
 
-// Re-export all security utilities
-export * from "./headers";
-export * from "./rate-limit";
-export * from "./sanitize";
-export * from "./csrf";
-export * from "./audit";
-export * from "./validation";
-
-// Common validators from validators.ts
+// Rate Limiting
 export {
-  sanitizeHTML,
-  validateFileUpload,
-  validateSafeURL,
-  validateCreditCard,
-  validateEmailSecurity,
-  generateSecureToken,
-  PhoneNumberSchema,
-  StrongPasswordSchema,
-} from "./validators";
+  rateLimiters,
+  getIdentifier,
+  createRateLimitHeaders,
+  type RateLimitConfig,
+  type RateLimitResult,
+} from "./rate-limiter";
+
+export {
+  withRateLimit,
+  checkRateLimit,
+} from "./rate-limit-middleware";
+
+// CSRF Protection
+export {
+  getCsrfToken,
+  verifyCsrfToken,
+  withCsrfProtection,
+  getClientCsrfToken,
+  addCsrfHeader,
+  csrfFetch,
+  useCsrfToken,
+} from "./csrf";
+
+// Input Sanitization
+export {
+  sanitizeHtml,
+  sanitizeText,
+  sanitizeEmail,
+  sanitizeUrl,
+  sanitizeFilename,
+  sanitizePhone,
+  sanitizeSearchQuery,
+  sanitizePagination,
+  sanitizeObject,
+  removeNullBytes,
+} from "./sanitization";
+
+// Security Headers
+export {
+  generateCSP,
+  securityHeaders,
+  devSecurityHeaders,
+  applySecurityHeaders,
+  getSecurityHeaders,
+} from "./security-headers";
+
+// Audit Logging
+export {
+  logAuditEvent,
+  auditLog,
+  getIpAddress,
+  queryAuditLogs,
+  AuditEventType,
+  AuditSeverity,
+} from "./audit-logger";
