@@ -34,10 +34,7 @@ function tokenize(text: string): string[] {
 }
 
 // Calculate relevance score
-function calculateScore(
-  product: SearchableProduct,
-  queryTokens: string[],
-): number {
+function calculateScore(product: SearchableProduct, queryTokens: string[]): number {
   let score = 0;
 
   const nameTokens = tokenize(product.name);
@@ -98,10 +95,7 @@ function calculateScore(
 }
 
 // Generate highlights
-function generateHighlights(
-  text: string,
-  queryTokens: string[],
-): string | undefined {
+function generateHighlights(text: string, queryTokens: string[]): string | undefined {
   if (!text) return undefined;
 
   let highlighted = text;
@@ -179,7 +173,7 @@ export async function search(searchQuery: SearchQuery): Promise<SearchResult> {
   // Build database query
   const where: Record<string, unknown> = {
     tenantId,
-    isActive: true,
+    published: true,
   };
 
   // Apply filters
@@ -285,15 +279,13 @@ export async function search(searchQuery: SearchQuery): Promise<SearchResult> {
       switch (sort.field) {
         case "price":
           comparison =
-            (a.product.salePrice || a.product.price) -
-            (b.product.salePrice || b.product.price);
+            (a.product.salePrice || a.product.price) - (b.product.salePrice || b.product.price);
           break;
         case "name":
           comparison = a.product.name.localeCompare(b.product.name);
           break;
         case "createdAt":
-          comparison =
-            a.product.createdAt.getTime() - b.product.createdAt.getTime();
+          comparison = a.product.createdAt.getTime() - b.product.createdAt.getTime();
           break;
         case "rating":
           comparison = (a.product.rating || 0) - (b.product.rating || 0);
@@ -317,30 +309,25 @@ export async function search(searchQuery: SearchQuery): Promise<SearchResult> {
   const paginatedProducts = scoredProducts.slice(start, start + actualLimit);
 
   // Transform to result format
-  const resultProducts: SearchResultProduct[] = paginatedProducts.map(
-    ({ product, score }) => ({
-      id: product.id,
-      name: product.name,
-      slug: product.slug,
-      description: product.description,
-      price: product.price,
-      salePrice: product.salePrice,
-      image: product.image,
-      categoryName: product.categoryName,
-      categorySlug: product.categorySlug,
-      rating: product.rating,
-      reviewCount: product.reviewCount,
-      inStock: product.stock > 0,
-      score,
-      highlights: {
-        name: generateHighlights(product.name, queryTokens),
-        description: generateHighlights(
-          product.description.substring(0, 200),
-          queryTokens,
-        ),
-      },
-    }),
-  );
+  const resultProducts: SearchResultProduct[] = paginatedProducts.map(({ product, score }) => ({
+    id: product.id,
+    name: product.name,
+    slug: product.slug,
+    description: product.description,
+    price: product.price,
+    salePrice: product.salePrice,
+    image: product.image,
+    categoryName: product.categoryName,
+    categorySlug: product.categorySlug,
+    rating: product.rating,
+    reviewCount: product.reviewCount,
+    inStock: product.stock > 0,
+    score,
+    highlights: {
+      name: generateHighlights(product.name, queryTokens),
+      description: generateHighlights(product.description.substring(0, 200), queryTokens),
+    },
+  }));
 
   return {
     products: resultProducts,
@@ -354,10 +341,7 @@ export async function search(searchQuery: SearchQuery): Promise<SearchResult> {
 }
 
 // Quick count for a search
-export async function searchCount(
-  query: string,
-  tenantId: string,
-): Promise<number> {
+export async function searchCount(query: string, tenantId: string): Promise<number> {
   const result = await search({
     query,
     tenantId,

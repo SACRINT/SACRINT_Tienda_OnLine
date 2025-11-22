@@ -63,9 +63,7 @@ export interface SearchResult {
 /**
  * Main search function with filters and facets
  */
-export async function searchProducts(
-  filters: SearchFilters,
-): Promise<SearchResult> {
+export async function searchProducts(filters: SearchFilters): Promise<SearchResult> {
   const {
     query = "",
     categoryId,
@@ -83,7 +81,7 @@ export async function searchProducts(
 
   // Build WHERE clause
   const where: Prisma.ProductWhereInput = {
-    isActive: true,
+    published: true,
   };
 
   // Tenant isolation
@@ -111,12 +109,12 @@ export async function searchProducts(
 
   // Price range
   if (minPrice !== undefined || maxPrice !== undefined) {
-    where.price = {};
+    (where as any).basePrice = {};
     if (minPrice !== undefined) {
-      where.price.gte = minPrice;
+      (where as any).basePrice.gte = minPrice;
     }
     if (maxPrice !== undefined) {
-      where.price.lte = maxPrice;
+      (where as any).basePrice.lte = maxPrice;
     }
   }
 
@@ -127,18 +125,19 @@ export async function searchProducts(
 
   // Featured filter
   if (featured) {
-    where.isFeatured = true;
+    where.featured = true;
   }
 
   // Build ORDER BY clause
-  let orderBy: Prisma.ProductOrderByWithRelationInput | Prisma.ProductOrderByWithRelationInput[] = [];
+  let orderBy: Prisma.ProductOrderByWithRelationInput | Prisma.ProductOrderByWithRelationInput[] =
+    [];
 
   switch (sortBy) {
     case "price-asc":
-      orderBy = { price: "asc" };
+      orderBy = { basePrice: "asc" };
       break;
     case "price-desc":
-      orderBy = { price: "desc" };
+      orderBy = { basePrice: "desc" };
       break;
     case "newest":
       orderBy = { createdAt: "desc" };
@@ -155,10 +154,7 @@ export async function searchProducts(
     case "relevance":
     default:
       // For relevance, prioritize exact matches, then featured, then newest
-      orderBy = [
-        { isFeatured: "desc" },
-        { createdAt: "desc" },
-      ];
+      orderBy = [{ isFeatured: "desc" }, { createdAt: "desc" }];
       break;
   }
 
@@ -192,9 +188,7 @@ export async function searchProducts(
   const productsWithRating = products.map((product) => {
     const reviews = product.reviews || [];
     const avgRating =
-      reviews.length > 0
-        ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
-        : 0;
+      reviews.length > 0 ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length : 0;
 
     return {
       id: product.id,
@@ -238,10 +232,7 @@ export async function searchProducts(
 /**
  * Generate facets for filter UI
  */
-async function generateFacets(
-  baseWhere: Prisma.ProductWhereInput,
-  tenantId?: string,
-) {
+async function generateFacets(baseWhere: Prisma.ProductWhereInput, tenantId?: string) {
   const where = { ...baseWhere };
   if (tenantId) {
     where.tenantId = tenantId;
@@ -258,12 +249,13 @@ async function generateFacets(
     .map((g) => g.categoryId)
     .filter((id): id is string => id !== null);
 
-  const categories = categoryIds.length > 0
-    ? await db.category.findMany({
-        where: { id: { in: categoryIds } },
-        select: { id: true, name: true },
-      })
-    : [];
+  const categories =
+    categoryIds.length > 0
+      ? await db.category.findMany({
+          where: { id: { in: categoryIds } },
+          select: { id: true, name: true },
+        })
+      : [];
 
   const categoriesWithCount = categoryGroups
     .map((group) => {
@@ -327,7 +319,7 @@ export async function getSearchSuggestions(
   if (!query.trim()) return [];
 
   const where: Prisma.ProductWhereInput = {
-    isActive: true,
+    published: true,
     name: {
       contains: query,
       mode: "insensitive",

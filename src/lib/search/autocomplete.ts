@@ -27,11 +27,8 @@ async function getProductSuggestions(
   const products = await db.product.findMany({
     where: {
       tenantId,
-      isActive: true,
-      OR: [
-        { name: { contains: query, mode: "insensitive" } },
-        { tags: { hasSome: [query] } },
-      ],
+      published: true,
+      OR: [{ name: { contains: query, mode: "insensitive" } }, { tags: { hasSome: [query] } }],
     },
     select: {
       id: true,
@@ -146,10 +143,7 @@ export async function getAutocomplete(
 }
 
 // Get trending searches
-export async function getTrendingSearches(
-  tenantId: string,
-  limit: number = 10,
-): Promise<string[]> {
+export async function getTrendingSearches(tenantId: string, limit: number = 10): Promise<string[]> {
   const cacheKey = "trending_searches:" + tenantId;
   let trending = await cache.get<string[]>(cacheKey);
 
@@ -164,20 +158,14 @@ export async function getTrendingSearches(
 }
 
 // Get recent searches for a user
-export async function getRecentSearches(
-  userId: string,
-  limit: number = 5,
-): Promise<string[]> {
+export async function getRecentSearches(userId: string, limit: number = 5): Promise<string[]> {
   const cacheKey = "recent_searches:" + userId;
   const recent = await cache.get<string[]>(cacheKey);
   return recent ? recent.slice(0, limit) : [];
 }
 
 // Save a search to user's recent searches
-export async function saveRecentSearch(
-  userId: string,
-  query: string,
-): Promise<void> {
+export async function saveRecentSearch(userId: string, query: string): Promise<void> {
   const cacheKey = "recent_searches:" + userId;
   let recent = await cache.get<string[]>(cacheKey);
 

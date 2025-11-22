@@ -140,12 +140,9 @@ export async function getOrderMetrics(
 
   const total = orders.length;
   const pending = orders.filter((o) => o.status === "PENDING").length;
-  const completed = orders.filter((o) =>
-    ["COMPLETED", "DELIVERED"].includes(o.status),
-  ).length;
+  const completed = orders.filter((o) => ["COMPLETED", "DELIVERED"].includes(o.status)).length;
   const cancelled = orders.filter((o) => o.status === "CANCELLED").length;
-  const averageValue =
-    total > 0 ? orders.reduce((sum, o) => sum + o.total, 0) / total : 0;
+  const averageValue = total > 0 ? orders.reduce((sum, o) => sum + o.total, 0) / total : 0;
 
   // Calculate growth
   const periodLength = endDate.getTime() - startDate.getTime();
@@ -162,12 +159,10 @@ export async function getOrderMetrics(
 }
 
 // Product metrics
-export async function getProductMetrics(
-  tenantId: string,
-): Promise<ProductMetrics> {
+export async function getProductMetrics(tenantId: string): Promise<ProductMetrics> {
   const [total, active, outOfStock, lowStock] = await Promise.all([
     db.product.count({ where: { tenantId } }),
-    db.product.count({ where: { tenantId, isActive: true } }),
+    db.product.count({ where: { tenantId, published: true } }),
     db.product.count({ where: { tenantId, stock: 0 } }),
     db.product.count({ where: { tenantId, stock: { gt: 0, lte: 5 } } }),
   ]);
@@ -253,8 +248,7 @@ export async function getCustomerMetrics(
     },
     _sum: { total: true },
   });
-  const averageLifetimeValue =
-    total > 0 ? (totalRevenue._sum.total || 0) / total : 0;
+  const averageLifetimeValue = total > 0 ? (totalRevenue._sum.total || 0) / total : 0;
 
   return { total, new: newCustomers, returning, growth, averageLifetimeValue };
 }
@@ -279,10 +273,8 @@ export async function getConversionMetrics(
   });
 
   const rate = visitors > 0 ? (purchases / visitors) * 100 : 0;
-  const cartAbandonment =
-    addToCarts > 0 ? ((addToCarts - checkouts) / addToCarts) * 100 : 0;
-  const checkoutAbandonment =
-    checkouts > 0 ? ((checkouts - purchases) / checkouts) * 100 : 0;
+  const cartAbandonment = addToCarts > 0 ? ((addToCarts - checkouts) / addToCarts) * 100 : 0;
+  const checkoutAbandonment = checkouts > 0 ? ((checkouts - purchases) / checkouts) * 100 : 0;
 
   const funnel: FunnelStep[] = [
     { name: "Visitantes", count: visitors, percentage: 100 },
@@ -312,9 +304,7 @@ export async function getConversionMetrics(
 }
 
 // Helper: Group values by date
-function groupByDate(
-  items: { date: Date; value: number }[],
-): { date: string; value: number }[] {
+function groupByDate(items: { date: Date; value: number }[]): { date: string; value: number }[] {
   const grouped: Record<string, number> = {};
 
   for (const item of items) {

@@ -32,7 +32,7 @@ export async function getInventoryAlerts(
   const products = await db.product.findMany({
     where: {
       tenantId,
-      isActive: true,
+      published: true,
     },
     select: {
       id: true,
@@ -88,16 +88,12 @@ export async function getInventoryAlerts(
   }
 
   if (options?.severity) {
-    filteredAlerts = filteredAlerts.filter(
-      (a) => a.severity === options.severity,
-    );
+    filteredAlerts = filteredAlerts.filter((a) => a.severity === options.severity);
   }
 
   // Sort by severity
   const severityOrder = { critical: 0, warning: 1, info: 2 };
-  filteredAlerts.sort(
-    (a, b) => severityOrder[a.severity] - severityOrder[b.severity],
-  );
+  filteredAlerts.sort((a, b) => severityOrder[a.severity] - severityOrder[b.severity]);
 
   return filteredAlerts;
 }
@@ -138,7 +134,7 @@ export async function getReorderSuggestions(tenantId: string): Promise<
   const products = await db.product.findMany({
     where: {
       tenantId,
-      isActive: true,
+      published: true,
       stock: { lte: db.product.fields.reorderPoint },
     },
     select: {
@@ -215,20 +211,17 @@ export async function getInventoryHealthScore(tenantId: string): Promise<{
   };
 }> {
   const [totalProducts, outOfStock, lowStock] = await Promise.all([
-    db.product.count({ where: { tenantId, isActive: true } }),
-    db.product.count({ where: { tenantId, isActive: true, stock: 0 } }),
+    db.product.count({ where: { tenantId, published: true } }),
+    db.product.count({ where: { tenantId, published: true, stock: 0 } }),
     db.product.count({
-      where: { tenantId, isActive: true, stock: { lte: 5 } },
+      where: { tenantId, published: true, stock: { lte: 5 } },
     }),
   ]);
 
   // Calculate metrics
-  const outOfStockRate =
-    totalProducts > 0 ? (outOfStock / totalProducts) * 100 : 0;
+  const outOfStockRate = totalProducts > 0 ? (outOfStock / totalProducts) * 100 : 0;
   const stockCoverage =
-    totalProducts > 0
-      ? ((totalProducts - lowStock) / totalProducts) * 100
-      : 100;
+    totalProducts > 0 ? ((totalProducts - lowStock) / totalProducts) * 100 : 100;
 
   // Simplified turnover and accuracy (would need more data)
   const turnoverRate = 4.5; // Monthly turns
