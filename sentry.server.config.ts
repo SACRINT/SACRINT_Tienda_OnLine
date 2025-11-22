@@ -1,41 +1,53 @@
 /**
- * Sentry Server Configuration
- * Error tracking and performance monitoring for Node.js/Next.js server
+ * Sentry Server-Side Configuration
+ * Tracks errors and performance in Node.js/Next.js server
  */
 
 import * as Sentry from "@sentry/nextjs";
 
 const SENTRY_DSN = process.env.NEXT_PUBLIC_SENTRY_DSN;
+const SENTRY_ENVIRONMENT = process.env.NEXT_PUBLIC_SENTRY_ENVIRONMENT || "development";
 
-if (SENTRY_DSN) {
-  Sentry.init({
-    dsn: SENTRY_DSN,
-    environment: process.env.NODE_ENV || "development",
-    tracesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1.0,
+Sentry.init({
+  dsn: SENTRY_DSN,
 
-    // Performance Monitoring
-    enabled: process.env.NODE_ENV === "production",
+  // Environment
+  environment: SENTRY_ENVIRONMENT,
 
-    integrations: [Sentry.httpIntegration(), Sentry.prismaIntegration()],
+  // Performance Monitoring
+  tracesSampleRate: SENTRY_ENVIRONMENT === "production" ? 0.1 : 1.0,
 
-    // Ignore common errors
-    ignoreErrors: ["ECONNREFUSED", "ETIMEDOUT", "ENOTFOUND", "AbortError"],
+  // Enable HTTP instrumentation
+  integrations: [Sentry.httpIntegration(), Sentry.prismaIntegration()],
 
-    beforeSend(event) {
-      // Filter out PII data
-      if (event.request?.headers) {
-        delete event.request.headers["authorization"];
-        delete event.request.headers["cookie"];
-      }
+  beforeSend(event, hint) {
+    // Sanitize sensitive data
+    if (event.request) {
+      delete event.request.cookies;
+      delete event.request.headers?.["authorization"];
+      delete event.request.headers?.["cookie"];
+    }
 
-      // Filter sensitive data from extra context
-      if (event.extra) {
-        delete event.extra.password;
-        delete event.extra.token;
-        delete event.extra.apiKey;
-      }
+    // Remove sensitive query parameters
+    if (event.request?.query_string) {
+      const sensitiveParams = ["password", "token", "secret", "apiKey"];
+      sensitiveParams.forEach((param) => {
+        event.request!.query_string = event.request!.query_string?.replace(
+          new RegExp(`${param}=[^&]*`, "gi"),
+          `${param}=[REDACTED]`,
+        );
+      });
+    }
 
-      return event;
-    },
-  });
-}
+    return event;
+  },
+
+  beforeSendTransaction(event) {
+    // Filter out health check transactions
+    if (event.transaction?.includes("/api/health")) {
+      return null;
+    }
+
+    return event;
+  },
+});

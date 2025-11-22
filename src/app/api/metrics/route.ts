@@ -1,49 +1,70 @@
-// Metrics API Endpoint
-// Prometheus-compatible metrics export
+/**
+ * Metrics Endpoint
+ * Returns application metrics (protected endpoint)
+ */
 
-import { NextResponse } from "next/server";
-import { metricsRegistry } from "@/lib/monitoring";
+import { NextRequest, NextResponse } from "next/server";
+import { metrics } from "@/lib/monitoring/metrics";
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
-export async function GET(request: Request) {
-  const url = new URL(request.url);
-  const format = url.searchParams.get("format") || "prometheus";
+export async function GET(request: NextRequest) {
+  // Simple auth check - in production use proper authentication
+  const authHeader = request.headers.get("authorization");
+  const apiKey = process.env.METRICS_API_KEY;
 
-  // Add runtime metrics
-  addRuntimeMetrics();
-
-  if (format === "json") {
-    return NextResponse.json(metricsRegistry.toJSON(), {
-      headers: {
-        "Cache-Control": "no-cache, no-store, must-revalidate",
-      },
-    });
+  if (apiKey && authHeader !== `Bearer \${apiKey}`) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Default to Prometheus format
-  const metrics = metricsRegistry.toPrometheus();
+  const allMetrics = metrics.getAll();
+  const metricsArray = Array.from(allMetrics.values()).flat();
 
-  return new NextResponse(metrics, {
-    headers: {
-      "Content-Type": "text/plain; version=0.0.4; charset=utf-8",
-      "Cache-Control": "no-cache, no-store, must-revalidate",
+  // Group metrics by name
+  const groupedMetrics = metricsArray.reduce(
+    (acc, metric) => {
+      if (!acc[metric.name]) {
+        acc[metric.name] = [];
+      }
+      acc[metric.name].push(metric);
+      return acc;
     },
+    {} as Record<string, typeof metricsArray>,
+  );
+
+  // Calculate statistics
+  const statistics = Object.entries(groupedMetrics).map(([name, metrics]) => {
+    const values = metrics.map((m) => m.value);
+    const sum = values.reduce((a, b) => a + b, 0);
+    const avg = sum / values.length;
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+
+    return {
+      name,
+      count: values.length,
+      sum,
+      avg: Math.round(avg * 100) / 100,
+      min,
+      max,
+      unit: metrics[0].unit,
+      latest: metrics[metrics.length - 1],
+    };
   });
-}
 
-function addRuntimeMetrics(): void {
-  const memory = process.memoryUsage();
-
-  // Memory metrics
-  const memoryMetrics = [
-    { name: "nodejs_heap_used_bytes", value: memory.heapUsed },
-    { name: "nodejs_heap_total_bytes", value: memory.heapTotal },
-    { name: "nodejs_external_bytes", value: memory.external },
-    { name: "nodejs_rss_bytes", value: memory.rss },
-  ];
-
-  // These would need to be registered metrics in production
-  // For now, just log them
-  console.debug("Runtime metrics:", memoryMetrics);
+  return NextResponse.json(
+    {
+      timestamp: new Date().toISOString(),
+      totalMetrics: metricsArray.length,
+      uniqueMetrics: Object.keys(groupedMetrics).length,
+      statistics,
+      raw: process.env.NODE_ENV === "development" ? metricsArray : undefined,
+    },
+    {
+      headers: {
+        "Cache-Control": "no-store, no-cache, must-revalidate",
+      },
+    },
+  );
 }

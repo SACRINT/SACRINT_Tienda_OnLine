@@ -1,172 +1,78 @@
 /**
- * Logging Middleware for Next.js API Routes
- * Automatic request/response logging with performance tracking
+ * Monitoring Middleware
+ * Automatically track HTTP requests, responses, and errors
  */
 
-import { NextRequest, NextResponse } from "next/server";
-import { logger, createRequestContext, PerfTimer } from "./logger";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { logger, logRequest, logResponse } from "./logger";
+import { trackApiCall, trackError } from "./metrics";
 
-/**
- * Wrap API route handler with logging middleware
- */
-export function withLogging<T = any>(
-  handler: (
-    req: NextRequest,
-    context?: any,
-  ) => Promise<NextResponse<T> | Response>,
-  options?: {
-    skipPaths?: string[];
-    logBody?: boolean;
-    logHeaders?: boolean;
-  },
-) {
-  return async (
-    req: NextRequest,
-    context?: any,
-  ): Promise<NextResponse<T> | Response> => {
-    const {
-      skipPaths = [],
-      logBody = false,
-      logHeaders = false,
-    } = options || {};
+export function withMonitoring(handler: (req: NextRequest) => Promise<NextResponse>) {
+  return async (req: NextRequest): Promise<NextResponse> => {
+    const startTime = Date.now();
+    const { method, url, headers } = req;
+    const pathname = new URL(url).pathname;
 
-    // Skip logging for certain paths
-    if (skipPaths.some((path) => req.nextUrl.pathname.startsWith(path))) {
-      return handler(req, context);
+    // Skip health check endpoints from detailed logging
+    const isHealthCheck = pathname.includes("/health");
+
+    // Log request
+    if (!isHealthCheck) {
+      logRequest({
+        method,
+        url: pathname,
+        headers: Object.fromEntries(headers.entries()),
+      });
     }
-
-    const timer = new PerfTimer("api_request");
-    const requestId = crypto.randomUUID();
-
-    // Log incoming request
-    const requestContext = {
-      requestId,
-      method: req.method,
-      url: req.nextUrl.pathname + req.nextUrl.search,
-      userAgent: req.headers.get("user-agent") || undefined,
-      ip: req.headers.get("x-forwarded-for") || req.ip || undefined,
-      ...(logHeaders && { headers: Object.fromEntries(req.headers) }),
-    };
-
-    logger.info(
-      `[REQUEST] ${req.method} ${req.nextUrl.pathname}`,
-      requestContext,
-    );
-
-    // Log request body if enabled (only for non-GET requests)
-    if (logBody && req.method !== "GET") {
-      try {
-        const body = await req.clone().json();
-        logger.debug("Request body", { requestId, body });
-      } catch {
-        // Body is not JSON or empty
-      }
-    }
-
-    let response: NextResponse<T> | Response;
-    let statusCode = 500;
 
     try {
-      response = await handler(req, context);
-      statusCode = response.status;
+      // Execute handler
+      const response = await handler(req);
+      const duration = Date.now() - startTime;
 
       // Log response
-      const duration = timer.end();
-      logger.request(
-        req.method,
-        req.nextUrl.pathname,
-        statusCode,
-        duration,
-        requestContext,
-      );
+      if (!isHealthCheck) {
+        logResponse({
+          method,
+          url: pathname,
+          statusCode: response.status,
+          duration,
+        });
+
+        // Track metrics
+        trackApiCall(pathname, method, response.status, duration);
+      }
+
+      // Add performance headers
+      response.headers.set("X-Response-Time", `\${duration}ms`);
+      response.headers.set("X-Request-ID", req.headers.get("x-request-id") || crypto.randomUUID());
 
       return response;
     } catch (error) {
-      const duration = timer.end();
+      const duration = Date.now() - startTime;
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
 
+      // Log error
       logger.error(
-        `[ERROR] ${req.method} ${req.nextUrl.pathname}`,
-        error as Error,
-        { ...requestContext, statusCode },
-      );
-
-      throw error;
-    }
-  };
-}
-
-/**
- * Create logging middleware for Express-style middleware
- */
-export function createLoggingMiddleware() {
-  return async (req: NextRequest) => {
-    const start = Date.now();
-    const requestId = crypto.randomUUID();
-
-    // Add requestId to request headers for tracing
-    const requestHeaders = new Headers(req.headers);
-    requestHeaders.set("x-request-id", requestId);
-
-    const response = NextResponse.next({
-      request: {
-        headers: requestHeaders,
-      },
-    });
-
-    // Add requestId to response headers
-    response.headers.set("x-request-id", requestId);
-
-    const duration = Date.now() - start;
-
-    // Log after response (non-blocking)
-    Promise.resolve().then(() => {
-      logger.request(
-        req.method,
-        req.nextUrl.pathname,
-        response.status,
-        duration,
         {
-          requestId,
-          userAgent: req.headers.get("user-agent") || undefined,
-          ip: req.headers.get("x-forwarded-for") || req.ip || undefined,
+          type: "request_error",
+          method,
+          url: pathname,
+          error,
+          duration,
         },
-      );
-    });
-
-    return response;
-  };
-}
-
-/**
- * Error boundary wrapper for API routes
- */
-export function withErrorHandler<T = any>(
-  handler: (
-    req: NextRequest,
-    context?: any,
-  ) => Promise<NextResponse<T> | Response>,
-) {
-  return async (req: NextRequest, context?: any): Promise<NextResponse> => {
-    try {
-      const response = await handler(req, context);
-      return response as NextResponse;
-    } catch (error) {
-      const requestContext = createRequestContext(req);
-
-      logger.error(
-        "Unhandled error in API route",
-        error as Error,
-        requestContext,
+        "Request failed",
       );
 
+      // Track error metric
+      trackError("request_error", errorMessage);
+
+      // Return error response
       return NextResponse.json(
         {
-          error: "Internal server error",
-          message:
-            process.env.NODE_ENV === "production"
-              ? "An unexpected error occurred"
-              : (error as Error).message,
-          requestId: requestContext.requestId,
+          error: "Internal Server Error",
+          message: process.env.NODE_ENV === "development" ? errorMessage : undefined,
         },
         { status: 500 },
       );
@@ -175,30 +81,104 @@ export function withErrorHandler<T = any>(
 }
 
 /**
- * Combine multiple middleware functions
+ * Performance timing decorator
  */
-export function compose<T = any>(
-  ...middlewares: Array<
-    (
-      handler: (
-        req: NextRequest,
-        context?: any,
-      ) => Promise<NextResponse<T> | Response>,
-    ) => (
-      req: NextRequest,
-      context?: any,
-    ) => Promise<NextResponse<T> | Response>
-  >
-) {
-  return (
-    handler: (
-      req: NextRequest,
-      context?: any,
-    ) => Promise<NextResponse<T> | Response>,
-  ) => {
-    return middlewares.reduceRight(
-      (acc, middleware) => middleware(acc),
-      handler,
-    );
-  };
+export function withTiming<T extends (...args: any[]) => Promise<any>>(
+  fn: T,
+  operationName: string,
+): T {
+  return (async (...args: Parameters<T>): Promise<ReturnType<T>> => {
+    const startTime = Date.now();
+
+    try {
+      const result = await fn(...args);
+      const duration = Date.now() - startTime;
+
+      logger.debug(
+        {
+          type: "performance",
+          operation: operationName,
+          duration,
+        },
+        `Operation completed: \${operationName}`,
+      );
+
+      return result;
+    } catch (error) {
+      const duration = Date.now() - startTime;
+
+      logger.error(
+        {
+          type: "operation_error",
+          operation: operationName,
+          duration,
+          error,
+        },
+        `Operation failed: \${operationName}`,
+      );
+
+      throw error;
+    }
+  }) as T;
 }
+
+/**
+ * Database query timing decorator
+ */
+export function withDatabaseTiming<T extends (...args: any[]) => Promise<any>>(
+  fn: T,
+  model: string,
+  operation: string,
+): T {
+  return (async (...args: Parameters<T>): Promise<ReturnType<T>> => {
+    const startTime = Date.now();
+
+    try {
+      const result = await fn(...args);
+      const duration = Date.now() - startTime;
+
+      logger.debug(
+        {
+          type: "database_query",
+          model,
+          operation,
+          duration,
+        },
+        `Database query: \${model}.\${operation}`,
+      );
+
+      if (duration > 1000) {
+        logger.warn(
+          {
+            type: "slow_query",
+            model,
+            operation,
+            duration,
+          },
+          "Slow database query detected",
+        );
+      }
+
+      return result;
+    } catch (error) {
+      const duration = Date.now() - startTime;
+
+      logger.error(
+        {
+          type: "database_error",
+          model,
+          operation,
+          duration,
+          error,
+        },
+        `Database query failed: \${model}.\${operation}`,
+      );
+
+      trackError("database_error", `\${model}.\${operation}`);
+
+      throw error;
+    }
+  }) as T;
+}
+
+export default withMonitoring;
