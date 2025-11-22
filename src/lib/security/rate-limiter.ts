@@ -29,7 +29,7 @@ export class RateLimiter {
   private store = new Map<string, RateLimitEntry>();
   private cleanupInterval: NodeJS.Timeout;
 
-  constructor(private config: RateLimitConfig) {
+  constructor(public config: RateLimitConfig) {
     // Cleanup automático cada minuto
     this.cleanupInterval = setInterval(() => this.cleanup(), 60000);
   }

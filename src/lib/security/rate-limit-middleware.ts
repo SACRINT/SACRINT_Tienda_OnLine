@@ -19,10 +19,11 @@ export function withRateLimit(
   return async (req: Request): Promise<Response> => {
     const identifier = getIdentifier(req);
     const limiter = rateLimiters[limiterName];
-    const result = limiter.check(identifier);
+    const result = await limiter.checkLimit(identifier);
+    const limit = limiter.config.maxRequests;
 
-    if (!result.success) {
-      const retryAfter = Math.ceil((result.reset - Date.now()) / 1000);
+    if (!result.allowed) {
+      const retryAfter = Math.ceil((result.resetTime - Date.now()) / 1000);
 
       return NextResponse.json(
         {
@@ -33,7 +34,10 @@ export function withRateLimit(
         {
           status: 429,
           headers: {
-            ...createRateLimitHeaders(result),
+            ...createRateLimitHeaders(
+              { allowed: result.allowed, remaining: result.remaining, resetTime: result.resetTime },
+              limit,
+            ),
             "Retry-After": retryAfter.toString(),
           },
         },
@@ -45,7 +49,10 @@ export function withRateLimit(
 
     // Clone response to add headers
     const newResponse = new Response(response.body, response);
-    const headers = createRateLimitHeaders(result);
+    const headers = createRateLimitHeaders(
+      { allowed: result.allowed, remaining: result.remaining, resetTime: result.resetTime },
+      limit,
+    );
     Object.entries(headers).forEach(([key, value]) => {
       newResponse.headers.set(key, value);
     });
@@ -57,11 +64,17 @@ export function withRateLimit(
 /**
  * Check rate limit without blocking (for middleware)
  */
-export function checkRateLimit(
+export async function checkRateLimit(
   req: Request,
   limiterName: keyof typeof rateLimiters = "api",
-): RateLimitResult {
+): Promise<RateLimitResult> {
   const identifier = getIdentifier(req);
   const limiter = rateLimiters[limiterName];
-  return limiter.check(identifier);
+  const result = await limiter.checkLimit(identifier);
+
+  return {
+    allowed: result.allowed,
+    remaining: result.remaining,
+    resetTime: result.resetTime,
+  };
 }
