@@ -32,7 +32,7 @@ export interface SearchResult {
     slug: string | null;
     description: string | null;
     price: number;
-    compareAtPrice: number | null;
+    salePrice: number | null;
     images: string[];
     stock: number;
     isActive: boolean;
@@ -176,6 +176,7 @@ export async function searchProducts(filters: SearchFilters): Promise<SearchResu
             rating: true,
           },
         },
+        images: true,
       },
       orderBy,
       skip: (page - 1) * limit,
@@ -195,9 +196,9 @@ export async function searchProducts(filters: SearchFilters): Promise<SearchResu
       name: product.name,
       slug: product.slug,
       description: product.description,
-      price: product.basePrice,
-      compareAtPrice: product.compareAtPrice,
-      images: product.images,
+      price: Number(product.basePrice),
+      salePrice: product.salePrice ? Number(product.salePrice) : null,
+      images: product.images.map((img) => img.url),
       stock: product.stock,
       isActive: product.published,
       isFeatured: product.featured,
@@ -284,7 +285,7 @@ async function generateFacets(baseWhere: Prisma.ProductWhereInput, tenantId?: st
       const count = await db.product.count({
         where: {
           ...where,
-          price: {
+          basePrice: {
             gte: range.min,
             lte: range.max,
           },
