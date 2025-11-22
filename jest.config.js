@@ -1,61 +1,41 @@
-// Jest configuration for Next.js
 const nextJest = require("next/jest");
 
+/** @type {import('jest').Config} */
 const createJestConfig = nextJest({
-  // Provide the path to your Next.js app to load next.config.js and .env files in your test environment
   dir: "./",
 });
 
-// Add any custom config to be passed to Jest
-const customJestConfig = {
+const config = {
+  coverageProvider: "v8",
+  testEnvironment: "jsdom",
   setupFilesAfterEnv: ["<rootDir>/jest.setup.js"],
-  testEnvironment: "jest-environment-jsdom",
-  moduleDirectories: ["node_modules", "<rootDir>/"],
   moduleNameMapper: {
+    "^lucide-react$": "<rootDir>/__mocks__/lucide-react.js",
     "^@/(.*)$": "<rootDir>/src/$1",
   },
-  testMatch: ["**/__tests__/**/*.[jt]s?(x)", "**/?(*.)+(spec|test).[jt]s?(x)"],
-  testPathIgnorePatterns: [
-    "/node_modules/",
-    "/e2e/",
-    "/__tests__/mocks/",
-    "/__tests__/fixtures/",
-    // Skip component tests with broken imports or mismatched specs
-    "/__tests__/components/",
-    // Skip API tests (require Request global not available in Jest)
-    "/__tests__/api/",
-    "/__tests__/unit/api/",
-    // Skip db tests (next-auth ESM import issues)
-    "/__tests__/db/",
-    // Skip security tests (Prisma client not available in CI)
-    "/__tests__/security/tenant-isolation.test.ts",
-    // Skip performance tests with unsupported Jest features
-    "/__tests__/performance/bundle.test.ts",
-    // Skip upload tests (missing TextDecoder)
-    "/lib/upload/__tests__/",
-    // Skip unit tests with logic errors or missing globals
-    "/__tests__/unit/lib/",
-  ],
-  // Transform next-auth ESM modules to CommonJS for Jest
-  transformIgnorePatterns: [
-    "node_modules/(?!(next-auth|@auth/core|@panva/hkdf|@panva/asn1|preact|preact-render-to-string|oauth4webapi)/)",
-  ],
+  coverageDirectory: "coverage",
   collectCoverageFrom: [
     "src/**/*.{js,jsx,ts,tsx}",
     "!src/**/*.d.ts",
     "!src/**/*.stories.{js,jsx,ts,tsx}",
     "!src/**/__tests__/**",
+    "!src/**/__mocks__/**",
+    "!src/lib/db.ts",
+    "!src/lib/auth/auth.ts",
   ],
-  // Coverage threshold temporarily removed - will be re-enabled once more tests are fixed
-  // coverageThreshold: {
-  //   global: {
-  //     branches: 70,
-  //     functions: 70,
-  //     lines: 70,
-  //     statements: 70,
-  //   },
-  // },
+  coverageThreshold: {
+    global: {
+      branches: 70,
+      functions: 70,
+      lines: 70,
+      statements: 70,
+    },
+  },
+  transformIgnorePatterns: ["node_modules/(?!(lucide-react|@radix-ui)/)"],
+  testMatch: ["**/__tests__/**/*.[jt]s?(x)", "**/?(*.)+(spec|test).[jt]s?(x)"],
+  testPathIgnorePatterns: ["/node_modules/", "/.next/", "/out/", "/coverage/", "/e2e/"],
+  verbose: true,
+  maxWorkers: process.env.CI ? 2 : "50%",
 };
 
-// createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async
-module.exports = createJestConfig(customJestConfig);
+module.exports = createJestConfig(config);
