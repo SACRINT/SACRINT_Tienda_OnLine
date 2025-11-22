@@ -154,7 +154,7 @@ export async function searchProducts(filters: SearchFilters): Promise<SearchResu
     case "relevance":
     default:
       // For relevance, prioritize exact matches, then featured, then newest
-      orderBy = [{ isFeatured: "desc" }, { createdAt: "desc" }];
+      orderBy = [{ featured: "desc" }, { createdAt: "desc" }];
       break;
   }
 
