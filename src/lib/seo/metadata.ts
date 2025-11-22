@@ -1,167 +1,120 @@
-// SEO Metadata utilities
+// SEO Metadata Utilities
+// Next.js 14 Metadata API helpers
+
 import { Metadata } from "next";
 
-// Base site configuration
-export const siteConfig = {
-  name: "SACRINT Tienda Online",
-  description:
-    "Tu tienda online de confianza con los mejores productos y precios en México",
-  url: process.env.NEXT_PUBLIC_SITE_URL || "https://sacrint.com",
-  ogImage: "/og-image.jpg",
-  locale: "es_MX",
-  twitterHandle: "@sacrint",
-};
-
-// Base metadata that all pages inherit
-export const baseMetadata: Metadata = {
-  metadataBase: new URL(siteConfig.url),
-  title: {
-    default: siteConfig.name,
-    template: `%s | ${siteConfig.name}`,
-  },
-  description: siteConfig.description,
-  keywords: [
-    "tienda online",
-    "e-commerce",
-    "compras en línea",
-    "México",
-    "productos",
-    "envío gratis",
-  ],
-  authors: [{ name: "SACRINT" }],
-  creator: "SACRINT",
-  publisher: "SACRINT",
-  formatDetection: {
-    email: false,
-    address: false,
-    telephone: false,
-  },
-  openGraph: {
-    type: "website",
-    locale: siteConfig.locale,
-    url: siteConfig.url,
-    title: siteConfig.name,
-    description: siteConfig.description,
-    siteName: siteConfig.name,
-    images: [
-      {
-        url: siteConfig.ogImage,
-        width: 1200,
-        height: 630,
-        alt: siteConfig.name,
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: siteConfig.name,
-    description: siteConfig.description,
-    images: [siteConfig.ogImage],
-    creator: siteConfig.twitterHandle,
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
-  },
-  verification: {
-    google: process.env.GOOGLE_SITE_VERIFICATION,
-    // yandex: process.env.YANDEX_VERIFICATION,
-  },
-};
-
-// Generate metadata for product pages
-export function generateProductMetadata(product: {
-  name: string;
+export interface SEOConfig {
+  title: string;
   description: string;
-  price: number;
-  images: string[];
-  category?: string;
-  brand?: string;
-  sku?: string;
-}): Metadata {
-  const title = product.name;
-  const description = product.description.slice(0, 160);
-  const image = product.images[0] || siteConfig.ogImage;
+  keywords?: string[];
+  image?: string;
+  url?: string;
+  type?: "website" | "article" | "product" | "profile";
+  locale?: string;
+  siteName?: string;
+  author?: string;
+  publishedTime?: string;
+  modifiedTime?: string;
+}
+
+const DEFAULT_SITE_NAME = "SACRINT Tienda Online";
+const DEFAULT_LOCALE = "es_MX";
+const DEFAULT_URL = process.env.NEXT_PUBLIC_APP_URL || "https://sacrint-tienda.vercel.app";
+
+/**
+ * Generate complete metadata for Next.js pages
+ */
+export function generateMetadata(config: SEOConfig): Metadata {
+  const {
+    title,
+    description,
+    keywords = [],
+    image,
+    url,
+    type = "website",
+    locale = DEFAULT_LOCALE,
+    siteName = DEFAULT_SITE_NAME,
+    author,
+    publishedTime,
+    modifiedTime,
+  } = config;
+
+  const fullUrl = url ? `${DEFAULT_URL}${url}` : DEFAULT_URL;
+  const imageUrl = image ? (image.startsWith("http") ? image : `${DEFAULT_URL}${image}`) : `${DEFAULT_URL}/og-image.png`;
 
   return {
     title,
     description,
+    keywords: keywords.join(", "),
+    authors: author ? [{ name: author }] : undefined,
+    creator: siteName,
+    publisher: siteName,
+    formatDetection: {
+      email: false,
+      address: false,
+      telephone: false,
+    },
+    metadataBase: new URL(DEFAULT_URL),
+    alternates: {
+      canonical: fullUrl,
+      languages: {
+        "es-MX": fullUrl,
+        "es-ES": fullUrl,
+      },
+    },
     openGraph: {
       title,
       description,
-      type: "website",
+      url: fullUrl,
+      siteName,
       images: [
         {
-          url: image,
-          width: 800,
-          height: 800,
-          alt: product.name,
+          url: imageUrl,
+          width: 1200,
+          height: 630,
+          alt: title,
         },
       ],
+      locale,
+      type,
+      publishedTime,
+      modifiedTime,
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [image],
+      images: [imageUrl],
+      creator: "@sacrint",
+      site: "@sacrint",
     },
-  };
-}
-
-// Generate metadata for category pages
-export function generateCategoryMetadata(category: {
-  name: string;
-  description?: string;
-  productCount?: number;
-}): Metadata {
-  const title = `${category.name} - Productos`;
-  const description =
-    category.description ||
-    `Explora nuestra colección de ${category.name}. ${category.productCount || ""} productos disponibles.`;
-
-  return {
-    title,
-    description,
-    openGraph: {
-      title,
-      description,
-      type: "website",
-    },
-  };
-}
-
-// Generate metadata for search results
-export function generateSearchMetadata(
-  query: string,
-  resultCount: number,
-): Metadata {
-  return {
-    title: `"${query}" - Resultados de búsqueda`,
-    description: `${resultCount} resultados encontrados para "${query}"`,
     robots: {
-      index: false,
+      index: true,
       follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
     },
   };
 }
 
-// Canonical URL generator
-export function getCanonicalUrl(path: string): string {
-  return `${siteConfig.url}${path}`;
-}
-
-// Alternate language URLs
-export function getAlternateUrls(path: string) {
-  return {
-    "es-MX": `${siteConfig.url}${path}`,
-    // Add more languages as needed
-    // "en-US": `${siteConfig.url}/en${path}`,
-  };
+export function getDefaultMetadata(): Metadata {
+  return generateMetadata({
+    title: `${DEFAULT_SITE_NAME} - Tu Tienda Online de Confianza`,
+    description:
+      "Descubre productos de calidad en nuestra tienda online. Envíos rápidos, precios competitivos y atención personalizada. ¡Compra ahora!",
+    keywords: [
+      "tienda online",
+      "ecommerce",
+      "compras online",
+      "productos",
+      "México",
+      "envío gratis",
+    ],
+    type: "website",
+  });
 }
