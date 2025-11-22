@@ -34,6 +34,7 @@ const prismaClientOptions = {
 // Create Prisma client singleton
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
+  prismaMiddlewareApplied?: boolean;
 };
 
 export const prisma =
@@ -44,24 +45,30 @@ if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = prisma;
 }
 
-// Query timing middleware
-if (process.env.NODE_ENV === "development") {
-  prisma.$use(async (params, next) => {
-    const before = Date.now();
-    const result = await next(params);
-    const after = Date.now();
+// Query timing middleware - Only apply once to prevent "not a function" error
+if (process.env.NODE_ENV === "development" && !globalForPrisma.prismaMiddlewareApplied) {
+  try {
+    prisma.$use(async (params, next) => {
+      const before = Date.now();
+      const result = await next(params);
+      const after = Date.now();
 
-    const duration = after - before;
+      const duration = after - before;
 
-    // Log slow queries
-    if (duration > 100) {
-      console.warn(
-        `[Prisma] Slow query: ${params.model}.${params.action} took ${duration}ms`,
-      );
-    }
+      // Log slow queries
+      if (duration > 100) {
+        console.warn(
+          `[Prisma] Slow query: ${params.model}.${params.action} took ${duration}ms`,
+        );
+      }
 
-    return result;
-  });
+      return result;
+    });
+    globalForPrisma.prismaMiddlewareApplied = true;
+  } catch (error) {
+    // Middleware already applied in previous hot reload
+    console.debug("Prisma middleware already applied");
+  }
 }
 
 // Connection health check
