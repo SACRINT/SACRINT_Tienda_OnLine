@@ -127,7 +127,7 @@ export function initializeWebSocketServer(httpServer: HTTPServer) {
     });
 
     socket.on("error", (error) => {
-      logger.error(`Socket error for ${socket.id}:`, error);
+      logger.error({ error, socketId: socket.id }, `Socket error for ${socket.id}`);
     });
   });
 
@@ -140,9 +140,7 @@ export function initializeWebSocketServer(httpServer: HTTPServer) {
  */
 export function getWebSocketServer() {
   if (!io) {
-    throw new Error(
-      "WebSocket server not initialized. Call initializeWebSocketServer first.",
-    );
+    throw new Error("WebSocket server not initialized. Call initializeWebSocketServer first.");
   }
   return io;
 }
@@ -157,9 +155,7 @@ export function emitToTenant(tenantId: string, notification: Notification) {
   }
 
   io.to(`tenant:${tenantId}`).emit("notification", notification);
-  logger.info(
-    `Notification emitted to tenant ${tenantId}: ${notification.type}`,
-  );
+  logger.info(`Notification emitted to tenant ${tenantId}: ${notification.type}`);
 }
 
 /**
@@ -178,11 +174,7 @@ export function emitToUser(userId: string, notification: Notification) {
 /**
  * Emit order created event
  */
-export function emitOrderCreated(
-  tenantId: string,
-  orderId: string,
-  total: number,
-) {
+export function emitOrderCreated(tenantId: string, orderId: string, total: number) {
   if (!io) return;
 
   io.to(`tenant:${tenantId}`).emit("order:created", { orderId, total });
@@ -204,11 +196,7 @@ export function emitOrderCreated(
 /**
  * Emit order status update
  */
-export function emitOrderUpdated(
-  tenantId: string,
-  orderId: string,
-  status: string,
-) {
+export function emitOrderUpdated(tenantId: string, orderId: string, status: string) {
   if (!io) return;
 
   io.to(`tenant:${tenantId}`).emit("order:updated", { orderId, status });
@@ -269,11 +257,7 @@ export function emitLowInventory(
 /**
  * Emit payment completed event
  */
-export function emitPaymentCompleted(
-  tenantId: string,
-  orderId: string,
-  amount: number,
-) {
+export function emitPaymentCompleted(tenantId: string, orderId: string, amount: number) {
   if (!io) return;
 
   io.to(`tenant:${tenantId}`).emit("payment:completed", { orderId, amount });

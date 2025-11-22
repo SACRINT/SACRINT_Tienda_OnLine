@@ -1,19 +1,58 @@
-// Jest setup file
-// Runs before each test file
+import "@testing-library/jest-dom";
 
-// Import jest-dom matchers for testing-library
-require("@testing-library/jest-dom");
+jest.mock("next/navigation", () => ({
+  useRouter() {
+    return {
+      push: jest.fn(),
+      replace: jest.fn(),
+      prefetch: jest.fn(),
+      back: jest.fn(),
+      pathname: "/",
+      query: {},
+      asPath: "/",
+    };
+  },
+  useSearchParams() {
+    return new URLSearchParams();
+  },
+  usePathname() {
+    return "/";
+  },
+}));
 
-// Mock environment variables for testing
-process.env.DATABASE_URL =
-  process.env.DATABASE_URL || "postgresql://test:test@localhost:5432/test";
-process.env.NEXTAUTH_SECRET = "test-secret-key-for-jest-testing";
-process.env.NEXTAUTH_URL = "http://localhost:3000";
-process.env.RESEND_API_KEY = "test-resend-api-key";
-process.env.FROM_EMAIL = "test@test.com";
-process.env.STRIPE_SECRET_KEY = "sk_test_mock";
-process.env.STRIPE_WEBHOOK_SECRET = "whsec_test_mock";
-process.env.BLOB_READ_WRITE_TOKEN = "test-blob-token";
+jest.mock("next/image", () => ({
+  __esModule: true,
+  default: (props) => {
+    return <img {...props} />;
+  },
+}));
 
-// Extended test timeout for integration tests
-jest.setTimeout(30000);
+jest.mock("next-auth/react", () => ({
+  useSession() {
+    return {
+      data: null,
+      status: "unauthenticated",
+    };
+  },
+  SessionProvider: ({ children }) => children,
+}));
+
+global.ResizeObserver = jest.fn().mockImplementation(() => ({
+  observe: jest.fn(),
+  unobserve: jest.fn(),
+  disconnect: jest.fn(),
+}));
+
+Object.defineProperty(window, "matchMedia", {
+  writable: true,
+  value: jest.fn().mockImplementation((query) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: jest.fn(),
+    removeListener: jest.fn(),
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn(),
+    dispatchEvent: jest.fn(),
+  })),
+});

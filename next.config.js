@@ -40,7 +40,23 @@ const nextConfig = {
       "@radix-ui/react-icons",
       "date-fns",
       "lodash",
+      "recharts",
+      "zod",
     ],
+    // Enable optimizations
+    optimizeCss: true,
+    scrollRestoration: true,
+  },
+
+  // Modularize imports para reducir bundle size
+  modularizeImports: {
+    "lucide-react": {
+      transform: "lucide-react/dist/esm/icons/{{kebabCase member}}",
+      skipDefaultConversion: true,
+    },
+    "date-fns": {
+      transform: "date-fns/{{member}}",
+    },
   },
 
   // Webpack optimizations
@@ -52,7 +68,55 @@ const nextConfig = {
         ...config.optimization,
         usedExports: true,
         sideEffects: true,
+        // Split chunks for better caching
+        splitChunks: {
+          chunks: "all",
+          cacheGroups: {
+            default: false,
+            vendors: false,
+            // Vendor chunk
+            vendor: {
+              name: "vendor",
+              chunks: "all",
+              test: /node_modules/,
+              priority: 20,
+            },
+            // Common chunk
+            common: {
+              name: "common",
+              minChunks: 2,
+              chunks: "all",
+              priority: 10,
+              reuseExistingChunk: true,
+              enforce: true,
+            },
+            // React chunks
+            react: {
+              name: "react",
+              chunks: "all",
+              test: /[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/,
+              priority: 30,
+            },
+            // UI library chunks
+            ui: {
+              name: "ui",
+              chunks: "all",
+              test: /[\\/]node_modules[\\/](@radix-ui|@headlessui)[\\/]/,
+              priority: 25,
+            },
+            // Analytics chunks (lazy loaded)
+            analytics: {
+              name: "analytics",
+              chunks: "async",
+              test: /[\\/](recharts|d3-)[\\/]/,
+              priority: 15,
+            },
+          },
+        },
       };
+
+      // Minimize bundle size
+      config.optimization.minimize = true;
     }
 
     return config;

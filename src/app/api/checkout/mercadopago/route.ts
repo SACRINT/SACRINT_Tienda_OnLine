@@ -7,15 +7,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/auth";
 import { createOrder } from "@/lib/db/orders";
-import {
-  validateCartBeforeCheckout,
-  getCartTotal,
-  getCartById,
-} from "@/lib/db/cart";
-import {
-  createPaymentPreference,
-  getCurrencyForCountry,
-} from "@/lib/payment/mercadopago";
+import { validateCartBeforeCheckout, getCartTotal, getCartById } from "@/lib/db/cart";
+import { createPaymentPreference, getCurrencyForCountry } from "@/lib/payment/mercadopago";
 import { CheckoutSchema } from "@/lib/security/schemas/order-schemas";
 import { db } from "@/lib/db/client";
 import { reserveInventory } from "@/lib/db/inventory";
@@ -37,7 +30,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Apply rate limiting - 10 checkout attempts per hour
-    const rateLimitResult = applyRateLimit(req, {
+    const rateLimitResult = await applyRateLimit(req, {
       userId: session.user.id,
       config: { interval: 60 * 60 * 1000, limit: 10 },
     });
@@ -49,10 +42,7 @@ export async function POST(req: NextRequest) {
     const { tenantId } = session.user;
 
     if (!tenantId) {
-      return NextResponse.json(
-        { error: "User has no tenant assigned" },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: "User has no tenant assigned" }, { status: 404 });
     }
 
     const body = await req.json();
@@ -130,11 +120,14 @@ export async function POST(req: NextRequest) {
         throw new Error("Failed to create order");
       }
 
-      logger.info("Order created for Mercado Pago checkout", {
-        orderId,
-        userId: session.user.id,
-        tenantId,
-      });
+      logger.info(
+        {
+          orderId,
+          userId: session.user.id,
+          tenantId,
+        },
+        "Order created for Mercado Pago checkout",
+      );
 
       // Step 2: Reserve inventory
       const reservationItems = cart.items.map((item: any) => ({
@@ -143,16 +136,15 @@ export async function POST(req: NextRequest) {
         quantity: item.quantity,
       }));
 
-      reservationId = await reserveInventory(
-        tenantId,
-        orderId,
-        reservationItems,
-      );
+      reservationId = await reserveInventory(tenantId, orderId, reservationItems);
 
-      logger.info("Inventory reserved for Mercado Pago order", {
-        orderId,
-        reservationId,
-      });
+      logger.info(
+        {
+          orderId,
+          reservationId,
+        },
+        "Inventory reserved for Mercado Pago order",
+      );
 
       // Step 3: Determine currency based on country
       const currency = country ? getCurrencyForCountry(country) : "USD";
@@ -211,10 +203,13 @@ export async function POST(req: NextRequest) {
         expiration_date_to: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
       });
 
-      logger.info("Mercado Pago preference created", {
-        orderId,
-        preferenceId: preference.id,
-      });
+      logger.info(
+        {
+          orderId,
+          preferenceId: preference.id,
+        },
+        "Mercado Pago preference created",
+      );
 
       // Update order with Mercado Pago preference ID
       await db.order.update({
@@ -238,25 +233,25 @@ export async function POST(req: NextRequest) {
         message: "Order created. Redirect to Mercado Pago checkout.",
       });
     } catch (error) {
-      logger.error("Mercado Pago checkout error", error as Error);
+      logger.error({ error: error }, "Mercado Pago checkout error");
 
       // Rollback: Delete order if it was created
       if (orderId) {
         try {
           await db.order.delete({ where: { id: orderId } });
-          logger.info("Rolled back order due to Mercado Pago error", {
-            orderId,
-          });
+          logger.info(
+            {
+              orderId,
+            },
+            "Rolled back order due to Mercado Pago error",
+          );
         } catch (deleteError) {
-          logger.error("Failed to rollback order", deleteError as Error);
+          logger.error({ error: deleteError }, "Failed to rollback order");
         }
       }
 
       // Handle specific errors
-      if (
-        error instanceof Error &&
-        error.message.includes("Insufficient stock")
-      ) {
+      if (error instanceof Error && error.message.includes("Insufficient stock")) {
         return NextResponse.json(
           {
             error: "Insufficient stock",
@@ -275,11 +270,8 @@ export async function POST(req: NextRequest) {
       );
     }
   } catch (error) {
-    logger.error("Mercado Pago checkout API error", error as Error);
+    logger.error({ error: error }, "Mercado Pago checkout API error");
 
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

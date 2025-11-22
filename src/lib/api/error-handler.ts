@@ -72,10 +72,7 @@ interface ErrorResponse {
 /**
  * Format error response
  */
-export function formatErrorResponse(
-  error: unknown,
-  includeStack = false,
-): ErrorResponse {
+export function formatErrorResponse(error: unknown, includeStack = false): ErrorResponse {
   const timestamp = new Date().toISOString();
 
   // Handle APIError instances
@@ -132,10 +129,7 @@ export function formatErrorResponse(
 /**
  * Handle Prisma-specific errors
  */
-function handlePrismaError(
-  error: PrismaClientKnownRequestError,
-  timestamp: string,
-): ErrorResponse {
+function handlePrismaError(error: PrismaClientKnownRequestError, timestamp: string): ErrorResponse {
   switch (error.code) {
     case "P2002":
       // Unique constraint violation
@@ -186,23 +180,14 @@ function handlePrismaError(
 /**
  * Create error response
  */
-export function createErrorResponse(
-  error: unknown,
-  statusCode?: number,
-): NextResponse {
-  const formattedError = formatErrorResponse(
-    error,
-    process.env.NODE_ENV === "development",
-  );
+export function createErrorResponse(error: unknown, statusCode?: number): NextResponse {
+  const formattedError = formatErrorResponse(error, process.env.NODE_ENV === "development");
 
   // Log error
   if (error instanceof APIError && error.statusCode >= 500) {
-    logger.error("API Error", error as Error, {
-      code: error.code,
-      statusCode: error.statusCode,
-    });
+    logger.error({ error, code: error.code, statusCode: error.statusCode }, "API Error");
   } else if (!(error instanceof APIError)) {
-    logger.error("Unexpected Error", error as Error);
+    logger.error({ error: error }, "Unexpected Error");
   }
 
   // Determine status code
@@ -212,8 +197,7 @@ export function createErrorResponse(
   } else if (error instanceof ZodError) {
     status = 422;
   } else if (error instanceof PrismaClientKnownRequestError) {
-    status =
-      (error as PrismaClientKnownRequestError).code === "P2025" ? 404 : 400;
+    status = (error as PrismaClientKnownRequestError).code === "P2025" ? 404 : 400;
   }
 
   return NextResponse.json(formattedError, { status });
@@ -222,9 +206,9 @@ export function createErrorResponse(
 /**
  * Async error handler wrapper for API routes
  */
-export function withErrorHandling<
-  T extends (...args: any[]) => Promise<NextResponse>,
->(handler: T): T {
+export function withErrorHandling<T extends (...args: any[]) => Promise<NextResponse>>(
+  handler: T,
+): T {
   return (async (...args: Parameters<T>) => {
     try {
       return await handler(...args);
@@ -237,10 +221,7 @@ export function withErrorHandling<
 /**
  * Assert condition or throw error
  */
-export function assert(
-  condition: unknown,
-  error: APIError | string,
-): asserts condition {
+export function assert(condition: unknown, error: APIError | string): asserts condition {
   if (!condition) {
     throw typeof error === "string" ? new BadRequestError(error) : error;
   }
@@ -249,9 +230,7 @@ export function assert(
 /**
  * Assert authenticated or throw
  */
-export function assertAuthenticated(
-  userId: string | null | undefined,
-): asserts userId is string {
+export function assertAuthenticated(userId: string | null | undefined): asserts userId is string {
   if (!userId) {
     throw new UnauthorizedError("Authentication required");
   }
@@ -262,8 +241,6 @@ export function assertAuthenticated(
  */
 export function assertAuthorized(condition: boolean, message?: string): void {
   if (!condition) {
-    throw new ForbiddenError(
-      message || "You don't have permission to perform this action",
-    );
+    throw new ForbiddenError(message || "You don't have permission to perform this action");
   }
 }

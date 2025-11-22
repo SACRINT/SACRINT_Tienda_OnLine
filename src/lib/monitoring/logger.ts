@@ -1,293 +1,317 @@
 /**
- * Advanced Logging System with Pino
- * Production-ready logging with levels, context, performance tracking, and error reporting
+ * Structured Logging Utility
+ * Uses Pino for high-performance JSON logging
  */
 
 import pino from "pino";
-import * as Sentry from "@sentry/nextjs";
 
-export type LogLevel = "trace" | "debug" | "info" | "warn" | "error" | "fatal";
+const isDevelopment = process.env.NODE_ENV === "development";
+const isProduction = process.env.NODE_ENV === "production";
 
-export interface LogContext {
-  userId?: string;
-  tenantId?: string;
-  requestId?: string;
-  action?: string;
+// Extend pino logger type to include audit and cache methods
+type LoggerWithAudit = pino.Logger & {
+  audit: (obj: Record<string, any>, msg?: string) => void;
+  cache: (status: "hit" | "miss", key: string) => void;
+};
+
+// Create logger instance
+export const logger = pino({
+  level: process.env.LOG_LEVEL || (isDevelopment ? "debug" : "info"),
+
+  // Formatting
+  formatters: {
+    level: (label) => {
+      return { level: label.toUpperCase() };
+    },
+    bindings: (bindings) => {
+      return {
+        pid: bindings.pid,
+        hostname: bindings.hostname,
+        node_version: process.version,
+      };
+    },
+  },
+
+  // Timestamps
+  timestamp: pino.stdTimeFunctions.isoTime,
+
+  // Redact sensitive data
+  redact: {
+    paths: [
+      "req.headers.authorization",
+      "req.headers.cookie",
+      "res.headers['set-cookie']",
+      "password",
+      "token",
+      "secret",
+      "apiKey",
+      "creditCard",
+      "ssn",
+    ],
+    remove: true,
+  },
+
+  // Pretty print in development
+  transport: isDevelopment
+    ? {
+        target: "pino-pretty",
+        options: {
+          colorize: true,
+          translateTime: "HH:MM:ss Z",
+          ignore: "pid,hostname",
+        },
+      }
+    : undefined,
+
+  // Serializers
+  serializers: {
+    req: (req) => ({
+      id: req.id,
+      method: req.method,
+      url: req.url,
+      query: req.query,
+      params: req.params,
+      remoteAddress: req.socket?.remoteAddress,
+      remotePort: req.socket?.remotePort,
+    }),
+    res: (res) => ({
+      statusCode: res.statusCode,
+    }),
+    err: pino.stdSerializers.err,
+    error: pino.stdSerializers.err,
+  },
+}) as LoggerWithAudit;
+
+/**
+ * Log levels:
+ * - trace: Very detailed logs
+ * - debug: Debug information
+ * - info: General information
+ * - warn: Warning messages
+ * - error: Error messages
+ * - fatal: Fatal errors
+ */
+
+// Helper functions for common logging patterns
+
+/**
+ * Log HTTP request
+ */
+export function logRequest(req: {
+  method: string;
+  url: string;
+  headers?: Record<string, string | string[] | undefined>;
+  body?: unknown;
+}) {
+  logger.info(
+    {
+      type: "http_request",
+      method: req.method,
+      url: req.url,
+      userAgent: req.headers?.["user-agent"],
+    },
+    "HTTP Request",
+  );
+}
+
+/**
+ * Log HTTP response
+ */
+export function logResponse(res: {
+  statusCode: number;
+  duration: number;
+  url: string;
+  method: string;
+}) {
+  const level = res.statusCode >= 500 ? "error" : res.statusCode >= 400 ? "warn" : "info";
+
+  logger[level](
+    {
+      type: "http_response",
+      method: res.method,
+      url: res.url,
+      statusCode: res.statusCode,
+      duration: res.duration,
+    },
+    "HTTP Response",
+  );
+}
+
+/**
+ * Log database query
+ */
+export function logDatabaseQuery(query: {
+  operation: string;
+  model: string;
   duration?: number;
-  statusCode?: number;
-  [key: string]: unknown;
-}
-
-export interface LogEntry {
-  level: LogLevel;
-  msg: string;
-  time: number;
-  context?: LogContext;
-  err?: {
-    name: string;
-    message: string;
-    stack?: string;
-  };
-}
-
-/**
- * Create Pino logger instance with environment-based configuration
- */
-function createLogger() {
-  const isDev = process.env.NODE_ENV !== "production";
-  const logLevel = process.env.LOG_LEVEL || (isDev ? "debug" : "info");
-
-  return pino({
-    level: logLevel,
-    formatters: {
-      level: (label) => {
-        return { level: label };
+  error?: Error;
+}) {
+  if (query.error) {
+    logger.error(
+      {
+        type: "database_error",
+        operation: query.operation,
+        model: query.model,
+        duration: query.duration,
+        error: query.error,
       },
-    },
-    transport: isDev
-      ? {
-          target: "pino-pretty",
-          options: {
-            colorize: true,
-            translateTime: "HH:MM:ss Z",
-            ignore: "pid,hostname",
-          },
-        }
-      : undefined,
-    base: {
-      env: process.env.NODE_ENV,
-      revision: process.env.VERCEL_GIT_COMMIT_SHA,
-    },
-    serializers: {
-      err: pino.stdSerializers.err,
-      req: pino.stdSerializers.req,
-      res: pino.stdSerializers.res,
-    },
-  });
+      "Database Query Failed",
+    );
+  } else {
+    logger.debug(
+      {
+        type: "database_query",
+        operation: query.operation,
+        model: query.model,
+        duration: query.duration,
+      },
+      "Database Query",
+    );
+  }
 }
 
 /**
- * Advanced Logger class with Sentry integration
+ * Log authentication event
  */
-class AdvancedLogger {
-  private pino: pino.Logger;
-  private sentryEnabled: boolean;
+export function logAuth(event: {
+  type: "login" | "logout" | "signup" | "password_reset" | "failed_login";
+  userId?: string;
+  email?: string;
+  method?: string;
+  success: boolean;
+  error?: Error;
+}) {
+  const level = event.success ? "info" : "warn";
 
-  constructor() {
-    this.pino = createLogger();
-    this.sentryEnabled = !!process.env.NEXT_PUBLIC_SENTRY_DSN;
-  }
-
-  /**
-   * Merge context with log entry
-   */
-  private mergeContext(msg: string, context?: LogContext) {
-    return context ? { msg, ...context } : { msg };
-  }
-
-  /**
-   * Send error to Sentry
-   */
-  private sendToSentry(
-    error: Error,
-    level: "warning" | "error" | "fatal",
-    context?: LogContext,
-  ) {
-    if (!this.sentryEnabled) return;
-
-    Sentry.withScope((scope) => {
-      scope.setLevel(level);
-
-      if (context?.userId) {
-        scope.setUser({ id: context.userId });
-      }
-
-      if (context?.tenantId) {
-        scope.setTag("tenantId", context.tenantId);
-      }
-
-      if (context?.requestId) {
-        scope.setTag("requestId", context.requestId);
-      }
-
-      // Add all context as extras
-      if (context) {
-        Object.entries(context).forEach(([key, value]) => {
-          scope.setExtra(key, value);
-        });
-      }
-
-      Sentry.captureException(error);
-    });
-  }
-
-  trace(msg: string, context?: LogContext): void {
-    this.pino.trace(this.mergeContext(msg, context));
-  }
-
-  debug(msg: string, context?: LogContext): void {
-    this.pino.debug(this.mergeContext(msg, context));
-  }
-
-  info(msg: string, context?: LogContext): void {
-    this.pino.info(this.mergeContext(msg, context));
-  }
-
-  warn(msg: string, context?: LogContext): void {
-    this.pino.warn(this.mergeContext(msg, context));
-  }
-
-  error(msg: string, error?: Error, context?: LogContext): void {
-    const logData = this.mergeContext(msg, context);
-
-    if (error) {
-      this.pino.error({ ...logData, err: error });
-      this.sendToSentry(error, "error", context);
-    } else {
-      this.pino.error(logData);
-    }
-  }
-
-  fatal(msg: string, error?: Error, context?: LogContext): void {
-    const logData = this.mergeContext(msg, context);
-
-    if (error) {
-      this.pino.fatal({ ...logData, err: error });
-      this.sendToSentry(error, "fatal", context);
-    } else {
-      this.pino.fatal(logData);
-    }
-  }
-
-  /**
-   * Audit logging for security-sensitive operations
-   */
-  audit(action: string, context: LogContext): void {
-    this.info(`[AUDIT] ${action}`, {
-      ...context,
-      action,
-      audit: true,
-      timestamp: Date.now(),
-    });
-  }
-
-  /**
-   * Performance logging with duration tracking
-   */
-  perf(operation: string, durationMs: number, context?: LogContext): void {
-    this.info(`[PERF] ${operation}`, {
-      ...context,
-      operation,
-      durationMs,
-      perf: true,
-    });
-
-    // Alert if operation took too long
-    if (durationMs > 5000) {
-      this.warn(`Slow operation detected: ${operation}`, {
-        ...context,
-        durationMs,
-      });
-    }
-  }
-
-  /**
-   * Database query logging
-   */
-  query(
-    query: string,
-    durationMs: number,
-    context?: LogContext & { params?: unknown[] },
-  ): void {
-    this.debug(`[DB] ${query}`, {
-      ...context,
-      durationMs,
-      query,
-    });
-
-    // Alert on slow queries
-    if (durationMs > 1000) {
-      this.warn(`Slow query detected: ${query}`, { ...context, durationMs });
-    }
-  }
-
-  /**
-   * HTTP request logging
-   */
-  request(
-    method: string,
-    url: string,
-    statusCode: number,
-    durationMs: number,
-    context?: LogContext,
-  ): void {
-    const requestContext: LogContext = {
-      ...context,
-      method,
-      url,
-      statusCode,
-      durationMs,
-      http: true,
-    };
-
-    if (statusCode >= 500) {
-      this.error(
-        `[HTTP] ${method} ${url} ${statusCode}`,
-        undefined,
-        requestContext,
-      );
-    } else if (statusCode >= 400) {
-      this.warn(`[HTTP] ${method} ${url} ${statusCode}`, requestContext);
-    } else {
-      this.info(`[HTTP] ${method} ${url} ${statusCode}`, requestContext);
-    }
-  }
-
-  /**
-   * Cache hit/miss logging
-   */
-  cache(
-    operation: "hit" | "miss" | "set" | "del",
-    key: string,
-    context?: LogContext,
-  ): void {
-    this.debug(`[CACHE] ${operation.toUpperCase()} ${key}`, {
-      ...context,
-      cacheOperation: operation,
-      cacheKey: key,
-    });
-  }
-
-  /**
-   * Create child logger with bound context
-   */
-  child(context: LogContext): AdvancedLogger {
-    const childLogger = new AdvancedLogger();
-    childLogger.pino = this.pino.child(context);
-    childLogger.sentryEnabled = this.sentryEnabled;
-    return childLogger;
-  }
+  logger[level](
+    {
+      type: "auth_event",
+      authType: event.type,
+      userId: event.userId,
+      email: event.email,
+      method: event.method,
+      success: event.success,
+      error: event.error,
+    },
+    `Authentication: ${event.type}`,
+  );
 }
-
-export const logger = new AdvancedLogger();
 
 /**
- * Create request context from Next.js request
+ * Log payment event
  */
-export function createRequestContext(
-  request: Request,
-  userId?: string,
-  tenantId?: string,
-): LogContext {
-  return {
-    userId,
-    tenantId,
-    requestId: crypto.randomUUID(),
-    method: request.method,
-    url: request.url,
-    userAgent: request.headers.get("user-agent") || undefined,
-  };
+export function logPayment(event: {
+  type: "initiated" | "succeeded" | "failed" | "refunded";
+  orderId: string;
+  amount: number;
+  currency: string;
+  paymentMethod?: string;
+  error?: Error;
+}) {
+  const level = event.type === "failed" ? "error" : "info";
+
+  logger[level](
+    {
+      type: "payment_event",
+      paymentType: event.type,
+      orderId: event.orderId,
+      amount: event.amount,
+      currency: event.currency,
+      paymentMethod: event.paymentMethod,
+      error: event.error,
+    },
+    `Payment: ${event.type}`,
+  );
 }
+
+/**
+ * Log business metric
+ */
+export function logMetric(metric: {
+  name: string;
+  value: number;
+  unit?: string;
+  tags?: Record<string, string>;
+}) {
+  logger.info(
+    {
+      type: "metric",
+      metric: metric.name,
+      value: metric.value,
+      unit: metric.unit,
+      tags: metric.tags,
+    },
+    `Metric: ${metric.name}`,
+  );
+}
+
+/**
+ * Log security event
+ */
+export function logSecurity(event: {
+  type: "suspicious_activity" | "rate_limit" | "ip_blocked" | "invalid_token";
+  userId?: string;
+  ip?: string;
+  details?: Record<string, unknown>;
+}) {
+  logger.warn(
+    {
+      type: "security_event",
+      securityType: event.type,
+      userId: event.userId,
+      ip: event.ip,
+      details: event.details,
+    },
+    `Security: ${event.type}`,
+  );
+}
+
+/**
+ * Log application error
+ */
+export function logError(error: Error, context?: Record<string, unknown>) {
+  logger.error(
+    {
+      type: "application_error",
+      error,
+      ...context,
+    },
+    error.message,
+  );
+}
+
+/**
+ * Log performance metric
+ */
+export function logPerformance(perf: {
+  operation: string;
+  duration: number;
+  metadata?: Record<string, unknown>;
+}) {
+  logger.info(
+    {
+      type: "performance",
+      operation: perf.operation,
+      duration: perf.duration,
+      ...perf.metadata,
+    },
+    `Performance: ${perf.operation}`,
+  );
+}
+
+/**
+ * Audit logger for security-critical events
+ */
+logger.audit = function (obj: Record<string, any>, msg?: string) {
+  logger.info({ ...obj, audit: true }, msg || "Audit event");
+};
+
+/**
+ * Cache hit/miss logger
+ */
+logger.cache = function (status: "hit" | "miss", key: string) {
+  logger.debug({ type: "cache", status, key }, `Cache ${status}: ${key}`);
+};
 
 /**
  * Performance timer utility
@@ -295,61 +319,25 @@ export function createRequestContext(
 export class PerfTimer {
   private startTime: number;
   private operation: string;
-  private context?: LogContext;
 
-  constructor(operation: string, context?: LogContext) {
+  constructor(operation: string) {
     this.operation = operation;
-    this.context = context;
     this.startTime = Date.now();
   }
 
-  end(): number {
+  end(metadata?: Record<string, unknown>): number {
     const duration = Date.now() - this.startTime;
-    logger.perf(this.operation, duration, this.context);
+    logPerformance({
+      operation: this.operation,
+      duration,
+      metadata,
+    });
     return duration;
   }
 
-  endWithResult<T>(result: T): T {
-    this.end();
-    return result;
-  }
-
-  async endAsync<T>(promise: Promise<T>): Promise<T> {
-    try {
-      const result = await promise;
-      this.end();
-      return result;
-    } catch (error) {
-      this.end();
-      throw error;
-    }
+  getDuration(): number {
+    return Date.now() - this.startTime;
   }
 }
 
-/**
- * Performance decorator for async functions
- */
-export function logPerformance(operation?: string) {
-  return function (
-    target: any,
-    propertyKey: string,
-    descriptor: PropertyDescriptor,
-  ) {
-    const originalMethod = descriptor.value;
-    const opName = operation || `${target.constructor.name}.${propertyKey}`;
-
-    descriptor.value = async function (...args: any[]) {
-      const timer = new PerfTimer(opName);
-      try {
-        const result = await originalMethod.apply(this, args);
-        timer.end();
-        return result;
-      } catch (error) {
-        timer.end();
-        throw error;
-      }
-    };
-
-    return descriptor;
-  };
-}
+export default logger;

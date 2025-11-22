@@ -26,7 +26,7 @@ export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   // Apply strict rate limiting
-  const rateLimitResult = applyRateLimit(req, {
+  const rateLimitResult = await applyRateLimit(req, {
     config: PASSWORD_RESET_LIMIT,
   });
 
@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
 
     // Always return success to prevent email enumeration
     if (!user) {
-      logger.info("Password reset requested for non-existent email", { email });
+      logger.info({ email }, "Password reset requested for non-existent email");
       return NextResponse.json({
         message: "If the email exists, a password reset link has been sent.",
       });
@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
 
     // Check if user has a password (not OAuth-only)
     if (!user.password) {
-      logger.info("Password reset requested for OAuth-only user", { email });
+      logger.info({ email }, "Password reset requested for OAuth-only user");
       return NextResponse.json({
         message: "If the email exists, a password reset link has been sent.",
       });
@@ -97,12 +97,14 @@ export async function POST(req: NextRequest) {
 
     // TODO: Send email with reset link
     // For now, log the URL (in production, use email service)
-    logger.info("Password reset token generated", {
-      email,
-      userId: user.id,
-      resetUrl:
-        process.env.NODE_ENV === "development" ? resetUrl : "[REDACTED]",
-    });
+    logger.info(
+      {
+        email,
+        userId: user.id,
+        resetUrl: process.env.NODE_ENV === "development" ? resetUrl : "[REDACTED]",
+      },
+      "Password reset token generated",
+    );
 
     // In production, send email:
     // await sendPasswordResetEmail(email, resetUrl, user.name);
@@ -111,10 +113,7 @@ export async function POST(req: NextRequest) {
       message: "If the email exists, a password reset link has been sent.",
     });
   } catch (error) {
-    logger.error("Password reset request failed", error as Error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    logger.error({ error: error }, "Password reset request failed");
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

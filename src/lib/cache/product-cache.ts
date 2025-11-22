@@ -61,7 +61,7 @@ export async function getCachedProduct(tenantId: string, productId: string) {
 
     return product;
   } catch (error) {
-    logger.error("Error in getCachedProduct", error as Error);
+    logger.error({ error: error }, "Error in getCachedProduct");
     // Fallback to direct DB query on cache error
     return db.product.findFirst({
       where: {
@@ -119,16 +119,12 @@ export async function getCachedProductBySlug(tenantId: string, slug: string) {
     if (product) {
       await cache.set(cacheKey, product, CACHE_TTL.PRODUCT_DETAIL);
       // Also cache by ID for consistency
-      await cache.set(
-        CacheKeys.product(product.id),
-        product,
-        CACHE_TTL.PRODUCT_DETAIL,
-      );
+      await cache.set(CacheKeys.product(product.id), product, CACHE_TTL.PRODUCT_DETAIL);
     }
 
     return product;
   } catch (error) {
-    logger.error("Error in getCachedProductBySlug", error as Error);
+    logger.error({ error: error }, "Error in getCachedProductBySlug");
     return db.product.findFirst({
       where: {
         slug,
@@ -222,7 +218,7 @@ export async function getCachedProducts(
 
     return result;
   } catch (error) {
-    logger.error("Error in getCachedProducts", error as Error);
+    logger.error({ error: error }, "Error in getCachedProducts");
     const where: any = { tenantId };
 
     const [products, total] = await Promise.all([
@@ -289,7 +285,7 @@ export async function getCachedCategories(tenantId: string) {
 
     return categories;
   } catch (error) {
-    logger.error("Error in getCachedCategories", error as Error);
+    logger.error({ error: error }, "Error in getCachedCategories");
     return db.category.findMany({
       where: { tenantId },
       include: {
@@ -313,7 +309,7 @@ export async function invalidateProductCache(productId: string) {
     await cache.delPattern("products:*");
     logger.info(`Product cache invalidated: ${productId}`);
   } catch (error) {
-    logger.error("Error invalidating product cache", error as Error);
+    logger.error({ error: error }, "Error invalidating product cache");
   }
 }
 
@@ -325,7 +321,7 @@ export async function invalidateProductsCache(tenantId: string) {
     await cache.delPattern(`products:${tenantId}:*`);
     logger.info(`Products cache invalidated for tenant: ${tenantId}`);
   } catch (error) {
-    logger.error("Error invalidating products cache", error as Error);
+    logger.error({ error: error }, "Error invalidating products cache");
   }
 }
 
@@ -338,6 +334,6 @@ export async function invalidateCategoryCache(tenantId: string) {
     await cache.delPattern(`category:*`);
     logger.info(`Category cache invalidated for tenant: ${tenantId}`);
   } catch (error) {
-    logger.error("Error invalidating category cache", error as Error);
+    logger.error({ error: error }, "Error invalidating category cache");
   }
 }

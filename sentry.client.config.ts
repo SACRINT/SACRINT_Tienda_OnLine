@@ -1,57 +1,65 @@
 /**
- * Sentry Client Configuration
- * Error tracking and performance monitoring for browser
+ * Sentry Client-Side Configuration
+ * Tracks errors and performance in the browser
  */
 
 import * as Sentry from "@sentry/nextjs";
 
 const SENTRY_DSN = process.env.NEXT_PUBLIC_SENTRY_DSN;
+const SENTRY_ENVIRONMENT = process.env.NEXT_PUBLIC_SENTRY_ENVIRONMENT || "development";
 
-if (SENTRY_DSN) {
-  Sentry.init({
-    dsn: SENTRY_DSN,
-    environment: process.env.NODE_ENV || "development",
-    tracesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1.0,
+Sentry.init({
+  dsn: SENTRY_DSN,
 
-    // Session Replay
-    replaysSessionSampleRate: 0.1,
-    replaysOnErrorSampleRate: 1.0,
+  // Environment
+  environment: SENTRY_ENVIRONMENT,
 
-    integrations: [
-      Sentry.browserTracingIntegration(),
-      Sentry.replayIntegration({
-        maskAllText: true,
-        blockAllMedia: true,
-      }),
-    ],
+  // Performance Monitoring
+  tracesSampleRate: SENTRY_ENVIRONMENT === "production" ? 0.1 : 1.0,
 
-    // Performance Monitoring
-    enabled: process.env.NODE_ENV === "production",
+  // Session Replay
+  replaysSessionSampleRate: 0.1,
+  replaysOnErrorSampleRate: 1.0,
 
-    // Ignore common errors
-    ignoreErrors: [
-      "ResizeObserver loop limit exceeded",
-      "Non-Error promise rejection captured",
-      "Network request failed",
-      "Failed to fetch",
-    ],
+  integrations: [
+    Sentry.replayIntegration({
+      maskAllText: true,
+      blockAllMedia: true,
+    }),
+    Sentry.browserTracingIntegration(),
+  ],
 
-    beforeSend(event, hint) {
-      // Filter out errors from browser extensions
-      if (event.exception) {
-        const error = hint.originalException;
-        if (error && typeof error === "object" && "message" in error) {
-          const message = String(error.message);
-          if (
-            message.includes("chrome-extension://") ||
-            message.includes("moz-extension://")
-          ) {
-            return null;
-          }
-        }
-      }
+  // Filtering
+  ignoreErrors: [
+    // Browser extensions
+    "top.GLOBALS",
+    "originalCreateNotification",
+    "canvas.contentDocument",
+    "MyApp_RemoveAllHighlights",
+    "atomicFindClose",
+    // Network errors
+    "NetworkError",
+    "Non-Error promise rejection captured",
+    // Random plugins/extensions
+    "Can't find variable: ZiteReader",
+    "jigsaw is not defined",
+    "ComboSearch is not defined",
+    "http://loading.retry.widdit.com/",
+    "atomicFindClose is not defined",
+  ],
 
-      return event;
-    },
-  });
-}
+  beforeSend(event, hint) {
+    // Filter out localhost errors in development
+    if (SENTRY_ENVIRONMENT === "development" && event.request?.url?.includes("localhost")) {
+      return null;
+    }
+
+    // Sanitize sensitive data
+    if (event.request) {
+      delete event.request.cookies;
+      delete event.request.headers;
+    }
+
+    return event;
+  },
+});

@@ -6,10 +6,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db/client";
-import {
-  processWebhookNotification,
-  mapPaymentStatus,
-} from "@/lib/payment/mercadopago";
+import { processWebhookNotification, mapPaymentStatus } from "@/lib/payment/mercadopago";
 import { confirmInventoryReservation } from "@/lib/db/inventory";
 import { logger } from "@/lib/monitoring/logger";
 
@@ -31,10 +28,13 @@ export async function POST(req: NextRequest) {
     const type = searchParams.get("type");
     const dataId = searchParams.get("data.id") ?? searchParams.get("id");
 
-    logger.info("Mercado Pago webhook received", {
-      type,
-      dataId,
-    });
+    logger.info(
+      {
+        type,
+        dataId,
+      },
+      "Mercado Pago webhook received",
+    );
 
     // Ignore test notifications
     if (type === "test") {
@@ -44,25 +44,22 @@ export async function POST(req: NextRequest) {
 
     if (!type || !dataId) {
       logger.warn("Invalid Mercado Pago webhook - missing type or data.id");
-      return NextResponse.json(
-        { error: "Missing required parameters" },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: "Missing required parameters" }, { status: 400 });
     }
 
     // Process the notification
     const result = await processWebhookNotification(type, { id: dataId });
 
     if (!result.orderId || !result.status) {
-      logger.warn("Unable to process Mercado Pago webhook", {
-        type,
-        dataId,
-        result,
-      });
-      return NextResponse.json(
-        { error: "Unable to process notification" },
-        { status: 400 },
+      logger.warn(
+        {
+          type,
+          dataId,
+          result,
+        },
+        "Unable to process Mercado Pago webhook",
       );
+      return NextResponse.json({ error: "Unable to process notification" }, { status: 400 });
     }
 
     const { orderId, status: mpStatus, paymentId } = result;
@@ -70,12 +67,15 @@ export async function POST(req: NextRequest) {
     // Map Mercado Pago status to internal status
     const orderStatus = mapPaymentStatus(mpStatus);
 
-    logger.info("Processing Mercado Pago payment status", {
-      orderId,
-      mpStatus,
-      orderStatus,
-      paymentId,
-    });
+    logger.info(
+      {
+        orderId,
+        mpStatus,
+        orderStatus,
+        paymentId,
+      },
+      "Processing Mercado Pago payment status",
+    );
 
     // Find the order
     const order = await db.order.findUnique({
@@ -87,18 +87,21 @@ export async function POST(req: NextRequest) {
 
     if (!order) {
       logger.error(
+        { error: new Error("Order not found"), orderId },
         `Order not found for Mercado Pago webhook: ${orderId}`,
-        new Error("Order not found"),
       );
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
     // Handle payment approved
     if (mpStatus === "approved" && order.status !== "PROCESSING") {
-      logger.info("Mercado Pago payment approved, confirming order", {
-        orderId,
-        paymentId,
-      });
+      logger.info(
+        {
+          orderId,
+          paymentId,
+        },
+        "Mercado Pago payment approved, confirming order",
+      );
 
       // Update order status
       await db.order.update({
@@ -120,33 +123,42 @@ export async function POST(req: NextRequest) {
 
       if (reservation) {
         await confirmInventoryReservation(order.tenantId, reservation.id);
-        logger.info("Inventory reservation confirmed for paid order", {
-          orderId,
-          reservationId: reservation.id,
-        });
+        logger.info(
+          {
+            orderId,
+            reservationId: reservation.id,
+          },
+          "Inventory reservation confirmed for paid order",
+        );
       } else {
-        logger.warn("No active inventory reservation found for order", {
-          orderId,
-        });
+        logger.warn(
+          {
+            orderId,
+          },
+          "No active inventory reservation found for order",
+        );
       }
 
       // TODO: Send order confirmation email
-      logger.info("Order confirmed and paid via Mercado Pago", {
-        orderId,
-        orderNumber: order.orderNumber,
-        amount: order.total,
-      });
+      logger.info(
+        {
+          orderId,
+          orderNumber: order.orderNumber,
+          amount: order.total,
+        },
+        "Order confirmed and paid via Mercado Pago",
+      );
     }
 
     // Handle payment failed
-    if (
-      (mpStatus === "rejected" || mpStatus === "failed") &&
-      order.status === "PENDING"
-    ) {
-      logger.warn("Mercado Pago payment failed", {
-        orderId,
-        paymentId,
-      });
+    if ((mpStatus === "rejected" || mpStatus === "failed") && order.status === "PENDING") {
+      logger.warn(
+        {
+          orderId,
+          paymentId,
+        },
+        "Mercado Pago payment failed",
+      );
 
       await db.order.update({
         where: { id: orderId },
@@ -169,29 +181,38 @@ export async function POST(req: NextRequest) {
           data: { status: "CANCELLED" },
         });
 
-        logger.info("Inventory reservation cancelled for failed payment", {
-          orderId,
-          reservationId: reservation.id,
-        });
+        logger.info(
+          {
+            orderId,
+            reservationId: reservation.id,
+          },
+          "Inventory reservation cancelled for failed payment",
+        );
       }
     }
 
     // Handle payment pending (waiting for customer action)
     if (mpStatus === "pending" && order.status === "PENDING") {
-      logger.info("Mercado Pago payment still pending", {
-        orderId,
-        paymentId,
-      });
+      logger.info(
+        {
+          orderId,
+          paymentId,
+        },
+        "Mercado Pago payment still pending",
+      );
 
       // No action needed, keep order as PENDING
     }
 
     // Handle refund
     if (mpStatus === "refunded" && order.status === "PROCESSING") {
-      logger.info("Mercado Pago payment refunded", {
-        orderId,
-        paymentId,
-      });
+      logger.info(
+        {
+          orderId,
+          paymentId,
+        },
+        "Mercado Pago payment refunded",
+      );
 
       await db.order.update({
         where: { id: orderId },
@@ -210,7 +231,7 @@ export async function POST(req: NextRequest) {
       message: "Webhook processed successfully",
     });
   } catch (error) {
-    logger.error("Mercado Pago webhook processing error", error as Error);
+    logger.error({ error: error }, "Mercado Pago webhook processing error");
 
     // Return 200 to prevent Mercado Pago from retrying
     // Log the error for investigation

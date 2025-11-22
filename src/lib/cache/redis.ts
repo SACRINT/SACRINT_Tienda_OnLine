@@ -45,7 +45,7 @@ export function getRedisClient(): Redis | null {
     redisClient = new Redis(redisUrl, options);
 
     redisClient.on("error", (err) => {
-      logger.error("Redis connection error", err);
+      logger.error({ error: err }, "Redis connection error");
     });
 
     redisClient.on("connect", () => {
@@ -58,7 +58,7 @@ export function getRedisClient(): Redis | null {
 
     return redisClient;
   } catch (error) {
-    logger.error("Failed to initialize Redis client", error as Error);
+    logger.error({ error: error }, "Failed to initialize Redis client");
     return null;
   }
 }
@@ -94,7 +94,7 @@ export class CacheService {
       }
       return null;
     } catch (error) {
-      logger.error(`Cache get error for key: ${key}`, error as Error);
+      logger.error({ error, key }, `Cache get error for key: ${key}`);
       return null;
     }
   }
@@ -117,7 +117,7 @@ export class CacheService {
       }
       return true;
     } catch (error) {
-      logger.error(`Cache set error for key: ${key}`, error as Error);
+      logger.error({ error, key }, `Cache set error for key: ${key}`);
       return false;
     }
   }
@@ -134,7 +134,7 @@ export class CacheService {
       }
       return true;
     } catch (error) {
-      logger.error(`Cache delete error for key: ${key}`, error as Error);
+      logger.error({ error, key }, `Cache delete error for key: ${key}`);
       return false;
     }
   }
@@ -153,9 +153,7 @@ export class CacheService {
       } else {
         // Memory cache: manual pattern matching
         let count = 0;
-        const regex = new RegExp(
-          "^" + pattern.replace(/\*/g, ".*").replace(/\?/g, ".") + "$",
-        );
+        const regex = new RegExp("^" + pattern.replace(/\*/g, ".*").replace(/\?/g, ".") + "$");
         for (const key of memoryCache.keys()) {
           if (regex.test(key)) {
             memoryCache.delete(key);
@@ -166,7 +164,7 @@ export class CacheService {
       }
       return 0;
     } catch (error) {
-      logger.error(`Cache delete pattern error: ${pattern}`, error as Error);
+      logger.error({ error, pattern }, `Cache delete pattern error: ${pattern}`);
       return 0;
     }
   }
@@ -189,7 +187,7 @@ export class CacheService {
         return false;
       }
     } catch (error) {
-      logger.error(`Cache exists error for key: ${key}`, error as Error);
+      logger.error({ error, key }, `Cache exists error for key: ${key}`);
       return false;
     }
   }
@@ -212,7 +210,7 @@ export class CacheService {
         return newValue;
       }
     } catch (error) {
-      logger.error(`Cache incr error for key: ${key}`, error as Error);
+      logger.error({ error, key }, `Cache incr error for key: ${key}`);
       return 0;
     }
   }
@@ -234,7 +232,7 @@ export class CacheService {
         return false;
       }
     } catch (error) {
-      logger.error(`Cache expire error for key: ${key}`, error as Error);
+      logger.error({ error, key }, `Cache expire error for key: ${key}`);
       return false;
     }
   }
@@ -255,7 +253,7 @@ export class CacheService {
         return -2; // Key doesn't exist
       }
     } catch (error) {
-      logger.error(`Cache ttl error for key: ${key}`, error as Error);
+      logger.error({ error, key }, `Cache ttl error for key: ${key}`);
       return -1;
     }
   }
@@ -273,7 +271,7 @@ export class CacheService {
       logger.warn("Cache flushed");
       return true;
     } catch (error) {
-      logger.error("Cache flush error", error as Error);
+      logger.error({ error: error }, "Cache flush error");
       return false;
     }
   }
@@ -295,8 +293,7 @@ export const CacheKeys = {
   categories: (tenantId: string) => `categories:${tenantId}`,
   order: (id: string) => `order:${id}`,
   session: (sessionId: string) => `session:${sessionId}`,
-  productSearch: (tenantId: string, query: string) =>
-    `search:${tenantId}:${query}`,
+  productSearch: (tenantId: string, query: string) => `search:${tenantId}:${query}`,
 };
 
 /**

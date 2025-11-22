@@ -19,6 +19,7 @@ import {
 import { LineChart } from "@/components/analytics/charts/LineChart";
 import { BarChart } from "@/components/analytics/charts/BarChart";
 import { DateRangePicker } from "@/components/analytics/filters/DateRangePicker";
+import { RevenueForecastChart } from "@/components/analytics/RevenueForecastChart";
 import {
   OverviewMetrics,
   SalesMetrics,
@@ -268,6 +269,24 @@ export default function AnalyticsPage() {
               </tbody>
             </table>
           </div>
+        </div>
+      )}
+
+      {/* Revenue Forecast & Trend Analysis */}
+      {salesMetrics && salesMetrics.revenueByDay.length > 0 && (
+        <div className="mt-8 space-y-4">
+          <div className="border-t border-gray-200 pt-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              Revenue Forecast & Trend Analysis
+            </h2>
+            <p className="text-gray-600 mb-6">
+              Predictive analytics with trend detection and seasonality analysis
+            </p>
+          </div>
+          <RevenueForecastChart
+            historicalData={salesMetrics.revenueByDay}
+            forecastDays={7}
+          />
         </div>
       )}
     </div>

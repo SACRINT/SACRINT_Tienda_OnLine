@@ -1,29 +1,25 @@
-/**
- * Robots.txt Generation
- * Controls search engine crawling behavior
- */
+// Dynamic Robots.txt
+// SEO: Auto-generated robots.txt
 
 import { MetadataRoute } from "next";
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://example.com";
-
 export default function robots(): MetadataRoute.Robots {
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://sacrint-tienda.vercel.app";
+
   return {
     rules: [
       {
         userAgent: "*",
         allow: "/",
-        disallow: [
-          "/api/",
-          "/dashboard/",
-          "/account/",
-          "/checkout/",
-          "/cart/",
-          "/_next/",
-          "/admin/",
-        ],
+        disallow: ["/api/", "/dashboard/", "/_next/", "/admin/"],
+      },
+      {
+        userAgent: "Googlebot",
+        allow: "/",
+        disallow: ["/api/", "/dashboard/", "/admin/"],
       },
     ],
-    sitemap: `${BASE_URL}/sitemap.xml`,
+    sitemap: `${baseUrl}/sitemap.xml`,
+    host: baseUrl,
   };
 }

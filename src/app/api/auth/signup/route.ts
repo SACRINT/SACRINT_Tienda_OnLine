@@ -19,11 +19,7 @@ const SignupSchema = z.object({
     .regex(/[a-z]/, "Password must contain at least one lowercase letter")
     .regex(/[0-9]/, "Password must contain at least one number"),
   name: z.string().min(2, "Name must be at least 2 characters").max(100),
-  storeName: z
-    .string()
-    .min(3, "Store name must be at least 3 characters")
-    .max(100)
-    .optional(),
+  storeName: z.string().min(3, "Store name must be at least 3 characters").max(100).optional(),
 });
 
 // Force dynamic rendering for this API route
@@ -31,8 +27,8 @@ export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   // Apply rate limiting - 10 attempts per minute for anonymous users
-  const rateLimitResult = applyRateLimit(req, {
-    config: RATE_LIMITS.ANONYMOUS,
+  const rateLimitResult = await applyRateLimit(req, {
+    limiter: RATE_LIMITS.ANONYMOUS,
   });
 
   if (!rateLimitResult.allowed) {
@@ -63,10 +59,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (existingUser) {
-      return NextResponse.json(
-        { error: "Email already registered" },
-        { status: 409 },
-      );
+      return NextResponse.json({ error: "Email already registered" }, { status: 409 });
     }
 
     // Hash password
@@ -111,12 +104,7 @@ export async function POST(req: NextRequest) {
       return { user, tenant };
     });
 
-    console.log(
-      "[SIGNUP] Success - User:",
-      result.user.id,
-      "Tenant:",
-      result.tenant.id,
-    );
+    console.log("[SIGNUP] Success - User:", result.user.id, "Tenant:", result.tenant.id);
 
     return NextResponse.json(
       {
@@ -131,9 +119,6 @@ export async function POST(req: NextRequest) {
     );
   } catch (error) {
     console.error("[SIGNUP] Error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

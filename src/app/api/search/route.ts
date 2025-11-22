@@ -1,78 +1,96 @@
-/**
- * Advanced Search API
- * GET - Search products with advanced filters
- */
+// Search API Endpoint
+// Week 17-18: Advanced search with filters
 
 import { NextRequest, NextResponse } from "next/server";
-import { searchProducts, trackSearch } from "@/lib/search/search-service";
-import { z } from "zod";
+import { searchProducts, logSearchQuery } from "@/lib/search/search-engine";
+import { auth } from "@/lib/auth/auth";
 
-const searchSchema = z.object({
-  q: z.string().optional(),
-  tenantId: z.string().cuid(),
-  categoryId: z.string().cuid().optional(),
-  minPrice: z.coerce.number().nonnegative().optional(),
-  maxPrice: z.coerce.number().nonnegative().optional(),
-  minRating: z.coerce.number().min(1).max(5).optional(),
-  inStock: z.coerce.boolean().optional(),
-  sortBy: z
-    .enum(["relevance", "price_asc", "price_desc", "newest", "rating"])
-    .optional(),
-  page: z.coerce.number().positive().optional(),
-  limit: z.coerce.number().positive().max(100).optional(),
-});
-
-// Force dynamic rendering for this API route
 export const dynamic = "force-dynamic";
 
+/**
+ * GET /api/search
+ * Search products with advanced filters
+ *
+ * Query params:
+ * - q: search query
+ * - category: category ID or slug
+ * - minPrice, maxPrice: price range
+ * - minRating: minimum rating filter
+ * - inStock: true/false
+ * - featured: true/false
+ * - sortBy: relevance|price-asc|price-desc|rating|newest|popular
+ * - page, limit: pagination
+ */
 export async function GET(req: NextRequest) {
   try {
-    const { searchParams } = new URL(req.url);
+    const searchParams = req.nextUrl.searchParams;
 
-    const params = {
-      q: searchParams.get("q") || undefined,
-      tenantId: searchParams.get("tenantId")!,
-      categoryId: searchParams.get("categoryId") || undefined,
-      minPrice: searchParams.get("minPrice") || undefined,
-      maxPrice: searchParams.get("maxPrice") || undefined,
-      minRating: searchParams.get("minRating") || undefined,
-      inStock: searchParams.get("inStock") || undefined,
-      sortBy: searchParams.get("sortBy") || undefined,
-      page: searchParams.get("page") || undefined,
-      limit: searchParams.get("limit") || undefined,
-    };
+    // Parse filters from query params
+    const query = searchParams.get("q") || "";
+    const categoryId = searchParams.get("category") || undefined;
+    const categorySlug = searchParams.get("categorySlug") || undefined;
+    const minPrice = searchParams.get("minPrice")
+      ? parseFloat(searchParams.get("minPrice")!)
+      : undefined;
+    const maxPrice = searchParams.get("maxPrice")
+      ? parseFloat(searchParams.get("maxPrice")!)
+      : undefined;
+    const minRating = searchParams.get("minRating")
+      ? parseFloat(searchParams.get("minRating")!)
+      : undefined;
+    const inStock = searchParams.get("inStock") === "true";
+    const featured = searchParams.get("featured") === "true";
+    const sortBy = (searchParams.get("sortBy") ||
+      "relevance") as
+      | "relevance"
+      | "price-asc"
+      | "price-desc"
+      | "rating"
+      | "newest"
+      | "popular";
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "24");
+    const tenantId = searchParams.get("tenantId") || undefined;
 
-    const data = searchSchema.parse(params);
-
-    const result = await searchProducts({
-      query: data.q,
-      tenantId: data.tenantId,
-      categoryId: data.categoryId,
-      minPrice: data.minPrice,
-      maxPrice: data.maxPrice,
-      minRating: data.minRating,
-      inStock: data.inStock,
-      sortBy: data.sortBy,
-      page: data.page,
-      limit: data.limit,
-    });
-
-    // Track search for analytics
-    if (data.q) {
-      await trackSearch(data.q, data.tenantId, result.total);
-    }
-
-    return NextResponse.json(result);
-  } catch (error: any) {
-    if (error instanceof z.ZodError) {
+    // Validate pagination
+    if (page < 1 || limit < 1 || limit > 100) {
       return NextResponse.json(
-        { error: "Invalid request", details: error.issues },
+        { error: "Invalid pagination parameters" },
         { status: 400 },
       );
     }
-    console.error("[Search API] GET error:", error);
+
+    // Execute search
+    const results = await searchProducts({
+      query,
+      categoryId,
+      categorySlug,
+      minPrice,
+      maxPrice,
+      minRating,
+      inStock: inStock || undefined,
+      featured: featured || undefined,
+      sortBy,
+      page,
+      limit,
+      tenantId,
+    });
+
+    // Log search for analytics
+    const session = await auth();
+    await logSearchQuery(
+      query,
+      results.pagination.total,
+      tenantId,
+      session?.user?.id,
+    );
+
+    // Return results
+    return NextResponse.json(results);
+  } catch (error) {
+    console.error("Search error:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Failed to search products" },
       { status: 500 },
     );
   }

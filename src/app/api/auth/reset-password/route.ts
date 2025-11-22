@@ -40,7 +40,7 @@ export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   // Apply rate limiting
-  const rateLimitResult = applyRateLimit(req, {
+  const rateLimitResult = await applyRateLimit(req, {
     config: RESET_PASSWORD_LIMIT,
   });
 
@@ -76,11 +76,8 @@ export async function POST(req: NextRequest) {
     });
 
     if (!verificationToken) {
-      logger.warn("Invalid password reset token", { email });
-      return NextResponse.json(
-        { error: "Invalid or expired reset token" },
-        { status: 400 },
-      );
+      logger.warn({ email }, "Invalid password reset token");
+      return NextResponse.json({ error: "Invalid or expired reset token" }, { status: 400 });
     }
 
     // Check if token is expired
@@ -95,7 +92,7 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      logger.warn("Expired password reset token used", { email });
+      logger.warn({ email }, "Expired password reset token used");
       return NextResponse.json(
         { error: "Reset token has expired. Please request a new one." },
         { status: 400 },
@@ -108,7 +105,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!user) {
-      logger.warn("User not found during password reset", { email });
+      logger.warn({ email }, "User not found during password reset");
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
@@ -136,20 +133,16 @@ export async function POST(req: NextRequest) {
       where: { identifier: email },
     });
 
-    logger.audit("Password reset successful", { email, userId: user.id });
+    logger.audit({ email, userId: user.id }, "Password reset successful");
 
     // TODO: Send confirmation email
     // await sendPasswordChangedEmail(email, user.name);
 
     return NextResponse.json({
-      message:
-        "Password has been reset successfully. You can now log in with your new password.",
+      message: "Password has been reset successfully. You can now log in with your new password.",
     });
   } catch (error) {
-    logger.error("Password reset failed", error as Error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    logger.error({ error: error }, "Password reset failed");
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

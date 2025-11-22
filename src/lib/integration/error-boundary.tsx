@@ -16,10 +16,7 @@ interface ErrorBoundaryState {
   error: Error | null;
 }
 
-export class ErrorBoundary extends Component<
-  ErrorBoundaryProps,
-  ErrorBoundaryState
-> {
+export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false, error: null };
@@ -31,9 +28,10 @@ export class ErrorBoundary extends Component<
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
     // Log error
-    logger.error("React error boundary caught error", error, {
-      componentStack: errorInfo.componentStack,
-    });
+    logger.error(
+      { error, componentStack: errorInfo.componentStack },
+      "React error boundary caught error",
+    );
 
     // Call custom error handler
     this.props.onError?.(error, errorInfo);
@@ -55,21 +53,19 @@ export class ErrorBoundary extends Component<
 
       // Default fallback
       return (
-        <div className="p-6 bg-red-50 border border-red-200 rounded-lg">
-          <h2 className="text-lg font-semibold text-red-800 mb-2">
-            Algo salió mal
-          </h2>
-          <p className="text-red-600 mb-4">
+        <div className="rounded-lg border border-red-200 bg-red-50 p-6">
+          <h2 className="mb-2 text-lg font-semibold text-red-800">Algo salió mal</h2>
+          <p className="mb-4 text-red-600">
             Ha ocurrido un error inesperado. Por favor, intenta de nuevo.
           </p>
           {this.props.showDetails && this.state.error && (
-            <pre className="text-xs bg-red-100 p-2 rounded mb-4 overflow-auto">
+            <pre className="mb-4 overflow-auto rounded bg-red-100 p-2 text-xs">
               {this.state.error.message}
             </pre>
           )}
           <button
             onClick={this.handleReset}
-            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+            className="rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700"
           >
             Reintentar
           </button>
@@ -112,9 +108,7 @@ export function SuspenseErrorBoundary({
 }: SuspenseErrorBoundaryProps): JSX.Element {
   return (
     <ErrorBoundary {...errorProps}>
-      <React.Suspense fallback={loadingFallback || <DefaultLoading />}>
-        {children}
-      </React.Suspense>
+      <React.Suspense fallback={loadingFallback || <DefaultLoading />}>{children}</React.Suspense>
     </ErrorBoundary>
   );
 }
@@ -122,7 +116,7 @@ export function SuspenseErrorBoundary({
 function DefaultLoading(): JSX.Element {
   return (
     <div className="flex items-center justify-center p-6">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
+      <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900" />
     </div>
   );
 }

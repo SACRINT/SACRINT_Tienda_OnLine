@@ -19,9 +19,7 @@ export const dynamic = "force-dynamic";
 
 const RecommendationsSchema = z.object({
   tenantId: z.string().cuid(),
-  type: z
-    .enum(["fbt", "similar", "trending", "personalized", "combined"])
-    .default("combined"),
+  type: z.enum(["fbt", "similar", "trending", "personalized", "combined"]).default("combined"),
   userId: z.string().cuid().optional(),
   productId: z.string().cuid().optional(),
   limit: z.coerce.number().int().positive().max(50).default(12),
@@ -50,17 +48,11 @@ export async function GET(req: NextRequest) {
 
     // Validate required params for each type
     if (type === "fbt" && !productId) {
-      return NextResponse.json(
-        { error: "productId required for 'fbt' type" },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: "productId required for 'fbt' type" }, { status: 400 });
     }
 
     if (type === "similar" && !productId) {
-      return NextResponse.json(
-        { error: "productId required for 'similar' type" },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: "productId required for 'similar' type" }, { status: 400 });
     }
 
     if (type === "personalized" && !userId) {
@@ -75,11 +67,7 @@ export async function GET(req: NextRequest) {
 
     switch (type) {
       case "fbt":
-        recommendations = await getFrequentlyBoughtTogether(
-          tenantId,
-          productId!,
-          limit,
-        );
+        recommendations = await getFrequentlyBoughtTogether(tenantId, productId!, limit);
         break;
 
       case "similar":
@@ -91,11 +79,7 @@ export async function GET(req: NextRequest) {
         break;
 
       case "personalized":
-        recommendations = await getPersonalizedRecommendations(
-          tenantId,
-          userId!,
-          limit,
-        );
+        recommendations = await getPersonalizedRecommendations(tenantId, userId!, limit);
         break;
 
       case "combined":
@@ -127,15 +111,13 @@ export async function GET(req: NextRequest) {
     );
   } catch (error) {
     timer.end();
-    logger.error("Recommendations API error", error as Error);
+    logger.error({ error: error }, "Recommendations API error");
 
     return NextResponse.json(
       {
         error: "Failed to get recommendations",
         message:
-          process.env.NODE_ENV === "production"
-            ? "An error occurred"
-            : (error as Error).message,
+          process.env.NODE_ENV === "production" ? "An error occurred" : (error as Error).message,
       },
       { status: 500 },
     );

@@ -39,9 +39,7 @@ export interface EmailResult {
 /**
  * Send an email using a template
  */
-export async function sendEmail(
-  options: SendEmailOptions,
-): Promise<EmailResult> {
+export async function sendEmail(options: SendEmailOptions): Promise<EmailResult> {
   const {
     to,
     from = process.env.FROM_EMAIL || "noreply@sacrint.com",
@@ -56,15 +54,16 @@ export async function sendEmail(
   } = options;
 
   try {
-    // Get the React Email component for this template
-    const EmailComponent = await getEmailTemplate(template, data);
+    // Get the Email template
+    const emailTemplate = await getEmailTemplate(template, data);
 
     // Send email via Resend
     const result = await resend.emails.send({
       from,
       to: Array.isArray(to) ? to : [to],
-      subject,
-      react: EmailComponent,
+      subject: subject || emailTemplate.subject,
+      html: emailTemplate.html,
+      text: emailTemplate.text,
       replyTo,
       cc: cc ? (Array.isArray(cc) ? cc : [cc]) : undefined,
       bcc: bcc ? (Array.isArray(bcc) ? bcc : [bcc]) : undefined,
@@ -159,41 +158,33 @@ export async function sendEmailWithRetry(
 /**
  * Get React Email component for a template
  */
-async function getEmailTemplate(
-  template: EmailTemplate,
-  data: Record<string, any>,
-) {
+async function getEmailTemplate(template: EmailTemplate, data: Record<string, any>) {
   // Import all templates from index
   const templates = await import("./templates");
 
   // Dynamic template selection
   switch (template) {
     case EmailTemplate.ORDER_CONFIRMATION:
-      return templates.OrderConfirmationEmail(data as any);
+      return templates.orderConfirmationTemplate(data as any);
     case EmailTemplate.ORDER_SHIPPED:
-      return templates.OrderShippedEmail(data as any);
+      return templates.orderShippedTemplate(data as any);
     case EmailTemplate.ORDER_DELIVERED:
-      return templates.OrderDeliveredEmail(data as any);
     case EmailTemplate.ORDER_CANCELLED:
-      return templates.OrderCancelledEmail(data as any);
     case EmailTemplate.REFUND_PROCESSED:
-      return templates.RefundProcessedEmail(data as any);
     case EmailTemplate.PAYMENT_FAILED:
-      return templates.PaymentFailedEmail(data as any);
     case EmailTemplate.ACCOUNT_VERIFICATION:
-      return templates.AccountVerificationEmail(data as any);
+      // Fallback to welcome template for missing templates
+      return templates.welcomeTemplate(data as any);
     case EmailTemplate.PASSWORD_RESET:
-      return templates.PasswordResetEmail(data as any);
+      return templates.passwordResetTemplate(data as any);
     case EmailTemplate.WELCOME:
-      return templates.WelcomeEmail(data as any);
+      return templates.welcomeTemplate(data as any);
     case EmailTemplate.NEWSLETTER:
-      return templates.NewsletterEmail(data as any);
     case EmailTemplate.PROMOTION:
-      return templates.PromotionEmail(data as any);
     case EmailTemplate.REVIEW_REQUEST:
-      return templates.ReviewRequestEmail(data as any);
     case EmailTemplate.PRODUCT_RESTOCKED:
-      return templates.ProductRestockedEmail(data as any);
+      // Fallback to welcome template for missing templates
+      return templates.welcomeTemplate(data as any);
     default:
       throw new Error(`Unknown email template: ${template}`);
   }
@@ -241,10 +232,7 @@ export async function markEmailClicked(providerMessageId: string) {
 /**
  * Mark email as bounced (called by webhook)
  */
-export async function markEmailBounced(
-  providerMessageId: string,
-  error: string,
-) {
+export async function markEmailBounced(providerMessageId: string, error: string) {
   await db.emailLog.updateMany({
     where: { providerMessageId },
     data: {
@@ -259,16 +247,15 @@ export async function markEmailBounced(
  * Get email statistics for a user
  */
 export async function getEmailStats(userId: string) {
-  const [total, sent, delivered, opened, clicked, bounced, failed] =
-    await Promise.all([
-      db.emailLog.count({ where: { userId } }),
-      db.emailLog.count({ where: { userId, status: EmailStatus.SENT } }),
-      db.emailLog.count({ where: { userId, status: EmailStatus.DELIVERED } }),
-      db.emailLog.count({ where: { userId, status: EmailStatus.OPENED } }),
-      db.emailLog.count({ where: { userId, status: EmailStatus.CLICKED } }),
-      db.emailLog.count({ where: { userId, status: EmailStatus.BOUNCED } }),
-      db.emailLog.count({ where: { userId, status: EmailStatus.FAILED } }),
-    ]);
+  const [total, sent, delivered, opened, clicked, bounced, failed] = await Promise.all([
+    db.emailLog.count({ where: { userId } }),
+    db.emailLog.count({ where: { userId, status: EmailStatus.SENT } }),
+    db.emailLog.count({ where: { userId, status: EmailStatus.DELIVERED } }),
+    db.emailLog.count({ where: { userId, status: EmailStatus.OPENED } }),
+    db.emailLog.count({ where: { userId, status: EmailStatus.CLICKED } }),
+    db.emailLog.count({ where: { userId, status: EmailStatus.BOUNCED } }),
+    db.emailLog.count({ where: { userId, status: EmailStatus.FAILED } }),
+  ]);
 
   return {
     total,
