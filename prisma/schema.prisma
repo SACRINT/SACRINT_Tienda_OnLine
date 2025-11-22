@@ -452,9 +452,20 @@ model Review {
 
   status                ReviewStatus @default(PENDING)
 
+  // Social proof features
+  helpfulCount          Int      @default(0)
+  notHelpfulCount       Int      @default(0)
+  images                String[] @default([]) // URLs de fotos del review
+  verifiedPurchase      Boolean  @default(false)
+
+  // Seller response
+  sellerResponse        String?  @db.Text
+  sellerResponseAt      DateTime?
+
   // Relations
   product               Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  helpfulVotes          ReviewHelpfulVote[]
 
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
@@ -466,6 +477,27 @@ model Review {
   @@index([productId, status]) // Reviews aprobadas de un producto
   @@index([productId, rating]) // Ordenar reviews por calificación
   @@index([productId, createdAt]) // Reviews más recientes primero
+}
+
+model ReviewHelpfulVote {
+  id                    String   @id @default(cuid())
+  reviewId              String
+  userId                String
+  vote                  VoteType // HELPFUL or NOT_HELPFUL
+
+  // Relations
+  review                Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  createdAt             DateTime @default(now())
+
+  @@unique([reviewId, userId]) // Un voto por review por usuario
+  @@index([reviewId])
+  @@index([userId])
+}
+
+enum VoteType {
+  HELPFUL
+  NOT_HELPFUL
 }
 
 enum ReviewStatus {
