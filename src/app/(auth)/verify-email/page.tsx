@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
@@ -7,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, CheckCircle, AlertTriangle, Mail } from "lucide-react";
 
-export default function VerifyEmailPage() {
+function VerifyEmailContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [status, setStatus] = useState<"loading" | "success" | "error">(
@@ -26,35 +27,35 @@ export default function VerifyEmailPage() {
       return;
     }
 
-    verifyEmail();
-  }, [token, email]);
+    const verifyEmail = async () => {
+      try {
+        const response = await fetch(
+          `/api/auth/verify-email?token=${token}&email=${encodeURIComponent(email || "")}`,
+          { method: "GET" },
+        );
 
-  const verifyEmail = async () => {
-    try {
-      const response = await fetch(
-        `/api/auth/verify-email?token=${token}&email=${encodeURIComponent(email || "")}`,
-        { method: "GET" },
-      );
+        const data = await response.json();
 
-      const data = await response.json();
+        if (response.ok) {
+          setStatus("success");
+          setMessage(data.message || "Email verified successfully!");
 
-      if (response.ok) {
-        setStatus("success");
-        setMessage(data.message || "Email verified successfully!");
-
-        // Redirect to login after 3 seconds
-        setTimeout(() => {
-          router.push("/login?verified=true");
-        }, 3000);
-      } else {
+          // Redirect to login after 3 seconds
+          setTimeout(() => {
+            router.push("/login?verified=true");
+          }, 3000);
+        } else {
+          setStatus("error");
+          setMessage(data.error || "Verification failed");
+        }
+      } catch (error) {
         setStatus("error");
-        setMessage(data.error || "Verification failed");
+        setMessage("An error occurred during verification");
       }
-    } catch (error) {
-      setStatus("error");
-      setMessage("An error occurred during verification");
-    }
-  };
+    };
+
+    verifyEmail();
+  }, [token, email, router]);
 
   const handleResend = async () => {
     if (!email) return;
@@ -171,5 +172,26 @@ export default function VerifyEmailPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg text-center">
+        <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+          <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+        </div>
+        <h2 className="mt-6 text-2xl font-bold text-gray-900">Cargando...</h2>
+      </div>
+    </div>
+  );
+}
+
+export default function VerifyEmailPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <VerifyEmailContent />
+    </Suspense>
   );
 }
