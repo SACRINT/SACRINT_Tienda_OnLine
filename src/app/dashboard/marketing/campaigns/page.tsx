@@ -48,7 +48,7 @@ export default async function CampaignsPage() {
 
   // Calculate stats for each campaign
   const campaignsWithStats = await Promise.all(
-    campaigns.map(async (campaign) => {
+    campaigns.map(async (campaign: any) => {
       const stats = await db.emailSend.aggregate({
         where: {
           campaignId: campaign.id,
@@ -78,20 +78,18 @@ export default async function CampaignsPage() {
         openRate: totalSent > 0 ? (totalOpened / totalSent) * 100 : 0,
         clickRate: totalSent > 0 ? (totalClicked / totalSent) * 100 : 0,
       };
-    })
+    }),
   );
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="flex items-center justify-between mb-8">
+    <div className="container mx-auto px-4 py-8">
+      <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold flex items-center gap-3">
+          <h1 className="flex items-center gap-3 text-3xl font-bold">
             <Mail className="h-8 w-8" />
             Email Campaigns
           </h1>
-          <p className="text-gray-600 mt-2">
-            Create and manage your email marketing campaigns
-          </p>
+          <p className="mt-2 text-gray-600">Create and manage your email marketing campaigns</p>
         </div>
 
         <Link href="/dashboard/marketing/campaigns/new">

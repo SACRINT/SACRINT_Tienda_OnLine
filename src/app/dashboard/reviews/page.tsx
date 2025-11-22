@@ -67,7 +67,7 @@ async function getReviewsData(tenantId: string, status?: string) {
     REJECTED: 0,
   };
 
-  stats.forEach((stat) => {
+  stats.forEach((stat: any) => {
     statusCounts[stat.status as keyof typeof statusCounts] = stat._count;
   });
 
@@ -96,10 +96,7 @@ export default async function ReviewsModerationPage({
     redirect("/dashboard");
   }
 
-  const { reviews, statusCounts } = await getReviewsData(
-    user.tenantId,
-    searchParams.status,
-  );
+  const { reviews, statusCounts } = await getReviewsData(user.tenantId, searchParams.status);
 
   return (
     <ReviewsModerationClient

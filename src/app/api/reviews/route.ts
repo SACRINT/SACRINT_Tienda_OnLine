@@ -29,10 +29,7 @@ export async function GET(req: NextRequest) {
     const sortBy = searchParams.get("sortBy") || "recent"; // recent, helpful, rating
 
     if (!productId) {
-      return NextResponse.json(
-        { error: "Product ID is required" },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: "Product ID is required" }, { status: 400 });
     }
 
     // Build where clause
@@ -76,17 +73,17 @@ export async function GET(req: NextRequest) {
     });
 
     const ratingBreakdown = [1, 2, 3, 4, 5].map((rating) => {
-      const stat = stats.find((s) => s.rating === rating);
+      const stat = stats.find((s: any) => s.rating === rating);
       return {
         rating,
         count: stat?._count || 0,
       };
     });
 
-    const totalReviews = stats.reduce((sum, s) => sum + s._count, 0);
+    const totalReviews = stats.reduce((sum: number, s: any) => sum + s._count, 0);
     const avgRating =
       totalReviews > 0
-        ? stats.reduce((sum, s) => sum + s.rating * s._count, 0) / totalReviews
+        ? stats.reduce((sum: number, s: any) => sum + s.rating * s._count, 0) / totalReviews
         : 0;
 
     return NextResponse.json({
@@ -105,10 +102,7 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     console.error("Get reviews error:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch reviews" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Failed to fetch reviews" }, { status: 500 });
   }
 }
 
@@ -187,15 +181,12 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: "Validation error", details: error.errors },
+        { error: "Validation error", details: error.issues },
         { status: 400 },
       );
     }
 
     console.error("Create review error:", error);
-    return NextResponse.json(
-      { error: "Failed to create review" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Failed to create review" }, { status: 500 });
   }
 }

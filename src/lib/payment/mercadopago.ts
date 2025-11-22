@@ -4,12 +4,7 @@
  * Supports Argentina, Brazil, Chile, Colombia, Mexico, Peru, Uruguay, and more
  */
 
-import {
-  MercadoPagoConfig,
-  Preference,
-  Payment,
-  PaymentRefund,
-} from "mercadopago";
+import { MercadoPagoConfig, Preference, Payment, PaymentRefund } from "mercadopago";
 import { logger } from "@/lib/monitoring/logger";
 
 // Initialize Mercado Pago client
@@ -20,9 +15,7 @@ function getMercadoPagoClient(): MercadoPagoConfig {
     const accessToken = process.env.MERCADOPAGO_ACCESS_TOKEN;
 
     if (!accessToken) {
-      throw new Error(
-        "MERCADOPAGO_ACCESS_TOKEN is not defined in environment variables",
-      );
+      throw new Error("MERCADOPAGO_ACCESS_TOKEN is not defined in environment variables");
     }
 
     mercadoPagoClient = new MercadoPagoConfig({
@@ -116,8 +109,7 @@ export async function createPaymentPreference(
       auto_return: data.auto_return || "approved",
       external_reference: data.external_reference,
       notification_url:
-        data.notification_url ||
-        `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/mercadopago`,
+        data.notification_url || `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/mercadopago`,
       statement_descriptor: data.statement_descriptor || "TIENDA_ONLINE",
       expires: data.expires !== undefined ? data.expires : true,
     };
@@ -141,21 +133,24 @@ export async function createPaymentPreference(
       preferenceRequest.expiration_date_to = data.expiration_date_to;
     }
 
-    logger.info("Creating Mercado Pago preference", {
-      external_reference: data.external_reference,
-      items_count: data.items.length,
-      total_amount: data.items.reduce(
-        (sum, item) => sum + item.unit_price * item.quantity,
-        0,
-      ),
-    });
+    logger.info(
+      {
+        external_reference: data.external_reference,
+        items_count: data.items.length,
+        total_amount: data.items.reduce((sum, item) => sum + item.unit_price * item.quantity, 0),
+      },
+      "Creating Mercado Pago preference",
+    );
 
     const response = await preference.create({ body: preferenceRequest });
 
-    logger.info("Mercado Pago preference created", {
-      preference_id: response.id,
-      external_reference: data.external_reference,
-    });
+    logger.info(
+      {
+        preference_id: response.id,
+        external_reference: data.external_reference,
+      },
+      "Mercado Pago preference created",
+    );
 
     return {
       id: response.id || "",
@@ -167,7 +162,7 @@ export async function createPaymentPreference(
       date_created: response.date_created || new Date().toISOString(),
     };
   } catch (error) {
-    logger.error("Error creating Mercado Pago preference", error as Error);
+    logger.error({ error: error }, "Error creating Mercado Pago preference");
 
     if (error instanceof Error) {
       throw new Error(`Mercado Pago error: ${error.message}`);
@@ -210,7 +205,7 @@ export async function getPayment(paymentId: string): Promise<any> {
       payment_type_id: response.payment_type_id,
     };
   } catch (error) {
-    logger.error("Error retrieving Mercado Pago payment", error as Error);
+    logger.error({ error: error }, "Error retrieving Mercado Pago payment");
 
     if (error instanceof Error) {
       throw new Error(`Mercado Pago error: ${error.message}`);
@@ -228,7 +223,7 @@ export async function validatePayment(paymentId: string): Promise<boolean> {
     const payment = await getPayment(paymentId);
     return payment.status === "approved";
   } catch (error) {
-    logger.error("Error validating Mercado Pago payment", error as Error);
+    logger.error({ error: error }, "Error validating Mercado Pago payment");
     return false;
   }
 }
@@ -237,10 +232,7 @@ export async function validatePayment(paymentId: string): Promise<boolean> {
  * Creates a refund for a payment
  * Mercado Pago supports full and partial refunds
  */
-export async function createRefund(
-  paymentId: string,
-  amount?: number,
-): Promise<any> {
+export async function createRefund(paymentId: string, amount?: number): Promise<any> {
   try {
     const client = getMercadoPagoClient();
     const refund = new PaymentRefund(client);
@@ -251,21 +243,27 @@ export async function createRefund(
       refundBody.amount = amount;
     }
 
-    logger.info("Creating Mercado Pago refund", {
-      payment_id: paymentId,
-      amount,
-    });
+    logger.info(
+      {
+        payment_id: paymentId,
+        amount,
+      },
+      "Creating Mercado Pago refund",
+    );
 
     const response = await refund.create({
       payment_id: paymentId,
       body: refundBody,
     });
 
-    logger.info("Mercado Pago refund created", {
-      refund_id: response.id,
-      payment_id: paymentId,
-      status: response.status,
-    });
+    logger.info(
+      {
+        refund_id: response.id,
+        payment_id: paymentId,
+        status: response.status,
+      },
+      "Mercado Pago refund created",
+    );
 
     return {
       id: response.id,
@@ -275,7 +273,7 @@ export async function createRefund(
       date_created: response.date_created,
     };
   } catch (error) {
-    logger.error("Error creating Mercado Pago refund", error as Error);
+    logger.error({ error: error }, "Error creating Mercado Pago refund");
 
     if (error instanceof Error) {
       throw new Error(`Mercado Pago refund error: ${error.message}`);
@@ -298,10 +296,13 @@ export async function processWebhookNotification(
   paymentId: string | null;
 }> {
   try {
-    logger.info("Processing Mercado Pago webhook", {
-      type,
-      data,
-    });
+    logger.info(
+      {
+        type,
+        data,
+      },
+      "Processing Mercado Pago webhook",
+    );
 
     // Mercado Pago sends different notification types
     if (type === "payment") {
@@ -317,11 +318,14 @@ export async function processWebhookNotification(
       const orderId = payment.external_reference || null;
       const status = payment.status;
 
-      logger.info("Mercado Pago payment webhook processed", {
-        payment_id: paymentId,
-        order_id: orderId,
-        status,
-      });
+      logger.info(
+        {
+          payment_id: paymentId,
+          order_id: orderId,
+          status,
+        },
+        "Mercado Pago payment webhook processed",
+      );
 
       return {
         orderId,
@@ -331,7 +335,7 @@ export async function processWebhookNotification(
     }
 
     // Handle other notification types (test, merchant_order, etc.)
-    logger.warn("Unhandled Mercado Pago webhook type", { type });
+    logger.warn({ type }, "Unhandled Mercado Pago webhook type");
 
     return {
       orderId: null,
@@ -339,7 +343,7 @@ export async function processWebhookNotification(
       paymentId: null,
     };
   } catch (error) {
-    logger.error("Error processing Mercado Pago webhook", error as Error);
+    logger.error({ error: error }, "Error processing Mercado Pago webhook");
 
     return {
       orderId: null,

@@ -1,11 +1,7 @@
 // @ts-nocheck
 // Autocomplete Suggestions API
 import { NextRequest, NextResponse } from "next/server";
-import {
-  getAutocomplete,
-  getTrendingSearches,
-  getRecentSearches,
-} from "@/lib/search";
+import { getAutocomplete, getTrendingSearches, getRecentSearches } from "@/lib/search";
 import { z } from "zod";
 
 export const dynamic = "force-dynamic";
@@ -50,7 +46,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: "Invalid parameters", details: error.errors },
+        { error: "Invalid parameters", details: error.issues },
         { status: 400 },
       );
     }

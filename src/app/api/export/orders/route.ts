@@ -32,10 +32,7 @@ export async function GET(req: NextRequest) {
     const { tenantId } = session.user;
 
     if (!tenantId && session.user.role !== USER_ROLES.SUPER_ADMIN) {
-      return NextResponse.json(
-        { error: "User has no tenant assigned" },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: "User has no tenant assigned" }, { status: 404 });
     }
 
     const { searchParams } = new URL(req.url);
@@ -86,25 +83,22 @@ export async function GET(req: NextRequest) {
       const csvContent = exportOrdersToCSV(ordersForExport);
       const filename = `orders-${new Date().toISOString().split("T")[0]}.csv`;
 
-      logger.info("Orders exported to CSV", {
-        userId: session.user.id,
-        tenantId: tenantId ?? undefined,
-        count: orders.length,
-      });
+      logger.info(
+        {
+          userId: session.user.id,
+          tenantId: tenantId ?? undefined,
+          count: orders.length,
+        },
+        "Orders exported to CSV",
+      );
 
       return createCSVResponse(csvContent, filename);
     }
 
     // PDF format not yet implemented
-    return NextResponse.json(
-      { error: "PDF export not yet implemented" },
-      { status: 501 },
-    );
+    return NextResponse.json({ error: "PDF export not yet implemented" }, { status: 501 });
   } catch (error) {
-    logger.error("Export orders failed", error as Error);
-    return NextResponse.json(
-      { error: "Failed to export orders" },
-      { status: 500 },
-    );
+    logger.error({ error: error }, "Export orders failed");
+    return NextResponse.json({ error: "Failed to export orders" }, { status: 500 });
   }
 }

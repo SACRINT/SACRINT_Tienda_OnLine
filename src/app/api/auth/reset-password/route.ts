@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!verificationToken) {
-      logger.warn("Invalid password reset token", { email });
+      logger.warn({ email }, "Invalid password reset token");
       return NextResponse.json({ error: "Invalid or expired reset token" }, { status: 400 });
     }
 
@@ -92,7 +92,7 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      logger.warn("Expired password reset token used", { email });
+      logger.warn({ email }, "Expired password reset token used");
       return NextResponse.json(
         { error: "Reset token has expired. Please request a new one." },
         { status: 400 },
@@ -105,7 +105,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!user) {
-      logger.warn("User not found during password reset", { email });
+      logger.warn({ email }, "User not found during password reset");
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
@@ -142,7 +142,7 @@ export async function POST(req: NextRequest) {
       message: "Password has been reset successfully. You can now log in with your new password.",
     });
   } catch (error) {
-    logger.error("Password reset failed", error as Error);
+    logger.error({ error: error }, "Password reset failed");
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

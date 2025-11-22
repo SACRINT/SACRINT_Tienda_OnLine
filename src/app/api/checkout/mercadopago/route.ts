@@ -120,11 +120,14 @@ export async function POST(req: NextRequest) {
         throw new Error("Failed to create order");
       }
 
-      logger.info("Order created for Mercado Pago checkout", {
-        orderId,
-        userId: session.user.id,
-        tenantId,
-      });
+      logger.info(
+        {
+          orderId,
+          userId: session.user.id,
+          tenantId,
+        },
+        "Order created for Mercado Pago checkout",
+      );
 
       // Step 2: Reserve inventory
       const reservationItems = cart.items.map((item: any) => ({
@@ -135,10 +138,13 @@ export async function POST(req: NextRequest) {
 
       reservationId = await reserveInventory(tenantId, orderId, reservationItems);
 
-      logger.info("Inventory reserved for Mercado Pago order", {
-        orderId,
-        reservationId,
-      });
+      logger.info(
+        {
+          orderId,
+          reservationId,
+        },
+        "Inventory reserved for Mercado Pago order",
+      );
 
       // Step 3: Determine currency based on country
       const currency = country ? getCurrencyForCountry(country) : "USD";
@@ -197,10 +203,13 @@ export async function POST(req: NextRequest) {
         expiration_date_to: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
       });
 
-      logger.info("Mercado Pago preference created", {
-        orderId,
-        preferenceId: preference.id,
-      });
+      logger.info(
+        {
+          orderId,
+          preferenceId: preference.id,
+        },
+        "Mercado Pago preference created",
+      );
 
       // Update order with Mercado Pago preference ID
       await db.order.update({
@@ -224,15 +233,18 @@ export async function POST(req: NextRequest) {
         message: "Order created. Redirect to Mercado Pago checkout.",
       });
     } catch (error) {
-      logger.error("Mercado Pago checkout error", error as Error);
+      logger.error({ error: error }, "Mercado Pago checkout error");
 
       // Rollback: Delete order if it was created
       if (orderId) {
         try {
           await db.order.delete({ where: { id: orderId } });
-          logger.info("Rolled back order due to Mercado Pago error", {
-            orderId,
-          });
+          logger.info(
+            {
+              orderId,
+            },
+            "Rolled back order due to Mercado Pago error",
+          );
         } catch (deleteError) {
           logger.error("Failed to rollback order", deleteError as Error);
         }
@@ -258,7 +270,7 @@ export async function POST(req: NextRequest) {
       );
     }
   } catch (error) {
-    logger.error("Mercado Pago checkout API error", error as Error);
+    logger.error({ error: error }, "Mercado Pago checkout API error");
 
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }

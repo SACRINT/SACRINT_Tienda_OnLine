@@ -29,10 +29,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       take: 5000,
     });
 
-    const productPages: MetadataRoute.Sitemap = products.map((product) => ({
+    const productPages: MetadataRoute.Sitemap = products.map((product: any) => ({
       url: `${baseUrl}/shop/${product.slug || product.id}`,
       lastModified: product.updatedAt,
-      changeFrequency: "weekly",
+      changeFrequency: "weekly" as const,
       priority: 0.8,
     }));
 

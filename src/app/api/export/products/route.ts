@@ -32,10 +32,7 @@ export async function GET(req: NextRequest) {
     const { tenantId } = session.user;
 
     if (!tenantId && session.user.role !== USER_ROLES.SUPER_ADMIN) {
-      return NextResponse.json(
-        { error: "User has no tenant assigned" },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: "User has no tenant assigned" }, { status: 404 });
     }
 
     const { searchParams } = new URL(req.url);
@@ -86,24 +83,21 @@ export async function GET(req: NextRequest) {
       const csvContent = exportProductsToCSV(productsForExport);
       const filename = `products-${new Date().toISOString().split("T")[0]}.csv`;
 
-      logger.info("Products exported to CSV", {
-        userId: session.user.id,
-        tenantId: tenantId ?? undefined,
-        count: products.length,
-      });
+      logger.info(
+        {
+          userId: session.user.id,
+          tenantId: tenantId ?? undefined,
+          count: products.length,
+        },
+        "Products exported to CSV",
+      );
 
       return createCSVResponse(csvContent, filename);
     }
 
-    return NextResponse.json(
-      { error: "Only CSV format is supported" },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: "Only CSV format is supported" }, { status: 400 });
   } catch (error) {
-    logger.error("Export products failed", error as Error);
-    return NextResponse.json(
-      { error: "Failed to export products" },
-      { status: 500 },
-    );
+    logger.error({ error: error }, "Export products failed");
+    return NextResponse.json({ error: "Failed to export products" }, { status: 500 });
   }
 }

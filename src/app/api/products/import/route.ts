@@ -32,10 +32,7 @@ export async function POST(req: NextRequest) {
     const { tenantId } = session.user;
 
     if (!tenantId) {
-      return NextResponse.json(
-        { error: "User has no tenant assigned" },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: "User has no tenant assigned" }, { status: 404 });
     }
 
     const formData = await req.formData();
@@ -128,19 +125,21 @@ export async function POST(req: NextRequest) {
       } catch (error) {
         errors.push({
           sku: product.sku,
-          error:
-            error instanceof Error ? error.message : "Failed to create product",
+          error: error instanceof Error ? error.message : "Failed to create product",
         });
       }
     }
 
-    logger.info("Bulk product import completed", {
-      userId: session.user.id,
-      tenantId,
-      imported: imported.length,
-      errors: errors.length,
-      invalid: invalid.length,
-    });
+    logger.info(
+      {
+        userId: session.user.id,
+        tenantId,
+        imported: imported.length,
+        errors: errors.length,
+        invalid: invalid.length,
+      },
+      "Bulk product import completed",
+    );
 
     return NextResponse.json({
       success: true,
@@ -150,10 +149,7 @@ export async function POST(req: NextRequest) {
       products: imported,
     });
   } catch (error) {
-    logger.error("Bulk import failed", error as Error);
-    return NextResponse.json(
-      { error: "Failed to import products" },
-      { status: 500 },
-    );
+    logger.error({ error: error }, "Bulk import failed");
+    return NextResponse.json({ error: "Failed to import products" }, { status: 500 });
   }
 }

@@ -33,10 +33,7 @@ export async function GET(req: NextRequest) {
     });
 
     if (!user?.tenantId) {
-      return NextResponse.json(
-        { error: "User has no tenant" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "User has no tenant" }, { status: 400 });
     }
 
     const { searchParams } = new URL(req.url);
@@ -79,10 +76,7 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     console.error("Error fetching campaigns:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
@@ -101,10 +95,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!user?.tenantId) {
-      return NextResponse.json(
-        { error: "User has no tenant" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "User has no tenant" }, { status: 400 });
     }
 
     // Only STORE_OWNER and SUPER_ADMIN can create campaigns
@@ -119,9 +110,7 @@ export async function POST(req: NextRequest) {
       data: {
         ...validatedData,
         tenantId: user.tenantId,
-        scheduledFor: validatedData.scheduledFor
-          ? new Date(validatedData.scheduledFor)
-          : null,
+        scheduledFor: validatedData.scheduledFor ? new Date(validatedData.scheduledFor) : null,
         segmentRules: validatedData.segmentRules || {},
         subjectVariants: validatedData.subjectVariants || [],
       },
@@ -131,15 +120,12 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: "Validation error", details: error.errors },
-        { status: 400 }
+        { error: "Validation error", details: error.issues },
+        { status: 400 },
       );
     }
 
     console.error("Error creating campaign:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

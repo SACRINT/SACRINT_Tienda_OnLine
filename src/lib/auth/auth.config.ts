@@ -57,10 +57,13 @@ export const authConfig = {
           });
 
           tenantId = tenant.id;
-          logger.info("Created new tenant for Google user", {
-            tenantId: tenant.id,
-            email: profile.email,
-          });
+          logger.info(
+            {
+              tenantId: tenant.id,
+              email: profile.email,
+            },
+            "Created new tenant for Google user",
+          );
         } else {
           tenantId = user.tenantId;
         }
@@ -90,9 +93,12 @@ export const authConfig = {
         const validation = LoginSchema.safeParse(credentials);
 
         if (!validation.success) {
-          logger.warn("Auth validation failed", {
-            issues: validation.error.issues,
-          });
+          logger.warn(
+            {
+              issues: validation.error.issues,
+            },
+            "Auth validation failed",
+          );
           return null;
         }
 
@@ -103,23 +109,23 @@ export const authConfig = {
         });
 
         if (!user) {
-          logger.warn("User not found during login", { email });
+          logger.warn({ email }, "User not found during login");
           return null;
         }
 
         if (!user.password) {
-          logger.warn("No password set for user", { email });
+          logger.warn({ email }, "No password set for user");
           return null;
         }
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
 
         if (!isPasswordValid) {
-          logger.warn("Invalid password attempt", { email });
+          logger.warn({ email }, "Invalid password attempt");
           return null;
         }
 
-        logger.info("Login successful", { email, userId: user.id });
+        logger.info({ email, userId: user.id }, "Login successful");
 
         return {
           id: user.id,
@@ -185,9 +191,12 @@ export const authConfig = {
 
       if (isNewUser) {
         // TODO: Send welcome email
-        logger.info("New user registered - welcome email to be sent", {
-          email: user.email,
-        });
+        logger.info(
+          {
+            email: user.email,
+          },
+          "New user registered - welcome email to be sent",
+        );
       }
     },
     async signOut({ session, token }: any) {

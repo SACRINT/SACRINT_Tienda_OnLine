@@ -18,10 +18,7 @@ export async function GET(req: NextRequest) {
     const email = searchParams.get("email");
 
     if (!token || !email) {
-      return NextResponse.json(
-        { error: "Missing token or email" },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: "Missing token or email" }, { status: 400 });
     }
 
     // Hash the provided token
@@ -36,11 +33,8 @@ export async function GET(req: NextRequest) {
     });
 
     if (!verificationToken) {
-      logger.warn("Invalid email verification token", { email });
-      return NextResponse.json(
-        { error: "Invalid or expired verification token" },
-        { status: 400 },
-      );
+      logger.warn({ email }, "Invalid email verification token");
+      return NextResponse.json({ error: "Invalid or expired verification token" }, { status: 400 });
     }
 
     // Check if token is expired
@@ -55,7 +49,7 @@ export async function GET(req: NextRequest) {
         },
       });
 
-      logger.warn("Expired email verification token", { email });
+      logger.warn({ email }, "Expired email verification token");
       return NextResponse.json(
         { error: "Verification token has expired. Please request a new one." },
         { status: 400 },
@@ -68,7 +62,7 @@ export async function GET(req: NextRequest) {
     });
 
     if (!user) {
-      logger.warn("User not found during email verification", { email });
+      logger.warn({ email }, "User not found during email verification");
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
@@ -95,10 +89,7 @@ export async function GET(req: NextRequest) {
       verified: true,
     });
   } catch (error) {
-    logger.error("Email verification failed", error as Error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    logger.error({ error: error }, "Email verification failed");
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

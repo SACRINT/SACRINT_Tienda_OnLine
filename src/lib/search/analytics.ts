@@ -49,12 +49,15 @@ export async function trackSearch(
   await incrementSearchCount(tenantId, query);
 
   // Log for monitoring
-  logger.info("Search tracked", {
-    queryId,
-    query: analytics.query,
-    tenantId,
-    resultsCount,
-  });
+  logger.info(
+    {
+      queryId,
+      query: analytics.query,
+      tenantId,
+      resultsCount,
+    },
+    "Search tracked",
+  );
 
   return queryId;
 }
@@ -77,19 +80,19 @@ export async function trackClick(
     analytics.clickedProducts.push(productId);
     await cache.set(cacheKey, analytics, { ttl: 86400 });
 
-    logger.info("Search click tracked", {
-      queryId,
-      productId,
-      position,
-    });
+    logger.info(
+      {
+        queryId,
+        productId,
+        position,
+      },
+      "Search click tracked",
+    );
   }
 }
 
 // Track a conversion from search
-export async function trackConversion(
-  queryId: string,
-  productId: string,
-): Promise<void> {
+export async function trackConversion(queryId: string, productId: string): Promise<void> {
   if (!ANALYTICS_CONFIG.trackConversions) {
     return;
   }
@@ -102,18 +105,18 @@ export async function trackConversion(
     analytics.convertedProducts.push(productId);
     await cache.set(cacheKey, analytics, { ttl: 86400 });
 
-    logger.info("Search conversion tracked", {
-      queryId,
-      productId,
-    });
+    logger.info(
+      {
+        queryId,
+        productId,
+      },
+      "Search conversion tracked",
+    );
   }
 }
 
 // Increment search count for popularity
-async function incrementSearchCount(
-  tenantId: string,
-  query: string,
-): Promise<void> {
+async function incrementSearchCount(tenantId: string, query: string): Promise<void> {
   const normalizedQuery = query.toLowerCase().trim();
   const cacheKey = "search_counts:" + tenantId;
 
@@ -156,10 +159,7 @@ export async function getZeroResultSearches(
 }
 
 // Track zero-result search
-export async function trackZeroResults(
-  tenantId: string,
-  query: string,
-): Promise<void> {
+export async function trackZeroResults(tenantId: string, query: string): Promise<void> {
   const cacheKey = "zero_result_searches:" + tenantId;
   let searches = await cache.get<string[]>(cacheKey);
 

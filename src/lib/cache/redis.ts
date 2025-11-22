@@ -45,7 +45,7 @@ export function getRedisClient(): Redis | null {
     redisClient = new Redis(redisUrl, options);
 
     redisClient.on("error", (err) => {
-      logger.error("Redis connection error", err);
+      logger.error({ error: err }, "Redis connection error");
     });
 
     redisClient.on("connect", () => {
@@ -58,7 +58,7 @@ export function getRedisClient(): Redis | null {
 
     return redisClient;
   } catch (error) {
-    logger.error("Failed to initialize Redis client", error as Error);
+    logger.error({ error: error }, "Failed to initialize Redis client");
     return null;
   }
 }
@@ -153,9 +153,7 @@ export class CacheService {
       } else {
         // Memory cache: manual pattern matching
         let count = 0;
-        const regex = new RegExp(
-          "^" + pattern.replace(/\*/g, ".*").replace(/\?/g, ".") + "$",
-        );
+        const regex = new RegExp("^" + pattern.replace(/\*/g, ".*").replace(/\?/g, ".") + "$");
         for (const key of memoryCache.keys()) {
           if (regex.test(key)) {
             memoryCache.delete(key);
@@ -273,7 +271,7 @@ export class CacheService {
       logger.warn("Cache flushed");
       return true;
     } catch (error) {
-      logger.error("Cache flush error", error as Error);
+      logger.error({ error: error }, "Cache flush error");
       return false;
     }
   }
@@ -295,8 +293,7 @@ export const CacheKeys = {
   categories: (tenantId: string) => `categories:${tenantId}`,
   order: (id: string) => `order:${id}`,
   session: (sessionId: string) => `session:${sessionId}`,
-  productSearch: (tenantId: string, query: string) =>
-    `search:${tenantId}:${query}`,
+  productSearch: (tenantId: string, query: string) => `search:${tenantId}:${query}`,
 };
 
 /**

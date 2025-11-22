@@ -202,19 +202,13 @@ export async function getSimilarProducts(
 
     // Calculate similarity scores based on price and name
     const recommendations: RecommendedProduct[] = similar.map((p: any) => {
-      const priceDiff = Math.abs(
-        Number(p.basePrice) - Number(sourceProduct.basePrice),
-      );
+      const priceDiff = Math.abs(Number(p.basePrice) - Number(sourceProduct.basePrice));
       const priceScore = 1 - priceDiff / Number(sourceProduct.basePrice);
 
       // Simple name similarity (shared words)
-      const sourceWords = new Set(
-        sourceProduct.name.toLowerCase().split(/\s+/),
-      );
+      const sourceWords = new Set(sourceProduct.name.toLowerCase().split(/\s+/));
       const targetWords = p.name.toLowerCase().split(/\s+/);
-      const commonWords = targetWords.filter((w: string) =>
-        sourceWords.has(w),
-      ).length;
+      const commonWords = targetWords.filter((w: string) => sourceWords.has(w)).length;
       const nameScore = commonWords / sourceWords.size;
 
       const score = priceScore * 0.3 + nameScore * 0.7;
@@ -317,14 +311,9 @@ export async function getTrendingProducts(
       take: limit,
     });
 
-    const countMap = new Map(
-      trending.map((item: any) => [item.productId, item._count.productId]),
-    );
+    const countMap = new Map(trending.map((item: any) => [item.productId, item._count.productId]));
 
-    const totalOrders = trending.reduce(
-      (sum: number, item: any) => sum + item._count.productId,
-      0,
-    );
+    const totalOrders = trending.reduce((sum: number, item: any) => sum + item._count.productId, 0);
 
     const recommendations: RecommendedProduct[] = products.map((p: any) => ({
       id: p.id,
@@ -405,10 +394,7 @@ export async function getPersonalizedRecommendations(
 
         const categoryId = item.product.categoryId;
         if (categoryId) {
-          categoryFrequency.set(
-            categoryId,
-            (categoryFrequency.get(categoryId) || 0) + 1,
-          );
+          categoryFrequency.set(categoryId, (categoryFrequency.get(categoryId) || 0) + 1);
         }
       }
     }
@@ -447,8 +433,7 @@ export async function getPersonalizedRecommendations(
 
     // Score based on category preference
     const result: RecommendedProduct[] = recommendations.map((p: any) => {
-      const categoryScore =
-        (categoryFrequency.get(p.categoryId || "") || 0) / userOrders.length;
+      const categoryScore = (categoryFrequency.get(p.categoryId || "") || 0) / userOrders.length;
       const featuredBonus = p.featured ? 0.2 : 0;
 
       return {
@@ -516,11 +501,7 @@ export async function getCombinedRecommendations(
       switch (strategy.type) {
         case "fbt":
           if (productId) {
-            results = await getFrequentlyBoughtTogether(
-              tenantId,
-              productId,
-              limit,
-            );
+            results = await getFrequentlyBoughtTogether(tenantId, productId, limit);
           }
           break;
 
@@ -532,11 +513,7 @@ export async function getCombinedRecommendations(
 
         case "personalized":
           if (userId) {
-            results = await getPersonalizedRecommendations(
-              tenantId,
-              userId,
-              limit,
-            );
+            results = await getPersonalizedRecommendations(tenantId, userId, limit);
           }
           break;
 
@@ -564,12 +541,15 @@ export async function getCombinedRecommendations(
       .sort((a, b) => b.score - a.score)
       .slice(0, limit);
 
-    logger.info("Combined recommendations generated", {
-      tenantId,
-      userId,
-      productId,
-      count: finalRecommendations.length,
-    });
+    logger.info(
+      {
+        tenantId,
+        userId,
+        productId,
+        count: finalRecommendations.length,
+      },
+      "Combined recommendations generated",
+    );
 
     return finalRecommendations;
   } catch (error) {

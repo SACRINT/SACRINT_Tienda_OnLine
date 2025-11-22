@@ -28,7 +28,7 @@ export const dynamic = "force-dynamic";
 export async function POST(req: NextRequest) {
   // Apply rate limiting - 10 attempts per minute for anonymous users
   const rateLimitResult = await applyRateLimit(req, {
-    config: RATE_LIMITS.ANONYMOUS,
+    limiter: RATE_LIMITS.ANONYMOUS,
   });
 
   if (!rateLimitResult.allowed) {

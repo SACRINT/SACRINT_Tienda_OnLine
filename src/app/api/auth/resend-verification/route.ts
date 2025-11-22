@@ -55,9 +55,12 @@ export async function POST(req: NextRequest) {
 
     // Always return success to prevent email enumeration
     if (!user) {
-      logger.info("Verification resend requested for non-existent email", {
-        email,
-      });
+      logger.info(
+        {
+          email,
+        },
+        "Verification resend requested for non-existent email",
+      );
       return NextResponse.json({
         message: "If the email exists and is not verified, a verification link has been sent.",
       });
@@ -65,9 +68,12 @@ export async function POST(req: NextRequest) {
 
     // Check if already verified
     if (user.emailVerified) {
-      logger.info("Verification resend requested for already verified email", {
-        email,
-      });
+      logger.info(
+        {
+          email,
+        },
+        "Verification resend requested for already verified email",
+      );
       return NextResponse.json({
         message: "Email is already verified.",
       });
@@ -97,11 +103,14 @@ export async function POST(req: NextRequest) {
     // Generate verification URL
     const verifyUrl = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/verify-email?token=${token}&email=${encodeURIComponent(email)}`;
 
-    logger.info("Email verification token generated", {
-      email,
-      userId: user.id,
-      verifyUrl: process.env.NODE_ENV === "development" ? verifyUrl : "[REDACTED]",
-    });
+    logger.info(
+      {
+        email,
+        userId: user.id,
+        verifyUrl: process.env.NODE_ENV === "development" ? verifyUrl : "[REDACTED]",
+      },
+      "Email verification token generated",
+    );
 
     // TODO: Send verification email
     // await sendVerificationEmail(email, verifyUrl, user.name);
@@ -110,7 +119,7 @@ export async function POST(req: NextRequest) {
       message: "If the email exists and is not verified, a verification link has been sent.",
     });
   } catch (error) {
-    logger.error("Resend verification failed", error as Error);
+    logger.error({ error: error }, "Resend verification failed");
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
