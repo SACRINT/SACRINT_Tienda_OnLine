@@ -1,182 +1,178 @@
-// Translation System
-// Dictionary-based translations with interpolation
+/**
+ * Internationalization (i18n)
+ * Sistema de traducciones multi-idioma
+ */
 
-import { Locale, DEFAULT_LOCALE } from "./config";
+export type Locale = "es" | "en" | "pt" | "fr";
 
-type TranslationValue = string | Record<string, unknown>;
-type TranslationDictionary = Record<string, TranslationValue>;
+export interface TranslationKey {
+  es: string;
+  en: string;
+  pt?: string;
+  fr?: string;
+}
 
-// Spanish translations (default)
-const es: TranslationDictionary = {
-  // Navigation
-  "nav.home": "Inicio",
-  "nav.shop": "Tienda",
-  "nav.cart": "Carrito",
-  "nav.account": "Mi Cuenta",
-  "nav.search": "Buscar",
-  "nav.categories": "Categorías",
+/**
+ * Diccionario de traducciones
+ */
+export const translations = {
+  common: {
+    loading: { es: "Cargando...", en: "Loading...", pt: "Carregando...", fr: "Chargement..." },
+    error: { es: "Error", en: "Error", pt: "Erro", fr: "Erreur" },
+    success: { es: "Éxito", en: "Success", pt: "Sucesso", fr: "Succès" },
+    cancel: { es: "Cancelar", en: "Cancel", pt: "Cancelar", fr: "Annuler" },
+    save: { es: "Guardar", en: "Save", pt: "Salvar", fr: "Enregistrer" },
+    delete: { es: "Eliminar", en: "Delete", pt: "Excluir", fr: "Supprimer" },
+    edit: { es: "Editar", en: "Edit", pt: "Editar", fr: "Modifier" },
+    search: { es: "Buscar", en: "Search", pt: "Buscar", fr: "Rechercher" },
+  },
+  nav: {
+    home: { es: "Inicio", en: "Home", pt: "Início", fr: "Accueil" },
+    shop: { es: "Tienda", en: "Shop", pt: "Loja", fr: "Boutique" },
+    cart: { es: "Carrito", en: "Cart", pt: "Carrinho", fr: "Panier" },
+    account: { es: "Cuenta", en: "Account", pt: "Conta", fr: "Compte" },
+    logout: { es: "Cerrar sesión", en: "Logout", pt: "Sair", fr: "Déconnexion" },
+  },
+  products: {
+    addToCart: {
+      es: "Agregar al carrito",
+      en: "Add to cart",
+      pt: "Adicionar ao carrinho",
+      fr: "Ajouter au panier",
+    },
+    outOfStock: { es: "Agotado", en: "Out of stock", pt: "Esgotado", fr: "Rupture de stock" },
+    inStock: { es: "En stock", en: "In stock", pt: "Em estoque", fr: "En stock" },
+    price: { es: "Precio", en: "Price", pt: "Preço", fr: "Prix" },
+    reviews: { es: "Reseñas", en: "Reviews", pt: "Avaliações", fr: "Avis" },
+  },
+  checkout: {
+    title: { es: "Finalizar compra", en: "Checkout", pt: "Finalizar compra", fr: "Paiement" },
+    shipping: { es: "Envío", en: "Shipping", pt: "Envio", fr: "Livraison" },
+    payment: { es: "Pago", en: "Payment", pt: "Pagamento", fr: "Paiement" },
+    total: { es: "Total", en: "Total", pt: "Total", fr: "Total" },
+    placeOrder: {
+      es: "Realizar pedido",
+      en: "Place order",
+      pt: "Fazer pedido",
+      fr: "Passer commande",
+    },
+  },
+  errors: {
+    generic: {
+      es: "Algo salió mal. Por favor, inténtalo de nuevo.",
+      en: "Something went wrong. Please try again.",
+      pt: "Algo deu errado. Por favor, tente novamente.",
+      fr: "Quelque chose s'est mal passé. Veuillez réessayer.",
+    },
+    notFound: { es: "No encontrado", en: "Not found", pt: "Não encontrado", fr: "Non trouvé" },
+    unauthorized: {
+      es: "No autorizado",
+      en: "Unauthorized",
+      pt: "Não autorizado",
+      fr: "Non autorisé",
+    },
+    validation: {
+      es: "Por favor, revisa los campos del formulario.",
+      en: "Please check the form fields.",
+      pt: "Por favor, verifique os campos do formulário.",
+      fr: "Veuillez vérifier les champs du formulaire.",
+    },
+  },
+} as const;
 
-  // Products
-  "product.addToCart": "Agregar al Carrito",
-  "product.buyNow": "Comprar Ahora",
-  "product.outOfStock": "Agotado",
-  "product.inStock": "En Stock",
-  "product.price": "Precio",
-  "product.quantity": "Cantidad",
-  "product.description": "Descripción",
-  "product.reviews": "Reseñas",
-  "product.related": "Productos Relacionados",
+/**
+ * Obtener traducción
+ */
+export function t(key: string, locale: Locale = "es"): string {
+  const keys = key.split(".");
+  let current: any = translations;
 
-  // Cart
-  "cart.empty": "Tu carrito está vacío",
-  "cart.total": "Total",
-  "cart.subtotal": "Subtotal",
-  "cart.shipping": "Envío",
-  "cart.tax": "Impuestos",
-  "cart.checkout": "Proceder al Pago",
-  "cart.continue": "Continuar Comprando",
-  "cart.remove": "Eliminar",
-
-  // Checkout
-  "checkout.title": "Checkout",
-  "checkout.shipping": "Información de Envío",
-  "checkout.payment": "Método de Pago",
-  "checkout.review": "Revisar Pedido",
-  "checkout.confirm": "Confirmar Pedido",
-  "checkout.success": "¡Pedido Confirmado!",
-
-  // Account
-  "account.orders": "Mis Pedidos",
-  "account.addresses": "Direcciones",
-  "account.profile": "Perfil",
-  "account.settings": "Configuración",
-  "account.logout": "Cerrar Sesión",
-
-  // Common
-  "common.loading": "Cargando...",
-  "common.error": "Error",
-  "common.save": "Guardar",
-  "common.cancel": "Cancelar",
-  "common.delete": "Eliminar",
-  "common.edit": "Editar",
-  "common.search": "Buscar",
-  "common.filter": "Filtrar",
-  "common.sort": "Ordenar",
-  "common.all": "Todos",
-  "common.none": "Ninguno",
-};
-
-// English translations
-const en: TranslationDictionary = {
-  "nav.home": "Home",
-  "nav.shop": "Shop",
-  "nav.cart": "Cart",
-  "nav.account": "My Account",
-  "nav.search": "Search",
-  "nav.categories": "Categories",
-
-  "product.addToCart": "Add to Cart",
-  "product.buyNow": "Buy Now",
-  "product.outOfStock": "Out of Stock",
-  "product.inStock": "In Stock",
-  "product.price": "Price",
-  "product.quantity": "Quantity",
-  "product.description": "Description",
-  "product.reviews": "Reviews",
-  "product.related": "Related Products",
-
-  "cart.empty": "Your cart is empty",
-  "cart.total": "Total",
-  "cart.subtotal": "Subtotal",
-  "cart.shipping": "Shipping",
-  "cart.tax": "Tax",
-  "cart.checkout": "Proceed to Checkout",
-  "cart.continue": "Continue Shopping",
-  "cart.remove": "Remove",
-
-  "checkout.title": "Checkout",
-  "checkout.shipping": "Shipping Information",
-  "checkout.payment": "Payment Method",
-  "checkout.review": "Review Order",
-  "checkout.confirm": "Confirm Order",
-  "checkout.success": "Order Confirmed!",
-
-  "account.orders": "My Orders",
-  "account.addresses": "Addresses",
-  "account.profile": "Profile",
-  "account.settings": "Settings",
-  "account.logout": "Log Out",
-
-  "common.loading": "Loading...",
-  "common.error": "Error",
-  "common.save": "Save",
-  "common.cancel": "Cancel",
-  "common.delete": "Delete",
-  "common.edit": "Edit",
-  "common.search": "Search",
-  "common.filter": "Filter",
-  "common.sort": "Sort",
-  "common.all": "All",
-  "common.none": "None",
-};
-
-// All translations
-const translations: Record<Locale, TranslationDictionary> = {
-  es,
-  en,
-  fr: en, // Fallback to English
-  pt: es, // Fallback to Spanish (similar)
-  de: en, // Fallback to English
-};
-
-// Get translation
-export function t(
-  key: string,
-  locale: Locale = DEFAULT_LOCALE,
-  params?: Record<string, string | number>,
-): string {
-  const dict = translations[locale] || translations[DEFAULT_LOCALE];
-  let value =
-    (dict[key] as string) ||
-    (translations[DEFAULT_LOCALE][key] as string) ||
-    key;
-
-  // Interpolate parameters
-  if (params) {
-    Object.entries(params).forEach(([param, val]) => {
-      value = value.replace(
-        new RegExp("\\{" + param + "\\}", "g"),
-        String(val),
-      );
-    });
+  for (const k of keys) {
+    if (current[k]) {
+      current = current[k];
+    } else {
+      return key;
+    }
   }
 
-  return value;
+  return current[locale] || current.es || key;
 }
 
-// Get all translations for a namespace
-export function getNamespace(
-  namespace: string,
-  locale: Locale = DEFAULT_LOCALE,
-): Record<string, string> {
-  const dict = translations[locale] || translations[DEFAULT_LOCALE];
-  const prefix = namespace + ".";
-  const result: Record<string, string> = {};
+/**
+ * Formatear moneda
+ */
+export function formatCurrency(amount: number, locale: Locale = "es"): string {
+  const localeMap: Record<Locale, string> = {
+    es: "es-ES",
+    en: "en-US",
+    pt: "pt-BR",
+    fr: "fr-FR",
+  };
 
-  Object.entries(dict).forEach(([key, value]) => {
-    if (key.startsWith(prefix) && typeof value === "string") {
-      result[key.replace(prefix, "")] = value;
-    }
-  });
+  const currencyMap: Record<Locale, string> = {
+    es: "EUR",
+    en: "USD",
+    pt: "BRL",
+    fr: "EUR",
+  };
 
-  return result;
+  return new Intl.NumberFormat(localeMap[locale], {
+    style: "currency",
+    currency: currencyMap[locale],
+  }).format(amount);
 }
 
-// Check if translation exists
-export function hasTranslation(
-  key: string,
-  locale: Locale = DEFAULT_LOCALE,
-): boolean {
-  const dict = translations[locale] || translations[DEFAULT_LOCALE];
-  return key in dict;
+/**
+ * Formatear fecha
+ */
+export function formatDate(date: Date, locale: Locale = "es"): string {
+  const localeMap: Record<Locale, string> = {
+    es: "es-ES",
+    en: "en-US",
+    pt: "pt-BR",
+    fr: "fr-FR",
+  };
+
+  return new Intl.DateTimeFormat(localeMap[locale], {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  }).format(date);
 }
+
+/**
+ * Formatear número
+ */
+export function formatNumber(num: number, locale: Locale = "es"): string {
+  const localeMap: Record<Locale, string> = {
+    es: "es-ES",
+    en: "en-US",
+    pt: "pt-BR",
+    fr: "fr-FR",
+  };
+
+  return new Intl.NumberFormat(localeMap[locale]).format(num);
+}
+
+/**
+ * Pluralización
+ */
+export function plural(
+  count: number,
+  singular: string,
+  plural: string,
+  locale: Locale = "es",
+): string {
+  const rules = new Intl.PluralRules(locale);
+  const rule = rules.select(count);
+  return rule === "one" ? singular : plural;
+}
+
+export default {
+  t,
+  formatCurrency,
+  formatDate,
+  formatNumber,
+  plural,
+  translations,
+};
