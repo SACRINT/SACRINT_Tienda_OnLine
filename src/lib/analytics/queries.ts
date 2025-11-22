@@ -318,13 +318,23 @@ export async function getCustomerMetrics(
     customerOrdersMap.set(order.customerId, existing);
   });
 
-  // New vs returning customers
-  const newCustomers = Array.from(customerOrdersMap.values()).filter(
-    (c) => c.orders === 1,
-  ).length;
-  const returningCustomers = Array.from(customerOrdersMap.values()).filter(
-    (c) => c.orders > 1,
-  ).length;
+  // New vs returning customers with revenue calculation
+  const customersArray = Array.from(customerOrdersMap.values());
+  const newCustomersData = customersArray.filter((c) => c.orders === 1);
+  const returningCustomersData = customersArray.filter((c) => c.orders > 1);
+
+  const newCustomers = newCustomersData.length;
+  const returningCustomers = returningCustomersData.length;
+
+  // Calculate revenue by segment
+  const newCustomersRevenue = newCustomersData.reduce(
+    (sum, c) => sum + c.revenue,
+    0,
+  );
+  const returningCustomersRevenue = returningCustomersData.reduce(
+    (sum, c) => sum + c.revenue,
+    0,
+  );
 
   // Average lifetime value
   const totalRevenue = orders.reduce((sum: number, o) => sum + o.total, 0);
@@ -350,6 +360,9 @@ export async function getCustomerMetrics(
     .sort((a, b) => b.totalRevenue - a.totalRevenue)
     .slice(0, 10);
 
+  // Calculate total active customers for percentage
+  const totalActiveCustomers = newCustomers + returningCustomers;
+
   return {
     totalCustomers,
     newCustomers,
@@ -357,12 +370,23 @@ export async function getCustomerMetrics(
     avgLifetimeValue,
     avgPurchaseFrequency,
     customersBySegment: [
-      { segment: "new", count: newCustomers, revenue: 0, percentage: 0 },
+      {
+        segment: "new",
+        count: newCustomers,
+        revenue: newCustomersRevenue,
+        percentage:
+          totalActiveCustomers > 0
+            ? (newCustomers / totalActiveCustomers) * 100
+            : 0,
+      },
       {
         segment: "returning",
         count: returningCustomers,
-        revenue: 0,
-        percentage: 0,
+        revenue: returningCustomersRevenue,
+        percentage:
+          totalActiveCustomers > 0
+            ? (returningCustomers / totalActiveCustomers) * 100
+            : 0,
       },
     ],
     topCustomers,
