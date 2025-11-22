@@ -19,9 +19,14 @@ import {
   DollarSign,
   Target,
   Zap,
+  Download,
 } from "lucide-react";
 import { formatCurrency, formatNumber } from "@/lib/analytics/types";
 import type { RFMSegment } from "@/lib/analytics/rfm";
+import {
+  exportRFMSegmentSummaryCSV,
+  generateFilename,
+} from "@/lib/analytics/export";
 
 interface RFMSegmentData {
   segment: RFMSegment;
@@ -147,6 +152,12 @@ export function RFMSegmentation({ tenantId }: RFMSegmentationProps) {
     }
   };
 
+  const handleExport = () => {
+    if (!data) return;
+    const filename = generateFilename("rfm-segments", "csv");
+    exportRFMSegmentSummaryCSV(data.segments, filename);
+  };
+
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
@@ -198,6 +209,14 @@ export function RFMSegmentation({ tenantId }: RFMSegmentationProps) {
             </p>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Export Button */}
+      <div className="flex justify-end">
+        <Button onClick={handleExport} variant="outline">
+          <Download className="mr-2 h-4 w-4" />
+          Export to CSV
+        </Button>
       </div>
 
       {/* Segment Cards */}

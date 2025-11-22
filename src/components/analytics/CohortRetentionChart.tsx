@@ -15,8 +15,13 @@ import {
   TrendingUp,
   Users,
   BarChart3,
+  Download,
 } from "lucide-react";
 import { formatCurrency } from "@/lib/analytics/types";
+import {
+  exportCohortRetentionCSV,
+  generateFilename,
+} from "@/lib/analytics/export";
 
 interface CohortData {
   cohortDate: string; // YYYY-MM
@@ -81,6 +86,12 @@ export function CohortRetentionChart({
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleExport = () => {
+    if (!data || !data.retention) return;
+    const filename = generateFilename("cohort-retention", "csv");
+    exportCohortRetentionCSV(data.retention, filename);
   };
 
   const getRetentionColor = (retention: number): string => {
@@ -161,6 +172,10 @@ export function CohortRetentionChart({
               >
                 <BarChart3 className="mr-2 h-4 w-4" />
                 Revenue
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleExport}>
+                <Download className="mr-2 h-4 w-4" />
+                Export CSV
               </Button>
             </div>
           </div>
