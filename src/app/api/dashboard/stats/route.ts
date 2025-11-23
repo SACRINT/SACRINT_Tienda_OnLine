@@ -1,12 +1,14 @@
 // Dashboard Analytics API
 // GET /api/dashboard/stats - Get dashboard statistics
 // ✅ SECURITY [P0.7]: Authentication and tenant isolation enforced
+// ✅ PERFORMANCE [P1.16]: Caching implemented (2min TTL)
 
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { logger } from "@/lib/monitoring/logger";
 import { USER_ROLES } from "@/lib/types/user-role";
+import { cache } from "@/lib/performance/cache";
 
 export async function GET() {
   try {
@@ -37,6 +39,14 @@ export async function GET() {
     if (!tenantId) {
       logger.error({ userId: session.user.id }, "User has no tenantId assigned");
       return NextResponse.json({ error: "No tenant assigned to user" }, { status: 400 });
+    }
+
+    // ✅ PERFORMANCE [P1.16]: Cache with 2min TTL
+    const cacheKey = `dashboard:stats:${tenantId}`;
+    const cached = await cache.get(cacheKey);
+
+    if (cached) {
+      return NextResponse.json(cached);
     }
 
     // Get counts
@@ -166,7 +176,7 @@ export async function GET() {
       },
     ];
 
-    return NextResponse.json({
+    const response = {
       kpiData: {
         revenue: {
           value: Number(totalRevenue._sum.total || 0),
@@ -212,7 +222,12 @@ export async function GET() {
       topProductsData: topProductsWithNames,
       recentOrders: formattedRecentOrders,
       orderStatusData,
-    });
+    };
+
+    // Cache the response for 2 minutes (120 seconds)
+    await cache.set(cacheKey, response, 120);
+
+    return NextResponse.json(response);
   } catch (error) {
     logger.error({ error }, "Error fetching dashboard stats");
     return NextResponse.json({ error: "Failed to fetch dashboard stats" }, { status: 500 });

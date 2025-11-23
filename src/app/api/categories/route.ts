@@ -1,6 +1,7 @@
 // Categories API
 // GET /api/categories - Get all categories for current user's tenant (with tree structure)
 // POST /api/categories - Create new category (STORE_OWNER only)
+// ✅ PERFORMANCE [P1.16]: Caching implemented (30min TTL)
 
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/auth";
@@ -12,6 +13,7 @@ import {
 } from "@/lib/db/categories";
 import { CreateCategorySchema } from "@/lib/security/schemas/product-schemas";
 import { USER_ROLES } from "@/lib/types/user-role";
+import { cache } from "@/lib/performance/cache";
 
 // Force dynamic rendering for this API route
 export const dynamic = "force-dynamic";
@@ -32,29 +34,34 @@ export async function GET(req: NextRequest) {
     const { tenantId } = session.user;
 
     if (!tenantId) {
-      return NextResponse.json(
-        { error: "User has no tenant assigned" },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: "User has no tenant assigned" }, { status: 404 });
     }
 
     // Get query parameters
     const { searchParams } = new URL(req.url);
     const format = searchParams.get("format") || "flat"; // 'flat' or 'tree'
     const parentId = searchParams.get("parentId");
-    const includeSubcategories =
-      searchParams.get("includeSubcategories") === "true";
+    const includeSubcategories = searchParams.get("includeSubcategories") === "true";
+
+    // ✅ PERFORMANCE [P1.16]: Cache with 30min TTL
+    const cacheKey = `categories:${tenantId}:${format}:${parentId}:${includeSubcategories}`;
+    const cached = await cache.get(cacheKey);
+
+    if (cached) {
+      return NextResponse.json(cached);
+    }
 
     let categories;
+    let response;
 
     if (format === "tree") {
       // Return hierarchical tree structure
       categories = await getCategoryTree(tenantId);
 
-      return NextResponse.json({
+      response = {
         categories,
         format: "tree",
-      });
+      };
     } else {
       // Return flat list with optional filtering
       categories = await getCategoriesByTenant(tenantId, {
@@ -62,18 +69,20 @@ export async function GET(req: NextRequest) {
         includeSubcategories,
       });
 
-      return NextResponse.json({
+      response = {
         categories,
         format: "flat",
         total: categories.length,
-      });
+      };
     }
+
+    // Cache the response for 30 minutes (1800 seconds)
+    await cache.set(cacheKey, response, 1800);
+
+    return NextResponse.json(response);
   } catch (error) {
     console.error("[CATEGORIES] GET error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
@@ -93,18 +102,14 @@ export async function POST(req: NextRequest) {
     const { role, tenantId } = session.user;
 
     if (!tenantId) {
-      return NextResponse.json(
-        { error: "User has no tenant assigned" },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: "User has no tenant assigned" }, { status: 404 });
     }
 
     // Check if user has permission to create categories
     if (role !== USER_ROLES.STORE_OWNER && role !== USER_ROLES.SUPER_ADMIN) {
       return NextResponse.json(
         {
-          error:
-            "Forbidden - Only STORE_OWNER or SUPER_ADMIN can create categories",
+          error: "Forbidden - Only STORE_OWNER or SUPER_ADMIN can create categories",
         },
         { status: 403 },
       );
@@ -131,8 +136,7 @@ export async function POST(req: NextRequest) {
     if (!slugAvailable) {
       return NextResponse.json(
         {
-          error:
-            "Slug already taken within your store. Please choose a different slug.",
+          error: "Slug already taken within your store. Please choose a different slug.",
         },
         { status: 409 },
       );
@@ -148,12 +152,7 @@ export async function POST(req: NextRequest) {
       parentId: parentId || null,
     });
 
-    console.log(
-      "[CATEGORIES] Created new category:",
-      category.id,
-      "by user:",
-      session.user.id,
-    );
+    console.log("[CATEGORIES] Created new category:", category.id, "by user:", session.user.id);
 
     return NextResponse.json(
       {
@@ -183,9 +182,6 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
