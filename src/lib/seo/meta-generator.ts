@@ -43,7 +43,7 @@ export function generateMetadata(config: SEOConfig): Metadata {
     nofollow = false,
   } = config;
 
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://example.com";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://example.com"; // ✅ ENV [P1.8]: Consolidated URL variable
   const siteName = process.env.NEXT_PUBLIC_SITE_NAME || "Tienda Online";
 
   // Map to valid OpenGraph types (Next.js only supports "website" and "article")

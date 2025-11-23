@@ -74,10 +74,7 @@ export function sanitizeUrl(url: string): string {
 }
 
 // Sanitize redirect URL (prevent open redirect)
-export function sanitizeRedirectUrl(
-  url: string,
-  allowedHosts?: string[],
-): string {
+export function sanitizeRedirectUrl(url: string, allowedHosts?: string[]): string {
   // Handle relative URLs
   if (url.startsWith("/") && !url.startsWith("//")) {
     return url;
@@ -85,7 +82,7 @@ export function sanitizeRedirectUrl(
 
   try {
     const parsed = new URL(url);
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+    const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"; // ✅ ENV [P1.8]: Consolidated URL variable
     const siteHost = new URL(siteUrl).host;
 
     const hosts = [siteHost, ...(allowedHosts || [])];
@@ -142,10 +139,7 @@ export function sanitizeObject<T extends Record<string, unknown>>(
 
   for (const [key, value] of Object.entries(obj)) {
     if (typeof value === "string") {
-      (sanitized as Record<string, unknown>)[key] = sanitizeInput(
-        value,
-        options,
-      );
+      (sanitized as Record<string, unknown>)[key] = sanitizeInput(value, options);
     } else if (value && typeof value === "object" && !Array.isArray(value)) {
       (sanitized as Record<string, unknown>)[key] = sanitizeObject(
         value as Record<string, unknown>,
@@ -226,10 +220,7 @@ export function sanitizeJson(jsonString: string): string {
 }
 
 // Validate content type
-export function validateContentType(
-  contentType: string | null,
-  allowed: string[],
-): boolean {
+export function validateContentType(contentType: string | null, allowed: string[]): boolean {
   if (!contentType) return false;
 
   const type = contentType.split(";")[0].trim();
@@ -237,23 +228,13 @@ export function validateContentType(
 }
 
 // Validate file type by extension
-export function validateFileExtension(
-  filename: string,
-  allowed: string[],
-): boolean {
+export function validateFileExtension(filename: string, allowed: string[]): boolean {
   const ext = filename.split(".").pop()?.toLowerCase() || "";
   return allowed.includes(ext);
 }
 
 // Common allowed file types
-export const allowedImageExtensions = [
-  "jpg",
-  "jpeg",
-  "png",
-  "gif",
-  "webp",
-  "avif",
-];
+export const allowedImageExtensions = ["jpg", "jpeg", "png", "gif", "webp", "avif"];
 export const allowedDocumentExtensions = ["pdf", "doc", "docx", "txt"];
 export const allowedImageMimeTypes = [
   "image/jpeg",

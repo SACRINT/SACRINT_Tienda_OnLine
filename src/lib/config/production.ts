@@ -48,7 +48,7 @@ export function validateEnvironment(): {
     "STRIPE_SECRET_KEY",
     "STRIPE_WEBHOOK_SECRET",
     "RESEND_API_KEY",
-    "NEXT_PUBLIC_SITE_URL",
+    "NEXT_PUBLIC_APP_URL", // ✅ ENV [P1.8]: Consolidated URL variable
   ];
 
   const recommended = ["EMAIL_FROM", "NEXT_PUBLIC_SITE_NAME"];
@@ -100,10 +100,7 @@ export function getProductionConfig(): ProductionConfig {
         ? "staging"
         : "development",
     isProduction,
-    siteUrl:
-      process.env.NEXT_PUBLIC_SITE_URL ||
-      process.env.VERCEL_URL ||
-      "http://localhost:3000",
+    siteUrl: process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL || "http://localhost:3000",
     siteName: process.env.NEXT_PUBLIC_SITE_NAME || "SACRINT Tienda Online",
     features: {
       analytics:
@@ -162,10 +159,7 @@ export function isEnvironmentReady(): boolean {
   const validation = validateEnvironment();
 
   if (!validation.valid) {
-    console.error(
-      "Environment not ready. Missing:",
-      validation.missing.join(", "),
-    );
+    console.error("Environment not ready. Missing:", validation.missing.join(", "));
     return false;
   }
 
