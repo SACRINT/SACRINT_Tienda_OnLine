@@ -23,7 +23,9 @@ export const authConfig = {
     Google({
       clientId: process.env.GOOGLE_ID!,
       clientSecret: process.env.GOOGLE_SECRET!,
-      allowDangerousEmailAccountLinking: true,
+      // ✅ SECURITY [P0.2]: Disabled dangerous auto-linking to prevent account takeover
+      // Users must verify email ownership before linking OAuth accounts
+      allowDangerousEmailAccountLinking: false,
       authorization: {
         params: {
           prompt: "consent",
