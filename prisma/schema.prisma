@@ -56,6 +56,7 @@ model User {
   // Tenant & Role
   tenantId              String?  // null para SUPER_ADMIN
   role                  UserRole @default(CUSTOMER)
+  status                UserStatus @default(ACTIVE) // ✅ SECURITY [P1.2]: User account status
 
   // OAuth
   googleId              String?  @unique
@@ -83,6 +84,7 @@ model User {
   @@unique([email, tenantId]) // Email único por tenant
   @@index([tenantId])
   @@index([role])
+  @@index([status]) // ✅ SECURITY [P1.2]: Index for status queries
 }
 
 // Auth.js models
@@ -130,6 +132,13 @@ enum UserRole {
   SUPER_ADMIN
   STORE_OWNER
   CUSTOMER
+}
+
+// ✅ SECURITY [P1.2]: User account status for access control
+enum UserStatus {
+  ACTIVE      // User can access the system
+  SUSPENDED   // Temporarily disabled (e.g., payment issues, violation)
+  BLOCKED     // Permanently disabled (e.g., abuse, fraud)
 }
 
 // ============ PRODUCTOS ============

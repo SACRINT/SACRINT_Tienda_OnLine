@@ -9,6 +9,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import { db } from "@/lib/db/client";
 import bcrypt from "bcryptjs";
 import { USER_ROLES, type UserRole } from "@/lib/types/user-role";
+import { USER_STATUS, type UserStatus, canUserLogin } from "@/lib/types/user-status";
 import { logger } from "@/lib/monitoring/logger";
 import { loginSchema } from "@/lib/validations/auth";
 
@@ -140,18 +141,41 @@ export const authConfig = {
     verifyRequest: "/login",
   },
   callbacks: {
-    // CRITICAL: Pass role and tenantId to token and session
+    // CRITICAL: Pass role, tenantId, and status to token and session
     async jwt({ token, user, trigger, session }: any) {
       if (user) {
         // Initial sign in
         const dbUser = await db.user.findUnique({
           where: { id: user.id },
-          select: { role: true, tenantId: true },
+          select: { role: true, tenantId: true, status: true },
         });
 
         if (dbUser) {
           token.role = dbUser.role;
           token.tenantId = dbUser.tenantId;
+          token.status = dbUser.status; // ✅ SECURITY [P1.2]: Include status in token
+        }
+      }
+
+      // ✅ SECURITY [P1.2]: Verify user status on every token refresh
+      if (token.sub) {
+        const dbUser = await db.user.findUnique({
+          where: { id: token.sub },
+          select: { status: true },
+        });
+
+        if (dbUser && !canUserLogin(dbUser.status as UserStatus)) {
+          logger.warn(
+            { userId: token.sub, status: dbUser.status },
+            "Token refresh blocked: user status is inactive",
+          );
+          // Return null to invalidate the token
+          return null as any;
+        }
+
+        // Update status in token if changed
+        if (dbUser) {
+          token.status = dbUser.status;
         }
       }
 
@@ -159,6 +183,7 @@ export const authConfig = {
       if (trigger === "update" && session) {
         token.role = session.role;
         token.tenantId = session.tenantId;
+        token.status = session.status;
       }
 
       return token;
@@ -168,31 +193,40 @@ export const authConfig = {
         session.user.id = token.sub!;
         session.user.role = token.role as UserRole;
         session.user.tenantId = token.tenantId as string | null;
+        session.user.status = token.status as UserStatus; // ✅ SECURITY [P1.2]: Include status in session
       }
       return session;
     },
     async signIn(params: any) {
       const { user, account } = params;
 
-      // ✅ SECURITY [P1.1]: Block login if email not verified
-      // Only enforce for credentials login (not OAuth)
-      if (account?.provider === "credentials") {
-        // Check if email is verified
-        const dbUser = await db.user.findUnique({
-          where: { id: user.id },
-          select: { emailVerified: true, email: true },
-        });
+      // ✅ SECURITY [P1.2]: Block login if user status is not ACTIVE
+      const dbUser = await db.user.findUnique({
+        where: { id: user.id },
+        select: { emailVerified: true, email: true, status: true },
+      });
 
-        if (!dbUser?.emailVerified) {
-          logger.warn({ email: dbUser?.email }, "Login blocked: email not verified");
-          // Return false to block sign in
-          // NextAuth will redirect to error page
+      if (dbUser) {
+        // Check user status first (applies to all providers)
+        if (!canUserLogin(dbUser.status as UserStatus)) {
+          logger.warn(
+            { email: dbUser.email, status: dbUser.status },
+            "Login blocked: user account is inactive",
+          );
           return false;
+        }
+
+        // ✅ SECURITY [P1.1]: Block login if email not verified
+        // Only enforce for credentials login (not OAuth)
+        if (account?.provider === "credentials") {
+          if (!dbUser.emailVerified) {
+            logger.warn({ email: dbUser.email }, "Login blocked: email not verified");
+            return false;
+          }
         }
       }
 
       // OAuth providers (Google) have email verified by default
-      // Allow all OAuth sign ins
       return true;
     },
   },
@@ -232,11 +266,13 @@ declare module "next-auth" {
       image?: string | null;
       role: UserRole;
       tenantId: string | null;
+      status: UserStatus; // ✅ SECURITY [P1.2]: User account status
     };
   }
 
   interface User {
     role?: UserRole;
     tenantId?: string | null;
+    status?: UserStatus;
   }
 }
