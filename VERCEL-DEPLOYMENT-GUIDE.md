@@ -1,7 +1,7 @@
 # 🚀 Guía de Deployment en Vercel - Production Ready
 
-**Versión**: 1.0.0 - Phase 2 Complete
-**Última actualización**: 2025-11-19
+**Versión**: 1.1.0 - P1.10/P1.11 Complete (Feature Flags & Monitoring)
+**Última actualización**: 2025-11-23
 **Estado**: Production Ready for Deployment
 
 ---
@@ -26,6 +26,7 @@ DATABASE_URL="postgresql://user:password@host.neon.tech/tienda_online?sslmode=re
 ```
 
 **Pasos**:
+
 1. Ir a https://neon.tech
 2. Crear proyecto PostgreSQL para producción
 3. Copiar connection string
@@ -46,6 +47,7 @@ NEXTAUTH_URL="https://tu-dominio.com"
 ```
 
 **Pasos**:
+
 1. Ir a https://generate-secret.vercel.app/32
 2. Copiar el valor generado
 3. Reemplazar `tu-dominio.com` con tu dominio real
@@ -61,6 +63,7 @@ GOOGLE_SECRET="[COPIAR_DE_GOOGLE_CLOUD]"
 ```
 
 **Pasos para obtener**:
+
 1. Ir a https://console.cloud.google.com
 2. Crear nuevo proyecto o seleccionar existente
 3. Buscar "OAuth consent screen"
@@ -83,6 +86,7 @@ STRIPE_WEBHOOK_SECRET="whsec_YOUR_WEBHOOK_SECRET"
 ```
 
 **Pasos**:
+
 1. Ir a https://dashboard.stripe.com
 2. Dashboard → API keys
 3. Copiar Secret key y Publishable key
@@ -104,6 +108,7 @@ RESEND_API_KEY="re_YOUR_RESEND_API_KEY"
 ```
 
 **Pasos**:
+
 1. Ir a https://resend.com
 2. Crear cuenta y verificar dominio
 3. API keys → Crear nueva
@@ -120,6 +125,43 @@ NEXT_PUBLIC_APP_URL="https://tu-dominio.com"
 # Clave pública de Stripe (accesible desde cliente)
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="pk_[test_o_live]_YOUR_KEY"
 ```
+
+---
+
+### 7️⃣ OPCIONAL - Feature Flags & Monitoring
+
+✅ **P1.10/P1.11**: Variables opcionales para features avanzadas
+
+```env
+# ===== FEATURE FLAGS =====
+# Analytics - Google Analytics (opcional)
+ENABLE_ANALYTICS="true"
+NEXT_PUBLIC_GA_ID="G-XXXXXXXXXX"
+
+# Push Notifications (opcional, requiere setup adicional)
+ENABLE_PUSH_NOTIFICATIONS="false"
+
+# Maintenance Mode - Mostrar página de mantenimiento
+MAINTENANCE_MODE="false"
+
+# Debug Mode - Logs detallados (auto-habilitado en dev)
+DEBUG="false"
+
+# ===== LOGGING & MONITORING =====
+# Log Level: trace, debug, info, warn, error, fatal
+LOG_LEVEL="info"
+
+# Sentry - Error tracking (opcional)
+NEXT_PUBLIC_SENTRY_DSN="https://YOUR_DSN@sentry.io/PROJECT_ID"
+```
+
+**Pasos** (Opcional):
+
+1. **Google Analytics**: Ir a https://analytics.google.com → Crear propiedad → Copiar GA4 ID
+2. **Sentry**: Ir a https://sentry.io → Crear proyecto → Copiar DSN
+3. Feature flags: Configurar según necesidades del proyecto
+
+**Nota**: Estas variables son opcionales. El sistema funciona sin ellas.
 
 ---
 
@@ -159,6 +201,8 @@ vercel env add NEXTAUTH_SECRET
 
 ## ✅ Lista de Variables (Copiar y Pegar)
 
+### Variables Requeridas (OBLIGATORIAS)
+
 ```
 DATABASE_URL
 NEXTAUTH_SECRET
@@ -173,13 +217,32 @@ NEXT_PUBLIC_APP_URL
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
 ```
 
-**Total**: 11 variables de entorno
+**Total Requeridas**: 11 variables
+
+### Variables Opcionales (Feature Flags & Monitoring)
+
+✅ **P1.10/P1.11**: Agregar según necesidades
+
+```
+ENABLE_ANALYTICS
+NEXT_PUBLIC_GA_ID
+ENABLE_PUSH_NOTIFICATIONS
+MAINTENANCE_MODE
+DEBUG
+LOG_LEVEL
+NEXT_PUBLIC_SENTRY_DSN
+```
+
+**Total Opcionales**: 7 variables
+
+**Total General**: 18 variables de entorno (11 requeridas + 7 opcionales)
 
 ---
 
 ## 🔒 Seguridad - Mejores Prácticas
 
 ### ✅ DO's (Si hacer esto):
+
 - ✅ Usar secretos diferentes para test y producción
 - ✅ Rotar secretos regularmente
 - ✅ Usar Vercel Environment Variables (nunca hardcodear)
@@ -187,6 +250,7 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
 - ✅ Habilitar 2FA en Google Cloud, Stripe, Resend
 
 ### ❌ DON'Ts (No hacer esto):
+
 - ❌ Nunca pushear `.env.local` al repo
 - ❌ No compartir secretos por Slack/email
 - ❌ No usar mismos secretos en dev y prod
@@ -210,6 +274,7 @@ https://tu-dominio.com/api/webhooks/stripe
 ```
 
 **Verificar en Vercel Logs**:
+
 ```
 Vercel Dashboard → Deployments → Logs → Filter: "webhook"
 ```
@@ -219,16 +284,19 @@ Vercel Dashboard → Deployments → Logs → Filter: "webhook"
 ## 🚀 Proceso de Deployment
 
 ### Paso 1: Push a Main
+
 ```bash
 git push origin main
 ```
 
 ### Paso 2: Vercel Auto-Deploy
+
 - Automático: Vercel detecta push a `main`
 - Builds y deploya en ~2 minutos
 - Status: Vercel deployment check en GitHub
 
 ### Paso 3: Verificar
+
 - URL: https://tu-dominio.com
 - Logs: Vercel Dashboard → Deployments → Logs
 - Funciones: Probar login, pago, emails
@@ -263,21 +331,25 @@ Filter por: "error", "warning", "DATABASE_ERROR"
 ## 🆘 Troubleshooting
 
 ### "DATABASE_ERROR: Connection failed"
+
 - Verificar `DATABASE_URL` está correcta
 - Revisar IP whitelist en Neon
 - Ejecutar `prisma migrate deploy` localmente
 
 ### "GOOGLE_OAUTH: Invalid client"
+
 - Verificar `GOOGLE_ID` y `GOOGLE_SECRET`
 - Revisar redirect URI en Google Cloud
 - Confirmar dominio coincida exactamente
 
 ### "STRIPE: API key invalid"
+
 - Asegurarse de usar keys de PRODUCCIÓN (no test)
 - Verificar `STRIPE_SECRET_KEY` comienza con `sk_live_`
 - Revisar webhooks están configurados
 
 ### "EMAIL: RESEND API failed"
+
 - Verificar `RESEND_API_KEY` es válido
 - Comprobar dominio está verificado en Resend
 - Revisar rate limits (100/día)
@@ -313,6 +385,7 @@ Filter por: "error", "warning", "DATABASE_ERROR"
 ## 🔄 Actualizaciones Futuras
 
 ### Desde Vercel CLI:
+
 ```bash
 # Pull cambios
 git pull origin main
@@ -346,5 +419,5 @@ vercel rollback
 ---
 
 **Estado**: ✅ Ready for Production Deployment
-**Versión de Código**: v1.0.0 (Phase 2 Complete)
-**Última Actualización**: 2025-11-19
+**Versión de Código**: v1.1.0 (P1.10/P1.11 Complete - Feature Flags & Monitoring)
+**Última Actualización**: 2025-11-23
