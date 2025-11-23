@@ -1,3 +1,10 @@
+// ✅ TESTING [P1.9]: Load test environment variables
+import { config } from "dotenv";
+import { resolve } from "path";
+
+// Load .env.test for testing
+config({ path: resolve(__dirname, ".env.test") });
+
 import "@testing-library/jest-dom";
 
 jest.mock("next/navigation", () => ({
