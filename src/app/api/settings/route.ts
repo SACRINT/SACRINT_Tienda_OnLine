@@ -1,14 +1,16 @@
 // GET /api/settings
+// ✅ SECURITY [P0.3]: Fixed tenant isolation - using session tenantId
 // PUT /api/settings
 // Store settings management
 
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/auth";
+import { getCurrentUserTenantId } from "@/lib/db/tenant";
+import { logger } from "@/lib/monitoring/logger";
 import { db } from "@/lib/db";
 import { z } from "zod";
 
 const SettingsSchema = z.object({
-  tenantId: z.string().uuid(),
   settings: z.object({
     storeName: z.string().min(1).optional(),
     storeDescription: z.string().optional(),
@@ -39,25 +41,15 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (
-      session.user.role !== "STORE_OWNER" &&
-      session.user.role !== "SUPER_ADMIN"
-    ) {
+    if (session.user.role !== "STORE_OWNER" && session.user.role !== "SUPER_ADMIN") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const searchParams = req.nextUrl.searchParams;
-    const tenantId = searchParams.get("tenantId");
+    // ✅ SECURITY: Get tenantId from authenticated session (not query params)
+    const tenantId = await getCurrentUserTenantId();
 
     if (!tenantId) {
-      return NextResponse.json({ error: "tenantId required" }, { status: 400 });
-    }
-
-    if (
-      session.user.role === "STORE_OWNER" &&
-      session.user.tenantId !== tenantId
-    ) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      return NextResponse.json({ error: "No tenant assigned to user" }, { status: 400 });
     }
 
     // Get tenant with basic info
@@ -99,11 +91,8 @@ export async function GET(req: NextRequest) {
       settings,
     });
   } catch (error) {
-    console.error("Get settings error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    logger.error({ error }, "Get settings error");
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
@@ -115,11 +104,15 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (
-      session.user.role !== "STORE_OWNER" &&
-      session.user.role !== "SUPER_ADMIN"
-    ) {
+    if (session.user.role !== "STORE_OWNER" && session.user.role !== "SUPER_ADMIN") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    // ✅ SECURITY: Get tenantId from authenticated session (not body)
+    const tenantId = await getCurrentUserTenantId();
+
+    if (!tenantId) {
+      return NextResponse.json({ error: "No tenant assigned to user" }, { status: 400 });
     }
 
     const body = await req.json();
@@ -132,14 +125,7 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    const { tenantId, settings } = validation.data;
-
-    if (
-      session.user.role === "STORE_OWNER" &&
-      session.user.tenantId !== tenantId
-    ) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
+    const { settings } = validation.data;
 
     // Update tenant feature flags (stored as JSON)
     const updated = await db.tenant.update({
@@ -161,10 +147,7 @@ export async function PUT(req: NextRequest) {
       settings: settings,
     });
   } catch (error) {
-    console.error("Update settings error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    logger.error({ error }, "Update settings error");
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

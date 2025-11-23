@@ -1,8 +1,11 @@
 // GET /api/products/:id
+// ✅ SECURITY [P0.3]: Fixed tenant isolation - using session tenantId
 // GET, PUT, PATCH, DELETE operations for individual product
 
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/auth";
+import { getCurrentUserTenantId } from "@/lib/db/tenant";
+import { logger } from "@/lib/monitoring/logger";
 
 import { db } from "@/lib/db";
 import { z } from "zod";
@@ -11,10 +14,7 @@ import { z } from "zod";
 export const dynamic = "force-dynamic";
 
 // GET single product
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } },
-) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await auth();
 
@@ -22,11 +22,11 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const searchParams = req.nextUrl.searchParams;
-    const tenantId = searchParams.get("tenantId");
+    // ✅ SECURITY: Get tenantId from authenticated session (not query params)
+    const tenantId = await getCurrentUserTenantId();
 
     if (!tenantId) {
-      return NextResponse.json({ error: "tenantId required" }, { status: 400 });
+      return NextResponse.json({ error: "No tenant assigned to user" }, { status: 400 });
     }
 
     const product = await db.product.findFirst({
@@ -47,17 +47,13 @@ export async function GET(
 
     return NextResponse.json(product);
   } catch (error) {
-    console.error("Get product error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    logger.error({ error }, "Get product error");
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
 // PATCH for quick updates (used by QuickEdit component)
 const QuickUpdateSchema = z.object({
-  tenantId: z.string().uuid(),
   name: z.string().min(1).optional(),
   description: z.string().optional(),
   price: z.number().positive().optional(),
@@ -65,10 +61,7 @@ const QuickUpdateSchema = z.object({
   status: z.enum(["ACTIVE", "DRAFT", "ARCHIVED"]).optional(),
 });
 
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } },
-) {
+export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await auth();
 
@@ -76,11 +69,15 @@ export async function PATCH(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (
-      session.user.role !== "STORE_OWNER" &&
-      session.user.role !== "SUPER_ADMIN"
-    ) {
+    if (session.user.role !== "STORE_OWNER" && session.user.role !== "SUPER_ADMIN") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    // ✅ SECURITY: Get tenantId from authenticated session (not body)
+    const tenantId = await getCurrentUserTenantId();
+
+    if (!tenantId) {
+      return NextResponse.json({ error: "No tenant assigned to user" }, { status: 400 });
     }
 
     const body = await req.json();
@@ -93,15 +90,7 @@ export async function PATCH(
       );
     }
 
-    const { tenantId, ...updates } = validation.data;
-
-    // Validate tenant access
-    if (
-      session.user.role === "STORE_OWNER" &&
-      session.user.tenantId !== tenantId
-    ) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
+    const updates = validation.data;
 
     // Verify product exists and belongs to tenant
     const existing = await db.product.findFirst({
@@ -134,17 +123,13 @@ export async function PATCH(
       product: updated,
     });
   } catch (error) {
-    console.error("Patch product error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    logger.error({ error }, "Patch product error");
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
 // PUT for full updates
 const UpdateProductSchema = z.object({
-  tenantId: z.string().uuid(),
   name: z.string().min(1),
   description: z.string().optional(),
   price: z.number().positive(),
@@ -155,10 +140,7 @@ const UpdateProductSchema = z.object({
   images: z.array(z.string().url()).optional(),
 });
 
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: { id: string } },
-) {
+export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await auth();
 
@@ -166,11 +148,15 @@ export async function PUT(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (
-      session.user.role !== "STORE_OWNER" &&
-      session.user.role !== "SUPER_ADMIN"
-    ) {
+    if (session.user.role !== "STORE_OWNER" && session.user.role !== "SUPER_ADMIN") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    // ✅ SECURITY: Get tenantId from authenticated session (not body)
+    const tenantId = await getCurrentUserTenantId();
+
+    if (!tenantId) {
+      return NextResponse.json({ error: "No tenant assigned to user" }, { status: 400 });
     }
 
     const body = await req.json();
@@ -183,14 +169,7 @@ export async function PUT(
       );
     }
 
-    const { tenantId, images, ...data } = validation.data;
-
-    if (
-      session.user.role === "STORE_OWNER" &&
-      session.user.tenantId !== tenantId
-    ) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
+    const { images, ...data } = validation.data;
 
     // Verify product exists and belongs to tenant
     const existing = await db.product.findFirst({
@@ -240,19 +219,13 @@ export async function PUT(
       product: updated,
     });
   } catch (error) {
-    console.error("Update product error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    logger.error({ error }, "Update product error");
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
 // DELETE (soft delete)
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } },
-) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await auth();
 
@@ -260,25 +233,15 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (
-      session.user.role !== "STORE_OWNER" &&
-      session.user.role !== "SUPER_ADMIN"
-    ) {
+    if (session.user.role !== "STORE_OWNER" && session.user.role !== "SUPER_ADMIN") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const searchParams = req.nextUrl.searchParams;
-    const tenantId = searchParams.get("tenantId");
+    // ✅ SECURITY: Get tenantId from authenticated session (not query params)
+    const tenantId = await getCurrentUserTenantId();
 
     if (!tenantId) {
-      return NextResponse.json({ error: "tenantId required" }, { status: 400 });
-    }
-
-    if (
-      session.user.role === "STORE_OWNER" &&
-      session.user.tenantId !== tenantId
-    ) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      return NextResponse.json({ error: "No tenant assigned to user" }, { status: 400 });
     }
 
     // Verify product exists and belongs to tenant
@@ -314,10 +277,7 @@ export async function DELETE(
       product: deleted,
     });
   } catch (error) {
-    console.error("Delete product error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    logger.error({ error }, "Delete product error");
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

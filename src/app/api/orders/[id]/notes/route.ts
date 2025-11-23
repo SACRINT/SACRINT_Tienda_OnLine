@@ -1,8 +1,11 @@
 // POST /api/orders/:id/notes
+// ✅ SECURITY [P0.3]: Fixed tenant isolation - using session tenantId
 // Add notes to orders (internal only - stored in order.adminNotes)
 
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/auth";
+import { getCurrentUserTenantId } from "@/lib/db/tenant";
+import { logger } from "@/lib/monitoring/logger";
 import { db } from "@/lib/db";
 import { z } from "zod";
 
@@ -10,14 +13,10 @@ import { z } from "zod";
 export const dynamic = "force-dynamic";
 
 const CreateNoteSchema = z.object({
-  tenantId: z.string().cuid(),
   content: z.string().min(1),
 });
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } },
-) {
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await auth();
 
@@ -25,11 +24,15 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (
-      session.user.role !== "STORE_OWNER" &&
-      session.user.role !== "SUPER_ADMIN"
-    ) {
+    if (session.user.role !== "STORE_OWNER" && session.user.role !== "SUPER_ADMIN") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    // ✅ SECURITY: Get tenantId from authenticated session (not body)
+    const tenantId = await getCurrentUserTenantId();
+
+    if (!tenantId) {
+      return NextResponse.json({ error: "No tenant assigned to user" }, { status: 400 });
     }
 
     const body = await req.json();
@@ -42,14 +45,7 @@ export async function POST(
       );
     }
 
-    const { tenantId, content } = validation.data;
-
-    if (
-      session.user.role === "STORE_OWNER" &&
-      session.user.tenantId !== tenantId
-    ) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
+    const { content } = validation.data;
 
     // Verify order exists and belongs to tenant
     const order = await db.order.findFirst({
@@ -81,20 +77,14 @@ export async function POST(
       adminNotes: updatedOrder.adminNotes,
     });
   } catch (error) {
-    console.error("Create note error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    logger.error({ error }, "Create note error");
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
 // GET /api/orders/:id/notes
 // Get notes for an order (stored in adminNotes)
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } },
-) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await auth();
 
@@ -102,11 +92,11 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const searchParams = req.nextUrl.searchParams;
-    const tenantId = searchParams.get("tenantId");
+    // ✅ SECURITY: Get tenantId from authenticated session (not query params)
+    const tenantId = await getCurrentUserTenantId();
 
     if (!tenantId) {
-      return NextResponse.json({ error: "tenantId required" }, { status: 400 });
+      return NextResponse.json({ error: "No tenant assigned to user" }, { status: 400 });
     }
 
     // Verify tenant access
@@ -125,24 +115,16 @@ export async function GET(
       notes: order.adminNotes || "",
     });
   } catch (error) {
-    console.error("Get notes error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    logger.error({ error }, "Get notes error");
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
 // DELETE /api/orders/:id/notes
 // Clear all notes for an order
-const DeleteNoteSchema = z.object({
-  tenantId: z.string().cuid(),
-});
+const DeleteNoteSchema = z.object({});
 
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } },
-) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await auth();
 
@@ -150,30 +132,15 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (
-      session.user.role !== "STORE_OWNER" &&
-      session.user.role !== "SUPER_ADMIN"
-    ) {
+    if (session.user.role !== "STORE_OWNER" && session.user.role !== "SUPER_ADMIN") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const body = await req.json();
-    const validation = DeleteNoteSchema.safeParse(body);
+    // ✅ SECURITY: Get tenantId from authenticated session (not body)
+    const tenantId = await getCurrentUserTenantId();
 
-    if (!validation.success) {
-      return NextResponse.json(
-        { error: "Invalid request", details: validation.error.issues },
-        { status: 400 },
-      );
-    }
-
-    const { tenantId } = validation.data;
-
-    if (
-      session.user.role === "STORE_OWNER" &&
-      session.user.tenantId !== tenantId
-    ) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (!tenantId) {
+      return NextResponse.json({ error: "No tenant assigned to user" }, { status: 400 });
     }
 
     // Verify order exists and belongs to tenant
@@ -201,10 +168,7 @@ export async function DELETE(
       message: "All notes cleared",
     });
   } catch (error) {
-    console.error("Delete notes error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    logger.error({ error }, "Delete notes error");
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

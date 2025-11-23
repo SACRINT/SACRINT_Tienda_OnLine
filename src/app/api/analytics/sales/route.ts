@@ -1,8 +1,11 @@
 // GET /api/analytics/sales
+// ✅ SECURITY [P0.3]: Fixed tenant isolation - using session tenantId
 // Sales metrics and reports
 
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/auth";
+import { getCurrentUserTenantId } from "@/lib/db/tenant";
+import { logger } from "@/lib/monitoring/logger";
 
 import { getSalesMetrics } from "@/lib/analytics/queries";
 import { AnalyticsResponse, SalesMetrics } from "@/lib/analytics/types";
@@ -20,31 +23,22 @@ export async function GET(req: NextRequest) {
     }
 
     // Only STORE_OWNER and SUPER_ADMIN can access analytics
-    if (
-      session.user.role !== "STORE_OWNER" &&
-      session.user.role !== "SUPER_ADMIN"
-    ) {
+    if (session.user.role !== "STORE_OWNER" && session.user.role !== "SUPER_ADMIN") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    // ✅ SECURITY: Get tenantId from authenticated session (not query params)
+    const tenantId = await getCurrentUserTenantId();
+
+    if (!tenantId) {
+      return NextResponse.json({ error: "No tenant assigned to user" }, { status: 400 });
     }
 
     // Parse query parameters
     const searchParams = req.nextUrl.searchParams;
-    const tenantId = searchParams.get("tenantId");
     const startDate = searchParams.get("startDate");
     const endDate = searchParams.get("endDate");
     const period = searchParams.get("period") || "last30days";
-
-    // Validate tenant access
-    if (
-      !tenantId ||
-      (session.user.role === "STORE_OWNER" &&
-        session.user.tenantId !== tenantId)
-    ) {
-      return NextResponse.json(
-        { error: "Forbidden - Invalid tenant" },
-        { status: 403 },
-      );
-    }
 
     // Determine date range
     let start: Date;
@@ -98,10 +92,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(response);
   } catch (error) {
-    console.error("Analytics sales error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    logger.error({ error }, "Analytics sales error");
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

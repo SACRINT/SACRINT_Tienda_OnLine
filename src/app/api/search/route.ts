@@ -1,9 +1,11 @@
 // Search API Endpoint
+// ✅ SECURITY [P0.3]: Fixed tenant isolation - using session tenantId
 // Week 17-18: Advanced search with filters
 
 import { NextRequest, NextResponse } from "next/server";
 import { searchProducts, logSearchQuery } from "@/lib/search/search-engine";
 import { auth } from "@/lib/auth/auth";
+import { logger } from "@/lib/monitoring/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -40,8 +42,7 @@ export async function GET(req: NextRequest) {
       : undefined;
     const inStock = searchParams.get("inStock") === "true";
     const featured = searchParams.get("featured") === "true";
-    const sortBy = (searchParams.get("sortBy") ||
-      "relevance") as
+    const sortBy = (searchParams.get("sortBy") || "relevance") as
       | "relevance"
       | "price-asc"
       | "price-desc"
@@ -54,10 +55,7 @@ export async function GET(req: NextRequest) {
 
     // Validate pagination
     if (page < 1 || limit < 1 || limit > 100) {
-      return NextResponse.json(
-        { error: "Invalid pagination parameters" },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: "Invalid pagination parameters" }, { status: 400 });
     }
 
     // Execute search
@@ -78,20 +76,12 @@ export async function GET(req: NextRequest) {
 
     // Log search for analytics
     const session = await auth();
-    await logSearchQuery(
-      query,
-      results.pagination.total,
-      tenantId,
-      session?.user?.id,
-    );
+    await logSearchQuery(query, results.pagination.total, tenantId, session?.user?.id);
 
     // Return results
     return NextResponse.json(results);
   } catch (error) {
-    console.error("Search error:", error);
-    return NextResponse.json(
-      { error: "Failed to search products" },
-      { status: 500 },
-    );
+    logger.error({ error }, "Search error");
+    return NextResponse.json({ error: "Failed to search products" }, { status: 500 });
   }
 }

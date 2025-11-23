@@ -1,8 +1,11 @@
 // POST /api/orders/:id/refund
+// ✅ SECURITY [P0.3]: Fixed tenant isolation - using session tenantId
 // Process refunds via Stripe
 
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/auth";
+import { getCurrentUserTenantId } from "@/lib/db/tenant";
+import { logger } from "@/lib/monitoring/logger";
 import { db } from "@/lib/db";
 import { z } from "zod";
 import Stripe from "stripe";
@@ -15,18 +18,12 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 });
 
 const RefundSchema = z.object({
-  tenantId: z.string().uuid(),
   amount: z.number().positive().optional(), // If not provided, full refund
-  reason: z
-    .enum(["duplicate", "fraudulent", "requested_by_customer"])
-    .optional(),
+  reason: z.enum(["duplicate", "fraudulent", "requested_by_customer"]).optional(),
   note: z.string().optional(),
 });
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } },
-) {
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await auth();
 
@@ -35,11 +32,15 @@ export async function POST(
     }
 
     // Only admins can process refunds
-    if (
-      session.user.role !== "STORE_OWNER" &&
-      session.user.role !== "SUPER_ADMIN"
-    ) {
+    if (session.user.role !== "STORE_OWNER" && session.user.role !== "SUPER_ADMIN") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    // ✅ SECURITY: Get tenantId from authenticated session (not body)
+    const tenantId = await getCurrentUserTenantId();
+
+    if (!tenantId) {
+      return NextResponse.json({ error: "No tenant assigned to user" }, { status: 400 });
     }
 
     const body = await req.json();
@@ -52,14 +53,7 @@ export async function POST(
       );
     }
 
-    const { tenantId, amount, reason, note } = validation.data;
-
-    if (
-      session.user.role === "STORE_OWNER" &&
-      session.user.tenantId !== tenantId
-    ) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
+    const { amount, reason, note } = validation.data;
 
     // Get order with payment info
     const order = await db.order.findFirst({
@@ -75,18 +69,12 @@ export async function POST(
 
     // Verify order has a payment ID (required for refund)
     if (!order.paymentId) {
-      return NextResponse.json(
-        { error: "Order has no payment to refund" },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: "Order has no payment to refund" }, { status: 400 });
     }
 
     // Verify order status allows refund
     if (order.status === "CANCELLED") {
-      return NextResponse.json(
-        { error: "Cannot refund cancelled order" },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: "Cannot refund cancelled order" }, { status: 400 });
     }
 
     // Note: Full refund tracking not implemented - supporting immediate refund processing only
@@ -120,8 +108,7 @@ export async function POST(
     const updatedOrder = await db.order.update({
       where: { id: params.id },
       data: {
-        status:
-          refundAmount >= Number(order.total) ? "CANCELLED" : order.status,
+        status: refundAmount >= Number(order.total) ? "CANCELLED" : order.status,
       },
     });
 
@@ -157,29 +144,20 @@ export async function POST(
       order: updatedOrder,
     });
   } catch (error: any) {
-    console.error("Refund error:", error);
+    logger.error({ error }, "Refund error");
 
     // Handle Stripe errors
-    if (
-      error.type === "StripeCardError" ||
-      error.type === "StripeInvalidRequestError"
-    ) {
+    if (error.type === "StripeCardError" || error.type === "StripeInvalidRequestError") {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
 // GET /api/orders/:id/refund
 // Get refund history for an order
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } },
-) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await auth();
 
@@ -187,11 +165,11 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const searchParams = req.nextUrl.searchParams;
-    const tenantId = searchParams.get("tenantId");
+    // ✅ SECURITY: Get tenantId from authenticated session (not query params)
+    const tenantId = await getCurrentUserTenantId();
 
     if (!tenantId) {
-      return NextResponse.json({ error: "tenantId required" }, { status: 400 });
+      return NextResponse.json({ error: "No tenant assigned to user" }, { status: 400 });
     }
 
     // TODO: Implement refund history tracking - currently returning empty for future implementation
@@ -201,10 +179,7 @@ export async function GET(
       refunds: formattedRefunds,
     });
   } catch (error) {
-    console.error("Get refunds error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    logger.error({ error }, "Get refunds error");
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

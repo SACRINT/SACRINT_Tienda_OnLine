@@ -1,8 +1,11 @@
 // POST /api/products/bulk
+// ✅ SECURITY [P0.3]: Fixed tenant isolation - using session tenantId
 // Bulk operations for products
 
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/auth";
+import { getCurrentUserTenantId } from "@/lib/db/tenant";
+import { logger } from "@/lib/monitoring/logger";
 
 import { db } from "@/lib/db";
 import { z } from "zod";
@@ -11,7 +14,6 @@ import { z } from "zod";
 export const dynamic = "force-dynamic";
 
 const BulkOperationSchema = z.object({
-  tenantId: z.string().uuid(),
   productIds: z.array(z.string().uuid()),
   operation: z.enum([
     "delete",
@@ -33,11 +35,15 @@ export async function POST(req: NextRequest) {
     }
 
     // Only STORE_OWNER and SUPER_ADMIN can perform bulk operations
-    if (
-      session.user.role !== "STORE_OWNER" &&
-      session.user.role !== "SUPER_ADMIN"
-    ) {
+    if (session.user.role !== "STORE_OWNER" && session.user.role !== "SUPER_ADMIN") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    // ✅ SECURITY: Get tenantId from authenticated session (not body)
+    const tenantId = await getCurrentUserTenantId();
+
+    if (!tenantId) {
+      return NextResponse.json({ error: "No tenant assigned to user" }, { status: 400 });
     }
 
     const body = await req.json();
@@ -50,15 +56,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { tenantId, productIds, operation, value } = validation.data;
-
-    // Validate tenant access
-    if (
-      session.user.role === "STORE_OWNER" &&
-      session.user.tenantId !== tenantId
-    ) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
+    const { productIds, operation, value } = validation.data;
 
     let result;
 
@@ -102,10 +100,7 @@ export async function POST(req: NextRequest) {
 
       case "updatePrice":
         if (!value || typeof value !== "number") {
-          return NextResponse.json(
-            { error: "Price value required" },
-            { status: 400 },
-          );
+          return NextResponse.json({ error: "Price value required" }, { status: 400 });
         }
 
         result = await db.product.updateMany({
@@ -121,10 +116,7 @@ export async function POST(req: NextRequest) {
 
       case "updateStock":
         if (!value || typeof value !== "number") {
-          return NextResponse.json(
-            { error: "Stock value required" },
-            { status: 400 },
-          );
+          return NextResponse.json({ error: "Stock value required" }, { status: 400 });
         }
 
         result = await db.product.updateMany({
@@ -140,10 +132,7 @@ export async function POST(req: NextRequest) {
 
       case "assignCategory":
         if (!value || typeof value !== "string") {
-          return NextResponse.json(
-            { error: "Category ID required" },
-            { status: 400 },
-          );
+          return NextResponse.json({ error: "Category ID required" }, { status: 400 });
         }
 
         // Verify category exists and belongs to tenant
@@ -155,10 +144,7 @@ export async function POST(req: NextRequest) {
         });
 
         if (!category) {
-          return NextResponse.json(
-            { error: "Category not found" },
-            { status: 404 },
-          );
+          return NextResponse.json({ error: "Category not found" }, { status: 404 });
         }
 
         result = await db.product.updateMany({
@@ -173,10 +159,7 @@ export async function POST(req: NextRequest) {
         break;
 
       default:
-        return NextResponse.json(
-          { error: "Invalid operation" },
-          { status: 400 },
-        );
+        return NextResponse.json({ error: "Invalid operation" }, { status: 400 });
     }
 
     // TODO: Log activity - implement with dedicated activity log model if needed
@@ -193,11 +176,8 @@ export async function POST(req: NextRequest) {
       operation,
     });
   } catch (error) {
-    console.error("Bulk operation error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    logger.error({ error }, "Bulk operation error");
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
@@ -211,17 +191,15 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const searchParams = req.nextUrl.searchParams;
-    const tenantId = searchParams.get("tenantId");
-    const productIds = searchParams.get("productIds")?.split(",");
+    // ✅ SECURITY: Get tenantId from authenticated session (not query params)
+    const tenantId = await getCurrentUserTenantId();
 
-    if (
-      !tenantId ||
-      (session.user.role === "STORE_OWNER" &&
-        session.user.tenantId !== tenantId)
-    ) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (!tenantId) {
+      return NextResponse.json({ error: "No tenant assigned to user" }, { status: 400 });
     }
+
+    const searchParams = req.nextUrl.searchParams;
+    const productIds = searchParams.get("productIds")?.split(",");
 
     // Fetch products
     const products = await db.product.findMany({
@@ -262,10 +240,7 @@ export async function GET(req: NextRequest) {
       product.createdAt.toISOString(),
     ]);
 
-    const csv = [
-      csvHeaders.join(","),
-      ...csvRows.map((row: any) => row.join(",")),
-    ].join("\n");
+    const csv = [csvHeaders.join(","), ...csvRows.map((row: any) => row.join(","))].join("\n");
 
     return new NextResponse(csv, {
       headers: {
@@ -274,10 +249,7 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Export error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    logger.error({ error }, "Export error");
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

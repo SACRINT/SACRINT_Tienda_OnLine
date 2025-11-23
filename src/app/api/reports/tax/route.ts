@@ -1,8 +1,11 @@
 // GET /api/reports/tax
+// ✅ SECURITY [P0.3]: Fixed tenant isolation - using session tenantId
 // Tax collection reports by state
 
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/auth";
+import { getCurrentUserTenantId } from "@/lib/db/tenant";
+import { logger } from "@/lib/monitoring/logger";
 
 import { getTaxReports } from "@/lib/analytics/queries";
 import { subDays } from "date-fns";
@@ -18,25 +21,20 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (
-      session.user.role !== "STORE_OWNER" &&
-      session.user.role !== "SUPER_ADMIN"
-    ) {
+    if (session.user.role !== "STORE_OWNER" && session.user.role !== "SUPER_ADMIN") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    // ✅ SECURITY: Get tenantId from authenticated session (not query params)
+    const tenantId = await getCurrentUserTenantId();
+
+    if (!tenantId) {
+      return NextResponse.json({ error: "No tenant assigned to user" }, { status: 400 });
     }
 
     const searchParams = req.nextUrl.searchParams;
-    const tenantId = searchParams.get("tenantId");
     const startDate = searchParams.get("startDate");
     const endDate = searchParams.get("endDate");
-
-    if (
-      !tenantId ||
-      (session.user.role === "STORE_OWNER" &&
-        session.user.tenantId !== tenantId)
-    ) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
 
     const start = startDate ? new Date(startDate) : subDays(new Date(), 29);
     const end = endDate ? new Date(endDate) : new Date();
@@ -52,10 +50,7 @@ export async function GET(req: NextRequest) {
       generatedAt: new Date().toISOString(),
     });
   } catch (error) {
-    console.error("Tax reports error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    logger.error({ error }, "Tax reports error");
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

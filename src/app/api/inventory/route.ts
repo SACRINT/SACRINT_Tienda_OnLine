@@ -1,11 +1,14 @@
 /**
  * Inventory Management API
+ * ✅ SECURITY [P0.3]: Fixed tenant isolation - using session tenantId
  * GET - Get inventory status
  * POST - Adjust inventory
  */
 
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/auth";
+import { getCurrentUserTenantId } from "@/lib/db/tenant";
+import { logger } from "@/lib/monitoring/logger";
 import {
   getLowStockProducts,
   getOutOfStockProducts,
@@ -36,8 +39,14 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
+    // ✅ SECURITY: Get tenantId from authenticated session (not query params)
+    const tenantId = await getCurrentUserTenantId();
+
+    if (!tenantId) {
+      return NextResponse.json({ error: "No tenant assigned to user" }, { status: 400 });
+    }
+
     const { searchParams } = new URL(req.url);
-    const tenantId = searchParams.get("tenantId")!;
     const threshold = parseInt(searchParams.get("threshold") || "10");
 
     const [lowStock, outOfStock] = await Promise.all([
@@ -55,11 +64,8 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error("[Inventory API] GET error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    logger.error({ error }, "[Inventory API] GET error");
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
@@ -70,14 +76,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
+    // ✅ SECURITY: Get tenantId from authenticated session
+    const tenantId = await getCurrentUserTenantId();
+
+    if (!tenantId) {
+      return NextResponse.json({ error: "No tenant assigned to user" }, { status: 400 });
+    }
+
     const body = await req.json();
     const data = adjustInventorySchema.parse(body);
 
-    const result = await adjustInventory(
-      data.adjustments,
-      session.user.id,
-      session.user.tenantId!,
-    );
+    const result = await adjustInventory(data.adjustments, session.user.id, tenantId);
 
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 400 });
@@ -91,10 +100,7 @@ export async function POST(req: NextRequest) {
         { status: 400 },
       );
     }
-    console.error("[Inventory API] POST error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    logger.error({ error }, "[Inventory API] POST error");
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

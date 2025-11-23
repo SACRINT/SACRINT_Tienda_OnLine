@@ -1,8 +1,11 @@
 // GET /api/products/stock
+// ✅ SECURITY [P0.3]: Fixed tenant isolation - using session tenantId
 // Stock management data and alerts
 
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/auth";
+import { getCurrentUserTenantId } from "@/lib/db/tenant";
+import { logger } from "@/lib/monitoring/logger";
 
 import { db } from "@/lib/db";
 
@@ -18,22 +21,15 @@ export async function GET(req: NextRequest) {
     }
 
     // Only STORE_OWNER and SUPER_ADMIN can view stock data
-    if (
-      session.user.role !== "STORE_OWNER" &&
-      session.user.role !== "SUPER_ADMIN"
-    ) {
+    if (session.user.role !== "STORE_OWNER" && session.user.role !== "SUPER_ADMIN") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const searchParams = req.nextUrl.searchParams;
-    const tenantId = searchParams.get("tenantId");
+    // ✅ SECURITY: Get tenantId from authenticated session (not query params)
+    const tenantId = await getCurrentUserTenantId();
 
-    if (
-      !tenantId ||
-      (session.user.role === "STORE_OWNER" &&
-        session.user.tenantId !== tenantId)
-    ) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (!tenantId) {
+      return NextResponse.json({ error: "No tenant assigned to user" }, { status: 400 });
     }
 
     // Default low stock threshold
@@ -57,9 +53,7 @@ export async function GET(req: NextRequest) {
 
     // Categorize products by stock level
     const outOfStock = products.filter((p: any) => p.stock === 0);
-    const lowStock = products.filter(
-      (p: any) => p.stock > 0 && p.stock <= lowStockThreshold,
-    );
+    const lowStock = products.filter((p: any) => p.stock > 0 && p.stock <= lowStockThreshold);
     const inStock = products.filter((p: any) => p.stock > lowStockThreshold);
 
     // Calculate total inventory value
@@ -111,11 +105,8 @@ export async function GET(req: NextRequest) {
       generatedAt: new Date().toISOString(),
     });
   } catch (error) {
-    console.error("Stock data error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    logger.error({ error }, "Stock data error");
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
@@ -129,25 +120,22 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (
-      session.user.role !== "STORE_OWNER" &&
-      session.user.role !== "SUPER_ADMIN"
-    ) {
+    if (session.user.role !== "STORE_OWNER" && session.user.role !== "SUPER_ADMIN") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    // ✅ SECURITY: Get tenantId from authenticated session (not body)
+    const tenantId = await getCurrentUserTenantId();
+
+    if (!tenantId) {
+      return NextResponse.json({ error: "No tenant assigned to user" }, { status: 400 });
     }
 
     const body = await req.json();
-    const { tenantId, productId, adjustment, reason } = body;
+    const { productId, adjustment, reason } = body;
 
-    if (!tenantId || !productId || typeof adjustment !== "number") {
+    if (!productId || typeof adjustment !== "number") {
       return NextResponse.json({ error: "Invalid request" }, { status: 400 });
-    }
-
-    if (
-      session.user.role === "STORE_OWNER" &&
-      session.user.tenantId !== tenantId
-    ) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     // Get current product
@@ -187,10 +175,7 @@ export async function PATCH(req: NextRequest) {
       adjustment,
     });
   } catch (error) {
-    console.error("Stock adjustment error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    logger.error({ error }, "Stock adjustment error");
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
