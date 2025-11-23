@@ -1,6 +1,7 @@
 // User Registration Endpoint
 // POST /api/auth/signup
 // Creates new user with email/password and automatically creates a tenant
+// ✅ SECURITY [P1.1]: Sends email verification
 
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db/client";
@@ -8,6 +9,10 @@ import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { USER_ROLES } from "@/lib/types/user-role";
 import { applyRateLimit, RATE_LIMITS } from "@/lib/security/rate-limiter";
+import { createVerificationToken, generateVerificationUrl } from "@/lib/auth/verification-tokens";
+import { sendEmail } from "@/lib/email/email-service";
+import { EmailTemplate } from "@/lib/db/enums";
+import { logger } from "@/lib/monitoring/logger";
 
 // Validation schema
 const SignupSchema = z.object({
@@ -82,7 +87,7 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      // Create user
+      // Create user (emailVerified = null until verification)
       const user = await tx.user.create({
         data: {
           email,
@@ -90,6 +95,7 @@ export async function POST(req: NextRequest) {
           name,
           tenantId: tenant.id,
           role: USER_ROLES.STORE_OWNER, // First user becomes STORE_OWNER
+          emailVerified: null, // ✅ SECURITY [P1.1]: Require email verification
         },
         select: {
           id: true,
@@ -104,16 +110,49 @@ export async function POST(req: NextRequest) {
       return { user, tenant };
     });
 
-    console.log("[SIGNUP] Success - User:", result.user.id, "Tenant:", result.tenant.id);
+    logger.info(
+      {
+        userId: result.user.id,
+        tenantId: result.tenant.id,
+        email: result.user.email,
+      },
+      "User and tenant created, sending verification email",
+    );
+
+    // ✅ SECURITY [P1.1]: Create verification token and send email
+    try {
+      const { token } = await createVerificationToken(email);
+      const verificationUrl = generateVerificationUrl(token);
+
+      await sendEmail({
+        to: email,
+        subject: "Verify Your Email Address",
+        template: EmailTemplate.ACCOUNT_VERIFICATION,
+        data: {
+          customerName: name,
+          verificationUrl,
+          expiresInHours: 24,
+        },
+        userId: result.user.id,
+        tenantId: result.tenant.id,
+      });
+
+      logger.info({ email, userId: result.user.id }, "Verification email sent successfully");
+    } catch (emailError) {
+      // Log error but don't fail registration
+      logger.error({ error: emailError, email }, "Failed to send verification email");
+      // User can request resend later
+    }
 
     return NextResponse.json(
       {
-        message: "User created successfully",
+        message: "User created successfully. Please check your email to verify your account.",
         user: result.user,
         tenant: {
           id: result.tenant.id,
           name: result.tenant.slug,
         },
+        requiresEmailVerification: true,
       },
       { status: 201 },
     );

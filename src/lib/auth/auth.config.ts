@@ -172,7 +172,27 @@ export const authConfig = {
       return session;
     },
     async signIn(params: any) {
-      // Allow all sign ins (can add additional checks here if needed)
+      const { user, account } = params;
+
+      // ✅ SECURITY [P1.1]: Block login if email not verified
+      // Only enforce for credentials login (not OAuth)
+      if (account?.provider === "credentials") {
+        // Check if email is verified
+        const dbUser = await db.user.findUnique({
+          where: { id: user.id },
+          select: { emailVerified: true, email: true },
+        });
+
+        if (!dbUser?.emailVerified) {
+          logger.warn({ email: dbUser?.email }, "Login blocked: email not verified");
+          // Return false to block sign in
+          // NextAuth will redirect to error page
+          return false;
+        }
+      }
+
+      // OAuth providers (Google) have email verified by default
+      // Allow all OAuth sign ins
       return true;
     },
   },
