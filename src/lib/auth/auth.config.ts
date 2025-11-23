@@ -141,42 +141,65 @@ export const authConfig = {
     verifyRequest: "/login",
   },
   callbacks: {
-    // CRITICAL: Pass role, tenantId, and status to token and session
+    // CRITICAL: Pass role, tenantId, status, and sessionVersion to token
     async jwt({ token, user, trigger, session }: any) {
       if (user) {
         // Initial sign in
         const dbUser = await db.user.findUnique({
           where: { id: user.id },
-          select: { role: true, tenantId: true, status: true },
+          select: {
+            role: true,
+            tenantId: true,
+            status: true,
+            sessionVersion: true,
+          },
         });
 
         if (dbUser) {
           token.role = dbUser.role;
           token.tenantId = dbUser.tenantId;
           token.status = dbUser.status; // ✅ SECURITY [P1.2]: Include status in token
+          token.sessionVersion = dbUser.sessionVersion; // ✅ SECURITY [P1.5]: Include session version
         }
       }
 
-      // ✅ SECURITY [P1.2]: Verify user status on every token refresh
+      // ✅ SECURITY [P1.2 & P1.5]: Verify user status and session version on token refresh
       if (token.sub) {
         const dbUser = await db.user.findUnique({
           where: { id: token.sub },
-          select: { status: true },
+          select: { status: true, sessionVersion: true },
         });
 
-        if (dbUser && !canUserLogin(dbUser.status as UserStatus)) {
+        if (!dbUser) {
+          logger.warn({ userId: token.sub }, "Token refresh blocked: user not found");
+          return null as any;
+        }
+
+        // Check if user status allows login
+        if (!canUserLogin(dbUser.status as UserStatus)) {
           logger.warn(
             { userId: token.sub, status: dbUser.status },
             "Token refresh blocked: user status is inactive",
           );
-          // Return null to invalidate the token
           return null as any;
         }
 
-        // Update status in token if changed
-        if (dbUser) {
-          token.status = dbUser.status;
+        // ✅ SECURITY [P1.5]: Validate session version (invalidates all sessions on version change)
+        if (token.sessionVersion !== dbUser.sessionVersion) {
+          logger.warn(
+            {
+              userId: token.sub,
+              tokenVersion: token.sessionVersion,
+              currentVersion: dbUser.sessionVersion,
+            },
+            "Token refresh blocked: session version mismatch (sessions invalidated)",
+          );
+          return null as any;
         }
+
+        // Update status and session version in token if changed
+        token.status = dbUser.status;
+        token.sessionVersion = dbUser.sessionVersion;
       }
 
       // Handle session updates
@@ -184,6 +207,7 @@ export const authConfig = {
         token.role = session.role;
         token.tenantId = session.tenantId;
         token.status = session.status;
+        token.sessionVersion = session.sessionVersion;
       }
 
       return token;
@@ -194,6 +218,7 @@ export const authConfig = {
         session.user.role = token.role as UserRole;
         session.user.tenantId = token.tenantId as string | null;
         session.user.status = token.status as UserStatus; // ✅ SECURITY [P1.2]: Include status in session
+        session.user.sessionVersion = token.sessionVersion as number; // ✅ SECURITY [P1.5]: Include session version
       }
       return session;
     },
@@ -267,6 +292,7 @@ declare module "next-auth" {
       role: UserRole;
       tenantId: string | null;
       status: UserStatus; // ✅ SECURITY [P1.2]: User account status
+      sessionVersion: number; // ✅ SECURITY [P1.5]: Session version for invalidation
     };
   }
 
@@ -274,5 +300,6 @@ declare module "next-auth" {
     role?: UserRole;
     tenantId?: string | null;
     status?: UserStatus;
+    sessionVersion?: number;
   }
 }

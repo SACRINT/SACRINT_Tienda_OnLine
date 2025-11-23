@@ -57,6 +57,7 @@ model User {
   tenantId              String?  // null para SUPER_ADMIN
   role                  UserRole @default(CUSTOMER)
   status                UserStatus @default(ACTIVE) // ✅ SECURITY [P1.2]: User account status
+  sessionVersion        Int      @default(1) // ✅ SECURITY [P1.5]: Session invalidation mechanism
 
   // OAuth
   googleId              String?  @unique
