@@ -1,21 +1,16 @@
 // NextAuth.js v5 Configuration
 // Multi-tenant E-commerce Platform with Google OAuth and Credentials
+// ✅ SECURITY [P1.7]: Strong password validation implemented
 
 import { type NextAuthConfig } from "next-auth";
 import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { db } from "@/lib/db/client";
-import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { USER_ROLES, type UserRole } from "@/lib/types/user-role";
 import { logger } from "@/lib/monitoring/logger";
-
-// Validation schemas
-const LoginSchema = z.object({
-  email: z.string().email("Invalid email format"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-});
+import { loginSchema } from "@/lib/validations/auth";
 
 export const authConfig = {
   adapter: PrismaAdapter(db),
@@ -90,7 +85,7 @@ export const authConfig = {
       async authorize(credentials) {
         logger.debug({ email: credentials?.email }, "Credentials login attempt");
 
-        const validation = LoginSchema.safeParse(credentials);
+        const validation = loginSchema.safeParse(credentials);
 
         if (!validation.success) {
           logger.warn(
