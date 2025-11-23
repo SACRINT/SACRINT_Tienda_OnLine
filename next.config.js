@@ -175,6 +175,47 @@ const nextConfig = {
           },
         ],
       },
+      // ✅ PERFORMANCE [P1.18]: API Cache Headers
+      // Products API - 5min cache
+      {
+        source: "/api/products",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, s-maxage=300, stale-while-revalidate=600",
+          },
+        ],
+      },
+      // Featured Products API - 10min cache
+      {
+        source: "/api/products/featured",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, s-maxage=600, stale-while-revalidate=1200",
+          },
+        ],
+      },
+      // Categories API - 30min cache
+      {
+        source: "/api/categories",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, s-maxage=1800, stale-while-revalidate=3600",
+          },
+        ],
+      },
+      // Dashboard Stats API - 2min cache
+      {
+        source: "/api/dashboard/stats",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "private, s-maxage=120, stale-while-revalidate=240",
+          },
+        ],
+      },
     ];
   },
 
