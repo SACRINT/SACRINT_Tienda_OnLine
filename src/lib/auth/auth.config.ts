@@ -201,7 +201,7 @@ export const authConfig = {
   },
   session: {
     strategy: "jwt" as const,
-    maxAge: 30 * 24 * 60 * 60, // 30 days
+    maxAge: 7 * 24 * 60 * 60, // 7 days (reduced from 30 for security - P1.4)
     updateAge: 24 * 60 * 60, // 1 day
   },
   debug: process.env.NODE_ENV === "development",
