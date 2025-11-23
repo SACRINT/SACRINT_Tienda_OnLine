@@ -1,8 +1,10 @@
 // Middleware - Route Protection and Security Headers
 // Handles authentication, route protection, and security headers
+// ✅ PERFORMANCE [P1.17]: Response time monitoring implemented
 
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { logger } from "@/lib/monitoring/logger";
 
 // CSP Header
 const CSP_HEADER = `
@@ -22,6 +24,9 @@ const CSP_HEADER = `
   .trim();
 
 export default async function middleware(req: NextRequest) {
+  // ✅ PERFORMANCE [P1.17]: Track request start time
+  const startTime = Date.now();
+
   try {
     const { pathname } = req.nextUrl;
 
@@ -31,14 +36,8 @@ export default async function middleware(req: NextRequest) {
       response.headers.set("X-Content-Type-Options", "nosniff");
       response.headers.set("X-Frame-Options", "DENY");
       response.headers.set("X-XSS-Protection", "1; mode=block");
-      response.headers.set(
-        "Referrer-Policy",
-        "strict-origin-when-cross-origin",
-      );
-      response.headers.set(
-        "Permissions-Policy",
-        "geolocation=(), microphone=(), camera=()",
-      );
+      response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+      response.headers.set("Permissions-Policy", "geolocation=(), microphone=(), camera=()");
       return response;
     };
 
@@ -82,19 +81,24 @@ export default async function middleware(req: NextRequest) {
     // Check if path is public (considering locale prefixes)
     const pathnameWithoutLocale = pathname.replace(/^\/(en|es)/, "") || "/";
     const isPublicPath = publicPaths.some(
-      (path) =>
-        pathnameWithoutLocale === path ||
-        pathnameWithoutLocale.startsWith(`${path}/`),
+      (path) => pathnameWithoutLocale === path || pathnameWithoutLocale.startsWith(`${path}/`),
     );
 
     // ===== ROUTE PROTECTION CHECKS =====
+
+    // Helper to add response time header
+    const addResponseTime = (response: NextResponse) => {
+      const duration = Date.now() - startTime;
+      response.headers.set("X-Response-Time", `${duration}ms`);
+      return response;
+    };
 
     // Protect dashboard routes
     if (pathnameWithoutLocale.startsWith("/dashboard")) {
       if (!isLoggedIn) {
         const loginUrl = new URL("/login", req.url);
         loginUrl.searchParams.set("callbackUrl", pathname);
-        return addSecurityHeaders(NextResponse.redirect(loginUrl));
+        return addResponseTime(addSecurityHeaders(NextResponse.redirect(loginUrl)));
       }
     }
 
@@ -103,11 +107,11 @@ export default async function middleware(req: NextRequest) {
       if (!isLoggedIn) {
         const loginUrl = new URL("/login", req.url);
         loginUrl.searchParams.set("callbackUrl", pathname);
-        return addSecurityHeaders(NextResponse.redirect(loginUrl));
+        return addResponseTime(addSecurityHeaders(NextResponse.redirect(loginUrl)));
       }
 
       if (userRole !== "STORE_OWNER" && userRole !== "SUPER_ADMIN") {
-        return addSecurityHeaders(NextResponse.redirect(new URL("/", req.url)));
+        return addResponseTime(addSecurityHeaders(NextResponse.redirect(new URL("/", req.url))));
       }
     }
 
@@ -121,19 +125,41 @@ export default async function middleware(req: NextRequest) {
       !pathname.startsWith("/api/search")
     ) {
       if (!isLoggedIn) {
-        return addSecurityHeaders(
-          NextResponse.json({ error: "Unauthorized" }, { status: 401 }),
+        return addResponseTime(
+          addSecurityHeaders(NextResponse.json({ error: "Unauthorized" }, { status: 401 })),
         );
       }
     }
 
     // Allow request to proceed
     const response = NextResponse.next();
+
+    // ✅ PERFORMANCE [P1.17]: Calculate and log response time
+    const duration = Date.now() - startTime;
+    response.headers.set("X-Response-Time", `${duration}ms`);
+
+    // Log slow requests (>1000ms)
+    if (duration > 1000) {
+      logger.warn(
+        {
+          path: pathname,
+          duration,
+          method: req.method,
+        },
+        `Slow request detected: ${pathname} (${duration}ms)`,
+      );
+    }
+
     return addSecurityHeaders(response);
   } catch (error) {
     // Critical error handler - always return a valid response
     console.error("Middleware critical error:", error);
     const response = NextResponse.next();
+
+    // ✅ PERFORMANCE [P1.17]: Track error response time
+    const duration = Date.now() - startTime;
+    response.headers.set("X-Response-Time", `${duration}ms`);
+
     return response;
   }
 }
