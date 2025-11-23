@@ -178,9 +178,9 @@ const nextConfig = {
     ];
   },
 
-  // Redirects for SEO
+  // Redirects for SEO and security
   async redirects() {
-    return [
+    const redirects = [
       // Redirect trailing slashes
       {
         source: "/:path+/",
@@ -188,6 +188,24 @@ const nextConfig = {
         permanent: true,
       },
     ];
+
+    // ✅ SECURITY [P1.6]: Force HTTPS in production
+    if (process.env.NODE_ENV === "production") {
+      redirects.push({
+        source: "/:path*",
+        has: [
+          {
+            type: "header",
+            key: "x-forwarded-proto",
+            value: "http",
+          },
+        ],
+        destination: "https://:host/:path*",
+        permanent: true,
+      });
+    }
+
+    return redirects;
   },
 };
 
