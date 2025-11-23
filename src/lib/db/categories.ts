@@ -24,8 +24,11 @@ export async function getCategoriesByTenant(
     include: {
       subcategories: options?.includeSubcategories
         ? {
+            take: 50, // ✅ PERFORMANCE [P1.12]: Limit subcategories to prevent huge trees
             include: {
-              subcategories: true, // 2 levels deep
+              subcategories: {
+                take: 50, // ✅ PERFORMANCE [P1.12]: Limit 2nd level subcategories
+              },
             },
           }
         : false,
@@ -56,6 +59,7 @@ export async function getCategoryById(tenantId: string, categoryId: string) {
     include: {
       parent: true,
       subcategories: {
+        take: 100, // ✅ PERFORMANCE [P1.12]: Limit subcategories in detail view
         include: {
           _count: {
             select: { products: true },
@@ -80,7 +84,9 @@ export async function getCategoryBySlug(tenantId: string, slug: string) {
       tenantId_slug: { tenantId, slug },
     },
     include: {
-      subcategories: true,
+      subcategories: {
+        take: 100, // ✅ PERFORMANCE [P1.12]: Limit subcategories by slug
+      },
       _count: {
         select: { products: true },
       },
@@ -111,9 +117,7 @@ export async function createCategory(data: {
     });
 
     if (!parentCategory) {
-      throw new Error(
-        "Parent category not found or does not belong to this tenant",
-      );
+      throw new Error("Parent category not found or does not belong to this tenant");
     }
   }
 
@@ -145,10 +149,7 @@ export async function createCategory(data: {
 /**
  * Update category
  */
-export async function updateCategory(
-  categoryId: string,
-  data: Record<string, any>,
-) {
+export async function updateCategory(categoryId: string, data: Record<string, any>) {
   const category = await db.category.findUnique({
     where: { id: categoryId },
   });
@@ -197,9 +198,7 @@ export async function deleteCategory(categoryId: string) {
 
   // Cannot delete if has subcategories
   if (category._count.subcategories > 0) {
-    throw new Error(
-      "Cannot delete category with subcategories. Delete subcategories first.",
-    );
+    throw new Error("Cannot delete category with subcategories. Delete subcategories first.");
   }
 
   // If has products, set their category to null (uncategorized)
@@ -230,8 +229,11 @@ export async function getCategoryTree(tenantId: string) {
     },
     include: {
       subcategories: {
+        take: 50, // ✅ PERFORMANCE [P1.12]: Limit 1st level subcategories in tree
         include: {
-          subcategories: true,
+          subcategories: {
+            take: 50, // ✅ PERFORMANCE [P1.12]: Limit 2nd level subcategories in tree
+          },
           _count: {
             select: { products: true },
           },

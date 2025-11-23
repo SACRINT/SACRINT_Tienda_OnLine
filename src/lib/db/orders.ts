@@ -270,6 +270,7 @@ export async function getOrderById(orderId: string, tenantId: string) {
     },
     include: {
       items: {
+        take: 100, // ✅ PERFORMANCE [P1.14]: Limit order items (prevent loading 1000s)
         include: {
           product: {
             select: {
@@ -277,7 +278,7 @@ export async function getOrderById(orderId: string, tenantId: string) {
               name: true,
               slug: true,
               images: {
-                take: 1,
+                take: 1, // ✅ PERFORMANCE [P1.14]: Only one image per product
                 orderBy: { order: "asc" },
               },
             },
@@ -341,6 +342,7 @@ export async function getOrdersByUser(
       where,
       include: {
         items: {
+          take: 50, // ✅ PERFORMANCE [P1.14]: Limit items in user orders listing
           include: {
             product: {
               select: {
@@ -438,6 +440,7 @@ export async function getOrdersByTenant(
       where,
       include: {
         items: {
+          take: 50, // ✅ PERFORMANCE [P1.14]: Limit items in tenant orders listing
           include: {
             product: {
               select: {
@@ -512,6 +515,7 @@ export async function updateOrderStatus(
     },
     include: {
       items: {
+        take: 100, // ✅ PERFORMANCE [P1.14]: Limit items in status update
         include: {
           product: {
             select: {
