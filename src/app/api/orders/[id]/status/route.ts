@@ -1,8 +1,11 @@
 // PATCH /api/orders/:id/status
+// ✅ SECURITY [P0.3]: Fixed tenant isolation - using session tenantId
 // Update order status with audit trail
 
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/auth";
+import { getCurrentUserTenantId } from "@/lib/db/tenant";
+import { logger } from "@/lib/monitoring/logger";
 import { db } from "@/lib/db";
 import { z } from "zod";
 
@@ -10,21 +13,11 @@ import { z } from "zod";
 export const dynamic = "force-dynamic";
 
 const UpdateStatusSchema = z.object({
-  tenantId: z.string().uuid(),
-  status: z.enum([
-    "PENDING",
-    "PROCESSING",
-    "SHIPPED",
-    "DELIVERED",
-    "CANCELLED",
-  ]),
+  status: z.enum(["PENDING", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"]),
   note: z.string().optional(),
 });
 
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } },
-) {
+export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await auth();
 
@@ -32,11 +25,15 @@ export async function PATCH(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (
-      session.user.role !== "STORE_OWNER" &&
-      session.user.role !== "SUPER_ADMIN"
-    ) {
+    if (session.user.role !== "STORE_OWNER" && session.user.role !== "SUPER_ADMIN") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    // ✅ SECURITY: Get tenantId from authenticated session (not body)
+    const tenantId = await getCurrentUserTenantId();
+
+    if (!tenantId) {
+      return NextResponse.json({ error: "No tenant assigned to user" }, { status: 400 });
     }
 
     const body = await req.json();
@@ -49,14 +46,7 @@ export async function PATCH(
       );
     }
 
-    const { tenantId, status, note } = validation.data;
-
-    if (
-      session.user.role === "STORE_OWNER" &&
-      session.user.tenantId !== tenantId
-    ) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
+    const { status, note } = validation.data;
 
     // Verify order exists and belongs to tenant
     const order = await db.order.findFirst({
@@ -78,9 +68,7 @@ export async function PATCH(
 
     // Log status change and append note to adminNotes if provided
     if (note) {
-      const existingNotes = order.adminNotes
-        ? `${order.adminNotes}\n---\n`
-        : "";
+      const existingNotes = order.adminNotes ? `${order.adminNotes}\n---\n` : "";
       const timestamp = new Date().toISOString();
       const noteName = session.user.name || session.user.email;
       const noteContent = `[${timestamp}] Status changed from ${order.status} to ${status}. ${note} (by ${noteName})`;
@@ -110,20 +98,14 @@ export async function PATCH(
       order: updated,
     });
   } catch (error) {
-    console.error("Update status error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    logger.error({ error }, "Update status error");
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
 // GET /api/orders/:id/status
 // Get status history for an order
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } },
-) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await auth();
 
@@ -131,18 +113,11 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const searchParams = req.nextUrl.searchParams;
-    const tenantId = searchParams.get("tenantId");
+    // ✅ SECURITY: Get tenantId from authenticated session (not query params)
+    const tenantId = await getCurrentUserTenantId();
 
     if (!tenantId) {
-      return NextResponse.json({ error: "tenantId required" }, { status: 400 });
-    }
-
-    if (
-      session.user.role === "STORE_OWNER" &&
-      session.user.tenantId !== tenantId
-    ) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      return NextResponse.json({ error: "No tenant assigned to user" }, { status: 400 });
     }
 
     // TODO: Implement status history tracking - currently returning empty for future implementation
@@ -152,10 +127,7 @@ export async function GET(
       history: formattedHistory,
     });
   } catch (error) {
-    console.error("Get status history error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    logger.error({ error }, "Get status history error");
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

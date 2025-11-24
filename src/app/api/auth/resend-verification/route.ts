@@ -1,31 +1,36 @@
 /**
- * Resend Email Verification API
+ * Resend Email Verification Endpoint
  * POST /api/auth/resend-verification
- * Resends verification email
+ * ✅ SECURITY [P1.1]: Resend verification email
+ *
+ * Allows users to request a new verification email
  */
 
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db/client";
 import { z } from "zod";
-import crypto from "crypto";
-import { applyRateLimit } from "@/lib/security/rate-limiter";
+import {
+  createVerificationToken,
+  generateVerificationUrl,
+  hasPendingVerificationToken,
+} from "@/lib/auth/verification-tokens";
+import { sendEmail } from "@/lib/email/email-service";
+import { EmailTemplate } from "@/lib/db/enums";
+import { applyRateLimit, RATE_LIMITS } from "@/lib/security/rate-limiter";
 import { logger } from "@/lib/monitoring/logger";
 
-const RESEND_LIMIT = {
-  interval: 60 * 60 * 1000, // 1 hour
-  limit: 3, // 3 attempts per hour
-};
-
+// Validation schema
 const ResendVerificationSchema = z.object({
   email: z.string().email("Invalid email format"),
 });
 
+// Force dynamic rendering
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
-  // Apply rate limiting
+  // Apply rate limiting - prevent spam
   const rateLimitResult = await applyRateLimit(req, {
-    config: RESEND_LIMIT,
+    limiter: RATE_LIMITS.ANONYMOUS,
   });
 
   if (!rateLimitResult.allowed) {
@@ -34,12 +39,14 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
+
+    // Validate input
     const validation = ResendVerificationSchema.safeParse(body);
 
     if (!validation.success) {
       return NextResponse.json(
         {
-          error: "Invalid email",
+          error: "Invalid data",
           issues: validation.error.issues,
         },
         { status: 400 },
@@ -53,73 +60,79 @@ export async function POST(req: NextRequest) {
       where: { email },
     });
 
-    // Always return success to prevent email enumeration
     if (!user) {
-      logger.info(
+      // Don't reveal if user exists or not (security)
+      logger.warn({ email }, "Resend verification requested for non-existent user");
+
+      return NextResponse.json(
         {
-          email,
+          message:
+            "If the email exists and is not verified, a new verification email has been sent.",
         },
-        "Verification resend requested for non-existent email",
+        { status: 200 },
       );
-      return NextResponse.json({
-        message: "If the email exists and is not verified, a verification link has been sent.",
-      });
     }
 
     // Check if already verified
     if (user.emailVerified) {
-      logger.info(
+      logger.info({ email, userId: user.id }, "Resend verification for already verified user");
+
+      return NextResponse.json(
         {
-          email,
+          message: "This email is already verified. You can log in now.",
+          alreadyVerified: true,
         },
-        "Verification resend requested for already verified email",
+        { status: 200 },
       );
-      return NextResponse.json({
-        message: "Email is already verified.",
-      });
     }
 
-    // Generate verification token
-    const token = crypto.randomBytes(32).toString("hex");
-    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+    // Check if there's a pending token (rate limiting)
+    const hasPending = await hasPendingVerificationToken(email);
 
-    // Token expires in 24 hours
-    const expires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    if (hasPending) {
+      logger.warn({ email, userId: user.id }, "Resend verification blocked: pending token exists");
 
-    // Delete any existing tokens for this email
-    await db.verificationToken.deleteMany({
-      where: { identifier: email },
-    });
+      return NextResponse.json(
+        {
+          message:
+            "A verification email was recently sent. Please check your inbox and spam folder. You can request a new one in a few minutes.",
+        },
+        { status: 429 },
+      );
+    }
 
-    // Create new token
-    await db.verificationToken.create({
+    // Create new verification token
+    const { token } = await createVerificationToken(email);
+    const verificationUrl = generateVerificationUrl(token);
+
+    // Send verification email
+    await sendEmail({
+      to: email,
+      subject: "Verify Your Email Address",
+      template: EmailTemplate.ACCOUNT_VERIFICATION,
       data: {
-        identifier: email,
-        token: hashedToken,
-        expires,
+        customerName: user.name || "User",
+        verificationUrl,
+        expiresInHours: 24,
       },
+      userId: user.id,
+      tenantId: user.tenantId ?? undefined,
     });
 
-    // Generate verification URL
-    const verifyUrl = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/verify-email?token=${token}&email=${encodeURIComponent(email)}`;
+    logger.info({ email, userId: user.id }, "Verification email resent successfully");
 
-    logger.info(
+    return NextResponse.json(
       {
-        email,
-        userId: user.id,
-        verifyUrl: process.env.NODE_ENV === "development" ? verifyUrl : "[REDACTED]",
+        message: "A new verification email has been sent. Please check your inbox and spam folder.",
       },
-      "Email verification token generated",
+      { status: 200 },
     );
-
-    // TODO: Send verification email
-    // await sendVerificationEmail(email, verifyUrl, user.name);
-
-    return NextResponse.json({
-      message: "If the email exists and is not verified, a verification link has been sent.",
-    });
   } catch (error) {
-    logger.error({ error: error }, "Resend verification failed");
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    logger.error({ error }, "Resend verification error");
+
+    return NextResponse.json(
+      { error: "Failed to resend verification email. Please try again later." },
+      { status: 500 },
+    );
   }
 }

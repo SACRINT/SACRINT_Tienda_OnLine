@@ -1,17 +1,16 @@
 // GET /api/customers/segmentation
+// ✅ SECURITY [P0.3]: Fixed tenant isolation - using session tenantId
 // RFM Analysis and Customer Segmentation
 
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/auth";
+import { getCurrentUserTenantId } from "@/lib/db/tenant";
+import { logger } from "@/lib/monitoring/logger";
 import { db } from "@/lib/db";
 import { subDays } from "date-fns";
 
 // RFM Segmentation Logic
-function calculateRFMScore(
-  recencyDays: number,
-  frequency: number,
-  monetary: number,
-) {
+function calculateRFMScore(recencyDays: number, frequency: number, monetary: number) {
   // Recency: Lower is better (more recent)
   let recencyScore = 1;
   if (recencyDays <= 30) recencyScore = 5;
@@ -41,10 +40,7 @@ function calculateRFMScore(
   };
 }
 
-function assignSegment(
-  rfmScore: ReturnType<typeof calculateRFMScore>,
-  recencyDays: number,
-) {
+function assignSegment(rfmScore: ReturnType<typeof calculateRFMScore>, recencyDays: number) {
   const { recency, frequency, monetary, total } = rfmScore;
 
   // Champions: High RFM scores
@@ -92,25 +88,15 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (
-      session.user.role !== "STORE_OWNER" &&
-      session.user.role !== "SUPER_ADMIN"
-    ) {
+    if (session.user.role !== "STORE_OWNER" && session.user.role !== "SUPER_ADMIN") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const searchParams = req.nextUrl.searchParams;
-    const tenantId = searchParams.get("tenantId");
+    // ✅ SECURITY: Get tenantId from authenticated session (not query params)
+    const tenantId = await getCurrentUserTenantId();
 
     if (!tenantId) {
-      return NextResponse.json({ error: "tenantId required" }, { status: 400 });
-    }
-
-    if (
-      session.user.role === "STORE_OWNER" &&
-      session.user.tenantId !== tenantId
-    ) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      return NextResponse.json({ error: "No tenant assigned to user" }, { status: 400 });
     }
 
     // Get all customers with their orders
@@ -143,24 +129,14 @@ export async function GET(req: NextRequest) {
     const customersWithRFM = users.map((user: any) => {
       const orders = user.orders;
       const totalOrders = orders.length;
-      const totalSpent = orders.reduce(
-        (sum: number, order: any) => sum + order.total,
-        0,
-      );
+      const totalSpent = orders.reduce((sum: number, order: any) => sum + order.total, 0);
       const lastOrder = orders[0];
       const lastOrderDate = lastOrder ? lastOrder.createdAt : null;
       const recencyDays = lastOrderDate
-        ? Math.floor(
-            (now.getTime() - new Date(lastOrderDate).getTime()) /
-              (1000 * 60 * 60 * 24),
-          )
+        ? Math.floor((now.getTime() - new Date(lastOrderDate).getTime()) / (1000 * 60 * 60 * 24))
         : 999;
 
-      const rfmScore = calculateRFMScore(
-        recencyDays,
-        totalOrders,
-        totalSpent / 100,
-      );
+      const rfmScore = calculateRFMScore(recencyDays, totalOrders, totalSpent / 100);
       const segment = assignSegment(rfmScore, recencyDays);
 
       return {
@@ -178,21 +154,16 @@ export async function GET(req: NextRequest) {
 
     // Calculate summary
     const summary = {
-      champions: customersWithRFM.filter((c: any) => c.segment === "champions")
-        .length,
+      champions: customersWithRFM.filter((c: any) => c.segment === "champions").length,
       loyal: customersWithRFM.filter((c: any) => c.segment === "loyal").length,
-      promising: customersWithRFM.filter((c: any) => c.segment === "promising")
-        .length,
+      promising: customersWithRFM.filter((c: any) => c.segment === "promising").length,
       new: customersWithRFM.filter((c: any) => c.segment === "new").length,
-      atRisk: customersWithRFM.filter((c: any) => c.segment === "at_risk")
-        .length,
+      atRisk: customersWithRFM.filter((c: any) => c.segment === "at_risk").length,
       lost: customersWithRFM.filter((c: any) => c.segment === "lost").length,
     };
 
     // Sort by RFM total score descending
-    customersWithRFM.sort(
-      (a: any, b: any) => b.rfmScore.total - a.rfmScore.total,
-    );
+    customersWithRFM.sort((a: any, b: any) => b.rfmScore.total - a.rfmScore.total);
 
     return NextResponse.json({
       customers: customersWithRFM,
@@ -200,10 +171,7 @@ export async function GET(req: NextRequest) {
       generatedAt: new Date().toISOString(),
     });
   } catch (error) {
-    console.error("Customer segmentation error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    logger.error({ error }, "Customer segmentation error");
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

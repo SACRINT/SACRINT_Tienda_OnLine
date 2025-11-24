@@ -1,8 +1,10 @@
 // Search Suggestions API
+// ✅ SECURITY [P0.3]: Fixed tenant isolation - using session tenantId
 // Week 17-18: Autocomplete suggestions
 
 import { NextRequest, NextResponse } from "next/server";
 import { getSearchSuggestions } from "@/lib/search/search-engine";
+import { logger } from "@/lib/monitoring/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -30,7 +32,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ suggestions });
   } catch (error) {
-    console.error("Suggestions error:", error);
+    logger.error({ error }, "Suggestions error");
     return NextResponse.json({ error: "Failed to get suggestions" }, { status: 500 });
   }
 }

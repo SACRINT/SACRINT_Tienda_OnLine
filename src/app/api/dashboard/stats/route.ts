@@ -1,26 +1,54 @@
 // Dashboard Analytics API
 // GET /api/dashboard/stats - Get dashboard statistics
+// ✅ SECURITY [P0.7]: Authentication and tenant isolation enforced
+// ✅ PERFORMANCE [P1.16]: Caching implemented (2min TTL)
 
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-
-// Demo tenant ID
-const DEMO_TENANT_ID = async () => {
-  const tenant = await db.tenant.findUnique({
-    where: { slug: "demo-store" },
-  });
-  return tenant?.id || "";
-};
+import { auth } from "@/lib/auth";
+import { logger } from "@/lib/monitoring/logger";
+import { USER_ROLES } from "@/lib/types/user-role";
+import { cache } from "@/lib/performance/cache";
 
 export async function GET() {
   try {
-    const tenantId = await DEMO_TENANT_ID();
+    // ✅ AUTHENTICATION: Verify user is authenticated
+    const session = await auth();
+
+    if (!session?.user) {
+      logger.warn("Unauthorized dashboard stats access attempt");
+      return NextResponse.json(
+        { error: "Unauthorized - Authentication required" },
+        { status: 401 },
+      );
+    }
+
+    // ✅ AUTHORIZATION: Only STORE_OWNER and SUPER_ADMIN can access dashboard
+    if (
+      session.user.role !== USER_ROLES.STORE_OWNER &&
+      session.user.role !== USER_ROLES.SUPER_ADMIN
+    ) {
+      logger.warn(
+        { userId: session.user.id, role: session.user.role },
+        "Forbidden dashboard stats access attempt",
+      );
+      return NextResponse.json({ error: "Forbidden - Insufficient permissions" }, { status: 403 });
+    }
+
+    // ✅ TENANT ISOLATION: Use authenticated user's tenantId
+    const tenantId = session.user.tenantId;
 
     if (!tenantId) {
-      return NextResponse.json(
-        { error: "Demo tenant not found" },
-        { status: 404 },
-      );
+      logger.error({ userId: session.user.id }, "User has no tenantId assigned");
+      return NextResponse.json({ error: "No tenant assigned to user" }, { status: 400 });
+    }
+
+    // ✅ PERFORMANCE [P1.16]: Cache with 2min TTL
+    const cacheKey = `dashboard:stats:${tenantId}`;
+    const cached = await cache.get(cacheKey);
+
+    if (cached) {
+      return NextResponse.json(cached);
     }
 
     // Get counts
@@ -99,76 +127,58 @@ export async function GET() {
     ]);
 
     // Get product names for top products
-    const productIds = topProducts.map(
-      (p: (typeof topProducts)[number]) => p.productId,
-    );
+    const productIds = topProducts.map((p: (typeof topProducts)[number]) => p.productId);
     const products = await db.product.findMany({
       where: { id: { in: productIds } },
       select: { id: true, name: true },
     });
 
-    const productMap = new Map(
-      products.map((p: { id: string; name: string }) => [p.id, p.name]),
-    );
+    const productMap = new Map(products.map((p: { id: string; name: string }) => [p.id, p.name]));
 
-    const topProductsWithNames = topProducts.map(
-      (p: (typeof topProducts)[number]) => ({
-        name: productMap.get(p.productId) || "Unknown",
-        sales: p._sum.quantity || 0,
-        revenue: Number(p._sum.priceAtPurchase) || 0,
-      }),
-    );
+    const topProductsWithNames = topProducts.map((p: (typeof topProducts)[number]) => ({
+      name: productMap.get(p.productId) || "Unknown",
+      sales: p._sum.quantity || 0,
+      revenue: Number(p._sum.priceAtPurchase) || 0,
+    }));
 
     // Calculate average order value
-    const avgOrderValue =
-      totalOrders > 0 ? Number(totalRevenue._sum.total || 0) / totalOrders : 0;
+    const avgOrderValue = totalOrders > 0 ? Number(totalRevenue._sum.total || 0) / totalOrders : 0;
 
     // Format recent orders
-    const formattedRecentOrders = recentOrders.map(
-      (order: (typeof recentOrders)[number]) => ({
-        id: order.orderNumber,
-        customer: order.user.name || order.user.email || "Cliente",
-        total: Number(order.total),
-        status: order.status.toLowerCase(),
-        date: formatRelativeTime(order.createdAt),
-      }),
-    );
+    const formattedRecentOrders = recentOrders.map((order: (typeof recentOrders)[number]) => ({
+      id: order.orderNumber,
+      customer: order.user.name || order.user.email || "Cliente",
+      total: Number(order.total),
+      status: order.status.toLowerCase(),
+      date: formatRelativeTime(order.createdAt),
+    }));
 
     // Format order status data
     type OrderStatusGroup = (typeof ordersByStatus)[number];
     const orderStatusData = [
       {
         name: "Completadas",
-        value:
-          ordersByStatus.find((o: OrderStatusGroup) => o.status === "DELIVERED")
-            ?._count || 0,
+        value: ordersByStatus.find((o: OrderStatusGroup) => o.status === "DELIVERED")?._count || 0,
         color: "#22c55e",
       },
       {
         name: "En Proceso",
-        value:
-          ordersByStatus.find(
-            (o: OrderStatusGroup) => o.status === "PROCESSING",
-          )?._count || 0,
+        value: ordersByStatus.find((o: OrderStatusGroup) => o.status === "PROCESSING")?._count || 0,
         color: "#3b82f6",
       },
       {
         name: "Pendientes",
-        value:
-          ordersByStatus.find((o: OrderStatusGroup) => o.status === "PENDING")
-            ?._count || 0,
+        value: ordersByStatus.find((o: OrderStatusGroup) => o.status === "PENDING")?._count || 0,
         color: "#f59e0b",
       },
       {
         name: "Canceladas",
-        value:
-          ordersByStatus.find((o: OrderStatusGroup) => o.status === "CANCELLED")
-            ?._count || 0,
+        value: ordersByStatus.find((o: OrderStatusGroup) => o.status === "CANCELLED")?._count || 0,
         color: "#ef4444",
       },
     ];
 
-    return NextResponse.json({
+    const response = {
       kpiData: {
         revenue: {
           value: Number(totalRevenue._sum.total || 0),
@@ -214,13 +224,15 @@ export async function GET() {
       topProductsData: topProductsWithNames,
       recentOrders: formattedRecentOrders,
       orderStatusData,
-    });
+    };
+
+    // Cache the response for 2 minutes (120 seconds)
+    await cache.set(cacheKey, response, 120);
+
+    return NextResponse.json(response);
   } catch (error) {
-    console.error("[DASHBOARD] Error fetching stats:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch dashboard stats" },
-      { status: 500 },
-    );
+    logger.error({ error }, "Error fetching dashboard stats");
+    return NextResponse.json({ error: "Failed to fetch dashboard stats" }, { status: 500 });
   }
 }
 

@@ -154,7 +154,7 @@ describe("Input Sanitization", () => {
 
   describe("sanitizeRedirectUrl", () => {
     beforeEach(() => {
-      process.env.NEXT_PUBLIC_SITE_URL = "http://localhost:3000";
+      process.env.NEXT_PUBLIC_APP_URL = "http://localhost:3000"; // ✅ ENV [P1.8]: Consolidated URL variable
     });
 
     it("should allow relative URLs", () => {
@@ -200,9 +200,7 @@ describe("Input Sanitization", () => {
     });
 
     it("should allow HTML when specified", () => {
-      expect(sanitizeInput("<b>bold</b>", { allowHtml: true })).toBe(
-        "<b>bold</b>",
-      );
+      expect(sanitizeInput("<b>bold</b>", { allowHtml: true })).toBe("<b>bold</b>");
     });
 
     it("should not trim when specified", () => {
@@ -317,9 +315,7 @@ describe("Input Sanitization", () => {
 
   describe("validateContentType", () => {
     it("should validate allowed content types", () => {
-      expect(
-        validateContentType("image/jpeg", ["image/jpeg", "image/png"]),
-      ).toBe(true);
+      expect(validateContentType("image/jpeg", ["image/jpeg", "image/png"])).toBe(true);
     });
 
     it("should reject disallowed content types", () => {
@@ -327,11 +323,9 @@ describe("Input Sanitization", () => {
     });
 
     it("should handle charset suffix", () => {
-      expect(
-        validateContentType("application/json; charset=utf-8", [
-          "application/json",
-        ]),
-      ).toBe(true);
+      expect(validateContentType("application/json; charset=utf-8", ["application/json"])).toBe(
+        true,
+      );
     });
 
     it("should return false for null", () => {
@@ -341,36 +335,22 @@ describe("Input Sanitization", () => {
 
   describe("validateFileExtension", () => {
     it("should validate allowed extensions", () => {
-      expect(validateFileExtension("image.jpg", allowedImageExtensions)).toBe(
-        true,
-      );
-      expect(validateFileExtension("photo.png", allowedImageExtensions)).toBe(
-        true,
-      );
+      expect(validateFileExtension("image.jpg", allowedImageExtensions)).toBe(true);
+      expect(validateFileExtension("photo.png", allowedImageExtensions)).toBe(true);
     });
 
     it("should reject disallowed extensions", () => {
-      expect(validateFileExtension("script.js", allowedImageExtensions)).toBe(
-        false,
-      );
-      expect(validateFileExtension("file.exe", allowedImageExtensions)).toBe(
-        false,
-      );
+      expect(validateFileExtension("script.js", allowedImageExtensions)).toBe(false);
+      expect(validateFileExtension("file.exe", allowedImageExtensions)).toBe(false);
     });
 
     it("should be case-insensitive", () => {
-      expect(validateFileExtension("image.JPG", allowedImageExtensions)).toBe(
-        true,
-      );
-      expect(validateFileExtension("image.PNG", allowedImageExtensions)).toBe(
-        true,
-      );
+      expect(validateFileExtension("image.JPG", allowedImageExtensions)).toBe(true);
+      expect(validateFileExtension("image.PNG", allowedImageExtensions)).toBe(true);
     });
 
     it("should handle no extension", () => {
-      expect(validateFileExtension("noextension", allowedImageExtensions)).toBe(
-        false,
-      );
+      expect(validateFileExtension("noextension", allowedImageExtensions)).toBe(false);
     });
   });
 

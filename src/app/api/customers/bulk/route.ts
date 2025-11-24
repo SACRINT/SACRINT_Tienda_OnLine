@@ -1,8 +1,11 @@
 // GET /api/customers/bulk
+// ✅ SECURITY [P0.3]: Fixed tenant isolation - using session tenantId
 // Export customers to CSV
 
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/auth";
+import { getCurrentUserTenantId } from "@/lib/db/tenant";
+import { logger } from "@/lib/monitoring/logger";
 import { db } from "@/lib/db";
 
 // Force dynamic rendering for this API route
@@ -16,31 +19,21 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (
-      session.user.role !== "STORE_OWNER" &&
-      session.user.role !== "SUPER_ADMIN"
-    ) {
+    if (session.user.role !== "STORE_OWNER" && session.user.role !== "SUPER_ADMIN") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    // ✅ SECURITY: Get tenantId from authenticated session (not query params)
+    const tenantId = await getCurrentUserTenantId();
+
+    if (!tenantId) {
+      return NextResponse.json({ error: "No tenant assigned to user" }, { status: 400 });
     }
 
     const searchParams = req.nextUrl.searchParams;
-    const tenantId = searchParams.get("tenantId");
     const customerIdsParam = searchParams.get("customerIds");
 
-    if (!tenantId) {
-      return NextResponse.json({ error: "tenantId required" }, { status: 400 });
-    }
-
-    if (
-      session.user.role === "STORE_OWNER" &&
-      session.user.tenantId !== tenantId
-    ) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-
-    const customerIds = customerIdsParam
-      ? customerIdsParam.split(",")
-      : undefined;
+    const customerIds = customerIdsParam ? customerIdsParam.split(",") : undefined;
 
     // Get customers with order stats
     const customers = await db.user.findMany({
@@ -67,13 +60,9 @@ export async function GET(req: NextRequest) {
     const customersWithStats = customers.map((customer: any) => {
       const orders = customer.orders;
       const totalOrders = orders.length;
-      const totalSpent = orders.reduce(
-        (sum: number, order: any) => sum + order.total,
-        0,
-      );
+      const totalSpent = orders.reduce((sum: number, order: any) => sum + order.total, 0);
       const lastOrder = orders.sort(
-        (a: any, b: any) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        (a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
       )[0];
 
       return {
@@ -83,9 +72,7 @@ export async function GET(req: NextRequest) {
         phone: customer.phone || "",
         totalOrders,
         totalSpent: (totalSpent / 100).toFixed(2),
-        lastOrderDate: lastOrder
-          ? new Date(lastOrder.createdAt).toISOString().split("T")[0]
-          : "",
+        lastOrderDate: lastOrder ? new Date(lastOrder.createdAt).toISOString().split("T")[0] : "",
         createdAt: new Date(customer.createdAt).toISOString().split("T")[0],
       };
     });
@@ -113,10 +100,7 @@ export async function GET(req: NextRequest) {
       customer.createdAt,
     ]);
 
-    const csv = [
-      csvHeaders.join(","),
-      ...csvRows.map((row: any) => row.join(",")),
-    ].join("\n");
+    const csv = [csvHeaders.join(","), ...csvRows.map((row: any) => row.join(","))].join("\n");
 
     return new NextResponse(csv, {
       headers: {
@@ -125,10 +109,7 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Customer export error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    logger.error({ error }, "Customer export error");
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

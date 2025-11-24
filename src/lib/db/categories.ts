@@ -1,11 +1,14 @@
 // Data Access Layer - Categories
 // Reusable database operations for category management with tenant isolation
+// ✅ PERFORMANCE [P1.19]: Query timing implemented
 
 import { db } from "./client";
 import { getCurrentUserTenantId, ensureTenantAccess } from "./tenant";
+import { withTiming } from "../performance/query-optimization";
 
 /**
  * Get all categories for a tenant (tree structure)
+ * ✅ PERFORMANCE [P1.19]: Query timing enabled
  */
 export async function getCategoriesByTenant(
   tenantId: string,
@@ -14,29 +17,34 @@ export async function getCategoriesByTenant(
     parentId?: string | null;
   },
 ) {
-  await ensureTenantAccess(tenantId);
+  return withTiming("getCategoriesByTenant", async () => {
+    await ensureTenantAccess(tenantId);
 
-  return db.category.findMany({
-    where: {
-      tenantId,
-      parentId: options?.parentId !== undefined ? options.parentId : undefined,
-    },
-    include: {
-      subcategories: options?.includeSubcategories
-        ? {
-            include: {
-              subcategories: true, // 2 levels deep
-            },
-          }
-        : false,
-      _count: {
-        select: {
-          products: true,
-          subcategories: true,
+    return db.category.findMany({
+      where: {
+        tenantId,
+        parentId: options?.parentId !== undefined ? options.parentId : undefined,
+      },
+      include: {
+        subcategories: options?.includeSubcategories
+          ? {
+              take: 50, // ✅ PERFORMANCE [P1.12]: Limit subcategories to prevent huge trees
+              include: {
+                subcategories: {
+                  take: 50, // ✅ PERFORMANCE [P1.12]: Limit 2nd level subcategories
+                },
+              },
+            }
+          : false,
+        _count: {
+          select: {
+            products: true,
+            subcategories: true,
+          },
         },
       },
-    },
-    orderBy: { name: "asc" },
+      orderBy: { name: "asc" },
+    });
   });
 }
 
@@ -56,6 +64,7 @@ export async function getCategoryById(tenantId: string, categoryId: string) {
     include: {
       parent: true,
       subcategories: {
+        take: 100, // ✅ PERFORMANCE [P1.12]: Limit subcategories in detail view
         include: {
           _count: {
             select: { products: true },
@@ -80,7 +89,9 @@ export async function getCategoryBySlug(tenantId: string, slug: string) {
       tenantId_slug: { tenantId, slug },
     },
     include: {
-      subcategories: true,
+      subcategories: {
+        take: 100, // ✅ PERFORMANCE [P1.12]: Limit subcategories by slug
+      },
       _count: {
         select: { products: true },
       },
@@ -111,9 +122,7 @@ export async function createCategory(data: {
     });
 
     if (!parentCategory) {
-      throw new Error(
-        "Parent category not found or does not belong to this tenant",
-      );
+      throw new Error("Parent category not found or does not belong to this tenant");
     }
   }
 
@@ -145,10 +154,7 @@ export async function createCategory(data: {
 /**
  * Update category
  */
-export async function updateCategory(
-  categoryId: string,
-  data: Record<string, any>,
-) {
+export async function updateCategory(categoryId: string, data: Record<string, any>) {
   const category = await db.category.findUnique({
     where: { id: categoryId },
   });
@@ -197,9 +203,7 @@ export async function deleteCategory(categoryId: string) {
 
   // Cannot delete if has subcategories
   if (category._count.subcategories > 0) {
-    throw new Error(
-      "Cannot delete category with subcategories. Delete subcategories first.",
-    );
+    throw new Error("Cannot delete category with subcategories. Delete subcategories first.");
   }
 
   // If has products, set their category to null (uncategorized)
@@ -230,8 +234,11 @@ export async function getCategoryTree(tenantId: string) {
     },
     include: {
       subcategories: {
+        take: 50, // ✅ PERFORMANCE [P1.12]: Limit 1st level subcategories in tree
         include: {
-          subcategories: true,
+          subcategories: {
+            take: 50, // ✅ PERFORMANCE [P1.12]: Limit 2nd level subcategories in tree
+          },
           _count: {
             select: { products: true },
           },

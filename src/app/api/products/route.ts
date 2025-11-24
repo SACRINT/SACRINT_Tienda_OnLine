@@ -1,6 +1,7 @@
 // Products API
 // GET /api/products - Get products with advanced filtering and pagination
 // POST /api/products - Create new product (STORE_OWNER only)
+// ✅ PERFORMANCE [P1.16]: Caching implemented (5min TTL)
 
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/auth";
@@ -9,6 +10,7 @@ import { getCategoryById } from "@/lib/db/categories";
 import { ProductFilterSchema, CreateProductSchema } from "@/lib/security/schemas/product-schemas";
 import { USER_ROLES } from "@/lib/types/user-role";
 import { applyRateLimit, RATE_LIMITS } from "@/lib/security/rate-limiter";
+import { cache } from "@/lib/performance/cache";
 
 // Force dynamic rendering for this API route
 export const dynamic = "force-dynamic";
@@ -75,10 +77,18 @@ export async function GET(req: NextRequest) {
 
     const validatedFilters = validation.data;
 
+    // ✅ PERFORMANCE [P1.16]: Cache with 5min TTL
+    const cacheKey = `products:${tenantId}:${JSON.stringify(validatedFilters)}`;
+    const cached = await cache.get(cacheKey);
+
+    if (cached) {
+      return NextResponse.json(cached);
+    }
+
     // Get products with filters
     const result = await getProducts(tenantId, validatedFilters);
 
-    return NextResponse.json({
+    const response = {
       products: result.products.map((product: any) => ({
         id: product.id,
         name: product.name,
@@ -112,7 +122,12 @@ export async function GET(req: NextRequest) {
       })),
       pagination: result.pagination,
       filters: validatedFilters,
-    });
+    };
+
+    // Cache the response for 5 minutes (300 seconds)
+    await cache.set(cacheKey, response, 300);
+
+    return NextResponse.json(response);
   } catch (error) {
     console.error("[PRODUCTS] GET error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

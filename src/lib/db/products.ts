@@ -1,110 +1,113 @@
 // Data Access Layer - Products
 // Complete database operations for product management with tenant isolation
+// ✅ PERFORMANCE [P1.19]: Query timing implemented
 
 import { db } from "./client";
 import { Prisma } from "@prisma/client";
 import { getCurrentUserTenantId, ensureTenantAccess } from "./tenant";
-import type {
-  ProductFilters,
-  ProductSearchInput,
-} from "../security/schemas/product-schemas";
+import type { ProductFilters, ProductSearchInput } from "../security/schemas/product-schemas";
+import { withTiming } from "../performance/query-optimization";
 
 /**
  * Get products with advanced filtering and pagination
+ * ✅ PERFORMANCE [P1.19]: Query timing enabled
  */
 export async function getProducts(tenantId: string, filters: ProductFilters) {
-  await ensureTenantAccess(tenantId);
+  return withTiming("getProducts", async () => {
+    await ensureTenantAccess(tenantId);
 
-  const {
-    page,
-    limit,
-    categoryId,
-    search,
-    minPrice,
-    maxPrice,
-    inStock,
-    published,
-    featured,
-    tags,
-    sort,
-  } = filters;
-
-  const skip = (page - 1) * limit;
-
-  // Build where clause
-  const where: any = {
-    tenantId,
-    ...(categoryId && { categoryId }),
-    ...(search && {
-      OR: [
-        { name: { contains: search, mode: "insensitive" } },
-        { description: { contains: search, mode: "insensitive" } },
-        { sku: { contains: search, mode: "insensitive" } },
-      ],
-    }),
-    ...(minPrice !== undefined && {
-      basePrice: { gte: minPrice },
-    }),
-    ...(maxPrice !== undefined && {
-      basePrice: { lte: maxPrice },
-    }),
-    ...(inStock !== undefined && {
-      stock: inStock ? { gt: 0 } : { lte: 0 },
-    }),
-    ...(published !== undefined && { published }),
-    ...(featured !== undefined && { featured }),
-    ...(tags && {
-      tags: { hasSome: tags.split(",").map((t) => t.trim()) },
-    }),
-  };
-
-  // Build orderBy clause
-  const orderBy = getProductOrderBy(sort);
-
-  const [products, total] = await Promise.all([
-    db.product.findMany({
-      where,
-      skip,
-      take: limit,
-      include: {
-        category: {
-          select: {
-            id: true,
-            name: true,
-            slug: true,
-          },
-        },
-        images: {
-          orderBy: { order: "asc" },
-          take: 4,
-        },
-        variants: {
-          select: {
-            id: true,
-            size: true,
-            color: true,
-            price: true,
-            stock: true,
-          },
-        },
-        _count: {
-          select: { reviews: true },
-        },
-      },
-      orderBy,
-    }),
-    db.product.count({ where }),
-  ]);
-
-  return {
-    products,
-    pagination: {
+    const {
       page,
       limit,
-      total,
-      pages: Math.ceil(total / limit),
-    },
-  };
+      categoryId,
+      search,
+      minPrice,
+      maxPrice,
+      inStock,
+      published,
+      featured,
+      tags,
+      sort,
+    } = filters;
+
+    const skip = (page - 1) * limit;
+
+    // Build where clause
+    const where: any = {
+      tenantId,
+      ...(categoryId && { categoryId }),
+      ...(search && {
+        OR: [
+          { name: { contains: search, mode: "insensitive" } },
+          { description: { contains: search, mode: "insensitive" } },
+          { sku: { contains: search, mode: "insensitive" } },
+        ],
+      }),
+      ...(minPrice !== undefined && {
+        basePrice: { gte: minPrice },
+      }),
+      ...(maxPrice !== undefined && {
+        basePrice: { lte: maxPrice },
+      }),
+      ...(inStock !== undefined && {
+        stock: inStock ? { gt: 0 } : { lte: 0 },
+      }),
+      ...(published !== undefined && { published }),
+      ...(featured !== undefined && { featured }),
+      ...(tags && {
+        tags: { hasSome: tags.split(",").map((t) => t.trim()) },
+      }),
+    };
+
+    // Build orderBy clause
+    const orderBy = getProductOrderBy(sort);
+
+    const [products, total] = await Promise.all([
+      db.product.findMany({
+        where,
+        skip,
+        take: limit,
+        include: {
+          category: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+            },
+          },
+          images: {
+            orderBy: { order: "asc" },
+            take: 4, // ✅ PERFORMANCE [P1.13]: Limit images in listing
+          },
+          variants: {
+            take: 20, // ✅ PERFORMANCE [P1.13]: Limit variants in listing
+            select: {
+              id: true,
+              size: true,
+              color: true,
+              price: true,
+              stock: true,
+            },
+          },
+          _count: {
+            select: { reviews: true },
+          },
+        },
+        orderBy,
+      }),
+      db.product.count({ where }),
+    ]);
+
+    return {
+      products,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit),
+      },
+    };
+  });
 }
 
 /**
@@ -126,6 +129,7 @@ export async function getProductById(tenantId: string, productId: string) {
         orderBy: { order: "asc" },
       },
       variants: {
+        take: 50, // ✅ PERFORMANCE [P1.13]: Limit variants in detail view
         include: {
           image: true,
         },
@@ -133,6 +137,7 @@ export async function getProductById(tenantId: string, productId: string) {
       },
       reviews: {
         where: { status: "APPROVED" },
+        take: 10, // ✅ PERFORMANCE [P1.13]: Limit reviews (already good)
         include: {
           user: {
             select: {
@@ -143,7 +148,6 @@ export async function getProductById(tenantId: string, productId: string) {
           },
         },
         orderBy: { createdAt: "desc" },
-        take: 10,
       },
       tenant: {
         select: {
@@ -171,14 +175,17 @@ export async function getProductBySlug(tenantId: string, slug: string) {
       category: true,
       images: {
         orderBy: { order: "asc" },
+        take: 20, // ✅ PERFORMANCE [P1.13]: Limit images in slug view
       },
       variants: {
+        take: 50, // ✅ PERFORMANCE [P1.13]: Limit variants in slug view
         include: {
           image: true,
         },
       },
       reviews: {
         where: { status: "APPROVED" },
+        take: 20, // ✅ PERFORMANCE [P1.13]: Limit reviews in slug view
         include: {
           user: {
             select: {
@@ -283,9 +290,7 @@ export async function hardDeleteProduct(productId: string) {
 
   // Cannot hard delete if has order items
   if (product._count.orderItems > 0) {
-    throw new Error(
-      "Cannot delete product with existing orders. Use soft delete instead.",
-    );
+    throw new Error("Cannot delete product with existing orders. Use soft delete instead.");
   }
 
   return db.product.delete({
@@ -337,10 +342,7 @@ export async function getProductsByCategory(
 /**
  * Search products (advanced)
  */
-export async function searchProducts(
-  tenantId: string,
-  searchInput: ProductSearchInput,
-) {
+export async function searchProducts(tenantId: string, searchInput: ProductSearchInput) {
   await ensureTenantAccess(tenantId);
 
   const { q, categoryId, minPrice, maxPrice, page, limit } = searchInput;
@@ -543,10 +545,7 @@ export async function getLowStockProducts(tenantId: string) {
 /**
  * Get featured products
  */
-export async function getFeaturedProducts(
-  tenantId: string,
-  limit: number = 10,
-) {
+export async function getFeaturedProducts(tenantId: string, limit: number = 10) {
   await ensureTenantAccess(tenantId);
 
   return db.product.findMany({
@@ -567,10 +566,7 @@ export async function getFeaturedProducts(
 /**
  * Count products by tenant
  */
-export async function countProductsByTenant(
-  tenantId: string,
-  published?: boolean,
-) {
+export async function countProductsByTenant(tenantId: string, published?: boolean) {
   await ensureTenantAccess(tenantId);
 
   return db.product.count({
@@ -646,11 +642,7 @@ export async function addProductImage(
  * @param productId - Product ID
  * @param imageId - Image ID to remove
  */
-export async function removeProductImage(
-  tenantId: string,
-  productId: string,
-  imageId: string,
-) {
+export async function removeProductImage(tenantId: string, productId: string, imageId: string) {
   await ensureTenantAccess(tenantId);
 
   // Verify product belongs to tenant
@@ -712,9 +704,7 @@ export async function reorderProductImages(
     ),
   );
 
-  console.log(
-    `[PRODUCTS] Reordered ${imageOrders.length} images for product ${productId}`,
-  );
+  console.log(`[PRODUCTS] Reordered ${imageOrders.length} images for product ${productId}`);
 }
 
 // ============ HELPER FUNCTIONS ============
@@ -725,11 +715,7 @@ export async function reorderProductImages(
  * @param productId - Product ID to find related products for
  * @param limit - Maximum number of related products to return (default 6)
  */
-export async function getRelatedProducts(
-  tenantId: string,
-  productId: string,
-  limit: number = 6,
-) {
+export async function getRelatedProducts(tenantId: string, productId: string, limit: number = 6) {
   await ensureTenantAccess(tenantId);
 
   // Get the source product

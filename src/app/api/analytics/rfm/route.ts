@@ -1,8 +1,11 @@
 // GET /api/analytics/rfm
 // RFM (Recency, Frequency, Monetary) customer segmentation
+// ✅ SECURITY [P0.3]: Fixed tenant isolation - using session tenantId
 
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/auth";
+import { getCurrentUserTenantId } from "@/lib/db/tenant";
+import { logger } from "@/lib/monitoring/logger";
 import {
   calculateRFMScores,
   getRFMSegmentSummary,
@@ -21,30 +24,21 @@ export async function GET(req: NextRequest) {
     }
 
     // Only STORE_OWNER and SUPER_ADMIN can access analytics
-    if (
-      session.user.role !== "STORE_OWNER" &&
-      session.user.role !== "SUPER_ADMIN"
-    ) {
+    if (session.user.role !== "STORE_OWNER" && session.user.role !== "SUPER_ADMIN") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    // ✅ SECURITY: Get tenantId from authenticated session (not query params)
+    const tenantId = await getCurrentUserTenantId();
+
+    if (!tenantId) {
+      return NextResponse.json({ error: "No tenant assigned to user" }, { status: 400 });
     }
 
     // Parse query parameters
     const searchParams = req.nextUrl.searchParams;
-    const tenantId = searchParams.get("tenantId");
     const view = searchParams.get("view") || "summary"; // 'summary' | 'detailed' | 'segment'
     const segment = searchParams.get("segment"); // Optional: filter by specific segment
-
-    // Validate tenant access
-    if (
-      !tenantId ||
-      (session.user.role === "STORE_OWNER" &&
-        session.user.tenantId !== tenantId)
-    ) {
-      return NextResponse.json(
-        { error: "Forbidden - Invalid tenant" },
-        { status: 403 },
-      );
-    }
 
     let data;
 
@@ -69,10 +63,7 @@ export async function GET(req: NextRequest) {
         totalCustomers: scores.length,
       };
     } else {
-      return NextResponse.json(
-        { error: "Invalid view parameter" },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: "Invalid view parameter" }, { status: 400 });
     }
 
     return NextResponse.json({
@@ -80,7 +71,7 @@ export async function GET(req: NextRequest) {
       generatedAt: new Date().toISOString(),
     });
   } catch (error) {
-    console.error("RFM analytics error:", error);
+    logger.error({ error }, "RFM analytics error");
     return NextResponse.json(
       {
         error: "Internal server error",
