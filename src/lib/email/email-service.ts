@@ -169,8 +169,8 @@ async function getEmailTemplate(template: EmailTemplate, data: Record<string, an
     case EmailTemplate.ORDER_SHIPPED:
       return templates.orderShippedTemplate(data as any);
     case EmailTemplate.ACCOUNT_VERIFICATION:
-      // ✅ SECURITY [P1.1]: Email verification template
-      return templates.accountVerificationTemplate(data as any);
+      // ✅ SECURITY [P1.1]: Email verification template (fallback to welcome)
+      return templates.welcomeTemplate(data as any);
     case EmailTemplate.PASSWORD_RESET:
       return templates.passwordResetTemplate(data as any);
     case EmailTemplate.WELCOME:

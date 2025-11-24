@@ -24,8 +24,10 @@ export async function GET() {
     }
 
     // ✅ AUTHORIZATION: Only STORE_OWNER and SUPER_ADMIN can access dashboard
-    const allowedRoles = [USER_ROLES.STORE_OWNER, USER_ROLES.SUPER_ADMIN];
-    if (!allowedRoles.includes(session.user.role)) {
+    if (
+      session.user.role !== USER_ROLES.STORE_OWNER &&
+      session.user.role !== USER_ROLES.SUPER_ADMIN
+    ) {
       logger.warn(
         { userId: session.user.id, role: session.user.role },
         "Forbidden dashboard stats access attempt",

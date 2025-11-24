@@ -184,7 +184,7 @@ function validateEnv(): Env {
     return parsed;
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const missingVars = error.errors.map((err) => {
+      const missingVars = error.issues.map((err: z.ZodIssue) => {
         const path = err.path.join(".");
         return `  - ${path}: ${err.message}`;
       });
@@ -215,7 +215,7 @@ For more information, see: /docs/ENVIRONMENT-VARIABLES-AUDIT.md
       `;
 
       console.error(errorMessage);
-      logger.fatal({ errors: error.errors }, "Environment validation failed");
+      logger.fatal({ errors: error.issues }, "Environment validation failed");
 
       // Fail fast - don't start the app with invalid config
       throw new Error("Environment validation failed. See error message above.");

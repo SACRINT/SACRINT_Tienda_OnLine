@@ -116,7 +116,7 @@ export async function POST(req: NextRequest) {
         expiresInHours: 24,
       },
       userId: user.id,
-      tenantId: user.tenantId,
+      tenantId: user.tenantId ?? undefined,
     });
 
     logger.info({ email, userId: user.id }, "Verification email resent successfully");
