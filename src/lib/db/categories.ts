@@ -1,11 +1,14 @@
 // Data Access Layer - Categories
 // Reusable database operations for category management with tenant isolation
+// ✅ PERFORMANCE [P1.19]: Query timing implemented
 
 import { db } from "./client";
 import { getCurrentUserTenantId, ensureTenantAccess } from "./tenant";
+import { withTiming } from "../performance/query-optimization";
 
 /**
  * Get all categories for a tenant (tree structure)
+ * ✅ PERFORMANCE [P1.19]: Query timing enabled
  */
 export async function getCategoriesByTenant(
   tenantId: string,
@@ -14,32 +17,34 @@ export async function getCategoriesByTenant(
     parentId?: string | null;
   },
 ) {
-  await ensureTenantAccess(tenantId);
+  return withTiming("getCategoriesByTenant", async () => {
+    await ensureTenantAccess(tenantId);
 
-  return db.category.findMany({
-    where: {
-      tenantId,
-      parentId: options?.parentId !== undefined ? options.parentId : undefined,
-    },
-    include: {
-      subcategories: options?.includeSubcategories
-        ? {
-            take: 50, // ✅ PERFORMANCE [P1.12]: Limit subcategories to prevent huge trees
-            include: {
-              subcategories: {
-                take: 50, // ✅ PERFORMANCE [P1.12]: Limit 2nd level subcategories
+    return db.category.findMany({
+      where: {
+        tenantId,
+        parentId: options?.parentId !== undefined ? options.parentId : undefined,
+      },
+      include: {
+        subcategories: options?.includeSubcategories
+          ? {
+              take: 50, // ✅ PERFORMANCE [P1.12]: Limit subcategories to prevent huge trees
+              include: {
+                subcategories: {
+                  take: 50, // ✅ PERFORMANCE [P1.12]: Limit 2nd level subcategories
+                },
               },
-            },
-          }
-        : false,
-      _count: {
-        select: {
-          products: true,
-          subcategories: true,
+            }
+          : false,
+        _count: {
+          select: {
+            products: true,
+            subcategories: true,
+          },
         },
       },
-    },
-    orderBy: { name: "asc" },
+      orderBy: { name: "asc" },
+    });
   });
 }
 

@@ -1,108 +1,113 @@
 // Data Access Layer - Products
 // Complete database operations for product management with tenant isolation
+// ✅ PERFORMANCE [P1.19]: Query timing implemented
 
 import { db } from "./client";
 import { Prisma } from "@prisma/client";
 import { getCurrentUserTenantId, ensureTenantAccess } from "./tenant";
 import type { ProductFilters, ProductSearchInput } from "../security/schemas/product-schemas";
+import { withTiming } from "../performance/query-optimization";
 
 /**
  * Get products with advanced filtering and pagination
+ * ✅ PERFORMANCE [P1.19]: Query timing enabled
  */
 export async function getProducts(tenantId: string, filters: ProductFilters) {
-  await ensureTenantAccess(tenantId);
+  return withTiming("getProducts", async () => {
+    await ensureTenantAccess(tenantId);
 
-  const {
-    page,
-    limit,
-    categoryId,
-    search,
-    minPrice,
-    maxPrice,
-    inStock,
-    published,
-    featured,
-    tags,
-    sort,
-  } = filters;
-
-  const skip = (page - 1) * limit;
-
-  // Build where clause
-  const where: any = {
-    tenantId,
-    ...(categoryId && { categoryId }),
-    ...(search && {
-      OR: [
-        { name: { contains: search, mode: "insensitive" } },
-        { description: { contains: search, mode: "insensitive" } },
-        { sku: { contains: search, mode: "insensitive" } },
-      ],
-    }),
-    ...(minPrice !== undefined && {
-      basePrice: { gte: minPrice },
-    }),
-    ...(maxPrice !== undefined && {
-      basePrice: { lte: maxPrice },
-    }),
-    ...(inStock !== undefined && {
-      stock: inStock ? { gt: 0 } : { lte: 0 },
-    }),
-    ...(published !== undefined && { published }),
-    ...(featured !== undefined && { featured }),
-    ...(tags && {
-      tags: { hasSome: tags.split(",").map((t) => t.trim()) },
-    }),
-  };
-
-  // Build orderBy clause
-  const orderBy = getProductOrderBy(sort);
-
-  const [products, total] = await Promise.all([
-    db.product.findMany({
-      where,
-      skip,
-      take: limit,
-      include: {
-        category: {
-          select: {
-            id: true,
-            name: true,
-            slug: true,
-          },
-        },
-        images: {
-          orderBy: { order: "asc" },
-          take: 4, // ✅ PERFORMANCE [P1.13]: Limit images in listing
-        },
-        variants: {
-          take: 20, // ✅ PERFORMANCE [P1.13]: Limit variants in listing
-          select: {
-            id: true,
-            size: true,
-            color: true,
-            price: true,
-            stock: true,
-          },
-        },
-        _count: {
-          select: { reviews: true },
-        },
-      },
-      orderBy,
-    }),
-    db.product.count({ where }),
-  ]);
-
-  return {
-    products,
-    pagination: {
+    const {
       page,
       limit,
-      total,
-      pages: Math.ceil(total / limit),
-    },
-  };
+      categoryId,
+      search,
+      minPrice,
+      maxPrice,
+      inStock,
+      published,
+      featured,
+      tags,
+      sort,
+    } = filters;
+
+    const skip = (page - 1) * limit;
+
+    // Build where clause
+    const where: any = {
+      tenantId,
+      ...(categoryId && { categoryId }),
+      ...(search && {
+        OR: [
+          { name: { contains: search, mode: "insensitive" } },
+          { description: { contains: search, mode: "insensitive" } },
+          { sku: { contains: search, mode: "insensitive" } },
+        ],
+      }),
+      ...(minPrice !== undefined && {
+        basePrice: { gte: minPrice },
+      }),
+      ...(maxPrice !== undefined && {
+        basePrice: { lte: maxPrice },
+      }),
+      ...(inStock !== undefined && {
+        stock: inStock ? { gt: 0 } : { lte: 0 },
+      }),
+      ...(published !== undefined && { published }),
+      ...(featured !== undefined && { featured }),
+      ...(tags && {
+        tags: { hasSome: tags.split(",").map((t) => t.trim()) },
+      }),
+    };
+
+    // Build orderBy clause
+    const orderBy = getProductOrderBy(sort);
+
+    const [products, total] = await Promise.all([
+      db.product.findMany({
+        where,
+        skip,
+        take: limit,
+        include: {
+          category: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+            },
+          },
+          images: {
+            orderBy: { order: "asc" },
+            take: 4, // ✅ PERFORMANCE [P1.13]: Limit images in listing
+          },
+          variants: {
+            take: 20, // ✅ PERFORMANCE [P1.13]: Limit variants in listing
+            select: {
+              id: true,
+              size: true,
+              color: true,
+              price: true,
+              stock: true,
+            },
+          },
+          _count: {
+            select: { reviews: true },
+          },
+        },
+        orderBy,
+      }),
+      db.product.count({ where }),
+    ]);
+
+    return {
+      products,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit),
+      },
+    };
+  });
 }
 
 /**

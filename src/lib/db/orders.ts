@@ -1,6 +1,7 @@
 // Orders Data Access Layer
 // CRUD and transaction functions for order management
 // ✅ PERFORMANCE [P0.4]: Fixed N+1 query in order creation
+// ✅ PERFORMANCE [P1.19]: Query timing implemented
 
 import { db } from "./client";
 import { ensureTenantAccess } from "./tenant";
@@ -9,6 +10,7 @@ import { validateCoupon, calculateDiscount, incrementCouponUsage } from "./coupo
 import { logger } from "@/lib/monitoring/logger";
 import type { Prisma } from "@prisma/client";
 import type { OrderStatus, PaymentStatus, PaymentMethod } from "@/lib/types/user-role";
+import { withTiming } from "../performance/query-optimization";
 
 /**
  * Generates a unique order number
