@@ -201,3 +201,8 @@ export async function timedQuery<T>(name: string, queryFn: () => Promise<T>): Pr
     throw error;
   }
 }
+
+/**
+ * Alias for timedQuery (used for query wrapping with performance timing)
+ */
+export const withTiming = timedQuery;
