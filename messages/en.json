@@ -1,0 +1,120 @@
+{
+  "common": {
+    "appName": "SACRINT Online Store",
+    "welcome": "Welcome",
+    "home": "Home",
+    "about": "About",
+    "contact": "Contact",
+    "faq": "FAQ",
+    "blog": "Blog",
+    "search": "Search",
+    "searchPlaceholder": "Search products...",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "remove": "Remove",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "viewAll": "View All",
+    "noResults": "No results found",
+    "tryAgain": "Try Again",
+    "goHome": "Go Home"
+  },
+  "nav": {
+    "shop": "Shop",
+    "products": "Products",
+    "categories": "Categories",
+    "cart": "Cart",
+    "account": "My Account",
+    "login": "Sign In",
+    "logout": "Sign Out",
+    "register": "Register",
+    "wishlist": "Wishlist",
+    "orders": "My Orders",
+    "settings": "Settings",
+    "help": "Help",
+    "language": "Language"
+  },
+  "shop": {
+    "title": "Shop",
+    "description": "Explore our product catalog",
+    "allProducts": "All Products",
+    "featuredProducts": "Featured Products",
+    "newArrivals": "New Arrivals",
+    "onSale": "On Sale",
+    "bestSellers": "Best Sellers",
+    "filters": "Filters",
+    "sortBy": "Sort By",
+    "priceRange": "Price Range",
+    "category": "Category",
+    "brand": "Brand",
+    "inStock": "In Stock",
+    "outOfStock": "Out of Stock",
+    "clearFilters": "Clear Filters",
+    "productsFound": "{count} products found"
+  },
+  "product": {
+    "price": "Price",
+    "addToCart": "Add to Cart",
+    "buyNow": "Buy Now",
+    "addToWishlist": "Add to Wishlist",
+    "inStock": "In Stock",
+    "outOfStock": "Out of Stock",
+    "reviews": "Reviews",
+    "description": "Description",
+    "features": "Features",
+    "relatedProducts": "Related Products"
+  },
+  "cart": {
+    "title": "Shopping Cart",
+    "emptyCart": "Your cart is empty",
+    "continueShopping": "Continue Shopping",
+    "subtotal": "Subtotal",
+    "shipping": "Shipping",
+    "tax": "Tax",
+    "total": "Total",
+    "checkout": "Proceed to Checkout"
+  },
+  "checkout": {
+    "title": "Checkout",
+    "shippingAddress": "Shipping Address",
+    "paymentMethod": "Payment Method",
+    "placeOrder": "Place Order",
+    "orderComplete": "Order Complete!",
+    "thankYou": "Thank you for your purchase!"
+  },
+  "account": {
+    "title": "My Account",
+    "orders": "Orders",
+    "addresses": "Addresses",
+    "settings": "Settings",
+    "logout": "Sign Out"
+  },
+  "auth": {
+    "login": "Sign In",
+    "register": "Sign Up",
+    "email": "Email",
+    "password": "Password",
+    "loginButton": "Sign In",
+    "registerButton": "Create Account"
+  },
+  "footer": {
+    "copyright": "© {year} SACRINT Online Store. All rights reserved.",
+    "followUs": "Follow Us",
+    "newsletter": "Newsletter",
+    "subscribe": "Subscribe"
+  },
+  "errors": {
+    "somethingWentWrong": "Something went wrong",
+    "pageNotFound": "Page not found",
+    "tryAgainLater": "Please try again later"
+  }
+}
