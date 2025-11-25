@@ -35,6 +35,8 @@ model Tenant {
   emailSubscribers      EmailSubscriber[]
   emailAutomations      EmailAutomation[]
   emailSends            EmailSend[]
+  savedSearches         SavedSearch[]
+  searchQueries         SearchQuery[]
 
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
@@ -78,6 +80,8 @@ model User {
   reviews               Review[]
   notifications         Notification[]
   notificationPreference NotificationPreference?
+  savedSearches         SavedSearch[]
+  searchQueries         SearchQuery[]
 
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
@@ -964,4 +968,60 @@ enum AutomationTrigger {
   WIN_BACK         // Re-engage inactive customers
   BIRTHDAY         // Customer birthday
   CUSTOM           // Custom trigger
+}
+
+// ============ SEARCH & DISCOVERY ============
+
+model SavedSearch {
+  id                    String   @id @default(cuid())
+  userId                String
+  tenantId              String
+
+  // Search details
+  name                  String   // "Laptops baratos"
+  query                 String   // "laptop"
+  filters               Json?    @db.Json // { minPrice: 100, maxPrice: 500, categoryId: "..." }
+
+  // Notifications
+  notifyOnNewResults    Boolean  @default(false)
+  lastNotifiedAt        DateTime?
+
+  // Relations
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant                Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([userId])
+  @@index([tenantId])
+}
+
+model SearchQuery {
+  id                    String   @id @default(cuid())
+  tenantId              String
+
+  // Search details
+  query                 String
+  resultsCount          Int
+  filters               Json?    @db.Json
+
+  // User context (optional for anonymous searches)
+  userId                String?
+  sessionId             String?
+
+  // Metadata
+  userAgent             String?  @db.Text
+  locale                String?
+
+  // Relations
+  tenant                Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user                  User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  createdAt             DateTime @default(now())
+
+  @@index([tenantId, createdAt])
+  @@index([query])
+  @@index([tenantId, query])
+  @@index([userId])
 }
