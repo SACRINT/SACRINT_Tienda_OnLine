@@ -1,7 +1,15 @@
 // @ts-nocheck
-// Product Detail Page - Server Component with Real Data
+/**
+ * Product Detail Page - Server Component with Real Data
+ * Semanas 31-32: SEO Avanzado
+ * Incluye:
+ * - Structured Data (JSON-LD) para Product, Breadcrumbs, Organization
+ * - Metadatos optimizados para SEO
+ * - OpenGraph y Twitter Cards
+ */
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
+import { Metadata } from "next";
 import { db } from "@/lib/db";
 import {
   ProductGallery,
@@ -10,6 +18,14 @@ import {
 } from "@/components/shop";
 import { AddToCartButton } from "@/components/shop/AddToCartButton";
 import { Star, Truck, Shield, RotateCcw, Heart, Share2 } from "lucide-react";
+import StructuredData from "@/components/seo/StructuredData";
+import {
+  generateProductSchema,
+  generateBreadcrumbSchema,
+  generateOrganizationSchema,
+  combineSchemas,
+} from "@/lib/seo/structured-data";
+import { generateMetadata as generateSEOMetadata } from "@/lib/seo/metadata";
 
 interface ProductDetailPageProps {
   params: {
@@ -19,6 +35,54 @@ interface ProductDetailPageProps {
 
 // Demo tenant ID - in production would come from subdomain/domain
 const DEMO_TENANT_SLUG = "demo-store";
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://tienda-online-2025.vercel.app";
+
+// ============================================================================
+// METADATA GENERATION
+// ============================================================================
+
+export async function generateMetadata({
+  params,
+}: ProductDetailPageProps): Promise<Metadata> {
+  const product = await getProduct(params.id);
+
+  if (!product) {
+    return {
+      title: "Producto no encontrado",
+      description: "El producto que buscas no está disponible.",
+    };
+  }
+
+  const avgRating =
+    product.reviews.length > 0
+      ? product.reviews.reduce((sum, r) => sum + r.rating, 0) /
+        product.reviews.length
+      : 0;
+
+  const currentPrice = product.salePrice
+    ? Number(product.salePrice)
+    : Number(product.basePrice);
+
+  const productImage =
+    product.images[0]?.url ||
+    "https://images.unsplash.com/photo-1505740420928-5e560c06d30e";
+
+  return generateSEOMetadata({
+    title: `${product.name} | Tienda Online`,
+    description: product.shortDescription || product.description || `Compra ${product.name} al mejor precio. Envío rápido y seguro.`,
+    keywords: [
+      product.name,
+      product.category?.name || "productos",
+      "comprar online",
+      "envío gratis",
+      "México",
+      product.brand || "",
+    ].filter(Boolean),
+    image: productImage,
+    url: `/shop/products/${params.id}`,
+    type: "product",
+  });
+}
 
 async function getProduct(idOrSlug: string) {
   try {
@@ -205,8 +269,75 @@ export default async function ProductDetailPage({
         "Soporte al cliente 24/7",
       ];
 
+  // ============================================================================
+  // STRUCTURED DATA (JSON-LD)
+  // ============================================================================
+
+  // Breadcrumb Schema
+  const breadcrumbItems = [
+    { name: "Inicio", url: BASE_URL },
+    { name: "Tienda", url: `${BASE_URL}/shop` },
+  ];
+
+  if (product.category) {
+    breadcrumbItems.push({
+      name: product.category.name,
+      url: `${BASE_URL}/shop/category/${product.category.slug}`,
+    });
+  }
+
+  breadcrumbItems.push({
+    name: product.name,
+    url: `${BASE_URL}/shop/products/${params.id}`,
+  });
+
+  const breadcrumbSchema = generateBreadcrumbSchema(breadcrumbItems);
+
+  // Product Schema
+  const productSchema = generateProductSchema(
+    {
+      name: product.name,
+      description: product.shortDescription || product.description || "",
+      image: galleryImages.map((img) => img.url),
+      price: currentPrice,
+      currency: "MXN",
+      availability: product.stock > 0 ? "InStock" : "OutOfStock",
+      sku: product.sku || undefined,
+      brand: product.brand || undefined,
+      rating:
+        product.reviews.length > 0
+          ? { value: avgRating, count: product.reviews.length }
+          : undefined,
+      reviews: transformedReviews.slice(0, 5).map((review) => ({
+        author: review.userName,
+        datePublished: review.createdAt,
+        reviewBody: review.content,
+        ratingValue: review.rating,
+      })),
+      priceValidUntil: new Date(
+        Date.now() + 30 * 24 * 60 * 60 * 1000
+      ).toISOString(), // 30 days
+    },
+    `${BASE_URL}/shop/products/${params.id}`
+  );
+
+  // Organization Schema
+  const organizationSchema = generateOrganizationSchema({
+    includeSocialMedia: true,
+  });
+
+  // Combine all schemas
+  const combinedSchema = combineSchemas([
+    productSchema,
+    breadcrumbSchema,
+    organizationSchema,
+  ]);
+
   return (
     <div className="min-h-screen bg-white">
+      {/* Structured Data (JSON-LD) */}
+      <StructuredData schema={combinedSchema} validate={false} />
+
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Breadcrumbs */}
         <nav className="mb-8 flex items-center gap-2 text-sm text-gray-600">
