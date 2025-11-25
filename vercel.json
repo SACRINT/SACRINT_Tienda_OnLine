@@ -3,13 +3,43 @@
   "framework": "nextjs",
   "regions": ["iad1"],
   "env": {
-    "PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING": "1"
+    "PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING": "1",
+    "NODE_ENV": "production"
+  },
+  "build": {
+    "env": {
+      "NEXT_TELEMETRY_DISABLED": "1"
+    }
   },
   "functions": {
     "app/**/*": {
       "maxDuration": 30
+    },
+    "app/api/checkout/**/*": {
+      "memory": 2048,
+      "maxDuration": 30
+    },
+    "app/api/webhooks/**/*": {
+      "memory": 1024,
+      "maxDuration": 30
     }
   },
+  "crons": [
+    {
+      "path": "/api/cron/cleanup-abandoned-carts",
+      "schedule": "0 2 * * *"
+    },
+    {
+      "path": "/api/cron/update-inventory",
+      "schedule": "*/15 * * * *"
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/healthz",
+      "destination": "/api/health"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
@@ -32,5 +62,11 @@
         }
       ]
     }
-  ]
+  ],
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "github": {
+    "silent": false,
+    "autoJobCancelation": true
+  }
 }
