@@ -7,6 +7,8 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { X, ShoppingBag, Trash2, Plus, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
+
 
 export interface CartItem {
   id: string;
@@ -152,9 +154,11 @@ export function CartDrawer({
               <div key={item.id} className="flex gap-4">
                 {/* Image */}
                 <div className="flex-shrink-0 w-20 h-20 rounded-md overflow-hidden bg-muted">
-                  <img
+                  <Image
                     src={item.image}
                     alt={item.name}
+                    width={80}
+                    height={80}
                     className="w-full h-full object-cover"
                   />
                 </div>

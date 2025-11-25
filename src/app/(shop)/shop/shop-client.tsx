@@ -62,6 +62,7 @@ export function ShopPageClient({ products, categories }: ShopPageClientProps) {
         name: product.name,
         image: product.image,
         sku: product.slug,
+        slug: product.slug,
       });
       setAddedToCart(productId);
       setTimeout(() => setAddedToCart(null), 2000);

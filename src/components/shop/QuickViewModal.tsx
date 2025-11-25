@@ -87,6 +87,7 @@ export function QuickViewModal({
       price: displayPrice,
       image: product.image,
       quantity,
+      slug: product.slug, // Added slug
     });
 
     toast.success(

@@ -5,8 +5,8 @@
 
 "use client";
 
-import { useEffect, ReactNode } from "react";
-import { analytics } from "./events";
+import { ReactNode } from "react";
+import analytics from "./events";
 import { usePageTracking } from "./hooks";
 import { Analytics as VercelAnalytics } from "@vercel/analytics/react";
 
@@ -15,12 +15,7 @@ interface AnalyticsProviderProps {
 }
 
 export function AnalyticsProvider({ children }: AnalyticsProviderProps) {
-  // Inicializar analytics en el montaje
-  useEffect(() => {
-    analytics.initialize();
-  }, []);
-
-  // Track page views automáticamente
+  // Track page views automticamente
   usePageTracking();
 
   return (

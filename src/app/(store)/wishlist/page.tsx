@@ -1,172 +1,93 @@
 "use client";
 
-import * as React from "react";
 import Link from "next/link";
-import { Heart, ShoppingCart, Trash2, ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useWishlist } from "@/lib/store/useWishlist";
-import { useCart } from "@/lib/store/useCart";
+import { ProductCard } from "@/app/components/shop/ProductCard";
+import { HeartCrack } from "lucide-react";
+
+// Dummy Wishlist Products
+const dummyWishlistProducts = [
+  {
+    id: "1",
+    name: "Laptop Gamer X1",
+    price: 1200,
+    originalPrice: 1500,
+    image: "https://picsum.photos/400/300?random=1",
+    rating: 4.5,
+    reviewCount: 120,
+    isNew: true,
+    isSale: true,
+    stock: 5,
+    slug: "laptop-gamer-x1",
+  },
+  {
+    id: "3",
+    name: "Mouse Inalámbrico Ergonómico",
+    price: 35,
+    image: "https://picsum.photos/400/300?random=3",
+    rating: 4.2,
+    reviewCount: 80,
+    isNew: false,
+    isSale: true,
+    stock: 20,
+    slug: "mouse-inalambrico-ergonomico",
+  },
+  {
+    id: "5",
+    name: "Auriculares Gaming Pro",
+    price: 95,
+    image: "https://picsum.photos/400/300?random=5",
+    rating: 4.6,
+    reviewCount: 90,
+    isNew: false,
+    isSale: true,
+    stock: 15,
+    slug: "auriculares-gaming-pro",
+  },
+];
 
 export default function WishlistPage() {
-  const { items, removeItem, clear } = useWishlist();
-  const { addItem: addToCart } = useCart();
-  const [mounted, setMounted] = React.useState(false);
-
-  React.useEffect(() => {
-    useWishlist.persist.rehydrate();
-    useCart.persist.rehydrate();
-    setMounted(true);
-  }, []);
-
-  const formatPrice = (price: number) =>
-    new Intl.NumberFormat("es-MX", {
-      style: "currency",
-      currency: "MXN",
-    }).format(price);
-
-  const handleAddToCart = (item: (typeof items)[0]) => {
-    addToCart({
-      productId: item.productId,
-      variantId: null,
-      quantity: 1,
-      price: item.price,
-      name: item.name,
-      image: item.image,
-      sku: item.slug,
-    });
-    removeItem(item.productId);
-  };
-
-  const handleAddAllToCart = () => {
-    items.forEach((item) => {
-      addToCart({
-        productId: item.productId,
-        variantId: null,
-        quantity: 1,
-        price: item.price,
-        name: item.name,
-        image: item.image,
-        sku: item.slug,
-      });
-    });
-    clear();
-  };
-
-  if (!mounted) {
-    return (
-      <div className="min-h-screen bg-background py-16">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-48 mb-8"></div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="h-64 bg-gray-200 rounded-lg"></div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (items.length === 0) {
-    return (
-      <div className="min-h-screen bg-background py-16">
-        <div className="max-w-3xl mx-auto px-4 text-center">
-          <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
-            <Heart className="h-12 w-12 text-muted-foreground" />
-          </div>
-          <h1 className="text-2xl font-bold mb-4">
-            Tu lista de deseos está vacía
-          </h1>
-          <p className="text-muted-foreground mb-8">
-            Guarda tus productos favoritos para comprarlos más tarde
-          </p>
-          <Button asChild>
-            <Link href="/shop">
-              Explorar Productos
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
-          </Button>
-        </div>
-      </div>
-    );
-  }
+  const wishlistProducts = dummyWishlistProducts; // In a real app, fetch from user's wishlist
 
   return (
-    <div className="min-h-screen bg-background py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-primary">Lista de Deseos</h1>
-            <p className="text-muted-foreground mt-1">
-              {items.length} {items.length === 1 ? "producto" : "productos"}{" "}
-              guardados
-            </p>
-          </div>
-          <div className="flex gap-3 mt-4 sm:mt-0">
-            <Button variant="outline" onClick={clear}>
-              Limpiar Lista
-            </Button>
-            <Button onClick={handleAddAllToCart}>
-              <ShoppingCart className="h-4 w-4 mr-2" />
-              Agregar Todo al Carrito
-            </Button>
-          </div>
+    <div className="mx-auto max-w-screen-xl px-4 py-8 sm:px-6 lg:px-8">
+      <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center">
+        Mi Lista de Deseos
+      </h1>
+
+      {wishlistProducts.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-16 text-gray-500">
+          <HeartCrack className="h-24 w-24 mb-6" />
+          <p className="text-xl font-medium mb-4">
+            Tu lista de deseos está vacía.
+          </p>
+          <p className="text-center mb-8">
+            ¡Explora nuestros productos y añade tus favoritos para no perderlos de vista!
+          </p>
+          <Link
+            href="/shop"
+            className="inline-block rounded-lg bg-blue-600 px-8 py-3 text-sm font-medium text-white shadow hover:bg-blue-700"
+          >
+            Seguir Comprando
+          </Link>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {items.map((item) => (
-            <div
-              key={item.productId}
-              className="bg-white rounded-lg shadow-soft overflow-hidden group"
-            >
-              <div className="relative aspect-square bg-neutral-100">
-                {item.image ? (
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-6xl">
-                    📦
-                  </div>
-                )}
-                <button
-                  onClick={() => removeItem(item.productId)}
-                  className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-md hover:bg-red-50 transition-colors"
-                  aria-label="Eliminar de lista de deseos"
-                >
-                  <Trash2 className="h-4 w-4 text-red-500" />
-                </button>
-              </div>
-
-              <div className="p-4">
-                <Link href={`/shop/products/${item.slug}`}>
-                  <h3 className="font-semibold text-primary hover:text-accent transition-colors line-clamp-2">
-                    {item.name}
-                  </h3>
-                </Link>
-
-                <div className="mt-2 flex items-center justify-between">
-                  <span className="text-lg font-bold text-primary">
-                    {formatPrice(item.price)}
-                  </span>
-                </div>
-
-                <Button
-                  className="w-full mt-4"
-                  onClick={() => handleAddToCart(item)}
-                >
-                  <ShoppingCart className="h-4 w-4 mr-2" />
-                  Agregar al Carrito
-                </Button>
-              </div>
-            </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          {wishlistProducts.map((product) => (
+            <ProductCard key={product.id} product={product} />
           ))}
         </div>
-      </div>
+      )}
+
+      {wishlistProducts.length > 0 && (
+        <div className="mt-12 text-center">
+          <Link
+            href="/shop"
+            className="inline-block rounded-lg border border-blue-600 px-8 py-3 text-sm font-medium text-blue-600 shadow hover:bg-blue-50"
+          >
+            Seguir Comprando
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

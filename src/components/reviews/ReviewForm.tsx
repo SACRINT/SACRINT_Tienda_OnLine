@@ -14,6 +14,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { X, Upload, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
+
 
 const reviewSchema = z.object({
   rating: z.number().int().min(1, "Por favor selecciona una calificación").max(5),
@@ -192,9 +194,11 @@ export function ReviewForm({ productId, orderId, onSubmit, onCancel, className }
                   key={index}
                   className="relative h-20 w-20 overflow-hidden rounded-lg border border-gray-200"
                 >
-                  <img
+                  <Image
                     src={url}
                     alt={`Preview ${index + 1}`}
+                    layout="fill"
+                    objectFit="cover"
                     className="h-full w-full object-cover"
                   />
                   <button

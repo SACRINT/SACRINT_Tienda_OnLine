@@ -7,7 +7,7 @@
 
 import { useEffect, useCallback } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
-import { analytics } from "./events";
+import analytics from "./events";
 
 /**
  * Hook para trackear page views autom�ticamente
@@ -31,11 +31,10 @@ export function usePageTracking() {
 export function useProductTracking() {
   const trackView = useCallback(
     (product: { id: string; name: string; category?: string; price: number }) => {
-      analytics.trackProductViewed({
-        productId: product.id,
-        productName: product.name,
-        productCategory: product.category,
-        productPrice: product.price,
+      analytics.trackProductView({
+        id: product.id,
+        name: product.name,
+        price: product.price,
       });
     },
     [],
@@ -49,13 +48,14 @@ export function useProductTracking() {
       price: number;
       quantity?: number;
     }) => {
-      analytics.trackAddToCart({
-        productId: product.id,
-        productName: product.name,
-        productCategory: product.category,
-        productPrice: product.price,
-        quantity: product.quantity || 1,
-      });
+      analytics.trackAddToCart(
+        {
+          id: product.id,
+          name: product.name,
+          price: product.price,
+        },
+        product.quantity || 1,
+      );
     },
     [],
   );
@@ -63,9 +63,9 @@ export function useProductTracking() {
   const trackRemoveFromCart = useCallback(
     (product: { id: string; name: string; price: number; quantity?: number }) => {
       analytics.trackRemoveFromCart({
-        productId: product.id,
-        productName: product.name,
-        productPrice: product.price,
+        id: product.id,
+        name: product.name,
+        price: product.price,
         quantity: product.quantity || 1,
       });
     },

@@ -7,6 +7,8 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { Trash2, Plus, Minus, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
+
 
 export interface CartPageItem {
   id: string;
@@ -103,9 +105,11 @@ export function CartPage({
                 href={item.href}
                 className="flex-shrink-0 w-24 h-24 rounded-md overflow-hidden bg-muted"
               >
-                <img
+                <Image
                   src={item.image}
                   alt={item.name}
+                  width={96}
+                  height={96}
                   className="w-full h-full object-cover"
                 />
               </a>

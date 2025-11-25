@@ -534,7 +534,7 @@ Code Quality:    ✅ Strict TypeScript, ESLint configured
 ```
 Frontend:        ✅ Next.js 14, React 18, TypeScript, Tailwind, shadcn/ui
 Backend:         ✅ Next.js API, Prisma, PostgreSQL, NextAuth.js v5
-Payments:        ✅ Stripe, MercadoPago (placeholders)
+Payments:        ✅ Stripe, MercadoPago (placeholders - MERCADOPAGO_ACCESS_TOKEN=APP_USR-TEST_TOKEN, NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY=APP_USR-TEST_PUBLIC_KEY)
 Email:           ✅ Resend API
 Deployment:      ✅ Vercel
 Database:        ✅ Neon PostgreSQL

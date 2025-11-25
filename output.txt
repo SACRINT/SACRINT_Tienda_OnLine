@@ -1,0 +1,35 @@
+Semana 7 completada.
+
+Se ha implementado el flujo de compra y la integración de pagos, incluyendo:
+
+*   **Página de Carrito Completa**: Creada con funcionalidades para gestionar los productos.
+*   **Asistente de Checkout**: Implementado un wizard de 4 pasos para guiar al usuario.
+*   **Integración con Stripe**: Configurado el backend para crear intentos de pago.
+*   **Creación de Órdenes**: Desarrollada la API para crear órdenes de forma atómica y segura.
+*   **Webhook de Pagos**: Creado un endpoint para procesar eventos de Stripe.
+*   **Cálculo de Impuestos y Cupones**: Implementada la lógica base para impuestos y un sistema de validación de cupones.
+*   **Email de Confirmación**: Creada la plantilla y la función para enviar correos de confirmación de orden.
+*   **Página de Estado de la Orden**: Desarrollada para que los usuarios puedan ver los detalles de sus pedidos.
+*   **Manejo de Errores y Checkout de Invitado**: Mejorada la robustez del checkout y sentadas las bases para compras sin registro.
+*   **Seguridad PCI**: Documentadas las medidas de cumplimiento.
+
+---
+
+Ahora estoy listo para comenzar con la **Semana 8: Validación y Pulido**.
+
+El objetivo de esta semana es asegurar la calidad y estabilidad de todo lo desarrollado hasta ahora, realizar optimizaciones de rendimiento y preparar la plataforma para un lanzamiento público (MVP). Las tareas a realizar son:
+
+1.  **Pruebas End-to-End (E2E)**: Crear una suite de pruebas automatizadas con Playwright para validar los flujos críticos de compra, desde la búsqueda de un producto hasta la confirmación del pedido.
+2.  **Optimización de Rendimiento**: Analizar y mejorar la velocidad de carga de las páginas, optimizando imágenes, código y consultas a la base de datos para alcanzar un Lighthouse score superior a 90.
+3.  **Pruebas de QA (Bug Bounty)**: Realizar un plan de pruebas manual exhaustivo para identificar y documentar cualquier bug o comportamiento inesperado.
+4.  **Verificación de Responsividad Móvil**: Asegurar que toda la experiencia de compra sea fluida y funcional en dispositivos móviles (iPhone, Android) y tabletas.
+5.  **Auditoría de Accesibilidad (WCAG AA)**: Realizar una auditoría para garantizar que la plataforma cumple con los estándares de accesibilidad WCAG AA.
+6.  **Revisión Final de SEO**: Verificar que todas las optimizaciones de SEO (meta tags, sitemaps, structured data) estén correctamente implementadas.
+7.  **Checklist de Despliegue**: Crear y completar una lista de verificación para asegurar que todo esté listo para un despliegue a producción.
+8.  **Monitoreo y Alertas**: Configurar Sentry para el seguimiento de errores en producción y establecer alertas básicas.
+9.  **Documentación Final**: Actualizar toda la documentación del proyecto para reflejar el estado actual.
+10. **Backup y Recuperación de Desastres**: Definir y documentar un plan de backups y recuperación ante desastres.
+11. **Preparación para el Lanzamiento**: Crear un plan de lanzamiento detallado.
+12. **Monitoreo Post-Lanzamiento**: Planificar el monitoreo de las primeras 24 horas después del lanzamiento.
+
+Comenzaré con la Tarea 8.1: **Pruebas End-to-End (E2E)**.

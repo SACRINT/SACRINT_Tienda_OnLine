@@ -31,6 +31,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import Image from "next/image";
+
 
 interface Category {
   id: string;
@@ -469,11 +471,13 @@ export function ProductForm({ product, categories }: ProductFormProps) {
                         : "border-border hover:border-primary/50"
                     }`}
                   >
-                    <img
-                      src={image.url}
-                      alt={image.alt}
-                      className="w-full h-full object-cover"
-                    />
+<Image
+                    src={image.url}
+                    alt={image.alt}
+                    width={80}
+                    height={80}
+                    className="h-full w-full object-cover"
+                  />
                     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                       <Button
                         type="button"

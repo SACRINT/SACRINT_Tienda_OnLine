@@ -10,11 +10,14 @@ import { MobileBottomNav } from "@/components/shared/MobileNav";
 import { SkipToContent } from "@/components/shared/SkipToContent";
 import { ToastContainer } from "@/components/ui/toast-container";
 import { StoreHeader, StoreFooter } from "@/components/store";
+import { AnalyticsTracker } from "@/lib/analytics/AnalyticsTracker";
+import { Suspense } from "react";
+
 
 export const metadata: Metadata = {
-  title: "Tienda Online 2025 - E-commerce SaaS",
-  description: "Plataforma multi-tenant de e-commerce con seguridad de nivel bancario",
-  keywords: "ecommerce, tienda online, shopping, productos, multi-tenant, SaaS",
+  title: "Tienda Online - Tu plataforma e-commerce SaaS",
+  description: "Crea tu tienda online profesional sin conocimiento técnico. Vende tus productos, gestiona tus pedidos y haz crecer tu negocio.",
+  keywords: "ecommerce, tienda online, venta online, saas, crear tienda, negocio online",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -23,6 +26,27 @@ export const metadata: Metadata = {
   },
   formatDetection: {
     telephone: false,
+  },
+  openGraph: {
+    title: "Tienda Online - Tu plataforma e-commerce SaaS",
+    description: "Crea tu tienda online profesional sin conocimiento técnico.",
+    url: "https://tienda-online-2025.vercel.app",
+    siteName: "Tienda Online",
+    images: [
+      {
+        url: "/og-image.png", // Replace with your actual OG image
+        width: 1200,
+        height: 630,
+      },
+    ],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Tienda Online - Tu plataforma e-commerce SaaS",
+    description: "Crea tu tienda online profesional sin conocimiento técnico.",
+    creator: "@TiendaOnlineApp", // Replace with your Twitter handle
+    images: ["/og-image.png"], // Replace with your actual OG image
   },
 };
 
@@ -49,6 +73,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body>
+        <Suspense>
+          <AnalyticsTracker />
+        </Suspense>
         <SkipToContent />
         <ServiceWorkerRegistration />
         <PWAInstallPrompt />

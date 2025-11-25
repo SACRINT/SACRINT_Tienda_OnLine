@@ -8,6 +8,8 @@ import { cn } from "@/lib/utils";
 import { MoreHorizontal, Edit, Trash2, Eye, Copy, Archive } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BadgeCustom } from "@/components/ui/badge-custom";
+import Image from "next/image";
+
 
 export interface ProductTableItem {
   id: string;
@@ -201,9 +203,11 @@ export function ProductTable({
                   <td className="p-3">
                     <div className="flex items-center gap-3">
                       {product.image && (
-                        <img
+                        <Image
                           src={product.image}
                           alt={product.name}
+                          width={40}
+                          height={40}
                           className="w-10 h-10 rounded object-cover"
                         />
                       )}

@@ -7,6 +7,8 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { CheckCircle, Package, Mail, MapPin, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
+
 
 export interface OrderDetails {
   orderNumber: string;
@@ -86,9 +88,11 @@ export function OrderConfirmation({
           {order.items.map((item, index) => (
             <div key={index} className="flex gap-3">
               <div className="flex-shrink-0 w-16 h-16 rounded-md overflow-hidden bg-muted">
-                <img
+                <Image
                   src={item.image}
                   alt={item.name}
+                  width={64}
+                  height={64}
                   className="w-full h-full object-cover"
                 />
               </div>

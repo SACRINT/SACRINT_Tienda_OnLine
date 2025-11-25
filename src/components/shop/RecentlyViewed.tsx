@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import * as React from "react";
 import Link from "next/link";
 import { Clock, X } from "lucide-react";
@@ -63,9 +64,11 @@ export function RecentlyViewed({
             <div className="bg-white rounded-lg shadow-soft overflow-hidden hover:shadow-medium transition-shadow">
               <div className="aspect-square bg-neutral-100 overflow-hidden">
                 {item.image ? (
-                  <img
+                  <Image
                     src={item.image}
                     alt={item.name}
+                    width={200}
+                    height={200}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 ) : (

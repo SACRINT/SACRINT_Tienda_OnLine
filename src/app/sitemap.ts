@@ -1,43 +1,38 @@
-// Dynamic Sitemap Generation
-// SEO: Auto-generated sitemap.xml
+import { MetadataRoute } from 'next'
+ 
+export default function sitemap(): MetadataRoute.Sitemap {
+  const baseUrl = 'https://tienda-online-2025.vercel.app';
 
-import { MetadataRoute } from "next";
-import { db } from "@/lib/db";
-
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://sacrint-tienda.vercel.app";
-
-  const staticPages: MetadataRoute.Sitemap = [
+  return [
     {
       url: baseUrl,
       lastModified: new Date(),
-      changeFrequency: "daily",
+      changeFrequency: 'yearly',
       priority: 1,
     },
     {
-      url: `${baseUrl}/shop`,
+      url: `${baseUrl}/pricing`,
       lastModified: new Date(),
-      changeFrequency: "daily",
-      priority: 0.9,
-    },
-  ];
-
-  try {
-    const products = await db.product.findMany({
-      where: { published: true },
-      select: { id: true, slug: true, updatedAt: true },
-      take: 5000,
-    });
-
-    const productPages: MetadataRoute.Sitemap = products.map((product: any) => ({
-      url: `${baseUrl}/shop/${product.slug || product.id}`,
-      lastModified: product.updatedAt,
-      changeFrequency: "weekly" as const,
+      changeFrequency: 'monthly',
       priority: 0.8,
-    }));
-
-    return [...staticPages, ...productPages];
-  } catch (error) {
-    return staticPages;
-  }
+    },
+    {
+      url: `${baseUrl}/features`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.8,
+    },
+    {
+        url: `${baseUrl}/contact`,
+        lastModified: new Date(),
+        changeFrequency: 'yearly',
+        priority: 0.5,
+    },
+    {
+        url: `${baseUrl}/blog`,
+        lastModified: new Date(),
+        changeFrequency: 'weekly',
+        priority: 0.7,
+    },
+  ]
 }

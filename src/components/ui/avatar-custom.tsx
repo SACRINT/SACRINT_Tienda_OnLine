@@ -6,6 +6,8 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { User } from "lucide-react";
+import Image from "next/image";
+
 
 export type AvatarSize = "xs" | "sm" | "md" | "lg" | "xl";
 export type AvatarStatus = "online" | "offline" | "busy" | "away";
@@ -103,9 +105,11 @@ export function AvatarCustom({
         )}
       >
         {showImage && (
-          <img
+          <Image
             src={src}
             alt={alt || name || "Avatar"}
+            width={80}
+            height={80}
             className="h-full w-full object-cover"
             onError={() => setImageError(true)}
           />

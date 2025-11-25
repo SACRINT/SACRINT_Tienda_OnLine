@@ -56,6 +56,7 @@ export function ProductCard({ product }: ProductCardProps) {
       name: product.name,
       image: product.image || "/placeholder.jpg",
       sku: product.sku,
+      slug: product.slug, // Added slug
     });
 
     // Mostrar notificación

@@ -7,6 +7,7 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 
 export interface RelatedProduct {
   id: string;
@@ -113,9 +114,11 @@ export function RelatedProducts({
             className="flex-shrink-0 w-48 group"
           >
             <div className="aspect-square overflow-hidden rounded-lg bg-muted">
-              <img
+              <Image
                 src={product.image}
                 alt={product.name}
+                width={200}
+                height={200}
                 className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
               />
             </div>

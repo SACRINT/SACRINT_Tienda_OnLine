@@ -20,6 +20,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import Image from "next/image";
+
 
 interface WishlistItem {
   id: string;
@@ -187,9 +189,11 @@ export default function WishlistPage() {
               <Card key={item.id} className="overflow-hidden group">
                 <div className="relative aspect-square bg-muted">
                   {item.image ? (
-                    <img
+                    <Image
                       src={item.image}
                       alt={item.name}
+                      width={200}
+                      height={200}
                       className="w-full h-full object-cover"
                     />
                   ) : (

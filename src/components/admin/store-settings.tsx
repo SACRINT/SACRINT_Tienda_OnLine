@@ -11,6 +11,8 @@ import { FormField } from "@/components/ui/form-field";
 import { SelectField } from "@/components/ui/select-field";
 import { TextareaField } from "@/components/ui/textarea-field";
 import { SettingsSection } from "./settings-layout";
+import Image from "next/image";
+
 
 export interface StoreSettingsData {
   name: string;
@@ -59,12 +61,13 @@ export function StoreSettings({
           <div className="flex items-center gap-4">
             <div className="w-20 h-20 rounded-lg border-2 border-dashed flex items-center justify-center bg-muted">
               {settings.logo ? (
-                <img
-                  src={settings.logo}
-                  alt="Store logo"
-                  className="w-full h-full object-cover rounded-lg"
-                />
-              ) : (
+                <Image
+                                src={settings.logo}
+                                alt="Store logo"
+                                width={80}
+                                height={80}
+                                className="w-full h-full object-cover rounded-lg"
+                              />              ) : (
                 <Upload className="h-6 w-6 text-muted-foreground" />
               )}
             </div>

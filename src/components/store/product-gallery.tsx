@@ -7,6 +7,8 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight, ZoomIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
+
 
 export interface ProductImage {
   id: string;
@@ -78,11 +80,13 @@ export function ProductGallery({
           onMouseMove={handleMouseMove}
           onMouseLeave={() => setIsZoomed(false)}
         >
-          <img
+          <Image
             src={currentImage.url}
             alt={
               currentImage.alt || `${productName} - Image ${selectedIndex + 1}`
             }
+            width={800}
+            height={800}
             className={cn(
               "h-full w-full object-cover transition-transform duration-200",
               isZoomed && "scale-150",
@@ -146,9 +150,11 @@ export function ProductGallery({
               aria-label={`View image ${index + 1}`}
               aria-current={index === selectedIndex ? "true" : undefined}
             >
-              <img
+              <Image
                 src={image.url}
                 alt=""
+                width={64}
+                height={64}
                 className="h-full w-full object-cover"
               />
             </button>

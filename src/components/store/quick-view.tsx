@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { X, ChevronLeft, ChevronRight, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NumberInput } from "@/components/ui/number-input";
+import Image from "next/image";
 
 export interface QuickViewProduct {
   id: string;
@@ -135,9 +136,11 @@ export function QuickView({
           {/* Images */}
           <div className="space-y-4">
             <div className="relative aspect-square overflow-hidden rounded-lg bg-muted">
-              <img
+              <Image
                 src={product.images[selectedImage]}
                 alt={`${product.name} - Image ${selectedImage + 1}`}
+                width={600}
+                height={600}
                 className="h-full w-full object-cover"
               />
 
@@ -179,9 +182,11 @@ export function QuickView({
                         : "border-transparent",
                     )}
                   >
-                    <img
+                    <Image
                       src={image}
                       alt=""
+                      width={64}
+                      height={64}
                       className="h-full w-full object-cover"
                     />
                   </button>

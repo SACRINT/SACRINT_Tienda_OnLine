@@ -25,6 +25,8 @@ import {
 } from "@/components/ui/status-indicator";
 import { Timeline, TimelineItem } from "@/components/ui/timeline";
 import { SelectField } from "@/components/ui/select-field";
+import Image from "next/image";
+
 
 export interface OrderItem {
   id: string;
@@ -194,10 +196,12 @@ export function OrderDetail({
               {order.items.map((item) => (
                 <div key={item.id} className="flex gap-4">
                   {item.image && (
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="w-16 h-16 rounded object-cover"
+                    <Image
+                    src={item.image}
+                    alt={item.name}
+                    width={64}
+                    height={64}
+                    className="w-16 h-16 rounded object-cover"
                     />
                   )}
                   <div className="flex-1 min-w-0">

@@ -6,6 +6,8 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { Search, X, Clock, TrendingUp } from "lucide-react";
+import Image from "next/image";
+
 
 export interface SearchSuggestion {
   id: string;
@@ -136,9 +138,11 @@ export function SearchBar({
                       className="w-full flex items-center gap-3 p-2 hover:bg-muted rounded-md text-left"
                     >
                       {suggestion.image ? (
-                        <img
+                        <Image
                           src={suggestion.image}
                           alt=""
+                          width={40}
+                          height={40}
                           className="w-10 h-10 rounded object-cover"
                         />
                       ) : (

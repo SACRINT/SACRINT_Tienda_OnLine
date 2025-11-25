@@ -115,12 +115,19 @@ export async function GET(
               }
             : null,
         })),
-        user: {
-          id: order.user.id,
-          name: order.user.name,
-          email: order.user.email,
-          phone: order.user.phone,
-        },
+        user: order.userId
+          ? {
+              id: order.user?.id,
+              name: order.user?.name,
+              email: order.user?.email,
+              phone: order.user?.phone,
+            }
+          : {
+              id: null, // No user ID for guest
+              name: order.customerName,
+              email: order.customerEmail,
+              phone: null, // No phone for guest
+            },
         createdAt: order.createdAt,
         updatedAt: order.updatedAt,
       },

@@ -13,7 +13,9 @@ interface Order {
   user: {
     name: string | null;
     email: string;
-  };
+  } | null; // User can be null for guest checkouts
+  customerName: string | null; // For guest orders
+  customerEmail: string | null; // For guest orders
 }
 
 interface OrdersTableProps {
@@ -136,10 +138,10 @@ export function OrdersTable({ orders, currentPage }: OrdersTableProps) {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">
-                      {order.user.name || "Sin nombre"}
+                      {order.user?.name || order.customerName || "Sin nombre"}
                     </div>
                     <div className="text-sm text-gray-500">
-                      {order.user.email}
+                      {order.user?.email || order.customerEmail || "N/A"}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">

@@ -8,6 +8,8 @@ import { cn } from "@/lib/utils";
 import { Grid, List, Star, Heart, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BadgeCustom } from "@/components/ui/badge-custom";
+import Image from "next/image";
+
 
 export interface Product {
   id: string;
@@ -168,9 +170,11 @@ function ProductCard({
             }
           }}
         >
-          <img
+          <Image
             src={product.image}
             alt={product.name}
+            width={400}
+            height={400}
             className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
         </a>
@@ -324,9 +328,11 @@ function ProductListItem({
             }
           }}
         >
-          <img
+          <Image
             src={product.image}
             alt={product.name}
+            width={128}
+            height={128}
             className="h-full w-full object-cover"
           />
         </a>

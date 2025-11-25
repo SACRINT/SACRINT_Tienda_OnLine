@@ -42,6 +42,7 @@ export function AddToCartButton({
       name: productName,
       image: productImage,
       sku: productSlug,
+      slug: productSlug, // Added slug
     });
 
     setIsAdded(true);

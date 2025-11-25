@@ -147,7 +147,7 @@ export async function GET() {
     // Format recent orders
     const formattedRecentOrders = recentOrders.map((order: (typeof recentOrders)[number]) => ({
       id: order.orderNumber,
-      customer: order.user.name || order.user.email || "Cliente",
+      customer: order.user ? (order.user.name || order.user.email) : (order.customerName || order.customerEmail || "Invitado"),
       total: Number(order.total),
       status: order.status.toLowerCase(),
       date: formatRelativeTime(order.createdAt),

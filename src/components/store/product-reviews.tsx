@@ -9,6 +9,7 @@ import { Star, ThumbsUp, Flag, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AvatarCustom } from "@/components/ui/avatar-custom";
 import { ProgressCustom } from "@/components/ui/progress-custom";
+import Image from "next/image";
 
 export interface Review {
   id: string;
@@ -201,11 +202,13 @@ export function ProductReviews({
                       key={index}
                       className="w-16 h-16 rounded-md overflow-hidden"
                     >
-                      <img
-                        src={image}
-                        alt={`Review image ${index + 1}`}
-                        className="w-full h-full object-cover"
-                      />
+                      <Image
+                      src={image}
+                      alt={`Review image ${index + 1}`}
+                      width={64}
+                      height={64}
+                      className="w-full h-full object-cover"
+                    />
                     </div>
                   ))}
                 </div>

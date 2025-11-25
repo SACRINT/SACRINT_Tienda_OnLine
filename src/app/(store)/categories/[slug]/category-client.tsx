@@ -40,6 +40,8 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
+
 
 interface Product {
   id: string;
@@ -325,12 +327,13 @@ export function CategoryPageClient({
                   >
                     <div className="relative aspect-square bg-neutral-100">
                       {product.image ? (
-                        <img
-                          src={product.image}
-                          alt={product.name}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
+                        <Image
+                                                src={product.image}
+                                                alt={product.name}
+                                                width={400}
+                                                height={400}
+                                                className="w-full h-full object-cover"
+                                              />                      ) : (
                         <div className="w-full h-full flex items-center justify-center text-6xl">
                           📦
                         </div>
