@@ -1,522 +1,388 @@
 "use client";
 
-import * as React from "react";
-import Link from "next/link";
-import { ArrowLeft, CreditCard, Lock } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import {
-  CheckoutProgress,
-  type CheckoutStep,
-} from "@/components/ui/checkout-progress";
+import { useState } from "react";
+import { ChevronRight, ChevronLeft, AlertCircle, XCircle } from "lucide-react";
+import { loadStripe } from "@stripe/stripe-js";
+import { Elements, useStripe, useElements, CardElement } from "@stripe/react-stripe-js";
 import { useCart } from "@/lib/store/useCart";
+import { env } from "@/lib/config/env";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
-const checkoutSteps: CheckoutStep[] = [
-  { id: "shipping", label: "Envío" },
-  { id: "payment", label: "Pago" },
-  { id: "review", label: "Revisar" },
-  { id: "confirm", label: "Confirmar" },
+const stripePromise = loadStripe(env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
+
+const steps = [
+  { id: "01", name: "Dirección de Envío", status: "current" },
+  { id: "02", name: "Método de Envío", status: "upcoming" },
+  { id: "03", name: "Método de Pago", status: "upcoming" },
+  { id: "04", name: "Revisar y Confirmar", status: "upcoming" },
 ];
 
-const mexicanStates = [
-  "Aguascalientes",
-  "Baja California",
-  "Baja California Sur",
-  "Campeche",
-  "Chiapas",
-  "Chihuahua",
-  "Ciudad de México",
-  "Coahuila",
-  "Colima",
-  "Durango",
-  "Estado de México",
-  "Guanajuato",
-  "Guerrero",
-  "Hidalgo",
-  "Jalisco",
-  "Michoacán",
-  "Morelos",
-  "Nayarit",
-  "Nuevo León",
-  "Oaxaca",
-  "Puebla",
-  "Querétaro",
-  "Quintana Roo",
-  "San Luis Potosí",
-  "Sinaloa",
-  "Sonora",
-  "Tabasco",
-  "Tamaulipas",
-  "Tlaxcala",
-  "Veracruz",
-  "Yucatán",
-  "Zacatecas",
-];
+// Error messages mapping
+const ERROR_MESSAGES: Record<string, string> = {
+  card_declined: "La tarjeta fue rechazada. Por favor intenta con otra tarjeta.",
+  insufficient_funds: "Fondos insuficientes. Por favor intenta con otra tarjeta.",
+  expired_card: "Tu tarjeta ha expirado. Por favor usa una tarjeta válida.",
+  incorrect_cvc:
+    "El código de seguridad (CVC) es incorrecto. Por favor verifica e intenta de nuevo.",
+  processing_error: "Hubo un error procesando el pago. Por favor intenta de nuevo.",
+  rate_limit: "Demasiados intentos. Por favor espera unos minutos e intenta de nuevo.",
+  out_of_stock: "Uno de los productos ya no está disponible. Por favor actualiza tu carrito.",
+  invalid_address: "La dirección de envío no es válida. Por favor verifica los datos.",
+  shipping_unavailable: "El envío a esa región no está disponible actualmente.",
+  amount_mismatch:
+    "Hubo un problema con el monto del pago. Por favor recarga la página e intenta de nuevo.",
+};
 
-export default function CheckoutPage() {
-  const { items: cartItems, subtotal, tax, clear } = useCart();
-  const [mounted, setMounted] = React.useState(false);
-  const [currentStep, setCurrentStep] = React.useState(1);
-  const [isProcessing, setIsProcessing] = React.useState(false);
-  const [orderNumber, setOrderNumber] = React.useState("");
-  const [formData, setFormData] = React.useState({
-    email: "",
-    phone: "",
-    firstName: "",
-    lastName: "",
-    address: "",
-    addressLine2: "",
-    city: "",
-    state: "",
-    postalCode: "",
-    sameAsBilling: true,
-  });
+// Component for displaying errors
+function ErrorAlert({ error, onDismiss }: { error: string | null; onDismiss: () => void }) {
+  if (!error) return null;
 
-  React.useEffect(() => {
-    useCart.persist.rehydrate();
-    setMounted(true);
-  }, []);
+  return (
+    <Alert variant="destructive" className="mb-4">
+      <AlertCircle className="h-4 w-4" />
+      <AlertTitle className="flex items-center justify-between">
+        Error
+        <button onClick={onDismiss} className="ml-2">
+          <XCircle className="h-4 w-4" />
+        </button>
+      </AlertTitle>
+      <AlertDescription>{error}</AlertDescription>
+    </Alert>
+  );
+}
 
-  const formatPrice = (price: number) =>
-    new Intl.NumberFormat("es-MX", {
-      style: "currency",
-      currency: "MXN",
-    }).format(price);
+function StepIndicator({ currentStep }: { currentStep: number }) {
+  return (
+    <nav aria-label="Progress">
+      <ol role="list" className="flex items-center">
+        {steps.map((step, stepIdx) => (
+          <li
+            key={step.name}
+            className={`relative ${stepIdx !== steps.length - 1 ? "pr-8 sm:pr-20" : ""}`}
+          >
+            {stepIdx < currentStep ? (
+              <>
+                <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                  <div className="h-0.5 w-full bg-blue-600" />
+                </div>
+                <a
+                  href="#"
+                  className="relative flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 hover:bg-blue-900"
+                >
+                  <span className="text-white">{step.id}</span>
+                </a>
+              </>
+            ) : stepIdx === currentStep ? (
+              <>
+                <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                  <div className="h-0.5 w-full bg-gray-200" />
+                </div>
+                <a
+                  href="#"
+                  className="relative flex h-8 w-8 items-center justify-center rounded-full border-2 border-blue-600 bg-white"
+                  aria-current="step"
+                >
+                  <span className="text-blue-600">{step.id}</span>
+                </a>
+              </>
+            ) : (
+              <>
+                <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                  <div className="h-0.5 w-full bg-gray-200" />
+                </div>
+                <a
+                  href="#"
+                  className="group relative flex h-8 w-8 items-center justify-center rounded-full border-2 border-gray-300 bg-white hover:border-gray-400"
+                >
+                  <span className="text-gray-500 group-hover:text-gray-900">{step.id}</span>
+                </a>
+              </>
+            )}
+          </li>
+        ))}
+      </ol>
+    </nav>
+  );
+}
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+function ShippingAddressStep() {
+  return (
+    <div>
+      <h2 className="text-lg font-medium text-gray-900">Información de Contacto</h2>
+      {/* Form fields for contact info */}
+      <h2 className="mt-8 text-lg font-medium text-gray-900">Dirección de Envío</h2>
+      {/* Form fields for shipping address */}
+    </div>
+  );
+}
+
+function ShippingMethodStep() {
+  return (
+    <div>
+      <h2 className="text-lg font-medium text-gray-900">Método de Envío</h2>
+      {/* Shipping options */}
+    </div>
+  );
+}
+
+function PaymentMethodStep() {
+  const cardElementOptions = {
+    style: {
+      base: {
+        fontSize: "16px",
+        color: "#32325d",
+        "::placeholder": {
+          color: "#aab7c4",
+        },
+      },
+      invalid: {
+        color: "#fa755a",
+        iconColor: "#fa755a",
+      },
+    },
   };
 
-  const cartSubtotal = subtotal();
-  const cartTax = tax();
-  const shipping = cartSubtotal >= 1000 ? 0 : 99;
-  const cartTotal = cartSubtotal + shipping + cartTax;
+  return (
+    <div>
+      <h2 className="text-lg font-medium text-gray-900">Método de Pago</h2>
+      <div className="mt-4">
+        <CardElement options={cardElementOptions} />
+      </div>
+    </div>
+  );
+}
 
-  const cartSummary = {
-    items: cartItems.map((item) => ({
-      name: item.name,
-      quantity: item.quantity,
-      price: item.price * item.quantity,
-    })),
-    subtotal: cartSubtotal,
-    shipping,
-    tax: cartTax,
-    total: cartTotal,
-  };
+function ReviewStep() {
+  return (
+    <div>
+      <h2 className="text-lg font-medium text-gray-900">Revisar Pedido</h2>
+      {/* Order summary */}
+    </div>
+  );
+}
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (currentStep < 4) setCurrentStep((prev) => prev + 1);
-  };
+function CheckoutForm() {
+  const [currentStep, setCurrentStep] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const stripe = useStripe();
+  const elements = useElements();
+  const { items } = useCart();
 
-  const handlePlaceOrder = async () => {
-    setIsProcessing(true);
+  // Validate stock availability
+  const validateStock = async (): Promise<boolean> => {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      const orderNum = `ORD-${Date.now().toString(36).toUpperCase()}`;
-      setOrderNumber(orderNum);
-      clear();
-      setCurrentStep(4);
-    } catch (error) {
-      alert("Error al procesar el pedido.");
+      const res = await fetch("/api/products/validate-stock", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items: items.map((item) => ({ productId: item.id, quantity: item.quantity })),
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        setError(ERROR_MESSAGES.out_of_stock);
+        return false;
+      }
+
+      return true;
+    } catch (err) {
+      setError("No pudimos verificar la disponibilidad de stock. Por favor intenta de nuevo.");
+      return false;
+    }
+  };
+
+  const goToNextStep = async () => {
+    setError(null);
+
+    // Validate before moving to next step
+    if (currentStep === 0) {
+      // TODO: Validate shipping address when form is implemented
+      // For now, just proceed
+    } else if (currentStep === 1) {
+      // TODO: Validate shipping method when implemented
+    } else if (currentStep === 2) {
+      // Validate stock before final review
+      const stockValid = await validateStock();
+      if (!stockValid) return;
+    }
+
+    setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
+  };
+
+  const goToPreviousStep = () => {
+    setError(null);
+    setCurrentStep((prev) => Math.max(prev - 1, 0));
+  };
+
+  const handleSubmit = async () => {
+    setError(null);
+    setIsProcessing(true);
+
+    if (!stripe || !elements) {
+      setError("El sistema de pagos no está disponible. Por favor recarga la página.");
+      setIsProcessing(false);
+      return;
+    }
+
+    // Validate cart is not empty
+    if (items.length === 0) {
+      setError("Tu carrito está vacío. Agrega productos antes de proceder.");
+      setIsProcessing(false);
+      return;
+    }
+
+    // Final stock validation
+    const stockValid = await validateStock();
+    if (!stockValid) {
+      setIsProcessing(false);
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/checkout/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cartItems: items }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        // Handle specific error types
+        if (res.status === 400) {
+          if (data.error?.includes("stock")) {
+            setError(ERROR_MESSAGES.out_of_stock);
+          } else if (data.error?.includes("address")) {
+            setError(ERROR_MESSAGES.invalid_address);
+          } else if (data.error?.includes("shipping")) {
+            setError(ERROR_MESSAGES.shipping_unavailable);
+          } else {
+            setError(
+              data.error ||
+                "Hubo un error con tu pedido. Por favor verifica los datos e intenta de nuevo.",
+            );
+          }
+        } else if (res.status === 429) {
+          setError(ERROR_MESSAGES.rate_limit);
+        } else {
+          setError("Hubo un error procesando tu pedido. Por favor intenta de nuevo más tarde.");
+        }
+        setIsProcessing(false);
+        return;
+      }
+
+      const { sessionId } = data;
+
+      const { error: redirectError } = await (stripe as any).redirectToCheckout({ sessionId });
+
+      if (redirectError) {
+        // Map Stripe error codes to friendly messages
+        const errorCode = (redirectError as any).code;
+        setError(
+          ERROR_MESSAGES[errorCode] ||
+            redirectError.message ||
+            "Hubo un error con el pago. Por favor intenta de nuevo.",
+        );
+      }
+    } catch (err) {
+      console.error("Checkout error:", err);
+      setError("Hubo un error inesperado. Por favor intenta de nuevo o contacta a soporte.");
     } finally {
       setIsProcessing(false);
     }
   };
 
-  if (!mounted) {
-    return (
-      <div className="min-h-screen bg-muted/30 py-8">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="animate-pulse">
-            <div className="h-12 bg-gray-200 rounded mb-8"></div>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-2">
-                <div className="h-96 bg-gray-200 rounded-lg"></div>
-              </div>
-              <div className="lg:col-span-1">
-                <div className="h-64 bg-gray-200 rounded-lg"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (cartItems.length === 0 && currentStep !== 4) {
-    return (
-      <div className="min-h-screen bg-muted/30 py-8">
-        <div className="max-w-6xl mx-auto px-4 text-center">
-          <h2 className="text-2xl font-bold mb-4">Tu carrito está vacío</h2>
-          <p className="text-muted-foreground mb-6">
-            Agrega productos antes de proceder al checkout.
-          </p>
-          <Button asChild>
-            <Link href="/shop">Ir a la Tienda</Link>
-          </Button>
-        </div>
-      </div>
-    );
-  }
+  const renderStepContent = () => {
+    switch (currentStep) {
+      case 0:
+        return <ShippingAddressStep />;
+      case 1:
+        return <ShippingMethodStep />;
+      case 2:
+        return <PaymentMethodStep />;
+      case 3:
+        return <ReviewStep />;
+      default:
+        return null;
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-muted/30 py-8">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        {currentStep < 4 && (
-          <Link
-            href="/cart"
-            className="inline-flex items-center text-sm text-muted-foreground hover:text-primary mb-6"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Volver al carrito
-          </Link>
-        )}
+    <div className="mx-auto mt-12 max-w-lg">
+      <StepIndicator currentStep={currentStep} />
 
-        <div className="mb-8">
-          <CheckoutProgress steps={checkoutSteps} currentStep={currentStep} />
+      {/* Error Alert */}
+      {error && (
+        <div className="mt-6">
+          <ErrorAlert error={error} onDismiss={() => setError(null)} />
         </div>
+      )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow-soft p-6">
-              {currentStep === 1 && (
-                <form onSubmit={handleSubmit}>
-                  <h2 className="text-xl font-semibold mb-6">
-                    Información de Contacto y Envío
-                  </h2>
-                  <div className="space-y-4 mb-8">
-                    <h3 className="font-medium text-sm text-muted-foreground">
-                      INFORMACIÓN DE CONTACTO
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="email">Correo Electrónico *</Label>
-                        <Input
-                          id="email"
-                          name="email"
-                          type="email"
-                          required
-                          value={formData.email}
-                          onChange={handleInputChange}
-                          placeholder="tu@email.com"
-                          className="mt-1"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="phone">Teléfono *</Label>
-                        <Input
-                          id="phone"
-                          name="phone"
-                          type="tel"
-                          required
-                          value={formData.phone}
-                          onChange={handleInputChange}
-                          placeholder="55 1234 5678"
-                          className="mt-1"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="space-y-4 mb-8">
-                    <h3 className="font-medium text-sm text-muted-foreground">
-                      DIRECCIÓN DE ENVÍO
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="firstName">Nombre *</Label>
-                        <Input
-                          id="firstName"
-                          name="firstName"
-                          required
-                          value={formData.firstName}
-                          onChange={handleInputChange}
-                          className="mt-1"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="lastName">Apellido *</Label>
-                        <Input
-                          id="lastName"
-                          name="lastName"
-                          required
-                          value={formData.lastName}
-                          onChange={handleInputChange}
-                          className="mt-1"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <Label htmlFor="address">Dirección *</Label>
-                      <Input
-                        id="address"
-                        name="address"
-                        required
-                        value={formData.address}
-                        onChange={handleInputChange}
-                        placeholder="Calle y número"
-                        className="mt-1"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="addressLine2">
-                        Departamento, suite, etc. (opcional)
-                      </Label>
-                      <Input
-                        id="addressLine2"
-                        name="addressLine2"
-                        value={formData.addressLine2}
-                        onChange={handleInputChange}
-                        className="mt-1"
-                      />
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
-                        <Label htmlFor="city">Ciudad *</Label>
-                        <Input
-                          id="city"
-                          name="city"
-                          required
-                          value={formData.city}
-                          onChange={handleInputChange}
-                          className="mt-1"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="state">Estado *</Label>
-                        <Select
-                          value={formData.state}
-                          onValueChange={(value) =>
-                            setFormData((prev) => ({ ...prev, state: value }))
-                          }
-                        >
-                          <SelectTrigger className="mt-1">
-                            <SelectValue placeholder="Seleccionar" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {mexicanStates.map((state) => (
-                              <SelectItem key={state} value={state}>
-                                {state}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <Label htmlFor="postalCode">Código Postal *</Label>
-                        <Input
-                          id="postalCode"
-                          name="postalCode"
-                          required
-                          value={formData.postalCode}
-                          onChange={handleInputChange}
-                          maxLength={5}
-                          className="mt-1"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2 mb-6">
-                    <Checkbox
-                      id="sameAsBilling"
-                      checked={formData.sameAsBilling}
-                      onCheckedChange={(checked) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          sameAsBilling: checked as boolean,
-                        }))
-                      }
-                    />
-                    <Label
-                      htmlFor="sameAsBilling"
-                      className="text-sm cursor-pointer"
-                    >
-                      Usar la misma dirección para facturación
-                    </Label>
-                  </div>
-                  <Button type="submit" size="lg" className="w-full">
-                    Continuar al Pago
-                  </Button>
-                </form>
-              )}
-
-              {currentStep === 2 && (
-                <div>
-                  <h2 className="text-xl font-semibold mb-6">Método de Pago</h2>
-                  <div className="space-y-4">
-                    <div className="p-4 border-2 border-primary rounded-lg bg-primary/5">
-                      <div className="flex items-center gap-3">
-                        <CreditCard className="h-5 w-5" />
-                        <span className="font-medium">
-                          Tarjeta de Crédito/Débito
-                        </span>
-                      </div>
-                    </div>
-                    <div className="p-4 bg-muted/50 rounded-lg">
-                      <p className="text-sm text-muted-foreground">
-                        <strong>Demo:</strong> En producción se mostraría Stripe
-                        Elements aquí.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex gap-4 mt-6">
-                    <Button
-                      variant="outline"
-                      onClick={() => setCurrentStep(1)}
-                      className="flex-1"
-                    >
-                      Volver
-                    </Button>
-                    <Button
-                      onClick={() => setCurrentStep(3)}
-                      className="flex-1"
-                    >
-                      Continuar
-                    </Button>
-                  </div>
-                </div>
-              )}
-
-              {currentStep === 3 && (
-                <div>
-                  <h2 className="text-xl font-semibold mb-6">Revisar Pedido</h2>
-                  <div className="space-y-4">
-                    <div className="p-4 bg-muted/50 rounded-lg">
-                      <h3 className="font-medium mb-2">Dirección de Envío</h3>
-                      <p className="text-sm text-muted-foreground">
-                        {formData.firstName} {formData.lastName}
-                        <br />
-                        {formData.address}
-                        <br />
-                        {formData.city}, {formData.state} {formData.postalCode}
-                        <br />
-                        Tel: {formData.phone}
-                      </p>
-                    </div>
-                    <div className="p-4 bg-muted/50 rounded-lg">
-                      <h3 className="font-medium mb-2">
-                        Productos ({cartItems.length})
-                      </h3>
-                      {cartSummary.items.map((item, index) => (
-                        <div
-                          key={index}
-                          className="flex justify-between text-sm py-1"
-                        >
-                          <span>
-                            {item.name} x{item.quantity}
-                          </span>
-                          <span>{formatPrice(item.price)}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="flex gap-4 mt-6">
-                    <Button
-                      variant="outline"
-                      onClick={() => setCurrentStep(2)}
-                      className="flex-1"
-                    >
-                      Volver
-                    </Button>
-                    <Button
-                      onClick={handlePlaceOrder}
-                      className="flex-1"
-                      disabled={isProcessing}
-                    >
-                      {isProcessing ? "Procesando..." : "Confirmar Pedido"}
-                    </Button>
-                  </div>
-                </div>
-              )}
-
-              {currentStep === 4 && (
-                <div className="text-center py-8">
-                  <div className="w-16 h-16 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span className="text-3xl">✓</span>
-                  </div>
-                  <h2 className="text-2xl font-bold text-primary mb-2">
-                    ¡Pedido Confirmado!
-                  </h2>
-                  <p className="text-muted-foreground mb-6">
-                    Tu número de pedido es:{" "}
-                    <span className="font-mono font-bold">#{orderNumber}</span>
-                  </p>
-                  <p className="text-sm text-muted-foreground mb-8">
-                    Te enviamos un correo de confirmación a {formData.email}
-                  </p>
-                  <Button asChild>
-                    <Link href="/">Volver al Inicio</Link>
-                  </Button>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {currentStep < 4 && (
-            <div className="lg:col-span-1">
-              <div className="bg-white rounded-lg shadow-soft p-6 sticky top-4">
-                <h2 className="text-lg font-semibold mb-4">
-                  Resumen del Pedido
-                </h2>
-                <div className="space-y-3 mb-4 max-h-48 overflow-y-auto">
-                  {cartSummary.items.map((item, index) => (
-                    <div key={index} className="flex justify-between text-sm">
-                      <span className="text-muted-foreground truncate pr-2">
-                        {item.name}{" "}
-                        <span className="text-xs">x{item.quantity}</span>
-                      </span>
-                      <span className="shrink-0">
-                        {formatPrice(item.price)}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-                <Separator className="my-4" />
-                <div className="space-y-3 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Subtotal</span>
-                    <span>{formatPrice(cartSummary.subtotal)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Envío</span>
-                    {cartSummary.shipping === 0 ? (
-                      <span className="text-success">Gratis</span>
-                    ) : (
-                      <span>{formatPrice(cartSummary.shipping)}</span>
-                    )}
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">IVA (16%)</span>
-                    <span>{formatPrice(cartSummary.tax)}</span>
-                  </div>
-                  <Separator />
-                  <div className="flex justify-between text-lg font-bold">
-                    <span>Total</span>
-                    <span className="text-primary">
-                      {formatPrice(cartSummary.total)}
-                    </span>
-                  </div>
-                </div>
-                <div className="mt-6 flex items-center justify-center gap-2 text-xs text-muted-foreground">
-                  <Lock className="h-3 w-3" />
-                  <span>Pago seguro encriptado</span>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+      <div className="mt-12 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+        {renderStepContent()}
       </div>
+
+      <div className="mt-6 flex justify-between">
+        <button
+          onClick={goToPreviousStep}
+          disabled={currentStep === 0 || isProcessing}
+          className="flex items-center gap-1 rounded-md bg-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-300 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <ChevronLeft className="h-4 w-4" />
+          Anterior
+        </button>
+        {currentStep < steps.length - 1 ? (
+          <button
+            onClick={goToNextStep}
+            disabled={isProcessing}
+            className="flex items-center gap-1 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isProcessing ? (
+              <>
+                <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
+                Validando...
+              </>
+            ) : (
+              <>
+                Siguiente
+                <ChevronRight className="h-4 w-4" />
+              </>
+            )}
+          </button>
+        ) : (
+          <button
+            onClick={handleSubmit}
+            disabled={isProcessing}
+            className="flex items-center gap-1 rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isProcessing ? (
+              <>
+                <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
+                Procesando...
+              </>
+            ) : (
+              "Confirmar y Pagar"
+            )}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <div className="bg-white">
+      <main className="mx-auto max-w-7xl px-4 pb-16 pt-4 sm:px-6 sm:pb-24 sm:pt-8 lg:px-8">
+        <h1 className="text-center text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+          Checkout
+        </h1>
+        <Elements stripe={stripePromise}>
+          <CheckoutForm />
+        </Elements>
+      </main>
     </div>
   );
 }
