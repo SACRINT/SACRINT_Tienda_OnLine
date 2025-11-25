@@ -3,7 +3,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   CreditCard,
   Lock,
@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 
 export interface PaymentFormProps {
   amount: number;
+  onPaymentComplete?: (paymentData: any) => void;
   onPaymentMethodReady?: (paymentMethodId: string) => void;
   onError?: (error: string) => void;
 }
@@ -41,6 +42,7 @@ const formatPrice = (price: number) =>
 
 export function PaymentForm({
   amount,
+  onPaymentComplete,
   onPaymentMethodReady,
   onError,
 }: PaymentFormProps) {
@@ -145,6 +147,18 @@ export function PaymentForm({
     return Object.keys(newErrors).length === 0;
   };
 
+  // Notify parent when payment method is selected and ready
+  useEffect(() => {
+    if (paymentMethod && onPaymentComplete) {
+      const paymentData = {
+        method: paymentMethod,
+        ...(paymentMethod === "card" && cardDetails),
+        saveCard,
+      };
+      onPaymentComplete(paymentData);
+    }
+  }, [paymentMethod, cardDetails, saveCard, onPaymentComplete]);
+
   return (
     <div className="space-y-6">
       <div>
@@ -155,7 +169,7 @@ export function PaymentForm({
       </div>
 
       {/* Payment Method Tabs */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <button
           onClick={() => setPaymentMethod("card")}
           className={cn(
@@ -211,9 +225,7 @@ export function PaymentForm({
         <div className="space-y-4">
           {/* Card Number */}
           <div>
-            <label className="block text-sm font-medium text-foreground">
-              Número de Tarjeta *
-            </label>
+            <label className="block text-sm font-medium text-foreground">Número de Tarjeta *</label>
             <div className="relative mt-1">
               <input
                 type="text"
@@ -289,9 +301,7 @@ export function PaymentForm({
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-foreground">
-                CVC *
-              </label>
+              <label className="block text-sm font-medium text-foreground">CVC *</label>
               <input
                 type="text"
                 value={cardDetails.cvc}
@@ -343,18 +353,14 @@ export function PaymentForm({
       {/* Mercado Pago Payment */}
       {paymentMethod === "mercadopago" && (
         <div className="space-y-4">
-          <div className="rounded-lg border-2 border-dashed border-accent/50 p-8 text-center bg-accent/5">
+          <div className="rounded-lg border-2 border-dashed border-accent/50 bg-accent/5 p-8 text-center">
             <Smartphone className="mx-auto h-16 w-16 text-accent" />
-            <h3 className="mt-4 text-lg font-semibold text-foreground">
-              Pagar con Mercado Pago
-            </h3>
+            <h3 className="mt-4 text-lg font-semibold text-foreground">Pagar con Mercado Pago</h3>
             <p className="mt-2 text-sm text-muted-foreground">
-              Serás redirigido a Mercado Pago para completar tu compra de forma
-              segura
+              Serás redirigido a Mercado Pago para completar tu compra de forma segura
             </p>
             <div className="mt-4 text-xs text-muted-foreground">
-              Acepta: Tarjetas de crédito/débito, dinero en cuenta, Mercado
-              Crédito
+              Acepta: Tarjetas de crédito/débito, dinero en cuenta, Mercado Crédito
             </div>
             <button className="mt-6 inline-flex items-center gap-2 rounded-lg bg-[#009ee3] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#0077b3]">
               Continuar con Mercado Pago
@@ -366,11 +372,9 @@ export function PaymentForm({
       {/* OXXO Payment */}
       {paymentMethod === "oxxo" && (
         <div className="space-y-4">
-          <div className="rounded-lg border-2 border-dashed border-warning/50 p-8 text-center bg-warning/5">
+          <div className="rounded-lg border-2 border-dashed border-warning/50 bg-warning/5 p-8 text-center">
             <Store className="mx-auto h-16 w-16 text-warning" />
-            <h3 className="mt-4 text-lg font-semibold text-foreground">
-              Pagar en OXXO
-            </h3>
+            <h3 className="mt-4 text-lg font-semibold text-foreground">Pagar en OXXO</h3>
             <p className="mt-2 text-sm text-muted-foreground">
               Recibirás un código de barras para pagar en cualquier tienda OXXO
             </p>
@@ -389,15 +393,13 @@ export function PaymentForm({
       {/* Bank Transfer */}
       {paymentMethod === "transfer" && (
         <div className="space-y-4">
-          <div className="rounded-lg border-2 border-dashed border-primary/50 p-8 text-center bg-primary/5">
+          <div className="rounded-lg border-2 border-dashed border-primary/50 bg-primary/5 p-8 text-center">
             <Building2 className="mx-auto h-16 w-16 text-primary" />
-            <h3 className="mt-4 text-lg font-semibold text-foreground">
-              Transferencia Bancaria
-            </h3>
+            <h3 className="mt-4 text-lg font-semibold text-foreground">Transferencia Bancaria</h3>
             <p className="mt-2 text-sm text-muted-foreground">
               Realiza una transferencia SPEI desde tu banca en línea
             </p>
-            <div className="mt-4 bg-background rounded-lg p-4 text-left">
+            <div className="mt-4 rounded-lg bg-background p-4 text-left">
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Banco:</span>
@@ -405,9 +407,7 @@ export function PaymentForm({
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">CLABE:</span>
-                  <span className="font-mono font-medium">
-                    0121 8000 0123 4567 89
-                  </span>
+                  <span className="font-mono font-medium">0121 8000 0123 4567 89</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Beneficiario:</span>
@@ -431,12 +431,8 @@ export function PaymentForm({
       {/* Order Total */}
       <div className="rounded-lg bg-primary/5 p-4">
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-foreground">
-            Total a pagar:
-          </span>
-          <span className="text-2xl font-bold text-primary">
-            {formatPrice(amount)}
-          </span>
+          <span className="text-sm font-medium text-foreground">Total a pagar:</span>
+          <span className="text-2xl font-bold text-primary">{formatPrice(amount)}</span>
         </div>
       </div>
     </div>

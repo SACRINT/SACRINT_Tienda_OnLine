@@ -124,27 +124,59 @@ const nextConfig = {
 
   // Security headers
   async headers() {
+    // Enhanced security headers for production
+    const securityHeaders = [
+      {
+        key: "X-DNS-Prefetch-Control",
+        value: "on",
+      },
+      {
+        key: "X-Frame-Options",
+        value: "SAMEORIGIN",
+      },
+      {
+        key: "X-Content-Type-Options",
+        value: "nosniff",
+      },
+      {
+        key: "Referrer-Policy",
+        value: "origin-when-cross-origin",
+      },
+      {
+        key: "Permissions-Policy",
+        value: "camera=(), microphone=(), geolocation=()",
+      },
+    ];
+
+    // Add HSTS in production
+    if (process.env.NODE_ENV === "production") {
+      securityHeaders.push({
+        key: "Strict-Transport-Security",
+        value: "max-age=63072000; includeSubDomains; preload",
+      });
+
+      // Content Security Policy (CSP)
+      securityHeaders.push({
+        key: "Content-Security-Policy",
+        value:
+          "default-src 'self'; " +
+          "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.stripe.com https://www.google-analytics.com; " +
+          "style-src 'self' 'unsafe-inline'; " +
+          "img-src 'self' data: https: blob:; " +
+          "font-src 'self' data:; " +
+          "connect-src 'self' https://api.stripe.com https://www.google-analytics.com https://*.sentry.io; " +
+          "frame-src 'self' https://js.stripe.com; " +
+          "object-src 'none'; " +
+          "base-uri 'self'; " +
+          "form-action 'self'; " +
+          "frame-ancestors 'self';",
+      });
+    }
+
     return [
       {
         source: "/(.*)",
-        headers: [
-          {
-            key: "X-DNS-Prefetch-Control",
-            value: "on",
-          },
-          {
-            key: "X-Frame-Options",
-            value: "SAMEORIGIN",
-          },
-          {
-            key: "X-Content-Type-Options",
-            value: "nosniff",
-          },
-          {
-            key: "Referrer-Policy",
-            value: "origin-when-cross-origin",
-          },
-        ],
+        headers: securityHeaders,
       },
       // Cache static assets
       {
