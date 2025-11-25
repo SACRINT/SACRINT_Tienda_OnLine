@@ -203,6 +203,7 @@ model Product {
   // Estados
   published             Boolean  @default(false)
   featured              Boolean  @default(false)
+  archivedAt            DateTime? // Soft delete - NULL = activo, NOT NULL = archivado
 
   // Relations
   tenant                Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
@@ -224,10 +225,12 @@ model Product {
   @@index([categoryId])
   @@index([published])
   @@index([featured])
+  @@index([archivedAt]) // Filter archived products
   @@index([tenantId, published]) // Listar productos publicados por tenant
   @@index([tenantId, categoryId, published]) // Filtrar por categoría y estado
   @@index([tenantId, featured, published]) // Productos destacados publicados
   @@index([tenantId, createdAt]) // Ordenar productos por fecha de creación
+  @@index([tenantId, archivedAt]) // Filter active/archived products by tenant
   @@index([stock]) // Detectar productos con bajo stock
 }
 
