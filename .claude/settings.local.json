@@ -13,7 +13,8 @@
       "Bash(findstr:*)",
       "Bash(git add:*)",
       "Bash(find:*)",
-      "Bash(1)"
+      "Bash(1)",
+      "mcp__chrome-devtools__list_pages"
     ],
     "deny": [],
     "ask": []
