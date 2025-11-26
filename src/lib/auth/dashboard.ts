@@ -58,9 +58,12 @@ export async function requireStoreOwner(storeId: string, userId: string) {
     where: { id: storeId },
     select: {
       id: true,
-      userId: true,
       name: true,
       slug: true,
+      users: {
+        where: { id: userId },
+        select: { id: true },
+      },
     },
   });
 
@@ -68,7 +71,7 @@ export async function requireStoreOwner(storeId: string, userId: string) {
     throw new NotFoundError("Tienda no encontrada");
   }
 
-  if (store.userId !== userId) {
+  if (store.users.length === 0) {
     throw new ForbiddenError("No tienes acceso a esta tienda");
   }
 
@@ -90,11 +93,17 @@ export async function getStoreOrThrow(storeId: string, userId: string) {
       id: true,
       name: true,
       slug: true,
-      description: true,
       logo: true,
-      userId: true,
+      primaryColor: true,
+      accentColor: true,
+      domain: true,
+      featureFlags: true,
       createdAt: true,
       updatedAt: true,
+      users: {
+        where: { id: userId },
+        select: { id: true },
+      },
     },
   });
 
@@ -102,11 +111,12 @@ export async function getStoreOrThrow(storeId: string, userId: string) {
     throw new NotFoundError("Tienda no encontrada");
   }
 
-  if (store.userId !== userId) {
+  if (store.users.length === 0) {
     throw new ForbiddenError("No tienes acceso a esta tienda");
   }
 
-  return store;
+  const { users, ...storeData } = store;
+  return storeData;
 }
 
 /**
@@ -120,10 +130,15 @@ export async function hasStoreAccess(storeId: string, userId: string): Promise<b
   try {
     const store = await db.tenant.findUnique({
       where: { id: storeId },
-      select: { userId: true },
+      select: {
+        users: {
+          where: { id: userId },
+          select: { id: true },
+        },
+      },
     });
 
-    return store?.userId === userId;
+    return store ? store.users.length > 0 : false;
   } catch {
     return false;
   }
@@ -137,7 +152,13 @@ export async function hasStoreAccess(storeId: string, userId: string): Promise<b
  */
 export async function getUserStores(userId: string) {
   return await db.tenant.findMany({
-    where: { userId },
+    where: {
+      users: {
+        some: {
+          id: userId,
+        },
+      },
+    },
     select: {
       id: true,
       name: true,

@@ -204,7 +204,7 @@ export default function OrderConfirmationEmail({
               <br />
               {shippingAddress.street}
               <br />
-              {shippingAddress.city}, {shippingAddress.state} {shippingAddress.postalCode}
+              {shippingAddress.city}, {shippingAddress.state} {shippingAddress.zipCode}
               <br />
               {shippingAddress.country}
             </Text>

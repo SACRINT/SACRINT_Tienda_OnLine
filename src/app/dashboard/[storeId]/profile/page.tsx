@@ -15,9 +15,7 @@ interface ProfilePageProps {
   };
 }
 
-export default async function ProfilePage({
-  params: { storeId },
-}: ProfilePageProps) {
+export default async function ProfilePage({ params: { storeId } }: ProfilePageProps) {
   // Require authentication
   const session = await requireAuth();
 
@@ -26,7 +24,7 @@ export default async function ProfilePage({
     where: { id: session.user.id },
     include: {
       sessions: {
-        orderBy: { createdAt: "desc" },
+        orderBy: { expires: "desc" },
         take: 10,
       },
     },
@@ -41,9 +39,7 @@ export default async function ProfilePage({
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Mi Perfil</h1>
-        <p className="text-gray-600 mt-1">
-          Administra tu información personal y configuración
-        </p>
+        <p className="mt-1 text-gray-600">Administra tu información personal y configuración</p>
       </div>
 
       {/* Profile Tabs */}

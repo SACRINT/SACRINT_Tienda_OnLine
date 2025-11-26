@@ -4,11 +4,11 @@
  * Auto-registro y gestión del ciclo de vida del SW
  */
 
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { X, RefreshCw } from 'lucide-react';
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { X, RefreshCw } from "lucide-react";
 
 export function ServiceWorkerRegister() {
   const [showUpdatePrompt, setShowUpdatePrompt] = useState(false);
@@ -17,7 +17,7 @@ export function ServiceWorkerRegister() {
 
   useEffect(() => {
     // Verificar si el navegador soporta Service Workers
-    if ('serviceWorker' in navigator) {
+    if ("serviceWorker" in navigator) {
       registerServiceWorker();
     }
 
@@ -25,32 +25,32 @@ export function ServiceWorkerRegister() {
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
 
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
 
     return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
     };
   }, []);
 
   const registerServiceWorker = async () => {
     try {
-      const registration = await navigator.serviceWorker.register('/service-worker.js', {
-        scope: '/',
+      const registration = await navigator.serviceWorker.register("/service-worker.js", {
+        scope: "/",
       });
 
-      console.log('[PWA] Service Worker registrado:', registration);
+      console.log("[PWA] Service Worker registrado:", registration);
 
       // Escuchar actualizaciones del SW
-      registration.addEventListener('updatefound', () => {
+      registration.addEventListener("updatefound", () => {
         const newWorker = registration.installing;
 
         if (newWorker) {
-          newWorker.addEventListener('statechange', () => {
-            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+          newWorker.addEventListener("statechange", () => {
+            if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
               // Hay una nueva versión disponible
-              console.log('[PWA] Nueva versión disponible');
+              console.log("[PWA] Nueva versión disponible");
               setWaitingWorker(newWorker);
               setShowUpdatePrompt(true);
             }
@@ -65,21 +65,24 @@ export function ServiceWorkerRegister() {
       }
 
       // Polling periódico para buscar actualizaciones (cada hora)
-      setInterval(() => {
-        registration.update();
-      }, 60 * 60 * 1000);
+      setInterval(
+        () => {
+          registration.update();
+        },
+        60 * 60 * 1000,
+      );
     } catch (error) {
-      console.error('[PWA] Error registrando Service Worker:', error);
+      console.error("[PWA] Error registrando Service Worker:", error);
     }
   };
 
   const handleUpdate = () => {
     if (waitingWorker) {
       // Enviar mensaje al SW para que se active inmediatamente
-      waitingWorker.postMessage({ type: 'SKIP_WAITING' });
+      waitingWorker.postMessage({ type: "SKIP_WAITING" });
 
       // Recargar la página cuando el nuevo SW tome control
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
+      navigator.serviceWorker.addEventListener("controllerchange", () => {
         window.location.reload();
       });
     }
@@ -93,31 +96,29 @@ export function ServiceWorkerRegister() {
     <>
       {/* Banner de Actualización Disponible */}
       {showUpdatePrompt && (
-        <div className="fixed bottom-4 left-4 right-4 md:left-auto md:w-96 z-50 animate-slide-up">
-          <div className="bg-primary text-white rounded-lg shadow-2xl p-4">
-            <div className="flex items-start justify-between mb-2">
+        <div className="animate-slide-up fixed bottom-4 left-4 right-4 z-50 md:left-auto md:w-96">
+          <div className="rounded-lg bg-primary p-4 text-white shadow-2xl">
+            <div className="mb-2 flex items-start justify-between">
               <div className="flex-1">
-                <h3 className="font-semibold text-lg mb-1">
-                  🎉 Nueva Versión Disponible
-                </h3>
+                <h3 className="mb-1 text-lg font-semibold">🎉 Nueva Versión Disponible</h3>
                 <p className="text-sm text-white/90">
                   Hay una actualización de la aplicación lista para instalarse.
                 </p>
               </div>
               <button
                 onClick={dismissUpdate}
-                className="text-white/80 hover:text-white transition-colors"
+                className="text-white/80 transition-colors hover:text-white"
                 aria-label="Cerrar"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <div className="flex gap-2 mt-3">
+            <div className="mt-3 flex gap-2">
               <Button
                 onClick={handleUpdate}
-                className="flex-1 bg-accent hover:bg-accent/90 text-white"
+                className="bg-accent hover:bg-accent/90 flex-1 text-white"
               >
-                <RefreshCw className="h-4 w-4 mr-2" />
+                <RefreshCw className="mr-2 h-4 w-4" />
                 Actualizar Ahora
               </Button>
               <Button
@@ -134,9 +135,9 @@ export function ServiceWorkerRegister() {
 
       {/* Banner de Estado Offline */}
       {!isOnline && (
-        <div className="fixed top-0 left-0 right-0 z-50 bg-yellow-500 text-black py-2 px-4 text-center text-sm font-medium shadow-lg">
+        <div className="fixed left-0 right-0 top-0 z-50 bg-yellow-500 px-4 py-2 text-center text-sm font-medium text-black shadow-lg">
           <div className="flex items-center justify-center gap-2">
-            <span className="inline-block w-2 h-2 bg-black rounded-full animate-pulse"></span>
+            <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-black"></span>
             Sin conexión - Navegando en modo offline
           </div>
         </div>
@@ -155,12 +156,12 @@ export function useOnlineStatus() {
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
 
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
 
     return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
     };
   }, []);
 
@@ -170,17 +171,17 @@ export function useOnlineStatus() {
 // Hook para enviar mensajes al Service Worker
 export function useSW() {
   const sendMessage = (message: any) => {
-    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+    if ("serviceWorker" in navigator && navigator.serviceWorker.controller) {
       navigator.serviceWorker.controller.postMessage(message);
     }
   };
 
   const cacheUrls = (urls: string[]) => {
-    sendMessage({ type: 'CACHE_URLS', urls });
+    sendMessage({ type: "CACHE_URLS", urls });
   };
 
   const clearCache = () => {
-    sendMessage({ type: 'CLEAR_CACHE' });
+    sendMessage({ type: "CLEAR_CACHE" });
   };
 
   return { sendMessage, cacheUrls, clearCache };
@@ -188,18 +189,18 @@ export function useSW() {
 
 // Función para solicitar permiso de notificaciones push
 export async function requestNotificationPermission(): Promise<boolean> {
-  if (!('Notification' in window)) {
-    console.log('[PWA] Notificaciones no soportadas');
+  if (!("Notification" in window)) {
+    console.log("[PWA] Notificaciones no soportadas");
     return false;
   }
 
-  if (Notification.permission === 'granted') {
+  if (Notification.permission === "granted") {
     return true;
   }
 
-  if (Notification.permission !== 'denied') {
+  if (Notification.permission !== "denied") {
     const permission = await Notification.requestPermission();
-    return permission === 'granted';
+    return permission === "granted";
   }
 
   return false;
@@ -211,7 +212,7 @@ export async function subscribeToPushNotifications() {
     const hasPermission = await requestNotificationPermission();
 
     if (!hasPermission) {
-      throw new Error('Permiso de notificaciones denegado');
+      throw new Error("Permiso de notificaciones denegado");
     }
 
     const registration = await navigator.serviceWorker.ready;
@@ -219,30 +220,28 @@ export async function subscribeToPushNotifications() {
     // Suscripción a push notifications (requiere VAPID keys en producción)
     const subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(
-        process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || ''
-      ),
+      applicationServerKey: urlBase64ToUint8Array(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || ""),
     });
 
     // Enviar suscripción al servidor para almacenar
-    await fetch('/api/push/subscribe', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    await fetch("/api/push/subscribe", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(subscription),
     });
 
-    console.log('[PWA] Suscrito a push notifications');
+    console.log("[PWA] Suscrito a push notifications");
     return subscription;
   } catch (error) {
-    console.error('[PWA] Error suscribiendo a push:', error);
+    console.error("[PWA] Error suscribiendo a push:", error);
     throw error;
   }
 }
 
 // Helper para convertir VAPID key
-function urlBase64ToUint8Array(base64String: string): Uint8Array {
-  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
-  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+function urlBase64ToUint8Array(base64String: string): Uint8Array<ArrayBuffer> {
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
 
   const rawData = window.atob(base64);
   const outputArray = new Uint8Array(rawData.length);
@@ -251,5 +250,5 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
     outputArray[i] = rawData.charCodeAt(i);
   }
 
-  return outputArray;
+  return outputArray as Uint8Array<ArrayBuffer>;
 }

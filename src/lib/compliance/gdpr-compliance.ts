@@ -28,14 +28,14 @@ export async function exportUserData(userId: string) {
 }
 
 export async function deleteUserData(userId: string) {
-  // Anonymize instead of delete for order history
+  // Anonymize instead of delete for order history (set to BLOCKED status per GDPR compliance)
   await db.user.update({
     where: { id: userId },
     data: {
       name: "Usuario Eliminado",
       email: `deleted_${userId}@deleted.com`,
       phone: null,
-      status: "DELETED",
+      status: "BLOCKED",
     },
   });
 

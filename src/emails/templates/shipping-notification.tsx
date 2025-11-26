@@ -73,7 +73,7 @@ export default function ShippingNotificationEmail({
           <Section style={trackingSection}>
             <div style={trackingBox}>
               <Text style={trackingLabel}>Número de Rastreo</Text>
-              <Text style={trackingNumber}>{trackingNumber}</Text>
+              <Text style={trackingNumberStyle}>{trackingNumber}</Text>
               <Text style={carrierText}>Transportista: {carrier}</Text>
             </div>
           </Section>
@@ -101,7 +101,7 @@ export default function ShippingNotificationEmail({
               <Text style={addressText}>
                 {shippingAddress.street}
                 <br />
-                {shippingAddress.city}, {shippingAddress.state} {shippingAddress.postalCode}
+                {shippingAddress.city}, {shippingAddress.state} {shippingAddress.zipCode}
               </Text>
             </div>
           </Section>
@@ -235,7 +235,7 @@ const trackingLabel = {
   fontWeight: "600",
 };
 
-const trackingNumber = {
+const trackingNumberStyle = {
   color: "#92400e",
   fontSize: "24px",
   fontWeight: "bold",

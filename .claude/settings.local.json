@@ -15,7 +15,8 @@
       "Bash(find:*)",
       "Bash(1)",
       "mcp__chrome-devtools__list_pages",
-      "Bash(timeout 240 npm run build)"
+      "Bash(timeout 240 npm run build)",
+      "Bash(timeout 300 npm run build:*)"
     ],
     "deny": [],
     "ask": []

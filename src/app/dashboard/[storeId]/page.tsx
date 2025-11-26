@@ -56,7 +56,7 @@ export default async function DashboardHome({ params: { storeId } }: DashboardHo
       month: "short",
       day: "numeric",
     }),
-    value: item._sum.total || 0,
+    value: item._sum.total ? Number(item._sum.total) : 0,
   }));
 
   // Get top products data
@@ -116,7 +116,7 @@ export default async function DashboardHome({ params: { storeId } }: DashboardHo
   }));
 
   // Get recent orders
-  const recentOrders = await db.order.findMany({
+  const recentOrdersRaw = await db.order.findMany({
     where: {
       tenantId: storeId,
     },
@@ -133,6 +133,12 @@ export default async function DashboardHome({ params: { storeId } }: DashboardHo
     },
     take: 10,
   });
+
+  // Convert Decimal to number for recent orders
+  const recentOrders = recentOrdersRaw.map((order) => ({
+    ...order,
+    total: Number(order.total),
+  }));
 
   return (
     <div className="space-y-8">

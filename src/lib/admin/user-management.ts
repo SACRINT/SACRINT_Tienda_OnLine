@@ -3,6 +3,7 @@
  * Administración de usuarios y roles
  */
 import { db } from "@/lib/db";
+import { UserRole } from "@prisma/client";
 
 export async function getAllUsers(tenantId: string) {
   return db.user.findMany({
@@ -18,7 +19,7 @@ export async function getAllUsers(tenantId: string) {
   });
 }
 
-export async function updateUserRole(userId: string, role: string) {
+export async function updateUserRole(userId: string, role: UserRole) {
   return db.user.update({
     where: { id: userId },
     data: { role },

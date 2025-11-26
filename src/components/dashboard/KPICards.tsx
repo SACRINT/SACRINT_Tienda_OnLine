@@ -10,6 +10,15 @@
 import { TrendingUp, TrendingDown, DollarSign, ShoppingCart, Users, Percent } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+interface KPICardProps {
+  title: string;
+  value: string;
+  subtitle?: string;
+  change?: number;
+  icon: React.ElementType;
+  color: "blue" | "green" | "purple" | "orange";
+}
+
 interface KPICardsProps {
   metrics: {
     revenue: {
@@ -32,7 +41,7 @@ interface KPICardsProps {
 }
 
 export function KPICards({ metrics }: KPICardsProps) {
-  const cards = [
+  const cards: KPICardProps[] = [
     {
       title: "Ventas Totales",
       value: `$${metrics.revenue.total.toLocaleString("es-MX", {
@@ -67,21 +76,12 @@ export function KPICards({ metrics }: KPICardsProps) {
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
       {cards.map((card, index) => (
         <KPICard key={index} {...card} />
       ))}
     </div>
   );
-}
-
-interface KPICardProps {
-  title: string;
-  value: string;
-  subtitle?: string;
-  change?: number;
-  icon: React.ElementType;
-  color: "blue" | "green" | "purple" | "orange";
 }
 
 function KPICard({ title, value, subtitle, change, icon: Icon, color }: KPICardProps) {
@@ -97,19 +97,19 @@ function KPICard({ title, value, subtitle, change, icon: Icon, color }: KPICardP
   const isNegative = change && change < 0;
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-6">
+    <div className="rounded-lg border border-gray-200 bg-white p-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="mb-4 flex items-center justify-between">
         <span className="text-sm font-medium text-gray-600">{title}</span>
-        <div className={cn("p-2 rounded-lg", colorClasses[color])}>
-          <Icon className="w-5 h-5" />
+        <div className={cn("rounded-lg p-2", colorClasses[color])}>
+          <Icon className="h-5 w-5" />
         </div>
       </div>
 
       {/* Value */}
       <div className="mb-2">
         <p className="text-3xl font-bold text-gray-900">{value}</p>
-        {subtitle && <p className="text-sm text-gray-500 mt-1">{subtitle}</p>}
+        {subtitle && <p className="mt-1 text-sm text-gray-500">{subtitle}</p>}
       </div>
 
       {/* Change indicator */}
@@ -117,20 +117,20 @@ function KPICard({ title, value, subtitle, change, icon: Icon, color }: KPICardP
         <div className="flex items-center gap-1">
           {isPositive && (
             <>
-              <TrendingUp className="w-4 h-4 text-green-600" />
+              <TrendingUp className="h-4 w-4 text-green-600" />
               <span className="text-sm font-medium text-green-600">+{change.toFixed(1)}%</span>
             </>
           )}
           {isNegative && (
             <>
-              <TrendingDown className="w-4 h-4 text-red-600" />
+              <TrendingDown className="h-4 w-4 text-red-600" />
               <span className="text-sm font-medium text-red-600">{change.toFixed(1)}%</span>
             </>
           )}
           {!isPositive && !isNegative && (
             <span className="text-sm font-medium text-gray-500">Sin cambios</span>
           )}
-          <span className="text-xs text-gray-500 ml-1">vs mes anterior</span>
+          <span className="ml-1 text-xs text-gray-500">vs mes anterior</span>
         </div>
       )}
     </div>

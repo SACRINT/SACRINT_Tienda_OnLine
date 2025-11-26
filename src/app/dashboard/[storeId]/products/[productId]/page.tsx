@@ -58,7 +58,6 @@ export default async function EditProductPage({
     sku: product.sku,
     basePrice: Number(product.basePrice),
     salePrice: product.salePrice ? Number(product.salePrice) : 0,
-    cost: product.cost ? Number(product.cost) : 0,
     stock: product.stock,
     categoryId: product.categoryId || "",
     published: product.published,
@@ -69,24 +68,19 @@ export default async function EditProductPage({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link
-            href={`/dashboard/${storeId}/products`}
-            className="p-2 hover:bg-gray-100 rounded"
-          >
-            <ArrowLeft className="w-5 h-5" />
+          <Link href={`/dashboard/${storeId}/products`} className="rounded p-2 hover:bg-gray-100">
+            <ArrowLeft className="h-5 w-5" />
           </Link>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
-              Editar Producto
-            </h1>
-            <p className="text-gray-600 mt-1">{product.name}</p>
+            <h1 className="text-3xl font-bold text-gray-900">Editar Producto</h1>
+            <p className="mt-1 text-gray-600">{product.name}</p>
           </div>
         </div>
         <button
-          className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
+          className="flex items-center gap-2 rounded-md border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50"
           title="Duplicar Producto"
         >
-          <Copy className="w-4 h-4" />
+          <Copy className="h-4 w-4" />
           Duplicar
         </button>
       </div>
@@ -102,9 +96,7 @@ export default async function EditProductPage({
   );
 }
 
-export async function generateMetadata({
-  params,
-}: EditProductPageProps) {
+export async function generateMetadata({ params }: EditProductPageProps) {
   const product = await db.product.findUnique({
     where: { id: params.productId },
     select: { name: true },

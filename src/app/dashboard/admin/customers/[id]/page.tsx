@@ -244,7 +244,7 @@ export default function CustomerDetailPage({ params }: { params: { id: string } 
                     )}
                     <p>{address.street}</p>
                     <p>
-                      {address.city}, {address.state} {address.postalCode}
+                      {address.city}, {address.state} {address.zipCode}
                     </p>
                     <p>{address.country}</p>
                   </div>
