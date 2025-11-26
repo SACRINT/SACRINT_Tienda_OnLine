@@ -1,41 +1,46 @@
 {
-  "name": "SACRINT Tienda",
-  "short_name": "SACRINT",
-  "description": "Tu tienda online favorita - Compra los mejores productos",
+  "name": "SACRINT Tienda Online - E-commerce SaaS",
+  "short_name": "SACRINT Shop",
+  "description": "Plataforma de e-commerce SaaS multi-tenant con seguridad de nivel bancario. Compra los mejores productos con confianza.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "orientation": "portrait",
-  "theme_color": "#000000",
-  "background_color": "#ffffff",
-  "categories": ["shopping", "business"],
+  "orientation": "portrait-primary",
+  "theme_color": "#3B82F6",
+  "background_color": "#FFFFFF",
+  "categories": ["shopping", "e-commerce", "productivity"],
   "lang": "es-MX",
   "dir": "ltr",
   "icons": [
     {
       "src": "/icons/icon-72x72.png",
       "sizes": "72x72",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-96x96.png",
       "sizes": "96x96",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-128x128.png",
       "sizes": "128x128",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-144x144.png",
       "sizes": "144x144",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-152x152.png",
       "sizes": "152x152",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-192x192.png",
@@ -46,7 +51,8 @@
     {
       "src": "/icons/icon-384x384.png",
       "sizes": "384x384",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-512x512.png",
@@ -69,31 +75,62 @@
       "type": "image/png",
       "form_factor": "narrow",
       "label": "Catálogo de productos"
+    },
+    {
+      "src": "/screenshots/cart.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Carrito de compras"
+    },
+    {
+      "src": "/screenshots/dashboard.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Dashboard de administración"
     }
   ],
   "shortcuts": [
     {
-      "name": "Ver ofertas",
+      "name": "Buscar Productos",
+      "short_name": "Buscar",
+      "description": "Busca productos en SACRINT Shop",
+      "url": "/shop?utm_source=pwa_shortcut",
+      "icons": [{ "src": "/icons/shortcut-search.png", "sizes": "96x96", "type": "image/png" }]
+    },
+    {
+      "name": "Mi Carrito",
+      "short_name": "Carrito",
+      "description": "Ver mi carrito de compras",
+      "url": "/cart?utm_source=pwa_shortcut",
+      "icons": [{ "src": "/icons/shortcut-cart.png", "sizes": "96x96", "type": "image/png" }]
+    },
+    {
+      "name": "Mis Órdenes",
+      "short_name": "Órdenes",
+      "description": "Ver mis órdenes anteriores",
+      "url": "/account/orders?utm_source=pwa_shortcut",
+      "icons": [{ "src": "/icons/shortcut-orders.png", "sizes": "96x96", "type": "image/png" }]
+    },
+    {
+      "name": "Ver Ofertas",
       "short_name": "Ofertas",
       "description": "Ver productos en oferta",
-      "url": "/shop?filter=sale",
-      "icons": [{ "src": "/icons/shortcut-sale.png", "sizes": "96x96" }]
-    },
-    {
-      "name": "Mis pedidos",
-      "short_name": "Pedidos",
-      "description": "Ver historial de pedidos",
-      "url": "/account/orders",
-      "icons": [{ "src": "/icons/shortcut-orders.png", "sizes": "96x96" }]
-    },
-    {
-      "name": "Carrito",
-      "short_name": "Carrito",
-      "description": "Ver carrito de compras",
-      "url": "/cart",
-      "icons": [{ "src": "/icons/shortcut-cart.png", "sizes": "96x96" }]
+      "url": "/shop?filter=sale&utm_source=pwa_shortcut",
+      "icons": [{ "src": "/icons/shortcut-sale.png", "sizes": "96x96", "type": "image/png" }]
     }
   ],
+  "prefer_related_applications": false,
   "related_applications": [],
-  "prefer_related_applications": false
+  "share_target": {
+    "action": "/share",
+    "method": "POST",
+    "enctype": "application/x-www-form-urlencoded",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  }
 }
