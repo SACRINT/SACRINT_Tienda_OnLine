@@ -88,6 +88,7 @@ model User {
   searchQueries         SearchQuery[]
   savedPaymentMethods   SavedPaymentMethod[]
   subscriptions         Subscription[]
+  orderNotes            OrderNote[] // Task 15.9: Order notes authored by this user
 
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
@@ -383,6 +384,7 @@ model Order {
   inventoryReservation  InventoryReservation?
   invoices              Invoice[]
   disputes              Dispute[]
+  orderNotes            OrderNote[] // Task 15.9: Order Notes
 
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
@@ -1142,4 +1144,19 @@ model Dispute {
 
   @@index([orderId])
   @@index([status])
+}
+
+// Order Notes System - Task 15.9
+model OrderNote {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  content   String   @db.Text
+  isPublic  Boolean  @default(false)
+  createdBy String
+  author    User     @relation(fields: [createdBy], references: [id])
+  createdAt DateTime @default(now())
+
+  @@index([orderId])
+  @@index([createdBy])
 }
