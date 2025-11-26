@@ -1,18 +1,27 @@
-/** Weeks 21-22: Admin User Management - Tasks 21.1-22.12 */
+/**
+ * User Management - Semana 21
+ * Administración de usuarios y roles
+ */
 import { db } from "@/lib/db";
 
-export async function getAllUsers(filters?: any) {
+export async function getAllUsers(tenantId: string) {
   return db.user.findMany({
-    where: filters,
-    include: { tenant: true },
-    take: 100,
+    where: { tenantId },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      status: true,
+      createdAt: true,
+    },
   });
 }
 
 export async function updateUserRole(userId: string, role: string) {
   return db.user.update({
     where: { id: userId },
-    data: { role: role as any },
+    data: { role },
   });
 }
 
