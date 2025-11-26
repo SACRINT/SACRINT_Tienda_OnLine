@@ -3,32 +3,32 @@
  * Semana 45, Tarea 45.7: Service Health Monitoring
  */
 
-import { logger } from "@/lib/monitoring"
+import { logger } from "@/lib/monitoring";
 
 export interface ServiceHealth {
-  serviceName: string
-  status: "healthy" | "degraded" | "down"
-  lastCheck: Date
-  uptime: number
-  responseTime: number
-  errorRate: number
+  serviceName: string;
+  status: "healthy" | "degraded" | "down";
+  lastCheck: Date;
+  uptime: number;
+  responseTime: number;
+  errorRate: number;
 }
 
 export interface HealthCheckResult {
-  id: string
-  serviceName: string
-  timestamp: Date
-  status: "pass" | "fail" | "warn"
-  checks: Record<string, boolean>
-  latency: number
+  id: string;
+  serviceName: string;
+  timestamp: Date;
+  status: "pass" | "fail" | "warn";
+  checks: Record<string, boolean>;
+  latency: number;
 }
 
 export class ServiceHealthMonitoringManager {
-  private health: Map<string, ServiceHealth> = new Map()
-  private checkResults: Map<string, HealthCheckResult> = new Map()
+  private health: Map<string, ServiceHealth> = new Map();
+  private checkResults: Map<string, HealthCheckResult> = new Map();
 
   constructor() {
-    logger.debug({ type: "health_init" }, "Service Health Monitoring Manager inicializado")
+    logger.debug({ type: "health_init" }, "Service Health Monitoring Manager inicializado");
   }
 
   performHealthCheck(serviceName: string): HealthCheckResult {
@@ -44,8 +44,8 @@ export class ServiceHealthMonitoringManager {
         external_api: true,
       },
       latency: Math.random() * 100,
-    }
-    this.checkResults.set(result.id, result)
+    };
+    this.checkResults.set(result.id, result);
 
     const health: ServiceHealth = {
       serviceName,
@@ -54,41 +54,41 @@ export class ServiceHealthMonitoringManager {
       uptime: 99.9,
       responseTime: result.latency,
       errorRate: Math.random() * 0.01,
-    }
-    this.health.set(serviceName, health)
+    };
+    this.health.set(serviceName, health);
 
-    logger.info({ type: "health_check_performed" }, `Health check: ${serviceName}`)
-    return result
+    logger.info({ type: "health_check_performed" }, `Health check: ${serviceName}`);
+    return result;
   }
 
   getServiceHealth(serviceName: string): ServiceHealth | null {
-    return this.health.get(serviceName) || null
+    return this.health.get(serviceName) || null;
   }
 
   getAllServiceHealth(): ServiceHealth[] {
-    return Array.from(this.health.values())
+    return Array.from(this.health.values());
   }
 
   getUnhealthyServices(): ServiceHealth[] {
-    return Array.from(this.health.values()).filter(h => h.status \!== "healthy")
+    return Array.from(this.health.values()).filter((h) => h.status !== "healthy");
   }
 
   getStatistics() {
-    const allHealth = Array.from(this.health.values())
+    const allHealth = Array.from(this.health.values());
     return {
       totalServices: allHealth.length,
-      healthyServices: allHealth.filter(h => h.status === "healthy").length,
-      degradedServices: allHealth.filter(h => h.status === "degraded").length,
-      downServices: allHealth.filter(h => h.status === "down").length,
-    }
+      healthyServices: allHealth.filter((h) => h.status === "healthy").length,
+      degradedServices: allHealth.filter((h) => h.status === "degraded").length,
+      downServices: allHealth.filter((h) => h.status === "down").length,
+    };
   }
 }
 
-let globalHealthMonitor: ServiceHealthMonitoringManager | null = null
+let globalHealthMonitor: ServiceHealthMonitoringManager | null = null;
 
 export function getServiceHealthMonitoringManager(): ServiceHealthMonitoringManager {
-  if (\!globalHealthMonitor) {
-    globalHealthMonitor = new ServiceHealthMonitoringManager()
+  if (!globalHealthMonitor) {
+    globalHealthMonitor = new ServiceHealthMonitoringManager();
   }
-  return globalHealthMonitor
+  return globalHealthMonitor;
 }

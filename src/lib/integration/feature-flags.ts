@@ -3,32 +3,32 @@
  * Semana 47, Tarea 47.5: Feature Flags & Canary Deployments
  */
 
-import { logger } from "@/lib/monitoring"
+import { logger } from "@/lib/monitoring";
 
 export interface FeatureFlag {
-  id: string
-  name: string
-  enabled: boolean
-  rolloutPercentage: number
-  targetEnvironments: string[]
-  createdAt: Date
-  updatedAt: Date
+  id: string;
+  name: string;
+  enabled: boolean;
+  rolloutPercentage: number;
+  targetEnvironments: string[];
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface CanaryDeployment {
-  id: string
-  featureName: string
-  currentPercentage: number
-  targetPercentage: number
-  status: "running" | "paused" | "completed" | "rolled_back"
+  id: string;
+  featureName: string;
+  currentPercentage: number;
+  targetPercentage: number;
+  status: "running" | "paused" | "completed" | "rolled_back";
 }
 
 export class FeatureFlagsManager {
-  private flags: Map<string, FeatureFlag> = new Map()
-  private canaries: Map<string, CanaryDeployment> = new Map()
+  private flags: Map<string, FeatureFlag> = new Map();
+  private canaries: Map<string, CanaryDeployment> = new Map();
 
   constructor() {
-    logger.debug({ type: "flags_init" }, "Feature Flags Manager inicializado")
+    logger.debug({ type: "flags_init" }, "Feature Flags Manager inicializado");
   }
 
   createFeatureFlag(name: string, enabled: boolean, environments: string[]): FeatureFlag {
@@ -40,10 +40,10 @@ export class FeatureFlagsManager {
       targetEnvironments: environments,
       createdAt: new Date(),
       updatedAt: new Date(),
-    }
-    this.flags.set(flag.id, flag)
-    logger.info({ type: "flag_created" }, `Flag: ${name}`)
-    return flag
+    };
+    this.flags.set(flag.id, flag);
+    logger.info({ type: "flag_created" }, `Flag: ${name}`);
+    return flag;
   }
 
   startCanaryDeployment(featureName: string, startPercentage: number = 10): CanaryDeployment {
@@ -53,37 +53,38 @@ export class FeatureFlagsManager {
       currentPercentage: startPercentage,
       targetPercentage: 100,
       status: "running",
-    }
-    this.canaries.set(canary.id, canary)
-    logger.info({ type: "canary_started" }, `Canary: ${featureName}@${startPercentage}%`)
-    return canary
+    };
+    this.canaries.set(canary.id, canary);
+    logger.info({ type: "canary_started" }, `Canary: ${featureName}@${startPercentage}%`);
+    return canary;
   }
 
   increaseCanaryRollout(canaryId: string, percentage: number): CanaryDeployment | null {
-    const canary = this.canaries.get(canaryId)
-    if (\!canary) return null
-    canary.currentPercentage = Math.min(canary.currentPercentage + percentage, 100)
+    const canary = this.canaries.get(canaryId);
+    if (!canary) return null;
+    canary.currentPercentage = Math.min(canary.currentPercentage + percentage, 100);
     if (canary.currentPercentage >= 100) {
-      canary.status = "completed"
+      canary.status = "completed";
     }
-    logger.info({ type: "canary_increased" }, `Rollout: ${canary.currentPercentage}%`)
-    return canary
+    logger.info({ type: "canary_increased" }, `Rollout: ${canary.currentPercentage}%`);
+    return canary;
   }
 
   getStatistics() {
     return {
       totalFlags: this.flags.size,
-      enabledFlags: Array.from(this.flags.values()).filter(f => f.enabled).length,
-      activeCanaries: Array.from(this.canaries.values()).filter(c => c.status === "running").length,
-    }
+      enabledFlags: Array.from(this.flags.values()).filter((f) => f.enabled).length,
+      activeCanaries: Array.from(this.canaries.values()).filter((c) => c.status === "running")
+        .length,
+    };
   }
 }
 
-let globalFeatureFlagsManager: FeatureFlagsManager | null = null
+let globalFeatureFlagsManager: FeatureFlagsManager | null = null;
 
 export function getFeatureFlagsManager(): FeatureFlagsManager {
-  if (\!globalFeatureFlagsManager) {
-    globalFeatureFlagsManager = new FeatureFlagsManager()
+  if (!globalFeatureFlagsManager) {
+    globalFeatureFlagsManager = new FeatureFlagsManager();
   }
-  return globalFeatureFlagsManager
+  return globalFeatureFlagsManager;
 }

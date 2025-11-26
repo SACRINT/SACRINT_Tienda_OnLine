@@ -3,39 +3,45 @@
  * Semana 45, Tarea 45.10: Security Monitoring
  */
 
-import { logger } from "@/lib/monitoring"
+import { logger } from "@/lib/monitoring";
 
 export interface SecurityEvent {
-  id: string
-  type: "login" | "failed_auth" | "suspicious_activity" | "access_violation" | "data_access"
-  severity: "low" | "medium" | "high" | "critical"
-  timestamp: Date
-  userId?: string
-  ipAddress?: string
-  description: string
-  isResolved: boolean
+  id: string;
+  type: "login" | "failed_auth" | "suspicious_activity" | "access_violation" | "data_access";
+  severity: "low" | "medium" | "high" | "critical";
+  timestamp: Date;
+  userId?: string;
+  ipAddress?: string;
+  description: string;
+  isResolved: boolean;
 }
 
 export interface SecurityThreat {
-  id: string
-  threatType: string
-  count: number
-  firstSeen: Date
-  lastSeen: Date
-  severity: string
-  mitigated: boolean
+  id: string;
+  threatType: string;
+  count: number;
+  firstSeen: Date;
+  lastSeen: Date;
+  severity: string;
+  mitigated: boolean;
 }
 
 export class SecurityMonitoringManager {
-  private events: Map<string, SecurityEvent> = new Map()
-  private threats: Map<string, SecurityThreat> = new Map()
-  private suspiciousIps: Set<string> = new Set()
+  private events: Map<string, SecurityEvent> = new Map();
+  private threats: Map<string, SecurityThreat> = new Map();
+  private suspiciousIps: Set<string> = new Set();
 
   constructor() {
-    logger.debug({ type: "security_init" }, "Security Monitoring Manager inicializado")
+    logger.debug({ type: "security_init" }, "Security Monitoring Manager inicializado");
   }
 
-  logSecurityEvent(type: string, severity: string, description: string, userId?: string, ipAddress?: string): SecurityEvent {
+  logSecurityEvent(
+    type: string,
+    severity: string,
+    description: string,
+    userId?: string,
+    ipAddress?: string,
+  ): SecurityEvent {
     const event: SecurityEvent = {
       id: `sec_${Date.now()}`,
       type: type as any,
@@ -45,25 +51,25 @@ export class SecurityMonitoringManager {
       ipAddress,
       description,
       isResolved: false,
-    }
-    this.events.set(event.id, event)
+    };
+    this.events.set(event.id, event);
 
     if (severity === "critical" || severity === "high") {
       if (ipAddress) {
-        this.suspiciousIps.add(ipAddress)
+        this.suspiciousIps.add(ipAddress);
       }
     }
 
-    logger.warn({ type: "security_event", severity }, `Evento de seguridad: ${description}`)
-    return event
+    logger.warn({ type: "security_event", severity }, `Evento de seguridad: ${description}`);
+    return event;
   }
 
   detectThreat(threatType: string, severity: string): SecurityThreat {
-    let threat = Array.from(this.threats.values()).find(t => t.threatType === threatType)
+    let threat = Array.from(this.threats.values()).find((t) => t.threatType === threatType);
 
     if (threat) {
-      threat.count++
-      threat.lastSeen = new Date()
+      threat.count++;
+      threat.lastSeen = new Date();
     } else {
       threat = {
         id: `threat_${Date.now()}`,
@@ -73,37 +79,37 @@ export class SecurityMonitoringManager {
         lastSeen: new Date(),
         severity,
         mitigated: false,
-      }
-      this.threats.set(threat.id, threat)
+      };
+      this.threats.set(threat.id, threat);
     }
 
-    logger.error({ type: "threat_detected", severity }, `Amenaza detectada: ${threatType}`)
-    return threat
+    logger.error({ type: "threat_detected", severity }, `Amenaza detectada: ${threatType}`);
+    return threat;
   }
 
   getSecurityEvents(severity?: string): SecurityEvent[] {
-    return Array.from(this.events.values()).filter(e => \!severity || e.severity === severity)
+    return Array.from(this.events.values()).filter((e) => !severity || e.severity === severity);
   }
 
   getSuspiciousIps(): string[] {
-    return Array.from(this.suspiciousIps)
+    return Array.from(this.suspiciousIps);
   }
 
   getStatistics() {
     return {
       totalSecurityEvents: this.events.size,
-      unresolvedEvents: Array.from(this.events.values()).filter(e => \!e.isResolved).length,
+      unresolvedEvents: Array.from(this.events.values()).filter((e) => !e.isResolved).length,
       threats: this.threats.size,
       suspiciousIps: this.suspiciousIps.size,
-    }
+    };
   }
 }
 
-let globalSecurityMonitor: SecurityMonitoringManager | null = null
+let globalSecurityMonitor: SecurityMonitoringManager | null = null;
 
 export function getSecurityMonitoringManager(): SecurityMonitoringManager {
-  if (\!globalSecurityMonitor) {
-    globalSecurityMonitor = new SecurityMonitoringManager()
+  if (!globalSecurityMonitor) {
+    globalSecurityMonitor = new SecurityMonitoringManager();
   }
-  return globalSecurityMonitor
+  return globalSecurityMonitor;
 }

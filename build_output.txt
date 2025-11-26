@@ -1,0 +1,20 @@
+
+> tienda-online-2025@0.1.0 build
+> prisma generate && next build
+
+Prisma schema loaded from prisma\schema.prisma
+
+✔ Generated Prisma Client (v6.19.0) to .\node_modules\@prisma\client in 280ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Need your database queries to be 1000x faster? Accelerate offers you that and more: https://pris.ly/tip-2-accelerate
+
+  ▲ Next.js 14.2.33
+  - Environments: .env.local, .env
+  - Experiments (use with caution):
+    · optimizeCss
+    · scrollRestoration
+
+   Creating an optimized production build ...
+   Linting and checking validity of types ...
