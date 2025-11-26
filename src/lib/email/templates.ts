@@ -1,12 +1,46 @@
 /**
- * Email Templates
- * Plantillas de emails transaccionales
+ * Email Templates Builder - WYSIWYG Editor
+ * Semana 32, Tarea 32.1: Constructor avanzado de plantillas de email
  */
 
+import { logger } from '@/lib/monitoring'
+
+/**
+ * Bloque de email (componente)
+ */
+export interface EmailBlock {
+  id: string
+  type: 'text' | 'button' | 'image' | 'divider' | 'spacer' | 'section'
+  content?: string
+  style?: {
+    fontSize?: number
+    color?: string
+    textAlign?: 'left' | 'center' | 'right'
+    padding?: number
+    backgroundColor?: string
+    fontWeight?: 'normal' | 'bold'
+  }
+  props?: Record<string, any>
+}
+
+/**
+ * Plantilla de email
+ */
 export interface EmailTemplate {
-  subject: string;
-  html: string;
-  text?: string;
+  id?: string
+  tenantId?: string
+  name?: string
+  description?: string
+  type?: 'transactional' | 'marketing' | 'notification'
+  subject: string
+  html: string
+  text?: string
+  previewText?: string
+  blocks?: EmailBlock[]
+  variables?: string[]
+  createdAt?: Date
+  updatedAt?: Date
+  isActive?: boolean
 }
 
 export interface OrderConfirmationData {
@@ -261,9 +295,278 @@ export function passwordResetTemplate(data: { name: string; resetLink: string })
   };
 }
 
+/**
+ * Constructor de templates avanzado
+ */
+export class EmailTemplateBuilder {
+  private templates: Map<string, EmailTemplate> = new Map()
+
+  constructor() {
+    logger.debug({ type: 'email_template_builder_init' }, 'Email Template Builder inicializado')
+  }
+
+  /**
+   * Crear nueva plantilla
+   */
+  createTemplate(
+    tenantId: string,
+    data: {
+      name: string
+      type: 'transactional' | 'marketing' | 'notification'
+      subject: string
+      previewText?: string
+      description?: string
+    },
+  ): EmailTemplate {
+    const template: EmailTemplate = {
+      id: `tpl-${Date.now()}-${Math.random().toString(36).substring(7)}`,
+      tenantId,
+      name: data.name,
+      type: data.type,
+      subject: data.subject,
+      previewText: data.previewText,
+      description: data.description,
+      blocks: [],
+      variables: [],
+      html: '',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      isActive: false,
+    }
+
+    this.templates.set(template.id!, template)
+
+    logger.debug(
+      { type: 'email_template_created', templateId: template.id, tenantId },
+      `Plantilla de email creada: ${template.name}`,
+    )
+
+    return template
+  }
+
+  /**
+   * Obtener plantilla
+   */
+  getTemplate(templateId: string): EmailTemplate | null {
+    return this.templates.get(templateId) || null
+  }
+
+  /**
+   * Agregar bloque a plantilla
+   */
+  addBlock(templateId: string, block: Omit<EmailBlock, 'id'>): EmailBlock {
+    const template = this.templates.get(templateId)
+    if (!template) {
+      throw new Error(`Plantilla no encontrada: ${templateId}`)
+    }
+
+    const newBlock: EmailBlock = {
+      ...block,
+      id: `block-${Date.now()}-${Math.random().toString(36).substring(7)}`,
+    }
+
+    template.blocks?.push(newBlock)
+    template.updatedAt = new Date()
+
+    logger.debug(
+      { type: 'block_added', templateId, blockType: block.type },
+      `Bloque ${block.type} agregado a plantilla`,
+    )
+
+    return newBlock
+  }
+
+  /**
+   * Actualizar bloque
+   */
+  updateBlock(templateId: string, blockId: string, updates: Partial<EmailBlock>): EmailBlock {
+    const template = this.templates.get(templateId)
+    if (!template) {
+      throw new Error(`Plantilla no encontrada: ${templateId}`)
+    }
+
+    const blockIndex = template.blocks?.findIndex((b) => b.id === blockId)
+    if (blockIndex === -1) {
+      throw new Error(`Bloque no encontrado: ${blockId}`)
+    }
+
+    template.blocks![blockIndex!] = {
+      ...template.blocks![blockIndex!],
+      ...updates,
+    }
+    template.updatedAt = new Date()
+
+    logger.debug(
+      { type: 'block_updated', templateId, blockId },
+      'Bloque actualizado',
+    )
+
+    return template.blocks![blockIndex!]
+  }
+
+  /**
+   * Generar HTML de plantilla
+   */
+  generateHTML(templateId: string, variables?: Record<string, string>): string {
+    const template = this.templates.get(templateId)
+    if (!template) {
+      throw new Error(`Plantilla no encontrada: ${templateId}`)
+    }
+
+    let html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>${template.subject}</title>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .block { margin-bottom: 20px; }
+    .button { display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 4px; }
+    .divider { border-top: 1px solid #ccc; margin: 20px 0; }
+  </style>
+</head>
+<body>
+  <div class="container">`
+
+    // Agregar bloques
+    for (const block of template.blocks || []) {
+      html += this.renderBlock(block, variables)
+    }
+
+    html += `
+  </div>
+</body>
+</html>`
+
+    template.html = html
+    return html
+  }
+
+  /**
+   * Renderizar bloque individual
+   */
+  private renderBlock(block: EmailBlock, variables?: Record<string, string>): string {
+    let content = block.content || ''
+
+    // Reemplazar variables
+    if (variables) {
+      for (const [key, value] of Object.entries(variables)) {
+        content = content.replace(new RegExp(`\\{\\{${key}\\}\\}`, 'g'), value)
+      }
+    }
+
+    const style = this.generateBlockStyle(block)
+
+    switch (block.type) {
+      case 'text':
+        return `<div class="block" style="${style}">${content}</div>`
+
+      case 'button':
+        return `
+          <div class="block" style="${style}">
+            <a href="${block.props?.url || '#'}" class="button">
+              ${content}
+            </a>
+          </div>`
+
+      case 'image':
+        return `
+          <div class="block" style="${style}">
+            <img src="${content}" alt="image" style="max-width: 100%; height: auto;">
+          </div>`
+
+      case 'divider':
+        return `<div class="divider" style="${style}"></div>`
+
+      case 'spacer':
+        return `<div style="height: ${block.props?.height || 20}px;"></div>`
+
+      case 'section':
+        return `
+          <div class="block" style="${style}; padding: ${block.style?.padding || 20}px;">
+            ${content}
+          </div>`
+
+      default:
+        return `<div class="block" style="${style}">${content}</div>`
+    }
+  }
+
+  /**
+   * Generar CSS para bloque
+   */
+  private generateBlockStyle(block: EmailBlock): string {
+    const style = block.style || {}
+    const css: string[] = []
+
+    if (style.fontSize) css.push(`font-size: ${style.fontSize}px`)
+    if (style.color) css.push(`color: ${style.color}`)
+    if (style.textAlign) css.push(`text-align: ${style.textAlign}`)
+    if (style.padding) css.push(`padding: ${style.padding}px`)
+    if (style.backgroundColor) css.push(`background-color: ${style.backgroundColor}`)
+    if (style.fontWeight) css.push(`font-weight: ${style.fontWeight}`)
+
+    return css.join('; ')
+  }
+
+  /**
+   * Guardar plantilla como activa
+   */
+  publishTemplate(templateId: string): EmailTemplate {
+    const template = this.templates.get(templateId)
+    if (!template) {
+      throw new Error(`Plantilla no encontrada: ${templateId}`)
+    }
+
+    template.isActive = true
+    template.updatedAt = new Date()
+
+    logger.info(
+      { type: 'template_published', templateId },
+      `Plantilla publicada: ${template.name}`,
+    )
+
+    return template
+  }
+
+  /**
+   * Listar plantillas por tenant
+   */
+  listTemplates(tenantId: string): EmailTemplate[] {
+    return Array.from(this.templates.values()).filter((t) => t.tenantId === tenantId)
+  }
+}
+
+/**
+ * Instancia global
+ */
+let globalBuilder: EmailTemplateBuilder | null = null
+
+/**
+ * Inicializar globalmente
+ */
+export function initializeEmailTemplateBuilder(): EmailTemplateBuilder {
+  if (!globalBuilder) {
+    globalBuilder = new EmailTemplateBuilder()
+  }
+  return globalBuilder
+}
+
+/**
+ * Obtener builder global
+ */
+export function getEmailTemplateBuilder(): EmailTemplateBuilder {
+  if (!globalBuilder) {
+    return initializeEmailTemplateBuilder()
+  }
+  return globalBuilder
+}
+
 export default {
   orderConfirmationTemplate,
   orderShippedTemplate,
   welcomeTemplate,
   passwordResetTemplate,
-};
+}
