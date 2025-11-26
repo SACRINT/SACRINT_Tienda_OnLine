@@ -39,6 +39,7 @@ model Tenant {
   searchQueries         SearchQuery[]
   subscriptions         Subscription[]
   shippingLabels        ShippingLabel[]
+  returnRequests        ReturnRequest[]
 
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
@@ -90,6 +91,8 @@ model User {
   savedPaymentMethods   SavedPaymentMethod[]
   subscriptions         Subscription[]
   orderNotes            OrderNote[] // Task 15.9: Order notes authored by this user
+  approvedReturns       ReturnRequest[] @relation("ApprovedReturns")
+  inspectedReturns      ReturnRequest[] @relation("InspectedReturns")
 
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
@@ -227,6 +230,7 @@ model Product {
   reviews               Review[]
   reservationItems      ReservationItem[]
   inventoryLogs         InventoryLog[]
+  returnItems           ReturnItem[]
 
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
@@ -270,6 +274,7 @@ model ProductVariant {
   cartItems             CartItem[]
   orderItems            OrderItem[]
   reservationItems      ReservationItem[]
+  returnItems           ReturnItem[]
 
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
@@ -387,6 +392,7 @@ model Order {
   disputes              Dispute[]
   orderNotes            OrderNote[] // Task 15.9: Order Notes
   shippingLabels        ShippingLabel[] // Task 16.4: Shipping Labels
+  returnRequests        ReturnRequest[] // Task 17.1: Return Requests
 
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
@@ -1203,4 +1209,101 @@ enum ShippingProvider {
   DHL
   UPS
   CUSTOM
+}
+
+// Returns & Refunds System - Task 17.1
+model ReturnRequest {
+  id              String        @id @default(cuid())
+  tenantId        String
+  orderId         String
+
+  // Relations
+  tenant          Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  order           Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  // Request details
+  reason          ReturnReason
+  description     String?       @db.Text
+  status          ReturnStatus  @default(PENDING)
+
+  // Items being returned
+  items           ReturnItem[]
+  refundAmount    Decimal       @db.Decimal(10, 2)
+
+  // Approval/Rejection
+  approvedAt      DateTime?
+  approvedBy      String?
+  approver        User?         @relation("ApprovedReturns", fields: [approvedBy], references: [id])
+  rejectionReason String?       @db.Text
+
+  // Shipping
+  shippingLabelId String?       @unique
+  shippingLabel   ShippingLabel? @relation("ReturnShippingLabel", fields: [shippingLabelId], references: [id])
+  shippedAt       DateTime?
+
+  // Reception & Inspection
+  receivedAt      DateTime?
+  inspectedAt     DateTime?
+  inspectedBy     String?
+  inspector       User?         @relation("InspectedReturns", fields: [inspectedBy], references: [id])
+  inspectionNotes String?       @db.Text
+
+  // Refund
+  refundedAt      DateTime?
+  refundProvider  String?       // "stripe", "mercado_pago"
+  refundId        String?       // Provider refund ID
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([orderId])
+  @@index([tenantId])
+  @@index([status])
+  @@index([orderId, status])
+}
+
+model ReturnItem {
+  id             String         @id @default(cuid())
+  returnId       String
+
+  // Relations
+  returnRequest  ReturnRequest  @relation(fields: [returnId], references: [id], onDelete: Cascade)
+
+  // Product details
+  productId      String
+  product        Product        @relation(fields: [productId], references: [id])
+  variantId      String?
+  variant        ProductVariant? @relation(fields: [variantId], references: [id])
+
+  // Quantity & pricing
+  quantity       Int
+  refundPrice    Decimal        @db.Decimal(10, 2)
+
+  // Inspection result
+  accepted       Boolean?       // null = not inspected, true = accepted, false = rejected
+  rejectionReason String?
+
+  @@index([returnId])
+  @@index([productId])
+}
+
+enum ReturnReason {
+  DEFECTIVE
+  NOT_AS_DESCRIBED
+  WRONG_ITEM
+  CHANGED_MIND
+  SIZE_ISSUE
+  DAMAGED_SHIPPING
+  OTHER
+}
+
+enum ReturnStatus {
+  PENDING         // Customer submitted, awaiting approval
+  APPROVED        // Store approved, awaiting customer to ship
+  REJECTED        // Store rejected request
+  SHIPPED         // Customer shipped return
+  RECEIVED        // Store received return
+  INSPECTED       // Items inspected
+  REFUNDED        // Refund processed
+  CANCELLED       // Customer cancelled
 }
