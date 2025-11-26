@@ -38,6 +38,7 @@ model Tenant {
   savedSearches         SavedSearch[]
   searchQueries         SearchQuery[]
   subscriptions         Subscription[]
+  shippingLabels        ShippingLabel[]
 
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
@@ -385,6 +386,7 @@ model Order {
   invoices              Invoice[]
   disputes              Dispute[]
   orderNotes            OrderNote[] // Task 15.9: Order Notes
+  shippingLabels        ShippingLabel[] // Task 16.4: Shipping Labels
 
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
@@ -1159,4 +1161,46 @@ model OrderNote {
 
   @@index([orderId])
   @@index([createdBy])
+}
+
+// Shipping Labels System - Task 16.4
+model ShippingLabel {
+  id              String           @id @default(cuid())
+  tenantId        String
+  orderId         String
+
+  // Relations
+  tenant          Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  order           Order            @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  provider        ShippingProvider
+  labelId         String           // Provider's label ID
+  trackingNumber  String
+  labelUrl        String           // PDF URL
+  cost            Decimal          @db.Decimal(10, 2)
+
+  // Tracking data
+  status          String           @default("pending") // pending, in_transit, delivered, exception
+  lastUpdate      DateTime         @default(now())
+  trackingEvents  Json?            @db.Json // Array of tracking events
+
+  // Return label
+  isReturnLabel   Boolean          @default(false)
+
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@index([orderId])
+  @@index([tenantId])
+  @@index([trackingNumber])
+  @@index([status])
+}
+
+enum ShippingProvider {
+  ESTAFETA
+  MERCADO_ENVIOS
+  FEDEX
+  DHL
+  UPS
+  CUSTOM
 }
