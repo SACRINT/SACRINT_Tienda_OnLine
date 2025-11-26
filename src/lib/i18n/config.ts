@@ -1,5 +1,14 @@
-// Internationalization Configuration
-// Multi-language support with locale detection
+/**
+ * Internationalization Configuration
+ * Semanas 33-34: Multi-language Support - Calidad Mundial
+ *
+ * Configuración exhaustiva de i18n con next-intl
+ * Soporta: Español, English, Français, Português, Deutsch
+ *
+ * Referencias:
+ * - https://next-intl-docs.vercel.app/
+ * - https://nextjs.org/docs/app/building-your-application/routing/internationalization
+ */
 
 export type Locale = "es" | "en" | "fr" | "pt" | "de";
 
@@ -95,3 +104,129 @@ export function addLocaleToPath(path: string, locale: Locale): string {
   const cleanPath = removeLocaleFromPath(path);
   return "/" + locale + cleanPath;
 }
+
+// ============================================================================
+// NEXT-INTL SPECIFIC UTILITIES
+// ============================================================================
+
+/**
+ * Get number format options by locale
+ */
+export function getNumberFormatOptions(locale: Locale): Intl.NumberFormatOptions {
+  return {
+    style: 'decimal',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  };
+}
+
+/**
+ * Get currency format options by locale
+ */
+export function getCurrencyFormatOptions(locale: Locale): Intl.NumberFormatOptions {
+  return {
+    style: 'currency',
+    currency: LOCALE_CURRENCY[locale],
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  };
+}
+
+/**
+ * Get date format options by locale
+ */
+export function getDateFormatOptions(locale: Locale): Intl.DateTimeFormatOptions {
+  return {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  };
+}
+
+/**
+ * Get date-time format options by locale
+ */
+export function getDateTimeFormatOptions(locale: Locale): Intl.DateTimeFormatOptions {
+  return {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: locale === 'en', // 12-hour format for English, 24-hour for others
+  };
+}
+
+/**
+ * Get relative time format options
+ */
+export function getRelativeTimeFormatOptions(): Intl.RelativeTimeFormatOptions {
+  return {
+    numeric: 'auto',
+    style: 'long',
+  };
+}
+
+/**
+ * Format currency for display
+ */
+export function formatCurrency(amount: number, locale: Locale): string {
+  return new Intl.NumberFormat(locale, getCurrencyFormatOptions(locale)).format(amount);
+}
+
+/**
+ * Format date for display
+ */
+export function formatDate(date: Date, locale: Locale): string {
+  return new Intl.DateTimeFormat(locale, getDateFormatOptions(locale)).format(date);
+}
+
+/**
+ * Format date-time for display
+ */
+export function formatDateTime(date: Date, locale: Locale): string {
+  return new Intl.DateTimeFormat(locale, getDateTimeFormatOptions(locale)).format(date);
+}
+
+/**
+ * Get locale direction (LTR or RTL)
+ * Currently all supported locales are LTR, but this is extensible for Arabic, Hebrew, etc.
+ */
+export function getLocaleDirection(locale: Locale): 'ltr' | 'rtl' {
+  const rtlLocales: Locale[] = []; // Add 'ar', 'he', etc. when supported
+  return rtlLocales.includes(locale) ? 'rtl' : 'ltr';
+}
+
+/**
+ * Get locale for Intl APIs (with region code)
+ */
+export function getIntlLocale(locale: Locale): string {
+  const localeMap: Record<Locale, string> = {
+    es: 'es-MX',
+    en: 'en-US',
+    fr: 'fr-FR',
+    pt: 'pt-BR',
+    de: 'de-DE',
+  };
+  return localeMap[locale] || locale;
+}
+
+/**
+ * Default export for easy import
+ */
+export default {
+  locales: SUPPORTED_LOCALES,
+  defaultLocale: DEFAULT_LOCALE,
+  localeNames: LOCALE_NAMES,
+  localeFlags: LOCALE_FLAGS,
+  detectLocale,
+  isValidLocale,
+  getLocaleFromPath,
+  removeLocaleFromPath,
+  addLocaleToPath,
+  formatCurrency,
+  formatDate,
+  formatDateTime,
+  getLocaleDirection,
+  getIntlLocale,
+};

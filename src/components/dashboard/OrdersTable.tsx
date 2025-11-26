@@ -60,7 +60,7 @@ export function OrdersTable({ orders, currentPage }: OrdersTableProps) {
   return (
     <div className="space-y-4">
       {/* Filters */}
-      <div className="flex gap-2 flex-wrap">
+      <div className="flex flex-wrap gap-2">
         <Button
           variant={statusFilter === "all" ? "default" : "outline"}
           size="sm"
@@ -76,9 +76,9 @@ export function OrdersTable({ orders, currentPage }: OrdersTableProps) {
           Pendientes
         </Button>
         <Button
-          variant={statusFilter === "PAID" ? "default" : "outline"}
+          variant={statusFilter === "PROCESSING" ? "default" : "outline"}
           size="sm"
-          onClick={() => handleStatusFilter("PAID")}
+          onClick={() => handleStatusFilter("PROCESSING")}
         >
           Pagadas
         </Button>
@@ -99,31 +99,31 @@ export function OrdersTable({ orders, currentPage }: OrdersTableProps) {
       </div>
 
       {/* Table */}
-      <div className="border rounded-lg overflow-hidden">
+      <div className="overflow-hidden rounded-lg border">
         <table className="w-full">
-          <thead className="bg-gray-50 border-b">
+          <thead className="border-b bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                 Número de Orden
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                 Cliente
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                 Total
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                 Estado
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                 Fecha
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                 Acciones
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="divide-y divide-gray-200 bg-white">
             {orders.length === 0 ? (
               <tr>
                 <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
@@ -133,37 +133,34 @@ export function OrdersTable({ orders, currentPage }: OrdersTableProps) {
             ) : (
               orders.map((order) => (
                 <tr key={order.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
                     #{order.orderNumber}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="whitespace-nowrap px-6 py-4">
                     <div className="text-sm font-medium text-gray-900">
                       {order.user?.name || order.customerName || "Sin nombre"}
                     </div>
                     <div className="text-sm text-gray-500">
-                      {order.user?.email || order.customerEmail || "N/A"}
+                      {order.customerEmail || order.customerEmail || "N/A"}
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
                     ${parseFloat(String(order.total)).toFixed(2)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="whitespace-nowrap px-6 py-4">
                     <span
-                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        statusColors[
-                          order.status as keyof typeof statusColors
-                        ] || "bg-gray-100 text-gray-800"
+                      className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${
+                        statusColors[order.status as keyof typeof statusColors] ||
+                        "bg-gray-100 text-gray-800"
                       }`}
                     >
-                      {statusLabels[
-                        order.status as keyof typeof statusLabels
-                      ] || order.status}
+                      {statusLabels[order.status as keyof typeof statusLabels] || order.status}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
                     {new Date(order.createdAt).toLocaleDateString("es-ES")}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  <td className="whitespace-nowrap px-6 py-4 text-sm font-medium">
                     <Link
                       href={`/dashboard/orders/${order.id}`}
                       className="text-blue-600 hover:text-blue-900"

@@ -343,30 +343,43 @@ export async function getSearchSuggestions(
 
 /**
  * Log search query for analytics
+ * ✅ Task 11.7: Search Analytics implementation
  */
 export async function logSearchQuery(
   query: string,
   resultsCount: number,
   tenantId?: string,
   userId?: string,
+  sessionId?: string,
 ) {
-  // In a real implementation, you would log to a SearchAnalytics table
-  // For now, we'll just console log
-  console.log("Search:", {
-    query,
-    resultsCount,
-    tenantId,
-    userId,
-    timestamp: new Date(),
-  });
+  try {
+    // Only log if we have a tenantId
+    if (!tenantId) {
+      console.log("Search (no tenant):", { query, resultsCount, userId });
+      return;
+    }
 
-  // TODO: Implement search analytics table
-  // await db.searchAnalytics.create({
-  //   data: {
-  //     query,
-  //     resultsCount,
-  //     tenantId,
-  //     userId,
-  //   },
-  // });
+    // Log to SearchQuery table for analytics
+    await db.searchQuery.create({
+      data: {
+        tenantId,
+        query: query || "",
+        resultsCount,
+        userId: userId || null,
+        sessionId: sessionId || null,
+        filters: null, // Can be extended to log applied filters
+      },
+    });
+
+    console.log("Search logged:", {
+      query,
+      resultsCount,
+      tenantId,
+      userId,
+      timestamp: new Date(),
+    });
+  } catch (error) {
+    // Don't fail the search if analytics logging fails
+    console.error("Error logging search query:", error);
+  }
 }
