@@ -103,3 +103,75 @@ export function clearUser() {
 
   Sentry.setUser(null);
 }
+
+// Wrapper para API routes con Sentry
+export function withSentry(handler: (req: any, res: any) => Promise<any>) {
+  return async (req: any, res: any) => {
+    const start = Date.now()
+
+    try {
+      const result = await handler(req, res)
+      const duration = Date.now() - start
+      console.log('[Sentry] Request completado', {
+        method: req.method,
+        url: req.url,
+        status: res.statusCode,
+        duration: duration + 'ms',
+      })
+      return result
+    } catch (error) {
+      const duration = Date.now() - start
+      captureError(error as Error, {
+        method: req.method,
+        url: req.url,
+        duration: duration + 'ms',
+      })
+      throw error
+    }
+  }
+}
+
+// Iniciar transacción de monitoreo
+export interface Transaction {
+  setStatus: (status: string) => void
+  finish: () => void
+  addBreadcrumb: (message: string) => void
+}
+
+export function startTransaction(name: string, op: string = 'http.request'): Transaction {
+  const startTime = Date.now()
+  const breadcrumbs: string[] = []
+
+  return {
+    setStatus: (status: string) => {
+      console.log('[Sentry] Transacción status:', { name, status })
+    },
+    addBreadcrumb: (message: string) => {
+      breadcrumbs.push(message)
+      console.log('[Sentry] Breadcrumb agregado:', { name, message })
+    },
+    finish: () => {
+      const duration = Date.now() - startTime
+      console.log('[Sentry] Transacción finalizada:', {
+        name,
+        duration: duration + 'ms',
+        op,
+        breadcrumbs: breadcrumbs.length,
+      })
+    },
+  }
+}
+
+// Agregar tags al contexto
+export function addTag(key: string, value: string) {
+  if (!Sentry) return
+  Sentry.setTag(key, value)
+  console.log('[Sentry] Tag agregado:', { key, value })
+}
+
+// Agregar contexto personalizado
+export function addContext(key: string, context: Record<string, unknown>) {
+  if (!Sentry) return
+  Sentry.setContext(key, context)
+  console.log('[Sentry] Contexto agregado:', { key, context })
+}
