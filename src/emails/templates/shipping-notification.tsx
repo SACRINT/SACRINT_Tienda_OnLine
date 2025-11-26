@@ -99,8 +99,9 @@ export default function ShippingNotificationEmail({
             <div style={infoRow}>
               <Text style={infoLabel}>Dirección de Envío:</Text>
               <Text style={addressText}>
-                {shippingAddress.street}<br />
-                {shippingAddress.city}, {shippingAddress.state} {shippingAddress.zipCode}
+                {shippingAddress.street}
+                <br />
+                {shippingAddress.city}, {shippingAddress.state} {shippingAddress.postalCode}
               </Text>
             </div>
           </Section>
@@ -109,13 +110,19 @@ export default function ShippingNotificationEmail({
 
           {/* Tips */}
           <Section style={tipsSection}>
-            <Heading as="h3" style={tipsHeading}>💡 Consejos para Recibir tu Pedido</Heading>
+            <Heading as="h3" style={tipsHeading}>
+              💡 Consejos para Recibir tu Pedido
+            </Heading>
             <ul style={tipsList}>
               <li style={tipItem}>
-                <Text style={tipText}>Asegúrate de que alguien esté disponible en la dirección de entrega</Text>
+                <Text style={tipText}>
+                  Asegúrate de que alguien esté disponible en la dirección de entrega
+                </Text>
               </li>
               <li style={tipItem}>
-                <Text style={tipText}>Ten tu identificación lista en caso de que sea necesaria</Text>
+                <Text style={tipText}>
+                  Ten tu identificación lista en caso de que sea necesaria
+                </Text>
               </li>
               <li style={tipItem}>
                 <Text style={tipText}>Revisa el paquete antes de firmar la entrega</Text>
@@ -134,7 +141,10 @@ export default function ShippingNotificationEmail({
               ¿Tienes preguntas sobre tu envío? Estamos aquí para ayudarte.
             </Text>
             <Text style={contactText}>
-              📧 <a href={`mailto:${storeEmail}`} style={link}>{storeEmail}</a>
+              📧{" "}
+              <a href={`mailto:${storeEmail}`} style={link}>
+                {storeEmail}
+              </a>
             </Text>
           </Section>
 

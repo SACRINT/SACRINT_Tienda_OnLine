@@ -41,7 +41,7 @@ export interface ShippingAnalytics {
 export async function getShippingAnalytics(
   tenantId: string,
   dateFrom?: Date,
-  dateTo?: Date
+  dateTo?: Date,
 ): Promise<ShippingAnalytics> {
   const since = dateFrom || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
   const until = dateTo || new Date();
@@ -72,15 +72,18 @@ export async function getShippingAnalytics(
   // Cost by carrier
   const carrierStats = labels
     .filter((l) => !l.isReturnLabel)
-    .reduce((acc, label) => {
-      const carrier = label.provider;
-      if (!acc[carrier]) {
-        acc[carrier] = { totalCost: 0, orderCount: 0 };
-      }
-      acc[carrier].totalCost += Number(label.cost);
-      acc[carrier].orderCount += 1;
-      return acc;
-    }, {} as Record<string, { totalCost: number; orderCount: number }>);
+    .reduce(
+      (acc, label) => {
+        const carrier = label.provider;
+        if (!acc[carrier]) {
+          acc[carrier] = { totalCost: 0, orderCount: 0 };
+        }
+        acc[carrier].totalCost += Number(label.cost);
+        acc[carrier].orderCount += 1;
+        return acc;
+      },
+      {} as Record<string, { totalCost: number; orderCount: number }>,
+    );
 
   const costByCarrier = Object.entries(carrierStats).map(([carrier, stats]) => ({
     carrier,
@@ -92,16 +95,19 @@ export async function getShippingAnalytics(
   // Cost by zone (based on ZIP code prefix)
   const zoneStats = labels
     .filter((l) => !l.isReturnLabel)
-    .reduce((acc, label) => {
-      const zipCode = label.order.shippingAddress.zipCode;
-      const zone = getZoneFromZipCode(zipCode);
-      if (!acc[zone]) {
-        acc[zone] = { totalCost: 0, orderCount: 0 };
-      }
-      acc[zone].totalCost += Number(label.cost);
-      acc[zone].orderCount += 1;
-      return acc;
-    }, {} as Record<string, { totalCost: number; orderCount: number }>);
+    .reduce(
+      (acc, label) => {
+        const zipCode = label.order.shippingAddress.postalCode;
+        const zone = getZoneFromZipCode(zipCode);
+        if (!acc[zone]) {
+          acc[zone] = { totalCost: 0, orderCount: 0 };
+        }
+        acc[zone].totalCost += Number(label.cost);
+        acc[zone].orderCount += 1;
+        return acc;
+      },
+      {} as Record<string, { totalCost: number; orderCount: number }>,
+    );
 
   const costByZone = Object.entries(zoneStats).map(([zone, stats]) => ({
     zone,
@@ -119,22 +125,26 @@ export async function getShippingAnalytics(
 
   const delayed = deliveredLabels.length - onTime;
 
-  const averageDeliveryDays = deliveredLabels.length > 0
-    ? deliveredLabels.reduce((sum, l) => {
-        const days = (l.lastUpdate.getTime() - l.createdAt.getTime()) / (1000 * 60 * 60 * 24);
-        return sum + days;
-      }, 0) / deliveredLabels.length
-    : 0;
+  const averageDeliveryDays =
+    deliveredLabels.length > 0
+      ? deliveredLabels.reduce((sum, l) => {
+          const days = (l.lastUpdate.getTime() - l.createdAt.getTime()) / (1000 * 60 * 60 * 24);
+          return sum + days;
+        }, 0) / deliveredLabels.length
+      : 0;
 
   // Exceptions
   const exceptionLabels = labels.filter((l) => l.status === "exception");
-  const exceptionsByType = exceptionLabels.reduce((acc, label) => {
-    const events = (label.trackingEvents as any)?.events || [];
-    const lastEvent = events[events.length - 1];
-    const type = lastEvent?.message || "Unknown";
-    acc[type] = (acc[type] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  const exceptionsByType = exceptionLabels.reduce(
+    (acc, label) => {
+      const events = (label.trackingEvents as any)?.events || [];
+      const lastEvent = events[events.length - 1];
+      const type = lastEvent?.message || "Unknown";
+      acc[type] = (acc[type] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>,
+  );
 
   const exceptions = {
     total: exceptionLabels.length,
@@ -182,7 +192,7 @@ function getZoneFromZipCode(zipCode: string): string {
 export async function getShippingTrends(
   tenantId: string,
   currentStart: Date,
-  currentEnd: Date
+  currentEnd: Date,
 ): Promise<{
   current: ShippingAnalytics;
   previous: ShippingAnalytics;
@@ -199,19 +209,23 @@ export async function getShippingTrends(
   const current = await getShippingAnalytics(tenantId, currentStart, currentEnd);
   const previous = await getShippingAnalytics(tenantId, previousStart, previousEnd);
 
-  const costChange = previous.totalShippingCost > 0
-    ? ((current.totalShippingCost - previous.totalShippingCost) / previous.totalShippingCost) * 100
-    : 0;
+  const costChange =
+    previous.totalShippingCost > 0
+      ? ((current.totalShippingCost - previous.totalShippingCost) / previous.totalShippingCost) *
+        100
+      : 0;
 
   const currentVolume = current.costByCarrier.reduce((sum, c) => sum + c.orderCount, 0);
   const previousVolume = previous.costByCarrier.reduce((sum, c) => sum + c.orderCount, 0);
-  const volumeChange = previousVolume > 0
-    ? ((currentVolume - previousVolume) / previousVolume) * 100
-    : 0;
+  const volumeChange =
+    previousVolume > 0 ? ((currentVolume - previousVolume) / previousVolume) * 100 : 0;
 
-  const efficiencyChange = previous.averageCostPerOrder > 0
-    ? ((current.averageCostPerOrder - previous.averageCostPerOrder) / previous.averageCostPerOrder) * 100
-    : 0;
+  const efficiencyChange =
+    previous.averageCostPerOrder > 0
+      ? ((current.averageCostPerOrder - previous.averageCostPerOrder) /
+          previous.averageCostPerOrder) *
+        100
+      : 0;
 
   return {
     current,

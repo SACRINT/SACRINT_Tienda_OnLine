@@ -93,7 +93,7 @@ export const fixtures = {
     completed: {
       id: "order_completed",
       status: "COMPLETED",
-      paymentStatus: "PAID",
+      paymentStatus: "PROCESSING",
       total: 299.99,
     },
     cancelled: {

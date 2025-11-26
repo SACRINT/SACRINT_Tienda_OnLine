@@ -36,16 +36,12 @@ interface SalesChartProps {
 
 export function SalesChart({ data }: SalesChartProps) {
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-6">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">Ventas (Últimos 30 días)</h3>
+    <div className="rounded-lg border border-gray-200 bg-white p-6">
+      <h3 className="mb-4 text-lg font-semibold text-gray-900">Ventas (Últimos 30 días)</h3>
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={data}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-          <XAxis
-            dataKey="date"
-            tick={{ fontSize: 12 }}
-            stroke="#9ca3af"
-          />
+          <XAxis dataKey="date" tick={{ fontSize: 12 }} stroke="#9ca3af" />
           <YAxis
             tick={{ fontSize: 12 }}
             stroke="#9ca3af"
@@ -91,8 +87,8 @@ interface TopProductsChartProps {
 
 export function TopProductsChart({ data }: TopProductsChartProps) {
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-6">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">Top 5 Productos</h3>
+    <div className="rounded-lg border border-gray-200 bg-white p-6">
+      <h3 className="mb-4 text-lg font-semibold text-gray-900">Top 5 Productos</h3>
       <ResponsiveContainer width="100%" height={300}>
         <BarChart data={data} layout="vertical">
           <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -158,8 +154,8 @@ export function OrdersStatusChart({ data }: OrdersStatusChartProps) {
   }));
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-6">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">Órdenes por Estado</h3>
+    <div className="rounded-lg border border-gray-200 bg-white p-6">
+      <h3 className="mb-4 text-lg font-semibold text-gray-900">Órdenes por Estado</h3>
       <ResponsiveContainer width="100%" height={300}>
         <PieChart>
           <Pie
@@ -191,10 +187,7 @@ export function OrdersStatusChart({ data }: OrdersStatusChartProps) {
       <div className="mt-4 flex flex-wrap gap-3">
         {chartData.map((item, index) => (
           <div key={index} className="flex items-center gap-2">
-            <div
-              className="w-3 h-3 rounded-full"
-              style={{ backgroundColor: item.color }}
-            />
+            <div className="h-3 w-3 rounded-full" style={{ backgroundColor: item.color }} />
             <span className="text-sm text-gray-600">
               {item.name} ({item.value})
             </span>
@@ -225,32 +218,32 @@ interface RecentOrdersProps {
 
 export function RecentOrders({ orders }: RecentOrdersProps) {
   return (
-    <div className="bg-white rounded-lg border border-gray-200">
-      <div className="p-6 border-b border-gray-200">
+    <div className="rounded-lg border border-gray-200 bg-white">
+      <div className="border-b border-gray-200 p-6">
         <h3 className="text-lg font-semibold text-gray-900">Órdenes Recientes</h3>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                 Orden
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                 Cliente
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                 Total
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                 Estado
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                 Fecha
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="divide-y divide-gray-200 bg-white">
             {orders.length === 0 ? (
               <tr>
                 <td colSpan={5} className="px-6 py-4 text-center text-sm text-gray-500">
@@ -260,28 +253,29 @@ export function RecentOrders({ orders }: RecentOrdersProps) {
             ) : (
               orders.map((order) => (
                 <tr key={order.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
                     {order.orderNumber}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                    {order.user?.name || order.user?.email || "Cliente"}
+                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-600">
+                    {order.user?.name || order.customerEmail || "Cliente"}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    ${order.total.toLocaleString("es-MX", {
+                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
+                    $
+                    {order.total.toLocaleString("es-MX", {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2,
                     })}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="whitespace-nowrap px-6 py-4">
                     <span
-                      className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadgeClass(
-                        order.status
+                      className={`rounded-full px-2 py-1 text-xs font-semibold ${getStatusBadgeClass(
+                        order.status,
                       )}`}
                     >
                       {STATUS_LABELS[order.status] || order.status}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-600">
                     {new Date(order.createdAt).toLocaleDateString("es-MX")}
                   </td>
                 </tr>

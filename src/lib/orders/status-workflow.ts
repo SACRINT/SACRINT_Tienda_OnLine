@@ -14,7 +14,7 @@ import { db } from "@/lib/db";
 
 export const OrderStatuses = {
   PENDING: "PENDING", // Orden creada, pago pendiente
-  PAID: "PAID", // Pago confirmado, listo para procesar
+  PAID: "PROCESSING", // Procesando pedido, listo para procesar
   PROCESSING: "PROCESSING", // Preparando envío
   SHIPPED: "SHIPPED", // En tránsito
   DELIVERED: "DELIVERED", // Entregado
@@ -33,7 +33,7 @@ export type OrderStatus = keyof typeof OrderStatuses;
  * Cada estado puede transicionar solo a los estados definidos en su array
  */
 export const StatusTransitions: Record<OrderStatus, OrderStatus[]> = {
-  PENDING: ["PAID", "CANCELLED"],
+  PENDING: ["PROCESSING", "CANCELLED"],
   PAID: ["PROCESSING", "CANCELLED", "REFUNDED"],
   PROCESSING: ["SHIPPED", "CANCELLED", "REFUNDED"],
   SHIPPED: ["DELIVERED", "REFUNDED"],
@@ -153,7 +153,7 @@ export interface StatusHistoryEntry {
  */
 export function validateTransition(
   currentStatus: OrderStatus,
-  newStatus: OrderStatus
+  newStatus: OrderStatus,
 ): { valid: boolean; error?: string } {
   if (currentStatus === newStatus) {
     return {
@@ -182,7 +182,7 @@ export function validateTransition(
 export async function executeTransitionLogic(
   orderId: string,
   fromStatus: OrderStatus,
-  toStatus: OrderStatus
+  toStatus: OrderStatus,
 ): Promise<void> {
   const order = await db.order.findUnique({
     where: { id: orderId },
@@ -197,14 +197,14 @@ export async function executeTransitionLogic(
 
   // Lógica específica por transición
   switch (toStatus) {
-    case "PAID":
+    case "PROCESSING":
       // Reducir stock cuando se confirma el pago
       await reduceStock(order);
       break;
 
     case "CANCELLED":
       // Restaurar stock si la orden se cancela
-      if (fromStatus === "PAID" || fromStatus === "PROCESSING") {
+      if (fromStatus === "PROCESSING" || fromStatus === "PROCESSING") {
         await restoreStock(order);
       }
       break;
@@ -279,14 +279,14 @@ export function isFinalStatus(status: OrderStatus): boolean {
  * Verifica si una orden puede ser cancelada
  */
 export function canBeCancelled(status: OrderStatus): boolean {
-  return ["PENDING", "PAID", "PROCESSING"].includes(status);
+  return ["PENDING", "PROCESSING", "PROCESSING"].includes(status);
 }
 
 /**
  * Verifica si una orden puede ser reembolsada
  */
 export function canBeRefunded(status: OrderStatus): boolean {
-  return ["PAID", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"].includes(status);
+  return ["PROCESSING", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"].includes(status);
 }
 
 /**

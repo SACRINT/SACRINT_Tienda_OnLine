@@ -32,14 +32,17 @@ export async function POST(req: NextRequest) {
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: "Invalid request data", details: error.errors },
-        { status: 400 }
+        { error: "Invalid request data", details: error.issues },
+        { status: 400 },
       );
     }
 
     return NextResponse.json(
-      { error: "Failed to compare rates", message: error instanceof Error ? error.message : "Unknown error" },
-      { status: 500 }
+      {
+        error: "Failed to compare rates",
+        message: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 },
     );
   }
 }

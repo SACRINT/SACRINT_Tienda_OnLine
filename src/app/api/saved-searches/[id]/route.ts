@@ -22,18 +22,12 @@ const updateSavedSearchSchema = z.object({
 
 // ============ GET - Obtener búsqueda guardada ============
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await auth();
 
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: "No autenticado" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "No autenticado" }, { status: 401 });
     }
 
     const savedSearch = await db.savedSearch.findUnique({
@@ -54,10 +48,7 @@ export async function GET(
     });
 
     if (!savedSearch) {
-      return NextResponse.json(
-        { error: "Búsqueda guardada no encontrada" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Búsqueda guardada no encontrada" }, { status: 404 });
     }
 
     return NextResponse.json({
@@ -66,27 +57,18 @@ export async function GET(
     });
   } catch (error) {
     console.error("Error fetching saved search:", error);
-    return NextResponse.json(
-      { error: "Error al obtener búsqueda guardada" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Error al obtener búsqueda guardada" }, { status: 500 });
   }
 }
 
 // ============ PATCH - Actualizar búsqueda guardada ============
 
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await auth();
 
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: "No autenticado" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "No autenticado" }, { status: 401 });
     }
 
     // Verificar que existe y pertenece al usuario
@@ -98,10 +80,7 @@ export async function PATCH(
     });
 
     if (!existing) {
-      return NextResponse.json(
-        { error: "Búsqueda guardada no encontrada" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Búsqueda guardada no encontrada" }, { status: 404 });
     }
 
     // Validar datos
@@ -139,33 +118,24 @@ export async function PATCH(
       return NextResponse.json(
         {
           error: "Datos inválidos",
-          details: error.errors,
+          details: error.issues,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    return NextResponse.json(
-      { error: "Error al actualizar búsqueda guardada" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Error al actualizar búsqueda guardada" }, { status: 500 });
   }
 }
 
 // ============ DELETE - Eliminar búsqueda guardada ============
 
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await auth();
 
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: "No autenticado" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "No autenticado" }, { status: 401 });
     }
 
     // Verificar que existe y pertenece al usuario
@@ -177,10 +147,7 @@ export async function DELETE(
     });
 
     if (!existing) {
-      return NextResponse.json(
-        { error: "Búsqueda guardada no encontrada" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Búsqueda guardada no encontrada" }, { status: 404 });
     }
 
     // Eliminar
@@ -196,9 +163,6 @@ export async function DELETE(
     });
   } catch (error) {
     console.error("Error deleting saved search:", error);
-    return NextResponse.json(
-      { error: "Error al eliminar búsqueda guardada" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Error al eliminar búsqueda guardada" }, { status: 500 });
   }
 }

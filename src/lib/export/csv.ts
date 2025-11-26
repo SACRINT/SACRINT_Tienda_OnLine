@@ -76,10 +76,7 @@ export function downloadCSV(csvContent: string, filename: string): void {
 /**
  * Create CSV Response for API
  */
-export function createCSVResponse(
-  csvContent: string,
-  filename: string,
-): Response {
+export function createCSVResponse(csvContent: string, filename: string): Response {
   return new Response(csvContent, {
     headers: {
       "Content-Type": "text/csv;charset=utf-8;",
@@ -104,7 +101,7 @@ export function exportOrdersToCSV(
   const data = orders.map((order) => ({
     "Order Number": order.orderNumber,
     Date: new Date(order.createdAt).toLocaleDateString(),
-    Customer: order.user?.name || order.user?.email || "N/A",
+    Customer: order.user?.name || order.customerEmail || "N/A",
     Total: `$${Number(order.total).toFixed(2)}`,
     Status: order.status,
     "Payment Status": order.paymentStatus,

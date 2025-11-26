@@ -5,10 +5,9 @@
  * Middlewares para proteger rutas del dashboard y verificar ownership de tiendas
  */
 
-import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
-import { authOptions } from "@/lib/auth";
+import { auth } from "./server";
 
 /**
  * Error personalizado para accesos prohibidos
@@ -35,7 +34,7 @@ export class NotFoundError extends Error {
  * Si no está autenticado, redirige a login
  */
 export async function requireAuth() {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
 
   if (!session || !session.user) {
     redirect("/auth/login?callbackUrl=/dashboard");

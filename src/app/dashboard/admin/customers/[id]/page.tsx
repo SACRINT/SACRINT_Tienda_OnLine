@@ -2,13 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -72,11 +66,7 @@ interface CustomerDetail {
   };
 }
 
-export default function CustomerDetailPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default function CustomerDetailPage({ params }: { params: { id: string } }) {
   const { data: session } = useSession();
   const [customer, setCustomer] = useState<CustomerDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -90,9 +80,7 @@ export default function CustomerDetailPage({
   const fetchCustomer = async () => {
     setLoading(true);
     try {
-      const res = await fetch(
-        `/api/customers/${params.id}?tenantId=${session?.user?.tenantId}`,
-      );
+      const res = await fetch(`/api/customers/${params.id}?tenantId=${session?.user?.tenantId}`);
       if (res.ok) {
         const data = await res.json();
         setCustomer(data);
@@ -138,17 +126,15 @@ export default function CustomerDetailPage({
         <div>
           <Link href="/admin/customers">
             <Button variant="ghost" size="sm">
-              <ArrowLeft className="h-4 w-4 mr-2" />
+              <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Customers
             </Button>
           </Link>
-          <h1 className="text-3xl font-bold mt-2">
-            {customer.name || "Customer"}
-          </h1>
+          <h1 className="mt-2 text-3xl font-bold">{customer.name || "Customer"}</h1>
           <p className="text-gray-600">{customer.email}</p>
         </div>
         <Button onClick={fetchCustomer} variant="outline">
-          <RefreshCw className="h-4 w-4 mr-2" />
+          <RefreshCw className="mr-2 h-4 w-4" />
           Refresh
         </Button>
       </div>
@@ -163,9 +149,7 @@ export default function CustomerDetailPage({
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {customer.stats.totalOrders}
-            </div>
+            <div className="text-2xl font-bold">{customer.stats.totalOrders}</div>
           </CardContent>
         </Card>
 
@@ -177,9 +161,7 @@ export default function CustomerDetailPage({
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {formatCurrency(customer.stats.totalSpent)}
-            </div>
+            <div className="text-2xl font-bold">{formatCurrency(customer.stats.totalSpent)}</div>
           </CardContent>
         </Card>
 
@@ -234,8 +216,7 @@ export default function CustomerDetailPage({
             <div className="flex items-center gap-3">
               <Calendar className="h-4 w-4 text-gray-500" />
               <span className="text-sm">
-                Customer since{" "}
-                {format(new Date(customer.createdAt), "MMM d, yyyy")}
+                Customer since {format(new Date(customer.createdAt), "MMM d, yyyy")}
               </span>
             </div>
           </CardContent>
@@ -255,10 +236,7 @@ export default function CustomerDetailPage({
             ) : (
               <div className="space-y-3">
                 {customer.addresses.map((address) => (
-                  <div
-                    key={address.id}
-                    className="p-3 bg-gray-50 rounded-lg border text-sm"
-                  >
+                  <div key={address.id} className="rounded-lg border bg-gray-50 p-3 text-sm">
                     {address.isDefault && (
                       <Badge className="mb-2" variant="outline">
                         Default
@@ -266,7 +244,7 @@ export default function CustomerDetailPage({
                     )}
                     <p>{address.street}</p>
                     <p>
-                      {address.city}, {address.state} {address.zipCode}
+                      {address.city}, {address.state} {address.postalCode}
                     </p>
                     <p>{address.country}</p>
                   </div>
@@ -285,9 +263,7 @@ export default function CustomerDetailPage({
         </CardHeader>
         <CardContent>
           {customer.orders.length === 0 ? (
-            <p className="text-sm text-gray-500 text-center py-8">
-              No orders yet
-            </p>
+            <p className="py-8 text-center text-sm text-gray-500">No orders yet</p>
           ) : (
             <Table>
               <TableHeader>
@@ -303,12 +279,8 @@ export default function CustomerDetailPage({
               <TableBody>
                 {customer.orders.map((order) => (
                   <TableRow key={order.id}>
-                    <TableCell className="font-medium">
-                      {order.orderNumber}
-                    </TableCell>
-                    <TableCell>
-                      {format(new Date(order.createdAt), "MMM d, yyyy")}
-                    </TableCell>
+                    <TableCell className="font-medium">{order.orderNumber}</TableCell>
+                    <TableCell>{format(new Date(order.createdAt), "MMM d, yyyy")}</TableCell>
                     <TableCell>{order.items.length} items</TableCell>
                     <TableCell>{formatCurrency(order.total)}</TableCell>
                     <TableCell>{getStatusBadge(order.status)}</TableCell>

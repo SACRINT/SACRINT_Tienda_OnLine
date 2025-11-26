@@ -371,10 +371,10 @@ export function getPublicKey(): string {
  */
 export function mapPaymentStatus(
   mercadoPagoStatus: string,
-): "PENDING" | "PAID" | "FAILED" | "REFUNDED" {
+): "PENDING" | "PROCESSING" | "FAILED" | "REFUNDED" {
   switch (mercadoPagoStatus) {
     case "approved":
-      return "PAID";
+      return "PROCESSING";
     case "pending":
     case "in_process":
     case "in_mediation":

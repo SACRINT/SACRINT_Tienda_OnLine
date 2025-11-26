@@ -22,15 +22,7 @@ const listOrdersSchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(20),
   status: z
-    .enum([
-      "PENDING",
-      "PAID",
-      "PROCESSING",
-      "SHIPPED",
-      "DELIVERED",
-      "CANCELLED",
-      "REFUNDED",
-    ])
+    .enum(["PENDING", "PAID", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED", "REFUNDED"])
     .optional(),
   dateFrom: z.string().datetime().optional(),
   dateTo: z.string().datetime().optional(),
@@ -48,11 +40,18 @@ const createOrderSchema = z.object({
       z.object({
         productId: z.string().cuid(),
         quantity: z.number().int().positive(),
-      })
+      }),
     )
     .min(1),
   shippingAddressId: z.string().cuid(),
-  paymentMethod: z.enum(["STRIPE", "MERCADO_PAGO", "CASH"]),
+  paymentMethod: z.enum([
+    "CREDIT_CARD",
+    "STRIPE",
+    "MERCADO_PAGO",
+    "PAYPAL",
+    "OXXO",
+    "BANK_TRANSFER",
+  ]),
   couponCode: z.string().optional(),
   notes: z.string().optional(),
 });
@@ -85,10 +84,7 @@ export async function GET(req: NextRequest) {
     } else if (session.user.role === "STORE_OWNER") {
       // Store owners see orders from their tenant
       if (!tenantId) {
-        return NextResponse.json(
-          { error: "User has no tenant assigned" },
-          { status: 404 }
-        );
+        return NextResponse.json({ error: "User has no tenant assigned" }, { status: 404 });
       }
       where.tenantId = tenantId;
     }
@@ -184,7 +180,7 @@ export async function GET(req: NextRequest) {
         paymentStatus: order.paymentStatus,
         paymentMethod: order.paymentMethod,
         customerName: order.customerName || order.user?.name,
-        customerEmail: order.customerEmail || order.user?.email,
+        customerEmail: order.customerEmail || order.customerEmail,
         subtotal: Number(order.subtotal),
         shippingCost: Number(order.shippingCost),
         tax: Number(order.tax),
@@ -194,7 +190,7 @@ export async function GET(req: NextRequest) {
         items: order.items.map((item) => ({
           id: item.id,
           quantity: item.quantity,
-          price: Number(item.price),
+          price: Number(item.priceAtPurchase),
           product: {
             id: item.product.id,
             name: item.product.name,
@@ -219,15 +215,12 @@ export async function GET(req: NextRequest) {
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: "Invalid parameters", details: error.errors },
-        { status: 400 }
+        { error: "Invalid parameters", details: error.issues },
+        { status: 400 },
       );
     }
 
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
@@ -258,7 +251,7 @@ export async function POST(req: NextRequest) {
     if (products.length !== data.items.length) {
       return NextResponse.json(
         { error: "One or more products not found or unavailable" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -270,7 +263,7 @@ export async function POST(req: NextRequest) {
           {
             error: `Insufficient stock for product: ${product?.name || item.productId}`,
           },
-          { status: 400 }
+          { status: 400 },
         );
       }
     }
@@ -285,10 +278,7 @@ export async function POST(req: NextRequest) {
       };
     });
 
-    const subtotal = itemsWithPrices.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0
-    );
+    const subtotal = itemsWithPrices.reduce((sum, item) => sum + item.price * item.quantity, 0);
     let discount = 0;
 
     // Apply coupon if provided
@@ -297,17 +287,20 @@ export async function POST(req: NextRequest) {
         where: {
           code: data.couponCode,
           tenantId: data.tenantId,
-          isActive: true,
-          validFrom: { lte: new Date() },
-          validUntil: { gte: new Date() },
+          startDate: { lte: new Date() },
+          expiresAt: { gte: new Date() },
         },
       });
 
       if (coupon) {
-        if (coupon.discountType === "PERCENTAGE") {
-          discount = (subtotal * Number(coupon.discountValue)) / 100;
+        if (coupon.type === "PERCENTAGE") {
+          discount = (subtotal * Number(coupon.value)) / 100;
+          // Apply maxDiscount if set
+          if (coupon.maxDiscount && discount > Number(coupon.maxDiscount)) {
+            discount = Number(coupon.maxDiscount);
+          }
         } else {
-          discount = Number(coupon.discountValue);
+          discount = Number(coupon.value);
         }
 
         // Increment usage count
@@ -318,7 +311,9 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const total = subtotal - discount;
+    // Calculate tax (assuming 16% IVA for Mexico)
+    const tax = subtotal * 0.16;
+    const total = subtotal + tax - discount;
 
     // Generate unique order number
     const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
@@ -334,6 +329,7 @@ export async function POST(req: NextRequest) {
           paymentStatus: "PENDING",
           paymentMethod: data.paymentMethod,
           subtotal,
+          tax,
           discount,
           total,
           notes: data.notes,
@@ -342,7 +338,7 @@ export async function POST(req: NextRequest) {
             create: itemsWithPrices.map((item) => ({
               productId: item.productId,
               quantity: item.quantity,
-              price: item.price,
+              priceAtPurchase: item.price,
             })),
           },
         },
@@ -364,15 +360,9 @@ export async function POST(req: NextRequest) {
     console.error("[ORDERS] POST error:", error);
 
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: "Invalid input", details: error.errors },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Invalid input", details: error.issues }, { status: 400 });
     }
 
-    return NextResponse.json(
-      { error: "Failed to create order" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to create order" }, { status: 500 });
   }
 }

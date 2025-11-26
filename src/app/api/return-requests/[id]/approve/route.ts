@@ -11,10 +11,7 @@ const ApprovalSchema = z.object({
   approvalNotes: z.string().optional(),
 });
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const body = await req.json();
     const { approvalNotes } = ApprovalSchema.parse(body);
@@ -37,27 +34,27 @@ export async function POST(
     });
 
     if (!returnRequest) {
-      return NextResponse.json(
-        { error: "Return request not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Return request not found" }, { status: 404 });
     }
 
     if (returnRequest.status !== "PENDING") {
       return NextResponse.json(
         { error: `Cannot approve return in status: ${returnRequest.status}` },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // Generate return shipping label
-    const returnLabelResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/orders/${returnRequest.orderId}/return-label`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        reason: returnRequest.reason,
-      }),
-    });
+    const returnLabelResponse = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/orders/${returnRequest.orderId}/return-label`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          reason: returnRequest.reason,
+        }),
+      },
+    );
 
     let shippingLabelId: string | undefined;
     if (returnLabelResponse.ok) {
@@ -90,7 +87,9 @@ export async function POST(
     });
 
     // TODO: Send email to customer with return instructions and label
-    console.log(`Return approved for order ${returnRequest.order.orderNumber}. Email notification pending.`);
+    console.log(
+      `Return approved for order ${returnRequest.order.orderNumber}. Email notification pending.`,
+    );
 
     return NextResponse.json({
       success: true,
@@ -107,14 +106,17 @@ export async function POST(
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: "Invalid request data", details: error.errors },
-        { status: 400 }
+        { error: "Invalid request data", details: error.issues },
+        { status: 400 },
       );
     }
 
     return NextResponse.json(
-      { error: "Failed to approve return", message: error instanceof Error ? error.message : "Unknown error" },
-      { status: 500 }
+      {
+        error: "Failed to approve return",
+        message: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 },
     );
   }
 }

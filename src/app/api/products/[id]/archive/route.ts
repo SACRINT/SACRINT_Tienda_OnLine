@@ -11,10 +11,7 @@ import { logger } from "@/lib/monitoring/logger";
 export const dynamic = "force-dynamic";
 
 // Archive product (soft delete)
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await auth();
 
@@ -23,20 +20,14 @@ export async function POST(
     }
 
     // Only STORE_OWNER and SUPER_ADMIN can archive products
-    if (
-      session.user.role !== "STORE_OWNER" &&
-      session.user.role !== "SUPER_ADMIN"
-    ) {
+    if (session.user.role !== "STORE_OWNER" && session.user.role !== "SUPER_ADMIN") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const tenantId = await getCurrentUserTenantId();
 
     if (!tenantId) {
-      return NextResponse.json(
-        { error: "No tenant assigned to user" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "No tenant assigned to user" }, { status: 400 });
     }
 
     // Check if product exists and belongs to tenant
@@ -62,11 +53,14 @@ export async function POST(
       },
     });
 
-    logger.info("Product archived", {
-      productId: params.id,
-      tenantId,
-      userId: session.user.id,
-    });
+    logger.info(
+      {
+        productId: params.id,
+        tenantId,
+        userId: session.user.id,
+      },
+      "Product archived",
+    );
 
     return NextResponse.json({
       success: true,
@@ -74,23 +68,23 @@ export async function POST(
       product: archived,
     });
   } catch (error: any) {
-    logger.error("Error archiving product", {
-      error: error.message,
-      productId: params.id,
-    });
+    logger.error(
+      {
+        error: error.message,
+        productId: params.id,
+      },
+      "Error archiving product",
+    );
 
     return NextResponse.json(
       { error: "Failed to archive product", details: error.message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 // Restore archived product
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await auth();
 
@@ -99,20 +93,14 @@ export async function DELETE(
     }
 
     // Only STORE_OWNER and SUPER_ADMIN can restore products
-    if (
-      session.user.role !== "STORE_OWNER" &&
-      session.user.role !== "SUPER_ADMIN"
-    ) {
+    if (session.user.role !== "STORE_OWNER" && session.user.role !== "SUPER_ADMIN") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const tenantId = await getCurrentUserTenantId();
 
     if (!tenantId) {
-      return NextResponse.json(
-        { error: "No tenant assigned to user" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "No tenant assigned to user" }, { status: 400 });
     }
 
     // Check if product exists and belongs to tenant
@@ -137,11 +125,14 @@ export async function DELETE(
       },
     });
 
-    logger.info("Product restored", {
-      productId: params.id,
-      tenantId,
-      userId: session.user.id,
-    });
+    logger.info(
+      {
+        productId: params.id,
+        tenantId,
+        userId: session.user.id,
+      },
+      "Product restored",
+    );
 
     return NextResponse.json({
       success: true,
@@ -149,14 +140,17 @@ export async function DELETE(
       product: restored,
     });
   } catch (error: any) {
-    logger.error("Error restoring product", {
-      error: error.message,
-      productId: params.id,
-    });
+    logger.error(
+      {
+        error: error.message,
+        productId: params.id,
+      },
+      "Error restoring product",
+    );
 
     return NextResponse.json(
       { error: "Failed to restore product", details: error.message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

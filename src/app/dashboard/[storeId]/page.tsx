@@ -22,9 +22,7 @@ interface DashboardHomeProps {
   };
 }
 
-export default async function DashboardHome({
-  params: { storeId },
-}: DashboardHomeProps) {
+export default async function DashboardHome({ params: { storeId } }: DashboardHomeProps) {
   // Fetch data for last 30 days
   const endDate = new Date();
   const startDate = subDays(endDate, 30);
@@ -42,7 +40,7 @@ export default async function DashboardHome({
         lte: endDate,
       },
       status: {
-        in: ["PAID", "PROCESSING", "SHIPPED", "DELIVERED"],
+        in: ["PROCESSING", "PROCESSING", "SHIPPED", "DELIVERED"],
       },
     },
     _sum: {
@@ -94,7 +92,7 @@ export default async function DashboardHome({
         name: product?.name || "Producto",
         sold: item._sum.quantity || 0,
       };
-    })
+    }),
   );
 
   // Get orders by status data
@@ -141,46 +139,40 @@ export default async function DashboardHome({
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-600 mt-1">
-          Bienvenido a tu panel de administración
-        </p>
+        <p className="mt-1 text-gray-600">Bienvenido a tu panel de administración</p>
       </div>
 
       {/* KPI Cards */}
       <KPICards metrics={metrics} />
 
       {/* Charts Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <SalesChart data={salesChartData} />
         <TopProductsChart data={topProducts} />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <OrdersStatusChart data={ordersStatusData} />
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            Resumen Rápido
-          </h3>
+        <div className="rounded-lg border border-gray-200 bg-white p-6">
+          <h3 className="mb-4 text-lg font-semibold text-gray-900">Resumen Rápido</h3>
           <div className="space-y-4">
-            <div className="flex justify-between items-center">
+            <div className="flex items-center justify-between">
               <span className="text-sm text-gray-600">Tasa de Conversión</span>
               <span className="text-sm font-semibold text-gray-900">
                 {metrics.conversion.rate.toFixed(2)}%
               </span>
             </div>
-            <div className="flex justify-between items-center">
+            <div className="flex items-center justify-between">
               <span className="text-sm text-gray-600">Valor Promedio</span>
               <span className="text-sm font-semibold text-gray-900">
                 ${metrics.orders.averageValue.toLocaleString("es-MX")}
               </span>
             </div>
-            <div className="flex justify-between items-center">
+            <div className="flex items-center justify-between">
               <span className="text-sm text-gray-600">Productos Activos</span>
-              <span className="text-sm font-semibold text-gray-900">
-                {metrics.products.active}
-              </span>
+              <span className="text-sm font-semibold text-gray-900">{metrics.products.active}</span>
             </div>
-            <div className="flex justify-between items-center">
+            <div className="flex items-center justify-between">
               <span className="text-sm text-gray-600">Stock Bajo</span>
               <span className="text-sm font-semibold text-red-600">
                 {metrics.products.lowStock}

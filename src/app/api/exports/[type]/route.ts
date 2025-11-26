@@ -14,11 +14,13 @@ import { z } from "zod";
 const exportSchema = z.object({
   tenantId: z.string().cuid(),
   format: z.enum(["csv", "json"]).default("csv"),
-  filters: z.object({
-    dateFrom: z.string().optional(),
-    dateTo: z.string().optional(),
-    status: z.string().optional(),
-  }).optional(),
+  filters: z
+    .object({
+      dateFrom: z.string().optional(),
+      dateTo: z.string().optional(),
+      status: z.string().optional(),
+    })
+    .optional(),
 });
 
 /**
@@ -42,7 +44,7 @@ function jsonToCSV(data: any[]): string {
         }
         return stringValue;
       })
-      .join(",")
+      .join(","),
   );
 
   return [csvHeaders, ...csvRows].join("\n");
@@ -51,10 +53,7 @@ function jsonToCSV(data: any[]): string {
 /**
  * GET /api/exports/[type]
  */
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { type: string } }
-) {
+export async function GET(req: NextRequest, { params }: { params: { type: string } }) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
@@ -154,10 +153,7 @@ export async function GET(
         break;
 
       default:
-        return NextResponse.json(
-          { error: "Invalid export type" },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: "Invalid export type" }, { status: 400 });
     }
 
     // Generar respuesta según formato
@@ -181,14 +177,11 @@ export async function GET(
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: "Invalid parameters", details: error.errors },
-        { status: 400 }
+        { error: "Invalid parameters", details: error.issues },
+        { status: 400 },
       );
     }
 
-    return NextResponse.json(
-      { error: "Export failed" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Export failed" }, { status: 500 });
   }
 }

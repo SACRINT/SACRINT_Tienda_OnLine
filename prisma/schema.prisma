@@ -248,7 +248,7 @@ model Product {
   @@index([tenantId, createdAt]) // Ordenar productos por fecha de creación
   @@index([tenantId, archivedAt]) // Filter active/archived products by tenant
   @@index([stock]) // Detectar productos con bajo stock
-  @@fulltext([name, description]) // Full-text search index
+  // @@fulltext([name, description]) // PostgreSQL full-text handled via raw SQL migration
 }
 
 model ProductVariant {
@@ -1178,6 +1178,7 @@ model ShippingLabel {
   // Relations
   tenant          Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   order           Order            @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  returnRequest   ReturnRequest?   @relation("ReturnShippingLabel")
 
   provider        ShippingProvider
   labelId         String           // Provider's label ID

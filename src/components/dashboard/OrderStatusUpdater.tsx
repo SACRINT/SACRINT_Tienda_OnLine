@@ -12,16 +12,13 @@ interface OrderStatusUpdaterProps {
 const statuses = [
   { value: "PENDING", label: "Pendiente" },
   { value: "PROCESSING", label: "Procesando" },
-  { value: "PAID", label: "Pagado" },
+  { value: "PROCESSING", label: "Pagado" },
   { value: "SHIPPED", label: "Enviado" },
   { value: "DELIVERED", label: "Entregado" },
   { value: "CANCELLED", label: "Cancelado" },
 ];
 
-export function OrderStatusUpdater({
-  orderId,
-  currentStatus,
-}: OrderStatusUpdaterProps) {
+export function OrderStatusUpdater({ orderId, currentStatus }: OrderStatusUpdaterProps) {
   const router = useRouter();
   const [status, setStatus] = useState(currentStatus);
   const [loading, setLoading] = useState(false);
@@ -55,7 +52,7 @@ export function OrderStatusUpdater({
       <select
         value={status}
         onChange={(e) => setStatus(e.target.value)}
-        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
       >
         {statuses.map((s) => (
           <option key={s.value} value={s.value}>

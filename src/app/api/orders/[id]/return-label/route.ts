@@ -6,7 +6,11 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { getProvider, isProviderSupported, ShippingProviderType } from "@/lib/shipping/provider-manager";
+import {
+  getProvider,
+  isProviderSupported,
+  ShippingProviderType,
+} from "@/lib/shipping/provider-manager";
 import { getShippingSettings } from "@/lib/shipping/settings";
 import { z } from "zod";
 
@@ -15,10 +19,7 @@ const ReturnLabelRequestSchema = z.object({
   provider: z.enum(["ESTAFETA", "MERCADO_ENVIOS", "FEDEX", "DHL", "UPS", "CUSTOM"]).optional(),
 });
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const body = await req.json();
     const { reason, provider: requestedProvider } = ReturnLabelRequestSchema.parse(body);
@@ -42,17 +43,14 @@ export async function POST(
     });
 
     if (!order) {
-      return NextResponse.json(
-        { error: "Order not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
     // Validate order can have a return label
     if (!["DELIVERED", "SHIPPED"].includes(order.status)) {
       return NextResponse.json(
         { error: "Return labels can only be generated for delivered or shipped orders" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -67,7 +65,7 @@ export async function POST(
     if (existingReturnLabel) {
       return NextResponse.json(
         { error: "Return label already exists for this order", label: existingReturnLabel },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -76,15 +74,13 @@ export async function POST(
 
     // Determine provider (use same as original shipment if not specified)
     const originalLabel = order.shippingLabels[0];
-    const provider: ShippingProviderType = requestedProvider ||
-      originalLabel?.provider ||
-      settings.enabledProviders[0] ||
-      "ESTAFETA";
+    const provider: ShippingProviderType =
+      requestedProvider || originalLabel?.provider || settings.enabledProviders[0] || "ESTAFETA";
 
     if (!isProviderSupported(provider)) {
       return NextResponse.json(
         { error: `Provider ${provider} is not yet supported` },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -111,7 +107,7 @@ export async function POST(
       },
       totalWeight: order.items.reduce(
         (sum, item) => sum + Number(item.product.weight || 0) * item.quantity,
-        0
+        0,
       ),
     });
 
@@ -142,7 +138,7 @@ export async function POST(
 
     // Send email to customer with return instructions
     await sendReturnLabelEmail({
-      customerEmail: order.user?.email || order.customerEmail || "",
+      customerEmail: order.customerEmail || "",
       orderNumber: order.orderNumber,
       labelUrl: label.labelUrl,
       trackingNumber: label.trackingNumber,
@@ -166,14 +162,17 @@ export async function POST(
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: "Invalid request data", details: error.errors },
-        { status: 400 }
+        { error: "Invalid request data", details: error.issues },
+        { status: 400 },
       );
     }
 
     return NextResponse.json(
-      { error: "Failed to generate return label", message: error instanceof Error ? error.message : "Unknown error" },
-      { status: 500 }
+      {
+        error: "Failed to generate return label",
+        message: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 },
     );
   }
 }

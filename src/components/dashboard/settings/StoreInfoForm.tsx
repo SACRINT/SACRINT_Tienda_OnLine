@@ -48,9 +48,7 @@ export function StoreInfoForm({ store }: StoreInfoFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     // Clear error for this field
@@ -92,7 +90,7 @@ export function StoreInfoForm({ store }: StoreInfoFormProps) {
     } catch (error: any) {
       if (error instanceof z.ZodError) {
         const fieldErrors: Record<string, string> = {};
-        error.errors.forEach((err) => {
+        error.issues.forEach((err) => {
           if (err.path[0]) {
             fieldErrors[err.path[0].toString()] = err.message;
           }
@@ -109,34 +107,27 @@ export function StoreInfoForm({ store }: StoreInfoFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
-          Información de Tienda
-        </h3>
-        <p className="text-sm text-gray-600 mb-6">
-          Actualiza la información básica de tu tienda
-        </p>
+        <h3 className="mb-4 text-lg font-semibold text-gray-900">Información de Tienda</h3>
+        <p className="mb-6 text-sm text-gray-600">Actualiza la información básica de tu tienda</p>
       </div>
 
       {/* Success Message */}
       {successMessage && (
-        <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded">
+        <div className="rounded border border-green-200 bg-green-50 px-4 py-3 text-green-800">
           {successMessage}
         </div>
       )}
 
       {/* General Error */}
       {errors.general && (
-        <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded">
+        <div className="rounded border border-red-200 bg-red-50 px-4 py-3 text-red-800">
           {errors.general}
         </div>
       )}
 
       {/* Name */}
       <div>
-        <label
-          htmlFor="name"
-          className="block text-sm font-medium text-gray-700 mb-1"
-        >
+        <label htmlFor="name" className="mb-1 block text-sm font-medium text-gray-700">
           Nombre de la Tienda *
         </label>
         <input
@@ -145,22 +136,17 @@ export function StoreInfoForm({ store }: StoreInfoFormProps) {
           name="name"
           value={formData.name}
           onChange={handleChange}
-          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+          className={`w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
             errors.name ? "border-red-500" : "border-gray-300"
           }`}
           placeholder="Mi Tienda Online"
         />
-        {errors.name && (
-          <p className="text-red-600 text-sm mt-1">{errors.name}</p>
-        )}
+        {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
       </div>
 
       {/* Slug */}
       <div>
-        <label
-          htmlFor="slug"
-          className="block text-sm font-medium text-gray-700 mb-1"
-        >
+        <label htmlFor="slug" className="mb-1 block text-sm font-medium text-gray-700">
           Slug (URL amigable) *
         </label>
         <input
@@ -169,25 +155,20 @@ export function StoreInfoForm({ store }: StoreInfoFormProps) {
           name="slug"
           value={formData.slug}
           onChange={handleChange}
-          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+          className={`w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
             errors.slug ? "border-red-500" : "border-gray-300"
           }`}
           placeholder="mi-tienda"
         />
-        <p className="text-sm text-gray-500 mt-1">
+        <p className="mt-1 text-sm text-gray-500">
           URL: https://tudominio.com/{formData.slug || "slug"}
         </p>
-        {errors.slug && (
-          <p className="text-red-600 text-sm mt-1">{errors.slug}</p>
-        )}
+        {errors.slug && <p className="mt-1 text-sm text-red-600">{errors.slug}</p>}
       </div>
 
       {/* Logo */}
       <div>
-        <label
-          htmlFor="logo"
-          className="block text-sm font-medium text-gray-700 mb-1"
-        >
+        <label htmlFor="logo" className="mb-1 block text-sm font-medium text-gray-700">
           URL del Logo
         </label>
         <input
@@ -196,21 +177,15 @@ export function StoreInfoForm({ store }: StoreInfoFormProps) {
           name="logo"
           value={formData.logo}
           onChange={handleChange}
-          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+          className={`w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
             errors.logo ? "border-red-500" : "border-gray-300"
           }`}
           placeholder="https://ejemplo.com/logo.png"
         />
-        {errors.logo && (
-          <p className="text-red-600 text-sm mt-1">{errors.logo}</p>
-        )}
+        {errors.logo && <p className="mt-1 text-sm text-red-600">{errors.logo}</p>}
         {formData.logo && (
           <div className="mt-2">
-            <img
-              src={formData.logo}
-              alt="Logo preview"
-              className="h-12 object-contain"
-            />
+            <img src={formData.logo} alt="Logo preview" className="h-12 object-contain" />
           </div>
         )}
       </div>
@@ -218,10 +193,7 @@ export function StoreInfoForm({ store }: StoreInfoFormProps) {
       {/* Colors */}
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label
-            htmlFor="primaryColor"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
+          <label htmlFor="primaryColor" className="mb-1 block text-sm font-medium text-gray-700">
             Color Primario *
           </label>
           <div className="flex gap-2">
@@ -231,7 +203,7 @@ export function StoreInfoForm({ store }: StoreInfoFormProps) {
               name="primaryColor"
               value={formData.primaryColor}
               onChange={handleChange}
-              className="h-10 w-20 border border-gray-300 rounded"
+              className="h-10 w-20 rounded border border-gray-300"
             />
             <input
               type="text"
@@ -242,20 +214,17 @@ export function StoreInfoForm({ store }: StoreInfoFormProps) {
                   primaryColor: e.target.value,
                 }))
               }
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-md"
+              className="flex-1 rounded-md border border-gray-300 px-3 py-2"
               placeholder="#0A1128"
             />
           </div>
           {errors.primaryColor && (
-            <p className="text-red-600 text-sm mt-1">{errors.primaryColor}</p>
+            <p className="mt-1 text-sm text-red-600">{errors.primaryColor}</p>
           )}
         </div>
 
         <div>
-          <label
-            htmlFor="accentColor"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
+          <label htmlFor="accentColor" className="mb-1 block text-sm font-medium text-gray-700">
             Color de Acento *
           </label>
           <div className="flex gap-2">
@@ -265,30 +234,23 @@ export function StoreInfoForm({ store }: StoreInfoFormProps) {
               name="accentColor"
               value={formData.accentColor}
               onChange={handleChange}
-              className="h-10 w-20 border border-gray-300 rounded"
+              className="h-10 w-20 rounded border border-gray-300"
             />
             <input
               type="text"
               value={formData.accentColor}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, accentColor: e.target.value }))
-              }
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-md"
+              onChange={(e) => setFormData((prev) => ({ ...prev, accentColor: e.target.value }))}
+              className="flex-1 rounded-md border border-gray-300 px-3 py-2"
               placeholder="#D4AF37"
             />
           </div>
-          {errors.accentColor && (
-            <p className="text-red-600 text-sm mt-1">{errors.accentColor}</p>
-          )}
+          {errors.accentColor && <p className="mt-1 text-sm text-red-600">{errors.accentColor}</p>}
         </div>
       </div>
 
       {/* Custom Domain */}
       <div>
-        <label
-          htmlFor="domain"
-          className="block text-sm font-medium text-gray-700 mb-1"
-        >
+        <label htmlFor="domain" className="mb-1 block text-sm font-medium text-gray-700">
           Dominio Personalizado (Opcional)
         </label>
         <input
@@ -297,15 +259,13 @@ export function StoreInfoForm({ store }: StoreInfoFormProps) {
           name="domain"
           value={formData.domain}
           onChange={handleChange}
-          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+          className={`w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
             errors.domain ? "border-red-500" : "border-gray-300"
           }`}
           placeholder="mitienda.com"
         />
-        {errors.domain && (
-          <p className="text-red-600 text-sm mt-1">{errors.domain}</p>
-        )}
-        <p className="text-sm text-gray-500 mt-1">
+        {errors.domain && <p className="mt-1 text-sm text-red-600">{errors.domain}</p>}
+        <p className="mt-1 text-sm text-gray-500">
           Configura tu propio dominio apuntando el DNS a nuestros servidores
         </p>
       </div>
@@ -315,7 +275,7 @@ export function StoreInfoForm({ store }: StoreInfoFormProps) {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="rounded-md bg-blue-600 px-6 py-2 text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isSubmitting ? "Guardando..." : "Guardar Cambios"}
         </button>

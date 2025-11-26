@@ -11,10 +11,7 @@ const RejectionSchema = z.object({
   rejectionReason: z.string().min(1),
 });
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const body = await req.json();
     const { rejectionReason } = RejectionSchema.parse(body);
@@ -31,16 +28,13 @@ export async function POST(
     });
 
     if (!returnRequest) {
-      return NextResponse.json(
-        { error: "Return request not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Return request not found" }, { status: 404 });
     }
 
     if (returnRequest.status !== "PENDING") {
       return NextResponse.json(
         { error: `Cannot reject return in status: ${returnRequest.status}` },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -64,7 +58,9 @@ export async function POST(
     });
 
     // TODO: Send email to customer with rejection explanation
-    console.log(`Return rejected for order ${returnRequest.order.orderNumber}. Customer notification pending.`);
+    console.log(
+      `Return rejected for order ${returnRequest.order.orderNumber}. Customer notification pending.`,
+    );
 
     return NextResponse.json({
       success: true,
@@ -79,14 +75,17 @@ export async function POST(
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: "Invalid request data", details: error.errors },
-        { status: 400 }
+        { error: "Invalid request data", details: error.issues },
+        { status: 400 },
       );
     }
 
     return NextResponse.json(
-      { error: "Failed to reject return", message: error instanceof Error ? error.message : "Unknown error" },
-      { status: 500 }
+      {
+        error: "Failed to reject return",
+        message: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 },
     );
   }
 }

@@ -31,10 +31,7 @@ const ReturnRequestSchema = z.object({
 
 const RETURN_WINDOW_DAYS = 30;
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const body = await req.json();
     const { reason, description, items } = ReturnRequestSchema.parse(body);
@@ -57,10 +54,7 @@ export async function POST(
     });
 
     if (!order) {
-      return NextResponse.json(
-        { error: "Order not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
     // TODO: Verify user owns this order
@@ -73,7 +67,7 @@ export async function POST(
 
     // Validate return window (30 days from purchase)
     const daysSincePurchase = Math.floor(
-      (Date.now() - order.createdAt.getTime()) / (1000 * 60 * 60 * 24)
+      (Date.now() - order.createdAt.getTime()) / (1000 * 60 * 60 * 24),
     );
 
     if (daysSincePurchase > RETURN_WINDOW_DAYS) {
@@ -83,7 +77,7 @@ export async function POST(
           message: `Returns must be requested within ${RETURN_WINDOW_DAYS} days of purchase`,
           daysSincePurchase,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -91,7 +85,7 @@ export async function POST(
     if (!["DELIVERED", "SHIPPED"].includes(order.status)) {
       return NextResponse.json(
         { error: "Order must be delivered or shipped to request a return" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -100,29 +94,28 @@ export async function POST(
       const orderItem = order.items.find(
         (oi) =>
           oi.productId === item.productId &&
-          (item.variantId ? oi.variantId === item.variantId : true)
+          (item.variantId ? oi.variantId === item.variantId : true),
       );
 
       if (!orderItem) {
         return NextResponse.json(
           { error: `Product ${item.productId} not found in order` },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
       if (item.quantity > orderItem.quantity) {
         return NextResponse.json(
-          { error: `Invalid quantity for product ${item.productId}. Maximum: ${orderItem.quantity}` },
-          { status: 400 }
+          {
+            error: `Invalid quantity for product ${item.productId}. Maximum: ${orderItem.quantity}`,
+          },
+          { status: 400 },
         );
       }
     }
 
     // Calculate refund amount
-    const refundAmount = items.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0
-    );
+    const refundAmount = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
     // Create return request
     const returnRequest = await db.returnRequest.create({
@@ -171,7 +164,9 @@ export async function POST(
     // );
 
     // TODO: Send email to vendor
-    console.log(`Return request created for order ${order.orderNumber}. Vendor notification pending.`);
+    console.log(
+      `Return request created for order ${order.orderNumber}. Vendor notification pending.`,
+    );
 
     return NextResponse.json({
       success: true,
@@ -183,7 +178,9 @@ export async function POST(
         items: returnRequest.items.map((item) => ({
           id: item.id,
           product: item.product.name,
-          variant: item.variant ? `${item.variant.size || ""} ${item.variant.color || ""}`.trim() : null,
+          variant: item.variant
+            ? `${item.variant.size || ""} ${item.variant.color || ""}`.trim()
+            : null,
           quantity: item.quantity,
           refundPrice: item.refundPrice.toString(),
         })),
@@ -195,23 +192,23 @@ export async function POST(
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: "Invalid request data", details: error.errors },
-        { status: 400 }
+        { error: "Invalid request data", details: error.issues },
+        { status: 400 },
       );
     }
 
     return NextResponse.json(
-      { error: "Failed to create return request", message: error instanceof Error ? error.message : "Unknown error" },
-      { status: 500 }
+      {
+        error: "Failed to create return request",
+        message: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 },
     );
   }
 }
 
 // GET endpoint to retrieve return requests for an order
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const returnRequests = await db.returnRequest.findMany({
       where: { orderId: params.id },
@@ -238,7 +235,9 @@ export async function GET(
         items: rr.items.map((item) => ({
           id: item.id,
           product: item.product.name,
-          variant: item.variant ? `${item.variant.size || ""} ${item.variant.color || ""}`.trim() : null,
+          variant: item.variant
+            ? `${item.variant.size || ""} ${item.variant.color || ""}`.trim()
+            : null,
           quantity: item.quantity,
           refundPrice: item.refundPrice.toString(),
           accepted: item.accepted,
@@ -255,9 +254,6 @@ export async function GET(
     });
   } catch (error) {
     console.error("Error retrieving return requests:", error);
-    return NextResponse.json(
-      { error: "Failed to retrieve return requests" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to retrieve return requests" }, { status: 500 });
   }
 }

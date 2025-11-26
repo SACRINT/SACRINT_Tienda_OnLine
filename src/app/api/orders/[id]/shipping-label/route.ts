@@ -5,7 +5,11 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { getProvider, isProviderSupported, ShippingProviderType } from "@/lib/shipping/provider-manager";
+import {
+  getProvider,
+  isProviderSupported,
+  ShippingProviderType,
+} from "@/lib/shipping/provider-manager";
 import { z } from "zod";
 
 // Validation schema
@@ -13,10 +17,7 @@ const LabelRequestSchema = z.object({
   provider: z.enum(["ESTAFETA", "MERCADO_ENVIOS", "FEDEX", "DHL", "UPS", "CUSTOM"]),
 });
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     // Parse and validate request
     const body = await req.json();
@@ -26,7 +27,7 @@ export async function POST(
     if (!isProviderSupported(provider)) {
       return NextResponse.json(
         { error: `Provider ${provider} is not yet supported` },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -45,17 +46,14 @@ export async function POST(
     });
 
     if (!order) {
-      return NextResponse.json(
-        { error: "Order not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
     // Validate order is in correct status
     if (order.paymentStatus !== "COMPLETED") {
       return NextResponse.json(
         { error: "Order payment must be completed before generating shipping label" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -70,7 +68,7 @@ export async function POST(
     if (existingLabel) {
       return NextResponse.json(
         { error: "Shipping label already exists for this order", label: existingLabel },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -91,12 +89,12 @@ export async function POST(
         street: order.shippingAddress.street,
         city: order.shippingAddress.city,
         state: order.shippingAddress.state,
-        zipCode: order.shippingAddress.zipCode,
+        zipCode: order.shippingAddress.postalCode,
         country: order.shippingAddress.country,
       },
       totalWeight: order.items.reduce(
         (sum, item) => sum + Number(item.product.weight || 0) * item.quantity,
-        0
+        0,
       ),
     });
 
@@ -138,23 +136,23 @@ export async function POST(
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: "Invalid request data", details: error.errors },
-        { status: 400 }
+        { error: "Invalid request data", details: error.issues },
+        { status: 400 },
       );
     }
 
     return NextResponse.json(
-      { error: "Failed to generate shipping label", message: error instanceof Error ? error.message : "Unknown error" },
-      { status: 500 }
+      {
+        error: "Failed to generate shipping label",
+        message: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 },
     );
   }
 }
 
 // GET endpoint to retrieve existing label
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const labels = await db.shippingLabel.findMany({
       where: {
@@ -168,7 +166,7 @@ export async function GET(
     if (labels.length === 0) {
       return NextResponse.json(
         { error: "No shipping labels found for this order" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -186,9 +184,6 @@ export async function GET(
     });
   } catch (error) {
     console.error("Error retrieving shipping labels:", error);
-    return NextResponse.json(
-      { error: "Failed to retrieve shipping labels" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to retrieve shipping labels" }, { status: 500 });
   }
 }

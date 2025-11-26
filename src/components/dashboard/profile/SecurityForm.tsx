@@ -82,7 +82,7 @@ export function SecurityForm({ user }: SecurityFormProps) {
     } catch (error: any) {
       if (error instanceof z.ZodError) {
         const fieldErrors: Record<string, string> = {};
-        error.errors.forEach((err) => {
+        error.issues.forEach((err) => {
           if (err.path[0]) {
             fieldErrors[err.path[0].toString()] = err.message;
           }
@@ -101,37 +101,32 @@ export function SecurityForm({ user }: SecurityFormProps) {
       {/* Password Change */}
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <div className="flex items-center gap-2 mb-4">
-            <Lock className="w-5 h-5 text-gray-600" />
-            <h3 className="text-lg font-semibold text-gray-900">
-              Cambiar Contraseña
-            </h3>
+          <div className="mb-4 flex items-center gap-2">
+            <Lock className="h-5 w-5 text-gray-600" />
+            <h3 className="text-lg font-semibold text-gray-900">Cambiar Contraseña</h3>
           </div>
-          <p className="text-sm text-gray-600 mb-6">
+          <p className="mb-6 text-sm text-gray-600">
             Actualiza tu contraseña para mantener tu cuenta segura
           </p>
         </div>
 
         {/* Success Message */}
         {successMessage && (
-          <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded">
+          <div className="rounded border border-green-200 bg-green-50 px-4 py-3 text-green-800">
             {successMessage}
           </div>
         )}
 
         {/* General Error */}
         {errors.general && (
-          <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded">
+          <div className="rounded border border-red-200 bg-red-50 px-4 py-3 text-red-800">
             {errors.general}
           </div>
         )}
 
         {/* Current Password */}
         <div>
-          <label
-            htmlFor="currentPassword"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
+          <label htmlFor="currentPassword" className="mb-1 block text-sm font-medium text-gray-700">
             Contraseña Actual *
           </label>
           <input
@@ -140,23 +135,18 @@ export function SecurityForm({ user }: SecurityFormProps) {
             name="currentPassword"
             value={formData.currentPassword}
             onChange={handleChange}
-            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+            className={`w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
               errors.currentPassword ? "border-red-500" : "border-gray-300"
             }`}
           />
           {errors.currentPassword && (
-            <p className="text-red-600 text-sm mt-1">
-              {errors.currentPassword}
-            </p>
+            <p className="mt-1 text-sm text-red-600">{errors.currentPassword}</p>
           )}
         </div>
 
         {/* New Password */}
         <div>
-          <label
-            htmlFor="newPassword"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
+          <label htmlFor="newPassword" className="mb-1 block text-sm font-medium text-gray-700">
             Nueva Contraseña *
           </label>
           <input
@@ -165,21 +155,16 @@ export function SecurityForm({ user }: SecurityFormProps) {
             name="newPassword"
             value={formData.newPassword}
             onChange={handleChange}
-            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+            className={`w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
               errors.newPassword ? "border-red-500" : "border-gray-300"
             }`}
           />
-          {errors.newPassword && (
-            <p className="text-red-600 text-sm mt-1">{errors.newPassword}</p>
-          )}
+          {errors.newPassword && <p className="mt-1 text-sm text-red-600">{errors.newPassword}</p>}
         </div>
 
         {/* Confirm Password */}
         <div>
-          <label
-            htmlFor="confirmPassword"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
+          <label htmlFor="confirmPassword" className="mb-1 block text-sm font-medium text-gray-700">
             Confirmar Nueva Contraseña *
           </label>
           <input
@@ -188,21 +173,19 @@ export function SecurityForm({ user }: SecurityFormProps) {
             name="confirmPassword"
             value={formData.confirmPassword}
             onChange={handleChange}
-            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+            className={`w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
               errors.confirmPassword ? "border-red-500" : "border-gray-300"
             }`}
           />
           {errors.confirmPassword && (
-            <p className="text-red-600 text-sm mt-1">
-              {errors.confirmPassword}
-            </p>
+            <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
           )}
         </div>
 
         <button
           type="submit"
           disabled={isSubmitting}
-          className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="rounded-md bg-blue-600 px-6 py-2 text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isSubmitting ? "Actualizando..." : "Cambiar Contraseña"}
         </button>
@@ -210,19 +193,19 @@ export function SecurityForm({ user }: SecurityFormProps) {
 
       {/* Two-Factor Authentication */}
       <div className="border-t border-gray-200 pt-8">
-        <div className="flex items-center gap-2 mb-4">
-          <Shield className="w-5 h-5 text-gray-600" />
+        <div className="mb-4 flex items-center gap-2">
+          <Shield className="h-5 w-5 text-gray-600" />
           <h3 className="text-lg font-semibold text-gray-900">
             Autenticación de Dos Factores (2FA)
           </h3>
         </div>
-        <p className="text-sm text-gray-600 mb-6">
+        <p className="mb-6 text-sm text-gray-600">
           Agrega una capa adicional de seguridad a tu cuenta
         </p>
 
-        <div className="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded">
+        <div className="rounded border border-blue-200 bg-blue-50 px-4 py-3 text-blue-800">
           <p className="font-medium">Próximamente</p>
-          <p className="text-sm mt-1">
+          <p className="mt-1 text-sm">
             La autenticación de dos factores estará disponible próximamente
           </p>
         </div>
@@ -230,7 +213,7 @@ export function SecurityForm({ user }: SecurityFormProps) {
         <div className="mt-6">
           <button
             disabled
-            className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="rounded-md bg-green-600 px-6 py-2 text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Habilitar 2FA
           </button>

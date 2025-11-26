@@ -36,9 +36,7 @@ export function PersonalInfoForm({ user }: PersonalInfoFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     // Clear error for this field
@@ -80,7 +78,7 @@ export function PersonalInfoForm({ user }: PersonalInfoFormProps) {
     } catch (error: any) {
       if (error instanceof z.ZodError) {
         const fieldErrors: Record<string, string> = {};
-        error.errors.forEach((err) => {
+        error.issues.forEach((err) => {
           if (err.path[0]) {
             fieldErrors[err.path[0].toString()] = err.message;
           }
@@ -97,43 +95,37 @@ export function PersonalInfoForm({ user }: PersonalInfoFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
-          Información Personal
-        </h3>
-        <p className="text-sm text-gray-600 mb-6">
-          Actualiza tu información personal
-        </p>
+        <h3 className="mb-4 text-lg font-semibold text-gray-900">Información Personal</h3>
+        <p className="mb-6 text-sm text-gray-600">Actualiza tu información personal</p>
       </div>
 
       {/* Success Message */}
       {successMessage && (
-        <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded">
+        <div className="rounded border border-green-200 bg-green-50 px-4 py-3 text-green-800">
           {successMessage}
         </div>
       )}
 
       {/* General Error */}
       {errors.general && (
-        <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded">
+        <div className="rounded border border-red-200 bg-red-50 px-4 py-3 text-red-800">
           {errors.general}
         </div>
       )}
 
       {/* Profile Photo */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Foto de Perfil
-        </label>
+        <label className="mb-2 block text-sm font-medium text-gray-700">Foto de Perfil</label>
         <div className="flex items-center gap-4">
           {formData.image ? (
             <img
               src={formData.image}
               alt="Profile"
-              className="w-20 h-20 rounded-full object-cover"
+              className="h-20 w-20 rounded-full object-cover"
             />
           ) : (
-            <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center">
-              <Upload className="w-8 h-8 text-gray-400" />
+            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gray-200">
+              <Upload className="h-8 w-8 text-gray-400" />
             </div>
           )}
           <div className="flex-1">
@@ -142,25 +134,18 @@ export function PersonalInfoForm({ user }: PersonalInfoFormProps) {
               name="image"
               value={formData.image}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="https://ejemplo.com/avatar.jpg"
             />
-            {errors.image && (
-              <p className="text-red-600 text-sm mt-1">{errors.image}</p>
-            )}
-            <p className="text-sm text-gray-500 mt-1">
-              URL de tu foto de perfil
-            </p>
+            {errors.image && <p className="mt-1 text-sm text-red-600">{errors.image}</p>}
+            <p className="mt-1 text-sm text-gray-500">URL de tu foto de perfil</p>
           </div>
         </div>
       </div>
 
       {/* Name */}
       <div>
-        <label
-          htmlFor="name"
-          className="block text-sm font-medium text-gray-700 mb-1"
-        >
+        <label htmlFor="name" className="mb-1 block text-sm font-medium text-gray-700">
           Nombre Completo *
         </label>
         <input
@@ -169,22 +154,17 @@ export function PersonalInfoForm({ user }: PersonalInfoFormProps) {
           name="name"
           value={formData.name}
           onChange={handleChange}
-          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+          className={`w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
             errors.name ? "border-red-500" : "border-gray-300"
           }`}
           placeholder="Juan Pérez"
         />
-        {errors.name && (
-          <p className="text-red-600 text-sm mt-1">{errors.name}</p>
-        )}
+        {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
       </div>
 
       {/* Email */}
       <div>
-        <label
-          htmlFor="email"
-          className="block text-sm font-medium text-gray-700 mb-1"
-        >
+        <label htmlFor="email" className="mb-1 block text-sm font-medium text-gray-700">
           Email *
         </label>
         <input
@@ -193,22 +173,17 @@ export function PersonalInfoForm({ user }: PersonalInfoFormProps) {
           name="email"
           value={formData.email}
           onChange={handleChange}
-          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+          className={`w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
             errors.email ? "border-red-500" : "border-gray-300"
           }`}
           placeholder="juan@ejemplo.com"
         />
-        {errors.email && (
-          <p className="text-red-600 text-sm mt-1">{errors.email}</p>
-        )}
+        {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
       </div>
 
       {/* Phone */}
       <div>
-        <label
-          htmlFor="phone"
-          className="block text-sm font-medium text-gray-700 mb-1"
-        >
+        <label htmlFor="phone" className="mb-1 block text-sm font-medium text-gray-700">
           Teléfono (Opcional)
         </label>
         <input
@@ -217,19 +192,15 @@ export function PersonalInfoForm({ user }: PersonalInfoFormProps) {
           name="phone"
           value={formData.phone}
           onChange={handleChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="+52 55 1234 5678"
         />
-        {errors.phone && (
-          <p className="text-red-600 text-sm mt-1">{errors.phone}</p>
-        )}
+        {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone}</p>}
       </div>
 
       {/* User Info */}
       <div className="border-t border-gray-200 pt-6">
-        <h4 className="text-sm font-semibold text-gray-900 mb-3">
-          Información de Cuenta
-        </h4>
+        <h4 className="mb-3 text-sm font-semibold text-gray-900">Información de Cuenta</h4>
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
             <p className="text-gray-600">ID de Usuario</p>
@@ -241,13 +212,11 @@ export function PersonalInfoForm({ user }: PersonalInfoFormProps) {
           </div>
           <div>
             <p className="text-gray-600">Fecha de Registro</p>
-            <p className="text-gray-900">
-              {new Date(user.createdAt).toLocaleDateString("es-MX")}
-            </p>
+            <p className="text-gray-900">{new Date(user.createdAt).toLocaleDateString("es-MX")}</p>
           </div>
           <div>
             <p className="text-gray-600">Estado</p>
-            <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs font-semibold">
+            <span className="rounded bg-green-100 px-2 py-1 text-xs font-semibold text-green-800">
               {user.status}
             </span>
           </div>
@@ -259,7 +228,7 @@ export function PersonalInfoForm({ user }: PersonalInfoFormProps) {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="rounded-md bg-blue-600 px-6 py-2 text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isSubmitting ? "Guardando..." : "Guardar Cambios"}
         </button>

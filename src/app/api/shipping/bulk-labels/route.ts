@@ -6,7 +6,11 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { getProvider, isProviderSupported, ShippingProviderType } from "@/lib/shipping/provider-manager";
+import {
+  getProvider,
+  isProviderSupported,
+  ShippingProviderType,
+} from "@/lib/shipping/provider-manager";
 import { z } from "zod";
 
 const BulkLabelRequestSchema = z.object({
@@ -35,7 +39,7 @@ export async function POST(req: NextRequest) {
     if (!isProviderSupported(provider)) {
       return NextResponse.json(
         { error: `Provider ${provider} is not yet supported` },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -45,7 +49,7 @@ export async function POST(req: NextRequest) {
         id: { in: orderIds },
         tenantId,
         paymentStatus: "COMPLETED",
-        status: { in: ["PAID", "PENDING"] },
+        status: { in: ["PROCESSING", "PENDING"] },
       },
       include: {
         items: {
@@ -60,8 +64,10 @@ export async function POST(req: NextRequest) {
 
     if (orders.length === 0) {
       return NextResponse.json(
-        { error: "No eligible orders found. Orders must be PAID and have COMPLETED payment status." },
-        { status: 400 }
+        {
+          error: "No eligible orders found. Orders must be PAID and have COMPLETED payment status.",
+        },
+        { status: 400 },
       );
     }
 
@@ -84,7 +90,7 @@ export async function POST(req: NextRequest) {
           error: "All orders already have shipping labels",
           skipped: orders.length,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -111,12 +117,12 @@ export async function POST(req: NextRequest) {
             street: order.shippingAddress.street,
             city: order.shippingAddress.city,
             state: order.shippingAddress.state,
-            zipCode: order.shippingAddress.zipCode,
+            zipCode: order.shippingAddress.postalCode,
             country: order.shippingAddress.country,
           },
           totalWeight: order.items.reduce(
             (sum, item) => sum + Number(item.product.weight || 0) * item.quantity,
-            0
+            0,
           ),
         });
 
@@ -195,14 +201,17 @@ export async function POST(req: NextRequest) {
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: "Invalid request data", details: error.errors },
-        { status: 400 }
+        { error: "Invalid request data", details: error.issues },
+        { status: 400 },
       );
     }
 
     return NextResponse.json(
-      { error: "Failed to generate bulk labels", message: error instanceof Error ? error.message : "Unknown error" },
-      { status: 500 }
+      {
+        error: "Failed to generate bulk labels",
+        message: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 },
     );
   }
 }

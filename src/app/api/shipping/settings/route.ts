@@ -10,21 +10,25 @@ import { z } from "zod";
 const SettingsUpdateSchema = z.object({
   tenantId: z.string(),
   enabledProviders: z.array(z.string()).optional(),
-  markup: z.object({
-    type: z.enum(["PERCENTAGE", "FIXED"]),
-    value: z.number(),
-  }).optional(),
+  markup: z
+    .object({
+      type: z.enum(["PERCENTAGE", "FIXED"]),
+      value: z.number(),
+    })
+    .optional(),
   defaultServiceType: z.enum(["STANDARD", "EXPRESS", "OVERNIGHT"]).optional(),
   packagingWeight: z.number().optional(),
   freeShippingThreshold: z.number().optional().nullable(),
   autoGenerateLabels: z.boolean().optional(),
-  originAddress: z.object({
-    street: z.string(),
-    city: z.string(),
-    state: z.string(),
-    zipCode: z.string(),
-    country: z.string(),
-  }).optional(),
+  originAddress: z
+    .object({
+      street: z.string(),
+      city: z.string(),
+      state: z.string(),
+      zipCode: z.string(),
+      country: z.string(),
+    })
+    .optional(),
 });
 
 export async function GET(req: NextRequest) {
@@ -33,10 +37,7 @@ export async function GET(req: NextRequest) {
     const tenantId = searchParams.get("tenantId");
 
     if (!tenantId) {
-      return NextResponse.json(
-        { error: "tenantId is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "tenantId is required" }, { status: 400 });
     }
 
     const settings = await getShippingSettings(tenantId);
@@ -48,8 +49,11 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     console.error("Error fetching shipping settings:", error);
     return NextResponse.json(
-      { error: "Failed to fetch settings", message: error instanceof Error ? error.message : "Unknown error" },
-      { status: 500 }
+      {
+        error: "Failed to fetch settings",
+        message: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 },
     );
   }
 }
@@ -59,7 +63,14 @@ export async function PUT(req: NextRequest) {
     const body = await req.json();
     const { tenantId, ...updates } = SettingsUpdateSchema.parse(body);
 
-    const settings = await updateShippingSettings(tenantId, updates);
+    // Transform null to undefined for freeShippingThreshold and cast types
+    const cleanedUpdates: any = {
+      ...updates,
+      freeShippingThreshold:
+        updates.freeShippingThreshold === null ? undefined : updates.freeShippingThreshold,
+    };
+
+    const settings = await updateShippingSettings(tenantId, cleanedUpdates);
 
     return NextResponse.json({
       success: true,
@@ -70,14 +81,17 @@ export async function PUT(req: NextRequest) {
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: "Invalid request data", details: error.errors },
-        { status: 400 }
+        { error: "Invalid request data", details: error.issues },
+        { status: 400 },
       );
     }
 
     return NextResponse.json(
-      { error: "Failed to update settings", message: error instanceof Error ? error.message : "Unknown error" },
-      { status: 500 }
+      {
+        error: "Failed to update settings",
+        message: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 },
     );
   }
 }

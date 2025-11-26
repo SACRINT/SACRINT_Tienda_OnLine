@@ -15,15 +15,7 @@ import {
 } from "@/lib/orders/status-workflow";
 
 const updateStatusSchema = z.object({
-  newStatus: z.enum([
-    "PENDING",
-    "PAID",
-    "PROCESSING",
-    "SHIPPED",
-    "DELIVERED",
-    "CANCELLED",
-    "REFUNDED",
-  ]),
+  newStatus: z.enum(["PENDING", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED", "REFUNDED"]),
   reason: z.string().optional(),
 });
 
@@ -32,10 +24,7 @@ const cancelOrderSchema = z.object({
   refund: z.boolean().default(true),
 });
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -47,13 +36,19 @@ export async function GET(
       items: {
         include: {
           product: {
-            select: { id: true, name: true, slug: true, sku: true, images: { select: { url: true }, take: 1 } },
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+              sku: true,
+              images: { select: { url: true }, take: 1 },
+            },
           },
         },
       },
       shippingAddress: true,
       user: { select: { id: true, name: true, email: true } },
-      shipping: true,
+      shippingLabels: true,
     },
   });
 
@@ -62,7 +57,8 @@ export async function GET(
   }
 
   const isOwner = order.userId === session.user.id;
-  const isStoreOwner = session.user.role === "STORE_OWNER" && session.user.tenantId === order.tenantId;
+  const isStoreOwner =
+    session.user.role === "STORE_OWNER" && session.user.tenantId === order.tenantId;
   const isSuperAdmin = session.user.role === "SUPER_ADMIN";
 
   if (!isOwner && !isStoreOwner && !isSuperAdmin) {
@@ -72,10 +68,7 @@ export async function GET(
   return NextResponse.json(order);
 }
 
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -98,7 +91,11 @@ export async function PATCH(
     return NextResponse.json({ error: validation.error }, { status: 400 });
   }
 
-  await executeTransitionLogic(order.id, order.status as OrderStatus, data.newStatus as OrderStatus);
+  await executeTransitionLogic(
+    order.id,
+    order.status as OrderStatus,
+    data.newStatus as OrderStatus,
+  );
 
   const updatedOrder = await db.order.update({
     where: { id: params.id },
@@ -108,10 +105,7 @@ export async function PATCH(
   return NextResponse.json(updatedOrder);
 }
 
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -136,7 +130,7 @@ export async function DELETE(
   await db.$transaction(async (tx) => {
     await tx.order.update({
       where: { id: params.id },
-      data: { status: "CANCELLED", cancelledAt: new Date(), notes: data.reason },
+      data: { status: "CANCELLED", notes: data.reason },
     });
 
     for (const item of order.items) {

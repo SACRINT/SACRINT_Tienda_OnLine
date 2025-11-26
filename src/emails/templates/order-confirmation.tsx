@@ -53,7 +53,7 @@ export default function OrderConfirmationEmail({
   orderDate = "25 de Noviembre, 2025",
   items = [
     {
-      name: "Laptop HP 15.6\"",
+      name: 'Laptop HP 15.6"',
       quantity: 1,
       price: 12999,
       image: "https://placehold.co/100x100",
@@ -101,12 +101,10 @@ export default function OrderConfirmationEmail({
           {/* Success Message */}
           <Section style={successBanner}>
             <Text style={successIcon}>✅</Text>
-            <Heading style={successHeading}>
-              ¡Pedido Confirmado!
-            </Heading>
+            <Heading style={successHeading}>¡Pedido Confirmado!</Heading>
             <Text style={successText}>
-              Gracias por tu compra, {customerName}. Tu pedido ha sido confirmado
-              y está siendo procesado.
+              Gracias por tu compra, {customerName}. Tu pedido ha sido confirmado y está siendo
+              procesado.
             </Text>
           </Section>
 
@@ -147,14 +145,10 @@ export default function OrderConfirmationEmail({
                 </Column>
                 <Column style={itemDetailsColumn}>
                   <Text style={itemName}>{item.name}</Text>
-                  <Text style={itemQuantity}>
-                    Cantidad: {item.quantity}
-                  </Text>
+                  <Text style={itemQuantity}>Cantidad: {item.quantity}</Text>
                 </Column>
                 <Column align="right" style={itemPriceColumn}>
-                  <Text style={itemPrice}>
-                    {formatCurrency(item.price * item.quantity)}
-                  </Text>
+                  <Text style={itemPrice}>{formatCurrency(item.price * item.quantity)}</Text>
                 </Column>
               </Row>
             ))}
@@ -206,9 +200,12 @@ export default function OrderConfirmationEmail({
               Dirección de Envío
             </Heading>
             <Text style={addressText}>
-              {shippingAddress.name}<br />
-              {shippingAddress.street}<br />
-              {shippingAddress.city}, {shippingAddress.state} {shippingAddress.zipCode}<br />
+              {shippingAddress.name}
+              <br />
+              {shippingAddress.street}
+              <br />
+              {shippingAddress.city}, {shippingAddress.state} {shippingAddress.postalCode}
+              <br />
               {shippingAddress.country}
             </Text>
           </Section>
@@ -233,25 +230,23 @@ export default function OrderConfirmationEmail({
               Si tienes alguna pregunta sobre tu pedido, no dudes en contactarnos:
             </Text>
             <Text style={contactInfo}>
-              📧 Email: <a href={`mailto:${storeEmail}`} style={link}>{storeEmail}</a>
+              📧 Email:{" "}
+              <a href={`mailto:${storeEmail}`} style={link}>
+                {storeEmail}
+              </a>
             </Text>
-            {storePhone && (
-              <Text style={contactInfo}>
-                📞 Teléfono: {storePhone}
-              </Text>
-            )}
+            {storePhone && <Text style={contactInfo}>📞 Teléfono: {storePhone}</Text>}
           </Section>
 
           {/* Footer */}
           <Section style={footer}>
-            <Text style={footerText}>
-              © 2025 {storeName}. Todos los derechos reservados.
-            </Text>
+            <Text style={footerText}>© 2025 {storeName}. Todos los derechos reservados.</Text>
             <Text style={footerText}>
               Este correo fue enviado a {customerName} en respuesta a tu orden #{orderNumber}
             </Text>
             <Text style={footerTextSmall}>
-              Si no realizaste esta compra, por favor contacta inmediatamente a nuestro equipo de soporte.
+              Si no realizaste esta compra, por favor contacta inmediatamente a nuestro equipo de
+              soporte.
             </Text>
           </Section>
         </Container>

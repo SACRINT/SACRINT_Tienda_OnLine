@@ -16,7 +16,10 @@ import { Save, X } from "lucide-react";
 const productSchema = z.object({
   name: z.string().min(3, "El nombre debe tener al menos 3 caracteres").max(200),
   description: z.string().min(10, "La descripción debe tener al menos 10 caracteres").max(5000),
-  sku: z.string().min(1, "El SKU es requerido").regex(/^[A-Z0-9-]+$/, "Solo letras mayúsculas, números y guiones"),
+  sku: z
+    .string()
+    .min(1, "El SKU es requerido")
+    .regex(/^[A-Z0-9-]+$/, "Solo letras mayúsculas, números y guiones"),
   basePrice: z.number().positive("El precio debe ser positivo"),
   salePrice: z.number().positive().optional().or(z.literal(0)),
   cost: z.number().positive().optional().or(z.literal(0)),
@@ -34,12 +37,7 @@ interface ProductFormProps {
   productId?: string;
 }
 
-export function ProductForm({
-  storeId,
-  categories,
-  initialData,
-  productId,
-}: ProductFormProps) {
+export function ProductForm({ storeId, categories, initialData, productId }: ProductFormProps) {
   const router = useRouter();
   const [formData, setFormData] = useState<ProductFormData>({
     name: initialData?.name || "",
@@ -56,7 +54,7 @@ export function ProductForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
   ) => {
     const { name, value, type } = e.target;
     let parsedValue: any = value;
@@ -89,9 +87,7 @@ export function ProductForm({
 
       setIsSubmitting(true);
 
-      const url = productId
-        ? `/api/products/${productId}`
-        : "/api/products";
+      const url = productId ? `/api/products/${productId}` : "/api/products";
       const method = productId ? "PATCH" : "POST";
 
       const response = await fetch(url, {
@@ -118,7 +114,7 @@ export function ProductForm({
     } catch (error: any) {
       if (error instanceof z.ZodError) {
         const fieldErrors: Record<string, string> = {};
-        error.errors.forEach((err) => {
+        error.issues.forEach((err) => {
           if (err.path[0]) {
             fieldErrors[err.path[0].toString()] = err.message;
           }
@@ -136,21 +132,19 @@ export function ProductForm({
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* General Error */}
       {errors.general && (
-        <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded">
+        <div className="rounded border border-red-200 bg-red-50 px-4 py-3 text-red-800">
           {errors.general}
         </div>
       )}
 
       {/* Información Básica */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
-          Información Básica
-        </h3>
+      <div className="rounded-lg border border-gray-200 bg-white p-6">
+        <h3 className="mb-4 text-lg font-semibold text-gray-900">Información Básica</h3>
 
         <div className="space-y-4">
           {/* Name */}
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="name" className="mb-1 block text-sm font-medium text-gray-700">
               Nombre del Producto *
             </label>
             <input
@@ -159,17 +153,17 @@ export function ProductForm({
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              className={`w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                 errors.name ? "border-red-500" : "border-gray-300"
               }`}
               placeholder="Ej: Camiseta Deportiva"
             />
-            {errors.name && <p className="text-red-600 text-sm mt-1">{errors.name}</p>}
+            {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
           </div>
 
           {/* Description */}
           <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="description" className="mb-1 block text-sm font-medium text-gray-700">
               Descripción *
             </label>
             <textarea
@@ -178,13 +172,15 @@ export function ProductForm({
               value={formData.description}
               onChange={handleChange}
               rows={5}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              className={`w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                 errors.description ? "border-red-500" : "border-gray-300"
               }`}
               placeholder="Describe las características del producto..."
             />
-            {errors.description && <p className="text-red-600 text-sm mt-1">{errors.description}</p>}
-            <p className="text-sm text-gray-500 mt-1">
+            {errors.description && (
+              <p className="mt-1 text-sm text-red-600">{errors.description}</p>
+            )}
+            <p className="mt-1 text-sm text-gray-500">
               {formData.description.length} / 5000 caracteres
             </p>
           </div>
@@ -192,7 +188,7 @@ export function ProductForm({
           {/* SKU and Category */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label htmlFor="sku" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="sku" className="mb-1 block text-sm font-medium text-gray-700">
                 SKU *
               </label>
               <input
@@ -201,16 +197,16 @@ export function ProductForm({
                 name="sku"
                 value={formData.sku}
                 onChange={handleChange}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                className={`w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                   errors.sku ? "border-red-500" : "border-gray-300"
                 }`}
                 placeholder="PROD-001"
               />
-              {errors.sku && <p className="text-red-600 text-sm mt-1">{errors.sku}</p>}
+              {errors.sku && <p className="mt-1 text-sm text-red-600">{errors.sku}</p>}
             </div>
 
             <div>
-              <label htmlFor="categoryId" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="categoryId" className="mb-1 block text-sm font-medium text-gray-700">
                 Categoría *
               </label>
               <select
@@ -218,7 +214,7 @@ export function ProductForm({
                 name="categoryId"
                 value={formData.categoryId}
                 onChange={handleChange}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                className={`w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                   errors.categoryId ? "border-red-500" : "border-gray-300"
                 }`}
               >
@@ -229,22 +225,22 @@ export function ProductForm({
                   </option>
                 ))}
               </select>
-              {errors.categoryId && <p className="text-red-600 text-sm mt-1">{errors.categoryId}</p>}
+              {errors.categoryId && (
+                <p className="mt-1 text-sm text-red-600">{errors.categoryId}</p>
+              )}
             </div>
           </div>
         </div>
       </div>
 
       {/* Precios */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
-          Precios e Inventario
-        </h3>
+      <div className="rounded-lg border border-gray-200 bg-white p-6">
+        <h3 className="mb-4 text-lg font-semibold text-gray-900">Precios e Inventario</h3>
 
         <div className="grid grid-cols-2 gap-4">
           {/* Base Price */}
           <div>
-            <label htmlFor="basePrice" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="basePrice" className="mb-1 block text-sm font-medium text-gray-700">
               Precio Base *
             </label>
             <div className="relative">
@@ -256,18 +252,18 @@ export function ProductForm({
                 value={formData.basePrice}
                 onChange={handleChange}
                 step="0.01"
-                className={`w-full pl-8 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                className={`w-full rounded-md border py-2 pl-8 pr-3 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                   errors.basePrice ? "border-red-500" : "border-gray-300"
                 }`}
                 placeholder="0.00"
               />
             </div>
-            {errors.basePrice && <p className="text-red-600 text-sm mt-1">{errors.basePrice}</p>}
+            {errors.basePrice && <p className="mt-1 text-sm text-red-600">{errors.basePrice}</p>}
           </div>
 
           {/* Sale Price */}
           <div>
-            <label htmlFor="salePrice" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="salePrice" className="mb-1 block text-sm font-medium text-gray-700">
               Precio de Oferta (Opcional)
             </label>
             <div className="relative">
@@ -279,7 +275,7 @@ export function ProductForm({
                 value={formData.salePrice}
                 onChange={handleChange}
                 step="0.01"
-                className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-md border border-gray-300 py-2 pl-8 pr-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="0.00"
               />
             </div>
@@ -287,7 +283,7 @@ export function ProductForm({
 
           {/* Cost */}
           <div>
-            <label htmlFor="cost" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="cost" className="mb-1 block text-sm font-medium text-gray-700">
               Costo (Opcional)
             </label>
             <div className="relative">
@@ -299,7 +295,7 @@ export function ProductForm({
                 value={formData.cost}
                 onChange={handleChange}
                 step="0.01"
-                className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-md border border-gray-300 py-2 pl-8 pr-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="0.00"
               />
             </div>
@@ -307,7 +303,7 @@ export function ProductForm({
 
           {/* Stock */}
           <div>
-            <label htmlFor="stock" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="stock" className="mb-1 block text-sm font-medium text-gray-700">
               Stock *
             </label>
             <input
@@ -316,21 +312,19 @@ export function ProductForm({
               name="stock"
               value={formData.stock}
               onChange={handleChange}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              className={`w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                 errors.stock ? "border-red-500" : "border-gray-300"
               }`}
               placeholder="0"
             />
-            {errors.stock && <p className="text-red-600 text-sm mt-1">{errors.stock}</p>}
+            {errors.stock && <p className="mt-1 text-sm text-red-600">{errors.stock}</p>}
           </div>
         </div>
       </div>
 
       {/* Publishing */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
-          Publicación
-        </h3>
+      <div className="rounded-lg border border-gray-200 bg-white p-6">
+        <h3 className="mb-4 text-lg font-semibold text-gray-900">Publicación</h3>
 
         <label className="flex items-center gap-2">
           <input
@@ -340,11 +334,9 @@ export function ProductForm({
             onChange={handleChange}
             className="rounded border-gray-300"
           />
-          <span className="text-sm text-gray-700">
-            Publicar producto inmediatamente
-          </span>
+          <span className="text-sm text-gray-700">Publicar producto inmediatamente</span>
         </label>
-        <p className="text-sm text-gray-500 mt-2">
+        <p className="mt-2 text-sm text-gray-500">
           Los productos no publicados se guardarán como borradores
         </p>
       </div>
@@ -354,17 +346,17 @@ export function ProductForm({
         <button
           type="button"
           onClick={() => router.back()}
-          className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
+          className="rounded-md border border-gray-300 px-6 py-2 text-gray-700 hover:bg-gray-50"
         >
-          <X className="w-4 h-4 inline mr-2" />
+          <X className="mr-2 inline h-4 w-4" />
           Cancelar
         </button>
         <button
           type="submit"
           disabled={isSubmitting}
-          className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="rounded-md bg-blue-600 px-6 py-2 text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          <Save className="w-4 h-4 inline mr-2" />
+          <Save className="mr-2 inline h-4 w-4" />
           {isSubmitting ? "Guardando..." : productId ? "Actualizar Producto" : "Crear Producto"}
         </button>
       </div>

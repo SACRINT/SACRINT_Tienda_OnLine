@@ -1,14 +1,6 @@
 "use client";
 
-import {
-  Clock,
-  CreditCard,
-  Package,
-  Truck,
-  CheckCircle,
-  XCircle,
-  MapPin,
-} from "lucide-react";
+import { Clock, CreditCard, Package, Truck, CheckCircle, XCircle, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface TimelineEvent {
@@ -72,10 +64,7 @@ const defaultEvents: TimelineEvent[] = [
   },
 ];
 
-export function OrderTimeline({
-  events = defaultEvents,
-  currentStatus,
-}: OrderTimelineProps) {
+export function OrderTimeline({ events = defaultEvents, currentStatus }: OrderTimelineProps) {
   const formatDate = (date: Date) =>
     new Date(date).toLocaleDateString("es-MX", {
       day: "2-digit",
@@ -99,17 +88,13 @@ export function OrderTimeline({
             <div className="flex flex-col items-center">
               <div
                 className={cn(
-                  "w-10 h-10 rounded-full border-2 flex items-center justify-center",
-                  isCurrent
-                    ? config?.color
-                    : "text-muted-foreground bg-muted border-border",
+                  "flex h-10 w-10 items-center justify-center rounded-full border-2",
+                  isCurrent ? config?.color : "border-border bg-muted text-muted-foreground",
                 )}
               >
                 <Icon className="h-5 w-5" />
               </div>
-              {!isLast && (
-                <div className="w-0.5 h-full min-h-[40px] bg-border mt-2" />
-              )}
+              {!isLast && <div className="mt-2 h-full min-h-[40px] w-0.5 bg-border" />}
             </div>
 
             {/* Content */}
@@ -120,23 +105,18 @@ export function OrderTimeline({
                     {config?.label || event.status}
                   </p>
                   {event.description && (
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {event.description}
-                    </p>
+                    <p className="mt-1 text-sm text-muted-foreground">{event.description}</p>
                   )}
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  {formatDate(event.timestamp)}
-                </p>
+                <p className="text-xs text-muted-foreground">{formatDate(event.timestamp)}</p>
               </div>
 
               {/* Additional Info */}
               {(event.trackingNumber || event.location) && (
-                <div className="mt-2 p-3 bg-muted rounded-lg text-sm space-y-1">
+                <div className="mt-2 space-y-1 rounded-lg bg-muted p-3 text-sm">
                   {event.trackingNumber && (
                     <p>
-                      <span className="font-medium">Guía:</span>{" "}
-                      {event.trackingNumber}
+                      <span className="font-medium">Guía:</span> {event.trackingNumber}
                     </p>
                   )}
                   {event.location && (
@@ -160,18 +140,17 @@ interface StatusProgressProps {
   currentStatus: string;
 }
 
-const statusOrder = ["PENDING", "PAID", "PROCESSING", "SHIPPED", "DELIVERED"];
+const statusOrder = ["PENDING", "PROCESSING", "PROCESSING", "SHIPPED", "DELIVERED"];
 
 export function OrderStatusProgress({ currentStatus }: StatusProgressProps) {
   const currentIndex = statusOrder.indexOf(currentStatus);
-  const isCancelled =
-    currentStatus === "CANCELLED" || currentStatus === "FAILED";
+  const isCancelled = currentStatus === "CANCELLED" || currentStatus === "FAILED";
 
   if (isCancelled) {
     return (
-      <div className="p-4 bg-error/10 rounded-lg text-center">
-        <XCircle className="h-8 w-8 mx-auto text-error mb-2" />
-        <p className="font-medium text-error">
+      <div className="bg-error/10 rounded-lg p-4 text-center">
+        <XCircle className="text-error mx-auto mb-2 h-8 w-8" />
+        <p className="text-error font-medium">
           {currentStatus === "CANCELLED" ? "Orden Cancelada" : "Orden Fallida"}
         </p>
       </div>
@@ -197,28 +176,26 @@ export function OrderStatusProgress({ currentStatus }: StatusProgressProps) {
             >
               <div
                 className={cn(
-                  "w-10 h-10 rounded-full flex items-center justify-center mb-2",
+                  "mb-2 flex h-10 w-10 items-center justify-center rounded-full",
                   isCompleted
                     ? isCurrent
-                      ? "bg-primary text-primary-foreground"
+                      ? "text-primary-foreground bg-primary"
                       : "bg-primary/20 text-primary"
                     : "bg-muted",
                 )}
               >
                 <Icon className="h-5 w-5" />
               </div>
-              <span className="text-xs text-center hidden sm:block">
-                {config?.label}
-              </span>
+              <span className="hidden text-center text-xs sm:block">{config?.label}</span>
             </div>
           );
         })}
       </div>
 
       {/* Progress Bar */}
-      <div className="relative h-2 bg-muted rounded-full overflow-hidden">
+      <div className="relative h-2 overflow-hidden rounded-full bg-muted">
         <div
-          className="absolute top-0 left-0 h-full bg-primary transition-all duration-500"
+          className="absolute left-0 top-0 h-full bg-primary transition-all duration-500"
           style={{
             width: `${((currentIndex + 1) / statusOrder.length) * 100}%`,
           }}

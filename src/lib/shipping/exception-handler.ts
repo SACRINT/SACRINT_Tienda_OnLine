@@ -33,11 +33,7 @@ export function detectException(tracking: TrackingInfo): ShippingException | nul
   const status = lastEvent.status.toLowerCase();
 
   // Returned to sender
-  if (
-    message.includes("return") ||
-    message.includes("devuelto") ||
-    status.includes("returned")
-  ) {
+  if (message.includes("return") || message.includes("devuelto") || status.includes("returned")) {
     return {
       type: "RETURNED_TO_SENDER",
       message: "Package returned to sender",
@@ -91,11 +87,7 @@ export function detectException(tracking: TrackingInfo): ShippingException | nul
   }
 
   // Weather delay
-  if (
-    message.includes("weather") ||
-    message.includes("clima") ||
-    message.includes("storm")
-  ) {
+  if (message.includes("weather") || message.includes("clima") || message.includes("storm")) {
     return {
       type: "WEATHER_DELAY",
       message: "Delayed due to weather conditions",
@@ -106,11 +98,7 @@ export function detectException(tracking: TrackingInfo): ShippingException | nul
   }
 
   // Customs delay
-  if (
-    message.includes("customs") ||
-    message.includes("aduana") ||
-    message.includes("clearance")
-  ) {
+  if (message.includes("customs") || message.includes("aduana") || message.includes("clearance")) {
     return {
       type: "CUSTOMS_DELAY",
       message: "Delayed in customs clearance",
@@ -126,7 +114,7 @@ export function detectException(tracking: TrackingInfo): ShippingException | nul
 export async function handleException(
   orderId: string,
   shippingLabelId: string,
-  exception: ShippingException
+  exception: ShippingException,
 ): Promise<void> {
   console.log(`[EXCEPTION] Handling ${exception.type} for order ${orderId}`);
 
@@ -188,11 +176,13 @@ export async function handleException(
 }
 
 async function notifyCustomerOfException(order: any, exception: ShippingException): Promise<void> {
-  console.log(`[EMAIL] Sending exception notification to ${order.user?.email || order.customerEmail}`);
+  console.log(
+    `[EMAIL] Sending exception notification to ${order.customerEmail || order.customerEmail}`,
+  );
 
   // TODO: Implement email via Resend
   const emailContent = {
-    to: order.user?.email || order.customerEmail,
+    to: order.customerEmail || order.customerEmail,
     subject: `Update on your order ${order.orderNumber}`,
     html: `
       <h2>Shipping Update</h2>
@@ -223,11 +213,13 @@ async function alertStoreOwner(order: any, exception: ShippingException): Promis
 }
 
 // Get exception history for an order
-export async function getExceptionHistory(orderId: string): Promise<Array<{
-  timestamp: string;
-  type: string;
-  message: string;
-}>> {
+export async function getExceptionHistory(orderId: string): Promise<
+  Array<{
+    timestamp: string;
+    type: string;
+    message: string;
+  }>
+> {
   const notes = await db.orderNote.findMany({
     where: {
       orderId,

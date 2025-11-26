@@ -20,15 +20,17 @@ import { z } from "zod";
 const createSavedSearchSchema = z.object({
   name: z.string().min(1).max(100),
   query: z.string().min(0).max(200),
-  filters: z.object({
-    categoryId: z.string().cuid().optional(),
-    minPrice: z.number().positive().optional(),
-    maxPrice: z.number().positive().optional(),
-    minRating: z.number().min(1).max(5).optional(),
-    inStock: z.boolean().optional(),
-    featured: z.boolean().optional(),
-    tags: z.array(z.string()).optional(),
-  }).optional(),
+  filters: z
+    .object({
+      categoryId: z.string().cuid().optional(),
+      minPrice: z.number().positive().optional(),
+      maxPrice: z.number().positive().optional(),
+      minRating: z.number().min(1).max(5).optional(),
+      inStock: z.boolean().optional(),
+      featured: z.boolean().optional(),
+      tags: z.array(z.string()).optional(),
+    })
+    .optional(),
   notifyOnNewResults: z.boolean().default(false),
 });
 
@@ -39,19 +41,13 @@ export async function GET(req: NextRequest) {
     const session = await auth();
 
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: "No autenticado" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "No autenticado" }, { status: 401 });
     }
 
     const { tenantId } = session.user;
 
     if (!tenantId) {
-      return NextResponse.json(
-        { error: "Usuario sin tenant asignado" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Usuario sin tenant asignado" }, { status: 400 });
     }
 
     // Obtener búsquedas guardadas del usuario
@@ -82,10 +78,7 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     console.error("Error fetching saved searches:", error);
-    return NextResponse.json(
-      { error: "Error al obtener búsquedas guardadas" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Error al obtener búsquedas guardadas" }, { status: 500 });
   }
 }
 
@@ -96,19 +89,13 @@ export async function POST(req: NextRequest) {
     const session = await auth();
 
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: "No autenticado" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "No autenticado" }, { status: 401 });
     }
 
     const { tenantId } = session.user;
 
     if (!tenantId) {
-      return NextResponse.json(
-        { error: "Usuario sin tenant asignado" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Usuario sin tenant asignado" }, { status: 400 });
     }
 
     // Validar datos
@@ -127,9 +114,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           error: "Límite alcanzado",
-          message: "Puedes tener máximo 20 búsquedas guardadas. Elimina alguna para crear una nueva.",
+          message:
+            "Puedes tener máximo 20 búsquedas guardadas. Elimina alguna para crear una nueva.",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -153,11 +141,14 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    return NextResponse.json({
-      success: true,
-      savedSearch,
-      message: "Búsqueda guardada exitosamente",
-    }, { status: 201 });
+    return NextResponse.json(
+      {
+        success: true,
+        savedSearch,
+        message: "Búsqueda guardada exitosamente",
+      },
+      { status: 201 },
+    );
   } catch (error) {
     console.error("Error creating saved search:", error);
 
@@ -165,15 +156,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           error: "Datos inválidos",
-          details: error.errors,
+          details: error.issues,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    return NextResponse.json(
-      { error: "Error al crear búsqueda guardada" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Error al crear búsqueda guardada" }, { status: 500 });
   }
 }

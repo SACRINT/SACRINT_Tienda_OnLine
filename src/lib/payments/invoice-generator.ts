@@ -20,7 +20,9 @@ export interface InvoiceData {
   total: number;
 }
 
-export async function generateInvoice(orderId: string): Promise<{ invoiceNumber: string; pdfUrl: string }> {
+export async function generateInvoice(
+  orderId: string,
+): Promise<{ invoiceNumber: string; pdfUrl: string }> {
   const order = await db.order.findUnique({
     where: { id: orderId },
     include: {
@@ -41,14 +43,14 @@ export async function generateInvoice(orderId: string): Promise<{ invoiceNumber:
       subtotal: order.subtotal,
       tax: order.tax,
       total: order.total,
-      status: "PAID",
+      status: "PROCESSING",
     },
   });
 
   const pdfUrl = await generateInvoicePDF({
     orderId: order.id,
     customerName: order.user?.name || "Guest",
-    customerEmail: order.user?.email || order.customerEmail || "",
+    customerEmail: order.customerEmail || order.customerEmail || "",
     items: order.items.map((item) => ({
       description: item.product.name,
       quantity: item.quantity,
@@ -83,5 +85,5 @@ export async function sendInvoiceEmail(invoiceId: string): Promise<void> {
   if (!invoice) return;
 
   // TODO: Send email with invoice PDF attached
-  console.log(`Invoice ${invoice.number} sent to ${invoice.order.user?.email}`);
+  console.log(`Invoice ${invoice.number} sent to ${invoice.order.customerEmail}`);
 }

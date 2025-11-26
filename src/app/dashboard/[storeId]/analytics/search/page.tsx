@@ -11,8 +11,7 @@
 
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { requireAuth } from "@/lib/auth/require-auth";
-import { getStoreOrThrow } from "@/lib/db/tenant";
+import { requireAuth, getStoreOrThrow } from "@/lib/auth/require-auth";
 import { db } from "@/lib/db";
 import { Search, TrendingUp, AlertCircle, BarChart3 } from "lucide-react";
 
@@ -58,7 +57,7 @@ async function getTopSearches(tenantId: string, limit: number = 10, days: number
     take: limit,
   });
 
-  return searches.map(s => ({
+  return searches.map((s) => ({
     query: s.query,
     count: s._count.query,
     avgResults: Math.round(s._avg.resultsCount || 0),
@@ -91,7 +90,7 @@ async function getZeroResultSearches(tenantId: string, limit: number = 10, days:
     take: limit,
   });
 
-  return searches.map(s => ({
+  return searches.map((s) => ({
     query: s.query,
     count: s._count.query,
   }));
@@ -114,14 +113,16 @@ async function getSearchMetrics(tenantId: string, days: number = 7) {
     }),
 
     // Búsquedas únicas
-    db.searchQuery.groupBy({
-      by: ["query"],
-      where: {
-        tenantId,
-        createdAt: { gte: since },
-        query: { not: "" },
-      },
-    }).then(r => r.length),
+    db.searchQuery
+      .groupBy({
+        by: ["query"],
+        where: {
+          tenantId,
+          createdAt: { gte: since },
+          query: { not: "" },
+        },
+      })
+      .then((r) => r.length),
 
     // Búsquedas sin resultados
     db.searchQuery.count({
@@ -179,7 +180,7 @@ export default async function SearchAnalyticsPage({
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Analytics de Búsqueda</h1>
-          <p className="text-gray-600 mt-1">
+          <p className="mt-1 text-gray-600">
             Analiza qué buscan tus clientes y optimiza tu catálogo
           </p>
         </div>
@@ -188,30 +189,30 @@ export default async function SearchAnalyticsPage({
         <div className="flex gap-2">
           <a
             href={`/dashboard/${storeId}/analytics/search?period=7d`}
-            className={`px-4 py-2 rounded-lg border ${
+            className={`rounded-lg border px-4 py-2 ${
               period === "7d"
-                ? "bg-blue-600 text-white border-blue-600"
-                : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                ? "border-blue-600 bg-blue-600 text-white"
+                : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
             }`}
           >
             7 días
           </a>
           <a
             href={`/dashboard/${storeId}/analytics/search?period=30d`}
-            className={`px-4 py-2 rounded-lg border ${
+            className={`rounded-lg border px-4 py-2 ${
               period === "30d"
-                ? "bg-blue-600 text-white border-blue-600"
-                : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                ? "border-blue-600 bg-blue-600 text-white"
+                : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
             }`}
           >
             30 días
           </a>
           <a
             href={`/dashboard/${storeId}/analytics/search?period=90d`}
-            className={`px-4 py-2 rounded-lg border ${
+            className={`rounded-lg border px-4 py-2 ${
               period === "90d"
-                ? "bg-blue-600 text-white border-blue-600"
-                : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                ? "border-blue-600 bg-blue-600 text-white"
+                : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
             }`}
           >
             90 días
@@ -220,11 +221,11 @@ export default async function SearchAnalyticsPage({
       </div>
 
       {/* Metrics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white rounded-lg border p-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div className="rounded-lg border bg-white p-6">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-blue-100 rounded-lg">
-              <Search className="w-6 h-6 text-blue-600" />
+            <div className="rounded-lg bg-blue-100 p-3">
+              <Search className="h-6 w-6 text-blue-600" />
             </div>
             <div>
               <p className="text-sm text-gray-600">Total Búsquedas</p>
@@ -233,10 +234,10 @@ export default async function SearchAnalyticsPage({
           </div>
         </div>
 
-        <div className="bg-white rounded-lg border p-6">
+        <div className="rounded-lg border bg-white p-6">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-green-100 rounded-lg">
-              <TrendingUp className="w-6 h-6 text-green-600" />
+            <div className="rounded-lg bg-green-100 p-3">
+              <TrendingUp className="h-6 w-6 text-green-600" />
             </div>
             <div>
               <p className="text-sm text-gray-600">Búsquedas Únicas</p>
@@ -245,10 +246,10 @@ export default async function SearchAnalyticsPage({
           </div>
         </div>
 
-        <div className="bg-white rounded-lg border p-6">
+        <div className="rounded-lg border bg-white p-6">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-red-100 rounded-lg">
-              <AlertCircle className="w-6 h-6 text-red-600" />
+            <div className="rounded-lg bg-red-100 p-3">
+              <AlertCircle className="h-6 w-6 text-red-600" />
             </div>
             <div>
               <p className="text-sm text-gray-600">Sin Resultados</p>
@@ -259,10 +260,10 @@ export default async function SearchAnalyticsPage({
           </div>
         </div>
 
-        <div className="bg-white rounded-lg border p-6">
+        <div className="rounded-lg border bg-white p-6">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-purple-100 rounded-lg">
-              <BarChart3 className="w-6 h-6 text-purple-600" />
+            <div className="rounded-lg bg-purple-100 p-3">
+              <BarChart3 className="h-6 w-6 text-purple-600" />
             </div>
             <div>
               <p className="text-sm text-gray-600">Promedio Resultados</p>
@@ -272,31 +273,27 @@ export default async function SearchAnalyticsPage({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Top Searches */}
-        <div className="bg-white rounded-lg border">
-          <div className="p-6 border-b">
+        <div className="rounded-lg border bg-white">
+          <div className="border-b p-6">
             <h2 className="text-xl font-bold">Top Búsquedas</h2>
-            <p className="text-sm text-gray-600 mt-1">
+            <p className="mt-1 text-sm text-gray-600">
               Las búsquedas más frecuentes de tus clientes
             </p>
           </div>
           <div className="p-6">
             {topSearches.length === 0 ? (
-              <p className="text-gray-500 text-center py-8">
-                No hay datos de búsquedas aún
-              </p>
+              <p className="py-8 text-center text-gray-500">No hay datos de búsquedas aún</p>
             ) : (
               <div className="space-y-3">
                 {topSearches.map((search, index) => (
                   <div
                     key={search.query}
-                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                    className="flex items-center justify-between rounded-lg bg-gray-50 p-3 transition-colors hover:bg-gray-100"
                   >
                     <div className="flex items-center gap-3">
-                      <span className="text-lg font-bold text-gray-400 w-6">
-                        {index + 1}
-                      </span>
+                      <span className="w-6 text-lg font-bold text-gray-400">{index + 1}</span>
                       <div>
                         <p className="font-medium">{search.query}</p>
                         <p className="text-sm text-gray-600">
@@ -304,7 +301,7 @@ export default async function SearchAnalyticsPage({
                         </p>
                       </div>
                     </div>
-                    <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
+                    <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-700">
                       {search.count} búsquedas
                     </span>
                   </div>
@@ -315,43 +312,37 @@ export default async function SearchAnalyticsPage({
         </div>
 
         {/* Zero Result Searches */}
-        <div className="bg-white rounded-lg border">
-          <div className="p-6 border-b">
+        <div className="rounded-lg border bg-white">
+          <div className="border-b p-6">
             <h2 className="text-xl font-bold">Búsquedas sin Resultados</h2>
-            <p className="text-sm text-gray-600 mt-1">
-              Oportunidades para mejorar tu catálogo
-            </p>
+            <p className="mt-1 text-sm text-gray-600">Oportunidades para mejorar tu catálogo</p>
           </div>
           <div className="p-6">
             {zeroResultSearches.length === 0 ? (
-              <div className="text-center py-8">
-                <p className="text-green-600 font-medium">¡Excelente!</p>
-                <p className="text-gray-500 text-sm mt-1">
-                  Todas las búsquedas tienen resultados
-                </p>
+              <div className="py-8 text-center">
+                <p className="font-medium text-green-600">¡Excelente!</p>
+                <p className="mt-1 text-sm text-gray-500">Todas las búsquedas tienen resultados</p>
               </div>
             ) : (
               <div className="space-y-3">
                 {zeroResultSearches.map((search, index) => (
                   <div
                     key={search.query}
-                    className="flex items-center justify-between p-3 bg-red-50 rounded-lg"
+                    className="flex items-center justify-between rounded-lg bg-red-50 p-3"
                   >
                     <div className="flex items-center gap-3">
-                      <span className="text-lg font-bold text-gray-400 w-6">
-                        {index + 1}
-                      </span>
+                      <span className="w-6 text-lg font-bold text-gray-400">{index + 1}</span>
                       <p className="font-medium text-red-900">{search.query}</p>
                     </div>
-                    <span className="px-3 py-1 bg-red-200 text-red-800 rounded-full text-sm font-medium">
+                    <span className="rounded-full bg-red-200 px-3 py-1 text-sm font-medium text-red-800">
                       {search.count} intentos
                     </span>
                   </div>
                 ))}
-                <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <div className="mt-4 rounded-lg border border-yellow-200 bg-yellow-50 p-4">
                   <p className="text-sm text-yellow-800">
-                    <strong>💡 Tip:</strong> Considera agregar productos relacionados con
-                    estas búsquedas para mejorar la experiencia de tus clientes.
+                    <strong>💡 Tip:</strong> Considera agregar productos relacionados con estas
+                    búsquedas para mejorar la experiencia de tus clientes.
                   </p>
                 </div>
               </div>

@@ -2,14 +2,14 @@
  * StructuredData Component
  * Semanas 31-32: SEO Avanzado
  *
- * Componente para insertar JSON-LD structured data en páginas Next.js
- * Soporta múltiples schemas y validación automática
+ * Componente para insertar JSON-LD structured data en paginas Next.js
+ * Soporta multiples schemas y validacion automatica
  *
  * @example
- * // Uso básico
+ * // Uso basico
  * <StructuredData schema={productSchema} />
  *
- * // Múltiples schemas
+ * // Multiples schemas
  * <StructuredData schemas={[organizationSchema, websiteSchema]} />
  */
 
@@ -35,18 +35,18 @@ export function StructuredData({ schema, schemas, validate = false }: Structured
     finalSchema = schema;
   } else {
     // No schema provided
-    if (process.env.NODE_ENV === 'development') {
-      console.warn('StructuredData component: No schema or schemas provided');
+    if (process.env.NODE_ENV === "development") {
+      console.warn("StructuredData component: No schema or schemas provided");
     }
     return null;
   }
 
   // Optional validation in development
-  if (validate && process.env.NODE_ENV === 'development') {
+  if (validate && process.env.NODE_ENV === "development") {
     try {
       JSON.parse(toJSONLD(finalSchema));
     } catch (error) {
-      console.error('StructuredData validation error:', error);
+      console.error("StructuredData validation error:", error);
       return null;
     }
   }
@@ -61,7 +61,7 @@ export function StructuredData({ schema, schemas, validate = false }: Structured
 
 /**
  * Hook para usar structured data en componentes
- * Útil cuando necesitas el JSON-LD como string
+ * Util cuando necesitas el JSON-LD como string
  */
 export function useStructuredData(schema: object): string {
   return toJSONLD(schema);

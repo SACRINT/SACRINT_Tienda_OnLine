@@ -10,10 +10,7 @@ import { logger } from "@/lib/monitoring/logger";
 // Force dynamic rendering
 export const dynamic = "force-dynamic";
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await auth();
 
@@ -22,20 +19,14 @@ export async function POST(
     }
 
     // Only STORE_OWNER and SUPER_ADMIN can duplicate products
-    if (
-      session.user.role !== "STORE_OWNER" &&
-      session.user.role !== "SUPER_ADMIN"
-    ) {
+    if (session.user.role !== "STORE_OWNER" && session.user.role !== "SUPER_ADMIN") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const tenantId = await getCurrentUserTenantId();
 
     if (!tenantId) {
-      return NextResponse.json(
-        { error: "No tenant assigned to user" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "No tenant assigned to user" }, { status: 400 });
     }
 
     // Get the original product with all relations
@@ -48,11 +39,9 @@ export async function POST(
         images: true,
         variants: {
           include: {
-            images: true,
-            attributes: true,
+            image: true,
           },
         },
-        tags: true,
       },
     });
 
@@ -62,9 +51,7 @@ export async function POST(
 
     // Generate unique SKU
     const timestamp = Date.now();
-    const newSku = original.sku
-      ? `${original.sku}-COPY-${timestamp}`
-      : `COPY-${timestamp}`;
+    const newSku = original.sku ? `${original.sku}-COPY-${timestamp}` : `COPY-${timestamp}`;
     const newSlug = `${original.slug}-copy-${timestamp}`;
 
     // Create duplicated product
@@ -77,52 +64,37 @@ export async function POST(
         sku: newSku,
         basePrice: original.basePrice,
         salePrice: original.salePrice,
-        cost: original.cost,
         stock: 0, // Reset stock for safety
         categoryId: original.categoryId,
         published: false, // Unpublish duplicate for review
         featured: false,
-        metaTitle: original.metaTitle,
-        metaDescription: original.metaDescription,
         weight: original.weight,
-        dimensions: original.dimensions,
+        length: original.length,
+        width: original.width,
+        height: original.height,
         // Create images
         images: {
-          create: original.images.map((img) => ({
+          create: original.images.map((img, index) => ({
             url: img.url,
             alt: img.alt,
-            isPrimary: img.isPrimary,
+            order: index,
           })),
         },
         // Create variants if they exist
         variants: original.variants.length
           ? {
               create: original.variants.map((variant) => ({
-                name: variant.name,
+                size: variant.size,
+                color: variant.color,
+                model: variant.model,
                 sku: `${variant.sku}-COPY-${timestamp}`,
                 price: variant.price,
                 stock: 0, // Reset variant stock
-                images: {
-                  create: variant.images.map((img) => ({
-                    url: img.url,
-                    alt: img.alt,
-                  })),
-                },
-                attributes: {
-                  create: variant.attributes.map((attr) => ({
-                    name: attr.name,
-                    value: attr.value,
-                  })),
-                },
               })),
             }
           : undefined,
-        // Create tags
-        tags: {
-          create: original.tags.map((tag) => ({
-            name: tag.name,
-          })),
-        },
+        // Copy tags
+        tags: original.tags || [],
       },
       include: {
         images: true,
@@ -130,12 +102,15 @@ export async function POST(
       },
     });
 
-    logger.info("Product duplicated successfully", {
-      originalId: original.id,
-      duplicatedId: duplicated.id,
-      tenantId,
-      userId: session.user.id,
-    });
+    logger.info(
+      {
+        originalId: original.id,
+        duplicatedId: duplicated.id,
+        tenantId,
+        userId: session.user.id,
+      },
+      "Product duplicated successfully",
+    );
 
     return NextResponse.json({
       success: true,
@@ -143,14 +118,17 @@ export async function POST(
       product: duplicated,
     });
   } catch (error: any) {
-    logger.error("Error duplicating product", {
-      error: error.message,
-      productId: params.id,
-    });
+    logger.error(
+      {
+        error: error.message,
+        productId: params.id,
+      },
+      "Error duplicating product",
+    );
 
     return NextResponse.json(
       { error: "Failed to duplicate product", details: error.message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
