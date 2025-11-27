@@ -5,7 +5,9 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/server";
-import { getAnalyticsDashboard, getPaymentAnalytics, getCampaignAnalytics } from "@/lib/analytics";
+import { getDashboardManager } from "@/lib/analytics/dashboard";
+import { getPaymentAnalytics } from "@/lib/analytics/payment-analytics";
+import { getCampaignAnalytics } from "@/lib/analytics/campaign-analytics";
 import { logger } from "@/lib/monitoring";
 
 export async function GET(request: NextRequest) {
@@ -22,7 +24,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "tenantId is required" }, { status: 400 });
     }
 
-    const dashboard = getAnalyticsDashboard();
+    const dashboard = getDashboardManager();
 
     if (dashboardId) {
       const dashboardData = dashboard.getDashboard(dashboardId);
@@ -76,7 +78,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { dashboardId, name, layout, widgets } = body;
 
-    const dashboard = getAnalyticsDashboard();
+    const dashboard = getDashboardManager();
     const newDashboard = dashboard.createDashboard(name, layout, 2, 6);
 
     if (widgets && Array.isArray(widgets)) {
