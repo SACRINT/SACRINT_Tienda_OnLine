@@ -1,0 +1,13 @@
+Deployment Timestamp: 2025-11-27 09:15:00 UTC
+Commit Purpose: Force Vercel webhook to detect and deploy latest changes
+Status: Ready for production deployment
+
+Latest changes included:
+- New pages: blog, security, contact, cookies, privacy, terms
+- Fixed Image component props (legacy → modern API)
+- Fixed TypeScript parsing errors (JSX files)
+- Fixed syntax errors (property name spaces)
+- Generated PWA icons and assets
+- Cleared .next cache for fresh build
+
+All local tests pass: npm run build ✅
