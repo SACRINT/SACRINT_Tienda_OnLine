@@ -16,7 +16,15 @@
       "Bash(1)",
       "mcp__chrome-devtools__list_pages",
       "Bash(timeout 240 npm run build)",
-      "Bash(timeout 300 npm run build:*)"
+      "Bash(timeout 300 npm run build:*)",
+      "Bash(for page in blog security contact cookies privacy terms)",
+      "Bash(do echo \"Probando /$page...\" curl -s http://localhost:3000/$page)",
+      "Bash(echo:*)",
+      "Bash(echo \"✗ Error en /$page\" done)",
+      "Bash(curl:*)",
+      "Bash(tasklist:*)",
+      "Bash(node generate-icons.js:*)",
+      "Bash(node generate-additional-icons.js:*)"
     ],
     "deny": [],
     "ask": []

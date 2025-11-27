@@ -41,3 +41,50 @@ export function getQueryOptimizationManager(): QueryOptimizationManager {
   }
   return globalQueryOptimizationManager;
 }
+
+/**
+ * Wrapper para ejecutar funciones con medición de tiempo
+ * @param label Nombre de la operación a medir
+ * @param fn Función a ejecutar
+ * @returns Resultado de la función
+ */
+export async function withTiming<T>(label: string, fn: () => Promise<T>): Promise<T> {
+  const startTime = performance.now();
+  try {
+    const result = await fn();
+    const endTime = performance.now();
+    const executionTime = endTime - startTime;
+
+    const manager = getQueryOptimizationManager();
+    if (executionTime > 100) {
+      // Reportar queries que tardan más de 100ms
+      manager.detectSlowQuery(label, executionTime);
+    }
+
+    logger.debug(
+      {
+        type: "query_timing",
+        label,
+        executionTime: `${executionTime.toFixed(2)}ms`,
+      },
+      "Operación completada",
+    );
+
+    return result;
+  } catch (error) {
+    const endTime = performance.now();
+    const executionTime = endTime - startTime;
+
+    logger.error(
+      {
+        type: "query_error",
+        label,
+        executionTime: `${executionTime.toFixed(2)}ms`,
+        error: error instanceof Error ? error.message : String(error),
+      },
+      "Error en operación",
+    );
+
+    throw error;
+  }
+}

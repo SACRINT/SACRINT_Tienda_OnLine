@@ -30,12 +30,12 @@ export const SCREEN_READER_UTILITIES = {
    */
   ariaLive: {
     polite: {
-      'aria-live': 'polite',
-      'aria-atomic': true,
+      "aria-live": "polite",
+      "aria-atomic": true,
     },
     assertive: {
-      'aria-live': 'assertive',
-      'aria-atomic': true,
+      "aria-live": "assertive",
+      "aria-atomic": true,
     },
   },
 };
@@ -45,25 +45,25 @@ export const SCREEN_READER_UTILITIES = {
  */
 export function announceToScreenReader(
   message: string,
-  priority: 'polite' | 'assertive' = 'polite'
+  priority: "polite" | "assertive" = "polite",
 ) {
-  let container = document.getElementById('sr-announcer');
+  let container = document.getElementById("sr-announcer");
 
   if (!container) {
-    container = document.createElement('div');
-    container.id = 'sr-announcer';
-    container.setAttribute('aria-live', priority);
-    container.setAttribute('aria-atomic', 'true');
-    container.className = 'sr-only';
+    container = document.createElement("div");
+    container.id = "sr-announcer";
+    container.setAttribute("aria-live", priority);
+    container.setAttribute("aria-atomic", "true");
+    container.className = "sr-only";
     document.body.appendChild(container);
   }
 
   container.textContent = message;
-  container.setAttribute('aria-live', priority);
+  container.setAttribute("aria-live", priority);
 
   // Limpiar después de que se anuncie
   setTimeout(() => {
-    container!.textContent = '';
+    container!.textContent = "";
   }, 1000);
 }
 
@@ -94,11 +94,11 @@ export const SCREEN_READER_NAV = {
    */
   dropdownAttrs: {
     button: {
-      'aria-haspopup': 'menu',
-      'aria-expanded': false,
+      "aria-haspopup": "menu",
+      "aria-expanded": false,
     },
     menuOpen: {
-      'aria-expanded': true,
+      "aria-expanded": true,
     },
   },
 };
@@ -107,13 +107,13 @@ export const SCREEN_READER_NAV = {
  * Actualizar estado aria-current para navegación
  */
 export function updateAriaCurrentPage(currentPath: string) {
-  document.querySelectorAll('[aria-current]').forEach((el) => {
-    el.removeAttribute('aria-current');
+  document.querySelectorAll("[aria-current]").forEach((el) => {
+    el.removeAttribute("aria-current");
   });
 
   const activeLink = document.querySelector(`a[href="${currentPath}"]`);
   if (activeLink) {
-    activeLink.setAttribute('aria-current', 'page');
+    activeLink.setAttribute("aria-current", "page");
   }
 }
 
@@ -124,10 +124,10 @@ export function describeFormError(fieldId: string, errorMessage: string) {
   let errorContainer = document.getElementById(`${fieldId}-error`);
 
   if (!errorContainer) {
-    errorContainer = document.createElement('div');
+    errorContainer = document.createElement("div");
     errorContainer.id = `${fieldId}-error`;
-    errorContainer.className = 'error-message sr-only';
-    errorContainer.setAttribute('role', 'alert');
+    errorContainer.className = "error-message sr-only";
+    errorContainer.setAttribute("role", "alert");
     const field = document.getElementById(fieldId);
     field?.parentElement?.appendChild(errorContainer);
   }
@@ -137,11 +137,11 @@ export function describeFormError(fieldId: string, errorMessage: string) {
   // Conectar al input con aria-describedby
   const field = document.getElementById(fieldId);
   if (field) {
-    const current = field.getAttribute('aria-describedby') || '';
-    const ids = current.split(' ').filter((id) => id !== errorContainer!.id);
+    const current = field.getAttribute("aria-describedby") || "";
+    const ids = current.split(" ").filter((id) => id !== errorContainer!.id);
     ids.push(errorContainer.id);
-    field.setAttribute('aria-describedby', ids.join(' '));
-    field.setAttribute('aria-invalid', 'true');
+    field.setAttribute("aria-describedby", ids.join(" "));
+    field.setAttribute("aria-invalid", "true");
   }
 }
 
@@ -149,7 +149,7 @@ export function describeFormError(fieldId: string, errorMessage: string) {
  * Describir cambios de estado con aria-live
  */
 export function describeStateChange(message: string) {
-  announceToScreenReader(message, 'assertive');
+  announceToScreenReader(message, "assertive");
 }
 
 /**
@@ -197,20 +197,20 @@ export function validateTableAccessibility(table: HTMLTableElement) {
   const issues: string[] = [];
 
   // Verificar caption
-  if (!table.querySelector('caption')) {
-    issues.push('Tabla sin <caption>');
+  if (!table.querySelector("caption")) {
+    issues.push("Tabla sin <caption>");
   }
 
   // Verificar encabezados con scope
-  table.querySelectorAll('th').forEach((th) => {
-    if (!th.getAttribute('scope')) {
+  table.querySelectorAll("th").forEach((th) => {
+    if (!th.getAttribute("scope")) {
       issues.push(`Encabezado sin scope: "${th.textContent}"`);
     }
   });
 
   // Verificar thead/tbody
-  if (!table.querySelector('thead')) {
-    issues.push('Tabla sin <thead>');
+  if (!table.querySelector("thead")) {
+    issues.push("Tabla sin <thead>");
   }
 
   return { valid: issues.length === 0, issues };
@@ -255,12 +255,12 @@ export const LIST_ACCESSIBILITY = {
  * Anuncios de página cargada
  */
 export function announcePageLoaded(pageName: string) {
-  announceToScreenReader(`${pageName} cargada`, 'polite');
+  announceToScreenReader(`${pageName} cargada`, "polite");
 }
 
 /**
  * Anunciar transiciones de página
  */
 export function announcePageTransition(fromPage: string, toPage: string) {
-  announceToScreenReader(`Navegando desde ${fromPage} a ${toPage}`, 'polite');
+  announceToScreenReader(`Navegando desde ${fromPage} a ${toPage}`, "polite");
 }

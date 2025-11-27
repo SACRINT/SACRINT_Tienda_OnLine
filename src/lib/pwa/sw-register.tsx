@@ -3,8 +3,8 @@
  * Semana 30, Tarea 30.2: Registro automático y actualización
  */
 
-const SW_FILE = '/sw.js';
-const SW_VERSION = 'v1.0.0';
+const SW_FILE = "/sw.js";
+const SW_VERSION = "v1.0.0";
 
 interface ServiceWorkerUpdateEvent extends Event {
   registration: ServiceWorkerRegistration;
@@ -20,7 +20,7 @@ interface PWARegistration {
  * Verificar si el navegador soporta Service Workers
  */
 export function isPWASupported(): boolean {
-  return 'serviceWorker' in navigator;
+  return "serviceWorker" in navigator;
 }
 
 /**
@@ -28,32 +28,35 @@ export function isPWASupported(): boolean {
  */
 export async function registerServiceWorker(): Promise<ServiceWorkerRegistration | null> {
   if (!isPWASupported()) {
-    console.warn('[PWA] Service Workers no soportados en este navegador');
+    console.warn("[PWA] Service Workers no soportados en este navegador");
     return null;
   }
 
   try {
-    console.log('[PWA] Registrando Service Worker...', SW_FILE);
+    console.log("[PWA] Registrando Service Worker...", SW_FILE);
 
     const registration = await navigator.serviceWorker.register(SW_FILE, {
-      scope: '/',
+      scope: "/",
     });
 
-    console.log('[PWA] Service Worker registrado exitosamente', registration);
+    console.log("[PWA] Service Worker registrado exitosamente", registration);
 
     // Escuchar actualizaciones
-    registration.addEventListener('updatefound', handleUpdateFound);
+    registration.addEventListener("updatefound", handleUpdateFound);
 
     // Verificar actualizaciones cada 6 horas
-    setInterval(() => {
-      registration.update().catch((error) => {
-        console.error('[PWA] Error verificando actualizaciones:', error);
-      });
-    }, 6 * 60 * 60 * 1000);
+    setInterval(
+      () => {
+        registration.update().catch((error) => {
+          console.error("[PWA] Error verificando actualizaciones:", error);
+        });
+      },
+      6 * 60 * 60 * 1000,
+    );
 
     return registration;
   } catch (error) {
-    console.error('[PWA] Error registrando Service Worker:', error);
+    console.error("[PWA] Error registrando Service Worker:", error);
     return null;
   }
 }
@@ -66,27 +69,27 @@ function handleUpdateFound(this: ServiceWorkerRegistration): void {
 
   if (!newWorker) return;
 
-  console.log('[PWA] Nuevo Service Worker detectado');
+  console.log("[PWA] Nuevo Service Worker detectado");
 
-  newWorker.addEventListener('statechange', () => {
-    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+  newWorker.addEventListener("statechange", () => {
+    if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
       // Nueva versión disponible
-      console.log('[PWA] Nueva versión disponible');
+      console.log("[PWA] Nueva versión disponible");
 
       // Notificar al usuario
       notifyUpdate();
 
       // Emitir evento para que la UI se actualice
       window.dispatchEvent(
-        new CustomEvent('sw-update-available', {
+        new CustomEvent("sw-update-available", {
           detail: { registration: this },
-        })
+        }),
       );
     }
 
-    if (newWorker.state === 'activated') {
-      console.log('[PWA] Service Worker actualizado');
-      window.dispatchEvent(new Event('sw-updated'));
+    if (newWorker.state === "activated") {
+      console.log("[PWA] Service Worker actualizado");
+      window.dispatchEvent(new Event("sw-updated"));
     }
   });
 }
@@ -96,8 +99,8 @@ function handleUpdateFound(this: ServiceWorkerRegistration): void {
  */
 function notifyUpdate(): void {
   // Mostrar notificación en la UI
-  const notification = document.createElement('div');
-  notification.className = 'pwa-update-notification';
+  const notification = document.createElement("div");
+  notification.className = "pwa-update-notification";
   notification.innerHTML = `
     <div style="
       position: fixed;
@@ -158,22 +161,22 @@ function notifyUpdate(): void {
  * Forzar actualización del Service Worker
  */
 export async function forceServiceWorkerUpdate(
-  registration: ServiceWorkerRegistration | null
+  registration: ServiceWorkerRegistration | null,
 ): Promise<void> {
   if (!registration) {
     registration = await navigator.serviceWorker.getRegistration();
   }
 
   if (!registration) {
-    console.error('[PWA] No hay Service Worker registrado');
+    console.error("[PWA] No hay Service Worker registrado");
     return;
   }
 
   try {
     const updated = await registration.update();
-    console.log('[PWA] Actualización forzada completada', updated);
+    console.log("[PWA] Actualización forzada completada", updated);
   } catch (error) {
-    console.error('[PWA] Error forzando actualización:', error);
+    console.error("[PWA] Error forzando actualización:", error);
   }
 }
 
@@ -213,10 +216,10 @@ export async function unregisterServiceWorker(): Promise<void> {
 
     if (registration) {
       const unregistered = await registration.unregister();
-      console.log('[PWA] Service Worker desregistrado:', unregistered);
+      console.log("[PWA] Service Worker desregistrado:", unregistered);
     }
   } catch (error) {
-    console.error('[PWA] Error desregistrando Service Worker:', error);
+    console.error("[PWA] Error desregistrando Service Worker:", error);
   }
 }
 
@@ -225,26 +228,24 @@ export async function unregisterServiceWorker(): Promise<void> {
  */
 export async function postMessageToServiceWorker(data: Record<string, unknown>): Promise<void> {
   if (!isPWASupported() || !navigator.serviceWorker.controller) {
-    console.warn('[PWA] Service Worker no está activo');
+    console.warn("[PWA] Service Worker no está activo");
     return;
   }
 
   navigator.serviceWorker.controller.postMessage(data);
-  console.log('[PWA] Mensaje enviado al Service Worker:', data);
+  console.log("[PWA] Mensaje enviado al Service Worker:", data);
 }
 
 /**
  * Escuchar mensajes del Service Worker
  */
-export function onServiceWorkerMessage(
-  callback: (data: Record<string, unknown>) => void
-): void {
+export function onServiceWorkerMessage(callback: (data: Record<string, unknown>) => void): void {
   if (!isPWASupported()) {
     return;
   }
 
-  navigator.serviceWorker.addEventListener('message', (event) => {
-    console.log('[PWA] Mensaje recibido del Service Worker:', event.data);
+  navigator.serviceWorker.addEventListener("message", (event) => {
+    console.log("[PWA] Mensaje recibido del Service Worker:", event.data);
     callback(event.data);
   });
 }
@@ -254,7 +255,7 @@ export function onServiceWorkerMessage(
  */
 export async function initializeServiceWorker(): Promise<ServiceWorkerRegistration | null> {
   // Solo en client-side
-  if (typeof window === 'undefined') {
+  if (typeof window === "undefined") {
     return null;
   }
 
@@ -262,9 +263,9 @@ export async function initializeServiceWorker(): Promise<ServiceWorkerRegistrati
   const registration = await registerServiceWorker();
 
   // Escuchar cambios en el controlador
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
-    console.log('[PWA] Service Worker controller cambió');
-    window.dispatchEvent(new Event('sw-controller-change'));
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    console.log("[PWA] Service Worker controller cambió");
+    window.dispatchEvent(new Event("sw-controller-change"));
   });
 
   return registration;

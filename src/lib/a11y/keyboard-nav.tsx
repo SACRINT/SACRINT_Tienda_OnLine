@@ -11,16 +11,16 @@
  * - Focus visible en elementos interactivos
  */
 export function setupKeyboardNavigation() {
-  if (typeof document === 'undefined') return;
+  if (typeof document === "undefined") return;
 
   // Skip to main content con Ctrl+K
-  document.addEventListener('keydown', (e) => {
-    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+  document.addEventListener("keydown", (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === "k") {
       e.preventDefault();
-      const mainContent = document.getElementById('main-content');
+      const mainContent = document.getElementById("main-content");
       if (mainContent) {
         mainContent.focus();
-        mainContent.scrollIntoView({ behavior: 'smooth' });
+        mainContent.scrollIntoView({ behavior: "smooth" });
       }
     }
   });
@@ -38,7 +38,7 @@ export function setupKeyboardNavigation() {
  */
 function setupTabTrap(element: HTMLElement) {
   const focusableElements = element.querySelectorAll(
-    'a[href], button, textarea, input, select, [tabindex]:not([tabindex="-1"])'
+    'a[href], button, textarea, input, select, [tabindex]:not([tabindex="-1"])',
   );
 
   if (focusableElements.length === 0) return;
@@ -46,8 +46,8 @@ function setupTabTrap(element: HTMLElement) {
   const firstElement = focusableElements[0] as HTMLElement;
   const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
 
-  element.addEventListener('keydown', (e: KeyboardEvent) => {
-    if (e.key !== 'Tab') return;
+  element.addEventListener("keydown", (e: KeyboardEvent) => {
+    if (e.key !== "Tab") return;
 
     if (e.shiftKey) {
       // Shift + Tab
@@ -99,16 +99,13 @@ export const focusStyles = `
 /**
  * Hook para manejar navegación con teclado en componentes React
  */
-export function useKeyboardNavigation(
-  onEscape?: () => void,
-  onEnter?: () => void
-) {
+export function useKeyboardNavigation(onEscape?: () => void, onEnter?: () => void) {
   return {
     onKeyDown: (e: React.KeyboardEvent) => {
-      if (e.key === 'Escape' && onEscape) {
+      if (e.key === "Escape" && onEscape) {
         onEscape();
       }
-      if (e.key === 'Enter' && onEnter) {
+      if (e.key === "Enter" && onEnter) {
         onEnter();
       }
     },
@@ -164,18 +161,18 @@ export const skipLinksStyles = `
  * Detectar navegación por teclado vs mouse
  */
 export function useKeyboardOnly() {
-  if (typeof document === 'undefined') return;
+  if (typeof document === "undefined") return;
 
   let lastInteractionWasKeyboard = false;
 
-  document.addEventListener('keydown', () => {
+  document.addEventListener("keydown", () => {
     lastInteractionWasKeyboard = true;
-    document.documentElement.classList.add('keyboard-nav');
+    document.documentElement.classList.add("keyboard-nav");
   });
 
-  document.addEventListener('mousedown', () => {
+  document.addEventListener("mousedown", () => {
     lastInteractionWasKeyboard = false;
-    document.documentElement.classList.remove('keyboard-nav');
+    document.documentElement.classList.remove("keyboard-nav");
   });
 
   return () => lastInteractionWasKeyboard;
@@ -185,10 +182,10 @@ export function useKeyboardOnly() {
  * Mantener registro de focus para debugging
  */
 export function enableFocusLogging() {
-  if (typeof document === 'undefined') return;
+  if (typeof document === "undefined") return;
 
-  document.addEventListener('focusin', (e) => {
+  document.addEventListener("focusin", (e) => {
     const target = e.target as HTMLElement;
-    console.log('[Focus]', target.tagName, target.id, target.className);
+    console.log("[Focus]", target.tagName, target.id, target.className);
   });
 }

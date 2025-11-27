@@ -5,7 +5,7 @@
  */
 
 export interface A11yCertification {
-  level: 'A' | 'AA' | 'AAA' | 'FAIL';
+  level: "A" | "AA" | "AAA" | "FAIL";
   score: number;
   date: Date;
   expiresAt: Date;
@@ -19,7 +19,7 @@ export interface A11yCertification {
 /**
  * Generar badge de certificación
  */
-export function generateA11yBadge(level: 'A' | 'AA' | 'AAA' | 'FAIL'): string {
+export function generateA11yBadge(level: "A" | "AA" | "AAA" | "FAIL"): string {
   const badges = {
     A: `
       <svg width="100" height="50" viewBox="0 0 100 50">
@@ -158,7 +158,7 @@ export function generateA11yCertificationReport(cert: A11yCertification): string
       </div>
 
       <div class="expires">
-        <strong>⏰ Válido hasta:</strong> ${cert.expiresAt.toLocaleDateString('es-ES')}
+        <strong>⏰ Válido hasta:</strong> ${cert.expiresAt.toLocaleDateString("es-ES")}
       </div>
 
       <div class="metrics">
@@ -184,7 +184,7 @@ export function generateA11yCertificationReport(cert: A11yCertification): string
         <h2>Detalles de la Certificación</h2>
         <div class="detail-row">
           <span class="label">Fecha de Auditoría:</span>
-          <span class="value">${cert.date.toLocaleDateString('es-ES')}</span>
+          <span class="value">${cert.date.toLocaleDateString("es-ES")}</span>
         </div>
         <div class="detail-row">
           <span class="label">Auditor:</span>
@@ -209,7 +209,7 @@ export function generateA11yCertificationReport(cert: A11yCertification): string
       <div class="footer">
         <p>Este certificado valida el cumplimiento de WCAG 2.1 Nivel ${cert.level}</p>
         <p>Para más información: <a href="https://www.w3.org/WAI/">W3C WAI</a></p>
-        <p>Generado el ${new Date().toLocaleString('es-ES')}</p>
+        <p>Generado el ${new Date().toLocaleString("es-ES")}</p>
       </div>
     </body>
     </html>
@@ -227,16 +227,16 @@ export class A11yCertificationManager {
     score: number,
     violations: number,
     passed: number,
-    auditor: string = 'Sistema Automático'
+    auditor: string = "Sistema Automático",
   ): A11yCertification {
-    let level: 'A' | 'AA' | 'AAA' | 'FAIL' = 'FAIL';
+    let level: "A" | "AA" | "AAA" | "FAIL" = "FAIL";
 
     if (score >= 95 && violations === 0) {
-      level = 'AAA';
+      level = "AAA";
     } else if (score >= 85 && violations < 3) {
-      level = 'AA';
+      level = "AA";
     } else if (score >= 70 && violations < 10) {
-      level = 'A';
+      level = "A";
     }
 
     const now = new Date();
@@ -261,7 +261,7 @@ export class A11yCertificationManager {
    */
   static async saveCertificate(cert: A11yCertification): Promise<boolean> {
     // En producción, guardar en BD
-    localStorage.setItem('a11y_cert', JSON.stringify(cert));
+    localStorage.setItem("a11y_cert", JSON.stringify(cert));
     return true;
   }
 
@@ -269,7 +269,7 @@ export class A11yCertificationManager {
    * Obtener certificado válido
    */
   static async getValidCertificate(): Promise<A11yCertification | null> {
-    const certStr = localStorage.getItem('a11y_cert');
+    const certStr = localStorage.getItem("a11y_cert");
     if (!certStr) return null;
 
     const cert = JSON.parse(certStr) as A11yCertification;
@@ -287,7 +287,7 @@ export class A11yCertificationManager {
    */
   static compareCertificates(
     oldCert: A11yCertification,
-    newCert: A11yCertification
+    newCert: A11yCertification,
   ): {
     improved: boolean;
     scoreChange: number;
@@ -314,19 +314,19 @@ export function AccessibilityCertificationBadge({
   level,
   reportUrl,
 }: {
-  level: 'A' | 'AA' | 'AAA';
+  level: "A" | "AA" | "AAA";
   reportUrl: string;
 }) {
   const colors = {
-    A: '#FCD34D',
-    AA: '#34D399',
-    AAA: '#60A5FA',
+    A: "#FCD34D",
+    AA: "#34D399",
+    AAA: "#60A5FA",
   };
 
   return `
     <a href="${reportUrl}" title="Certificado WCAG ${level} - Click para ver reporte" style="display: inline-block;">
       <img
-        src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='50'%3E%3Crect width='100' height='50' fill='${colors[level]}'/%3E%3Ctext x='50' y='30' font-size='${level === 'AAA' ? 20 : 24}' font-weight='bold' text-anchor='middle' fill='%231F2937'%3EWCAG ${level}%3C/text%3E%3C/svg%3E"
+        src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='50'%3E%3Crect width='100' height='50' fill='${colors[level]}'/%3E%3Ctext x='50' y='30' font-size='${level === "AAA" ? 20 : 24}' font-weight='bold' text-anchor='middle' fill='%231F2937'%3EWCAG ${level}%3C/text%3E%3C/svg%3E"
         alt="Cumple WCAG ${level}"
       />
     </a>

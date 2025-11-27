@@ -3,46 +3,46 @@
  * Semana 54, Tarea 54.2: Customer Success & Retention
  */
 
-import { logger } from "@/lib/monitoring"
+import { logger } from "@/lib/monitoring";
 
 export interface CustomerAccount {
-  id: string
-  customerId: string
-  accountName: string
-  tier: "startup" | "growth" | "enterprise"
-  createdDate: Date
-  healthScore: number
-  churnRisk: "low" | "medium" | "high"
-  nps Score: number
-  successManager: string
-  lastTouchDate: Date
+  id: string;
+  customerId: string;
+  accountName: string;
+  tier: "startup" | "growth" | "enterprise";
+  createdDate: Date;
+  healthScore: number;
+  churnRisk: "low" | "medium" | "high";
+  npsScore: number;
+  successManager: string;
+  lastTouchDate: Date;
 }
 
 export interface SuccessInitiative {
-  id: string
-  customerId: string
-  initiativeName: string
-  goal: string
-  status: "planned" | "in-progress" | "completed"
-  expectedOutcome: string
-  metrics: string[]
+  id: string;
+  customerId: string;
+  initiativeName: string;
+  goal: string;
+  status: "planned" | "in-progress" | "completed";
+  expectedOutcome: string;
+  metrics: string[];
 }
 
 export class CustomerSuccessManager {
-  private customerAccounts: Map<string, CustomerAccount> = new Map()
-  private successInitiatives: Map<string, SuccessInitiative> = new Map()
+  private customerAccounts: Map<string, CustomerAccount> = new Map();
+  private successInitiatives: Map<string, SuccessInitiative> = new Map();
 
   constructor() {
-    logger.debug({ type: "customer_success_init" }, "Manager inicializado")
+    logger.debug({ type: "customer_success_init" }, "Manager inicializado");
   }
 
   onboardCustomer(
     customerId: string,
     accountName: string,
     tier: "startup" | "growth" | "enterprise",
-    successManager: string
+    successManager: string,
   ): CustomerAccount {
-    const id = "account_" + Date.now()
+    const id = "account_" + Date.now();
     const account: CustomerAccount = {
       id,
       customerId,
@@ -54,39 +54,36 @@ export class CustomerSuccessManager {
       npsScore: 0,
       successManager,
       lastTouchDate: new Date(),
-    }
+    };
 
-    this.customerAccounts.set(id, account)
-    logger.info(
-      { type: "customer_onboarded", accountId: id },
-      `Cliente integrado: ${accountName}`
-    )
-    return account
+    this.customerAccounts.set(id, account);
+    logger.info({ type: "customer_onboarded", accountId: id }, `Cliente integrado: ${accountName}`);
+    return account;
   }
 
   updateCustomerHealth(
     accountId: string,
     healthScore: number,
-    npsScore: number
+    npsScore: number,
   ): CustomerAccount | null {
-    const account = this.customerAccounts.get(accountId)
-    if (!account) return null
+    const account = this.customerAccounts.get(accountId);
+    if (!account) return null;
 
-    account.healthScore = healthScore
-    account.npsScore = npsScore
-    account.lastTouchDate = new Date()
+    account.healthScore = healthScore;
+    account.npsScore = npsScore;
+    account.lastTouchDate = new Date();
 
     if (healthScore > 70) {
-      account.churnRisk = "low"
+      account.churnRisk = "low";
     } else if (healthScore > 40) {
-      account.churnRisk = "medium"
+      account.churnRisk = "medium";
     } else {
-      account.churnRisk = "high"
+      account.churnRisk = "high";
     }
 
-    this.customerAccounts.set(accountId, account)
-    logger.info({ type: "customer_health_updated", accountId }, `Salud del cliente actualizada`)
-    return account
+    this.customerAccounts.set(accountId, account);
+    logger.info({ type: "customer_health_updated", accountId }, `Salud del cliente actualizada`);
+    return account;
   }
 
   createSuccessInitiative(
@@ -94,9 +91,9 @@ export class CustomerSuccessManager {
     initiativeName: string,
     goal: string,
     expectedOutcome: string,
-    metrics: string[]
+    metrics: string[],
   ): SuccessInitiative {
-    const id = "init_" + Date.now()
+    const id = "init_" + Date.now();
     const initiative: SuccessInitiative = {
       id,
       customerId,
@@ -105,24 +102,22 @@ export class CustomerSuccessManager {
       status: "planned",
       expectedOutcome,
       metrics,
-    }
+    };
 
-    this.successInitiatives.set(id, initiative)
+    this.successInitiatives.set(id, initiative);
     logger.info(
       { type: "success_initiative_created", initiativeId: id },
-      `Iniciativa de éxito creada`
-    )
-    return initiative
+      `Iniciativa de éxito creada`,
+    );
+    return initiative;
   }
 
   getHighChurnRiskCustomers(): CustomerAccount[] {
-    return Array.from(this.customerAccounts.values()).filter(
-      (c) => c.churnRisk === "high"
-    )
+    return Array.from(this.customerAccounts.values()).filter((c) => c.churnRisk === "high");
   }
 
   getStatistics(): Record<string, unknown> {
-    const accounts = Array.from(this.customerAccounts.values())
+    const accounts = Array.from(this.customerAccounts.values());
 
     return {
       totalCustomers: accounts.length,
@@ -144,20 +139,20 @@ export class CustomerSuccessManager {
         accounts.length > 0
           ? accounts.reduce((sum, a) => sum + a.npsScore, 0) / accounts.length
           : 0,
-    }
+    };
   }
 
   generateCustomerSuccessReport(): string {
-    const stats = this.getStatistics()
-    return `Customer Success Report\nTotal Customers: ${stats.totalCustomers}\nAvg Health: ${stats.averageHealthScore.toFixed(2)}\nAvg NPS: ${stats.averageNPS.toFixed(2)}`
+    const stats = this.getStatistics();
+    return `Customer Success Report\nTotal Customers: ${stats.totalCustomers}\nAvg Health: ${stats.averageHealthScore.toFixed(2)}\nAvg NPS: ${stats.averageNPS.toFixed(2)}`;
   }
 }
 
-let globalCustomerSuccessManager: CustomerSuccessManager | null = null
+let globalCustomerSuccessManager: CustomerSuccessManager | null = null;
 
 export function getCustomerSuccessManager(): CustomerSuccessManager {
   if (!globalCustomerSuccessManager) {
-    globalCustomerSuccessManager = new CustomerSuccessManager()
+    globalCustomerSuccessManager = new CustomerSuccessManager();
   }
-  return globalCustomerSuccessManager
+  return globalCustomerSuccessManager;
 }
