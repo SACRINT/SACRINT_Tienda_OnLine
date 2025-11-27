@@ -73,10 +73,17 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { dashboardId, name, layout, widgets } = body;
+    const { dashboardId, name, layout, widgets, tenantId } = body;
+
+    if (!tenantId) {
+      return NextResponse.json({ error: "tenantId is required" }, { status: 400 });
+    }
 
     const dashboard = getDashboardManager();
-    const newDashboard = dashboard.createDashboard(name, layout, 2, 6);
+    const newDashboard = dashboard.createDashboard(tenantId, {
+      name,
+      layout,
+    });
 
     if (widgets && Array.isArray(widgets)) {
       widgets.forEach((widget) => {
