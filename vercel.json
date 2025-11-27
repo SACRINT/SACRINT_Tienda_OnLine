@@ -24,16 +24,6 @@
       "maxDuration": 30
     }
   },
-  "crons": [
-    {
-      "path": "/api/cron/cleanup-abandoned-carts",
-      "schedule": "0 2 * * *"
-    },
-    {
-      "path": "/api/cron/update-inventory",
-      "schedule": "*/15 * * * *"
-    }
-  ],
   "rewrites": [
     {
       "source": "/healthz",
