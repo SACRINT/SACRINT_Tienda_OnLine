@@ -1,0 +1,5 @@
+# Ignore node_modules
+node_modules/
+.next/
+
+# Ignore build artifacts (force fresh build)
