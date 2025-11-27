@@ -10,9 +10,10 @@ export function HeroSection() {
         <Image
           src="https://picsum.photos/1920/1080"
           alt="Hero background"
-          layout="fill"
-          objectFit="cover"
-          className="opacity-40"
+          fill
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 100vw"
+          priority
+          className="object-cover opacity-40"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/80 to-transparent" />
       </div>
@@ -24,9 +25,7 @@ export function HeroSection() {
             <span className="sm:block"> No necesitas conocimiento técnico. </span>
           </h1>
 
-          <p className="mx-auto mt-4 max-w-xl sm:text-xl/relaxed">
-            Crea tu tienda, vende online.
-          </p>
+          <p className="mx-auto mt-4 max-w-xl sm:text-xl/relaxed">Crea tu tienda, vende online.</p>
 
           <div className="mt-8 flex flex-wrap justify-center gap-4">
             <Link
