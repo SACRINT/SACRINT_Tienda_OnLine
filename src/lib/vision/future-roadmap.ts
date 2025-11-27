@@ -3,36 +3,36 @@
  * Semana 56, Tarea 56.4: Future Roadmap Planning & Strategic Direction
  */
 
-import { logger } from "@/lib/monitoring"
+import { logger } from "@/lib/monitoring";
 
 export interface FutureRoadmapPhase {
-  id: string
-  phaseNumber: number
-  phaseName: string
-  timeframe: string
-  objectives: string[]
-  expectedOutcomes: string[]
-  investmentRequired: number
-  riskLevel: "low" | "medium" | "high"
-  status: "planned" | "proposed" | "approved"
+  id: string;
+  phaseNumber: number;
+  phaseName: string;
+  timeframe: string;
+  objectives: string[];
+  expectedOutcomes: string[];
+  investmentRequired: number;
+  riskLevel: "low" | "medium" | "high";
+  status: "planned" | "proposed" | "approved";
 }
 
 export interface StrategicInitiative {
-  id: string
-  initiativeName: string
-  description: string
-  phases: FutureRoadmapPhase[]
-  totalDuration: number
-  strategicValue: number
-  marketOpportunity: string
+  id: string;
+  initiativeName: string;
+  description: string;
+  phases: FutureRoadmapPhase[];
+  totalDuration: number;
+  strategicValue: number;
+  marketOpportunity: string;
 }
 
 export class FutureRoadmapManager {
-  private initiatives: Map<string, StrategicInitiative> = new Map()
-  private roadmapVersions: Map<string, Array<StrategicInitiative>> = new Map()
+  private initiatives: Map<string, StrategicInitiative> = new Map();
+  private roadmapVersions: Map<string, Array<StrategicInitiative>> = new Map();
 
   constructor() {
-    logger.debug({ type: "future_roadmap_init" }, "Manager inicializado")
+    logger.debug({ type: "future_roadmap_init" }, "Manager inicializado");
   }
 
   createStrategicInitiative(
@@ -42,16 +42,16 @@ export class FutureRoadmapManager {
     strategicValue: number,
     marketOpportunity: string,
     phases: Array<{
-      phaseNumber: number
-      phaseName: string
-      timeframe: string
-      objectives: string[]
-      expectedOutcomes: string[]
-      investmentRequired: number
-      riskLevel: "low" | "medium" | "high"
-    }>
+      phaseNumber: number;
+      phaseName: string;
+      timeframe: string;
+      objectives: string[];
+      expectedOutcomes: string[];
+      investmentRequired: number;
+      riskLevel: "low" | "medium" | "high";
+    }>,
   ): StrategicInitiative {
-    const id = "initiative_" + Date.now()
+    const id = "initiative_" + Date.now();
     const initiativePhases: FutureRoadmapPhase[] = phases.map((p) => ({
       id: "phase_" + Date.now(),
       phaseNumber: p.phaseNumber,
@@ -62,7 +62,7 @@ export class FutureRoadmapManager {
       investmentRequired: p.investmentRequired,
       riskLevel: p.riskLevel,
       status: "planned",
-    }))
+    }));
 
     const initiative: StrategicInitiative = {
       id,
@@ -72,29 +72,29 @@ export class FutureRoadmapManager {
       totalDuration,
       strategicValue,
       marketOpportunity,
-    }
+    };
 
-    this.initiatives.set(id, initiative)
+    this.initiatives.set(id, initiative);
     logger.info(
       { type: "strategic_initiative_created", initiativeId: id },
-      `Iniciativa estratégica creada: ${initiativeName}`
-    )
-    return initiative
+      `Iniciativa estratégica creada: ${initiativeName}`,
+    );
+    return initiative;
   }
 
   publishRoadmapVersion(version: string): Array<StrategicInitiative> {
-    const initiatives = Array.from(this.initiatives.values())
-    this.roadmapVersions.set(version, JSON.parse(JSON.stringify(initiatives)))
+    const initiatives = Array.from(this.initiatives.values());
+    this.roadmapVersions.set(version, JSON.parse(JSON.stringify(initiatives)));
     logger.info(
       { type: "roadmap_version_published", version },
-      `Versión de hoja de ruta publicada: ${version}`
-    )
-    return initiatives
+      `Versión de hoja de ruta publicada: ${version}`,
+    );
+    return initiatives;
   }
 
-  getStatistics(): Record<string, unknown> {
-    const initiatives = Array.from(this.initiatives.values())
-    const allPhases = initiatives.flatMap((i) => i.phases)
+  getStatistics(): Record<string, any> {
+    const initiatives = Array.from(this.initiatives.values());
+    const allPhases = initiatives.flatMap((i) => i.phases);
 
     return {
       totalInitiatives: initiatives.length,
@@ -109,30 +109,26 @@ export class FutureRoadmapManager {
         medium: allPhases.filter((p) => p.riskLevel === "medium").length,
         high: allPhases.filter((p) => p.riskLevel === "high").length,
       },
-      totalInvestmentRequired: allPhases.reduce(
-        (sum, p) => sum + p.investmentRequired,
-        0
-      ),
+      totalInvestmentRequired: allPhases.reduce((sum, p) => sum + p.investmentRequired, 0),
       averageStrategicValue:
         initiatives.length > 0
-          ? initiatives.reduce((sum, i) => sum + i.strategicValue, 0) /
-            initiatives.length
+          ? initiatives.reduce((sum, i) => sum + i.strategicValue, 0) / initiatives.length
           : 0,
       roadmapVersions: this.roadmapVersions.size,
-    }
+    };
   }
 
   generateRoadmapReport(): string {
-    const stats = this.getStatistics()
-    return `Future Roadmap Report\nInitiatives: ${stats.totalInitiatives}\nPhases: ${stats.totalPhases}\nTotal Investment: $${stats.totalInvestmentRequired.toLocaleString()}`
+    const stats = this.getStatistics();
+    return `Future Roadmap Report\nInitiatives: ${stats.totalInitiatives}\nPhases: ${stats.totalPhases}\nTotal Investment: $${stats.totalInvestmentRequired.toLocaleString()}`;
   }
 }
 
-let globalFutureRoadmapManager: FutureRoadmapManager | null = null
+let globalFutureRoadmapManager: FutureRoadmapManager | null = null;
 
 export function getFutureRoadmapManager(): FutureRoadmapManager {
   if (!globalFutureRoadmapManager) {
-    globalFutureRoadmapManager = new FutureRoadmapManager()
+    globalFutureRoadmapManager = new FutureRoadmapManager();
   }
-  return globalFutureRoadmapManager
+  return globalFutureRoadmapManager;
 }

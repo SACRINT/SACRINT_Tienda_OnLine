@@ -16,7 +16,7 @@ export interface TestSuite {
 export interface TestCase {
   id: string;
   name: string;
-  status: "passed" | "failed" | "skipped";
+  status: "pending" | "passed" | "failed" | "skipped";
   errorMessage?: string;
   duration: number;
 }

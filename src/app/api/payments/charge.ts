@@ -5,9 +5,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/server";
-import { getPaymentOrchestrator } from "@/lib/payments";
-import { getAdvancedFraudDetector } from "@/lib/payments";
-import { getInvoiceGenerator } from "@/lib/payments";
+import { getPaymentOrchestrator, getAdvancedFraudDetector, generateInvoice } from "@/lib/payments";
 import { logger } from "@/lib/monitoring";
 import { z } from "zod";
 
@@ -17,7 +15,7 @@ const chargeSchema = z.object({
   currency: z.string().length(3),
   paymentMethod: z.string(),
   customerId: z.string().uuid(),
-  metadata: z.record(z.any()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 type ChargeRequest = z.infer<typeof chargeSchema>;
@@ -93,30 +91,21 @@ export async function POST(request: NextRequest) {
     }
 
     // Generar factura
-    const invoiceGenerator = getInvoiceGenerator();
-    const invoice = invoiceGenerator.generateInvoice(
-      chargeData.orderId,
-      chargeData.customerId,
-      session.user?.id || "unknown",
-      [
-        {
-          id: "1",
-          description: `Payment for Order ${chargeData.orderId}`,
-          quantity: 1,
-          unitPrice: chargeData.amount,
-          discount: 0,
-          taxRate: 0,
-          total: chargeData.amount,
-        },
-      ],
-      chargeData.currency,
-    );
+    let invoice = null;
+    try {
+      invoice = await generateInvoice(chargeData.orderId);
+    } catch (invoiceError) {
+      logger.error(
+        { type: "invoice_generation_error", error: String(invoiceError) },
+        "Error generando factura",
+      );
+    }
 
     logger.info(
       {
         type: "payment_successful",
         orderId: chargeData.orderId,
-        transactionId: paymentResult.transaction?.id,
+        transactionId: paymentResult.transaction?.transactionId,
       },
       `Pago procesado exitosamente`,
     );
@@ -124,11 +113,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       transaction: paymentResult.transaction,
-      invoice: {
-        id: invoice.id,
-        number: invoice.invoiceNumber,
-        total: invoice.total,
-      },
+      invoice: invoice
+        ? {
+            number: invoice.invoiceNumber,
+            pdfUrl: invoice.pdfUrl,
+          }
+        : null,
       fraudScore: {
         score: fraudScore.score,
         riskLevel: fraudScore.riskLevel,
@@ -139,7 +129,7 @@ export async function POST(request: NextRequest) {
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: "Invalid request data", details: error.errors },
+        { error: "Invalid request data", details: error.issues },
         { status: 400 },
       );
     }

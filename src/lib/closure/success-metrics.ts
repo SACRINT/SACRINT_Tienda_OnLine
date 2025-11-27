@@ -190,7 +190,7 @@ export class SuccessMetricsManager {
     return benefit;
   }
 
-  getStatistics(): Record<string, unknown> {
+  getStatistics(): Record<string, any> {
     const metrics = Array.from(this.metrics.values());
     const scorecards = Array.from(this.scorecards.values());
     const benefits = Array.from(this.benefitsRealization.values());

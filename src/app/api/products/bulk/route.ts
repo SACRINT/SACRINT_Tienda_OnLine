@@ -23,7 +23,7 @@ const BulkOperationSchema = z.object({
     "updateStock",
     "assignCategory",
   ]),
-  value: z.any().optional(), // For operations that need a value
+  value: z.unknown().optional(), // For operations that need a value
 });
 
 export async function POST(req: NextRequest) {

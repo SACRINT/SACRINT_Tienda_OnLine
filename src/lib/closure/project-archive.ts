@@ -3,55 +3,55 @@
  * Semana 52, Tarea 52.11: Project Archive & Historical Record Management
  */
 
-import { logger } from "@/lib/monitoring"
+import { logger } from "@/lib/monitoring";
 
 export interface ArchiveRecord {
-  id: string
-  projectId: string
-  projectName: string
-  archiveDate: Date
-  archiveLocation: string
-  retentionPeriodYears: number
-  archiveStatus: "pending" | "in-progress" | "completed"
-  archivedBy: string
-  description: string
+  id: string;
+  projectId: string;
+  projectName: string;
+  archiveDate: Date;
+  archiveLocation: string;
+  retentionPeriodYears: number;
+  archiveStatus: "pending" | "in-progress" | "completed";
+  archivedBy: string;
+  description: string;
 }
 
 export interface ProjectHistory {
-  id: string
-  projectId: string
-  projectName: string
-  startDate: Date
-  completionDate: Date
-  duration: number
-  totalBudget: number
-  finalBudget: number
-  teamSize: number
-  status: string
-  outcomes: string[]
-  keyMilestones: string[]
-  historicalNotes: string
+  id: string;
+  projectId: string;
+  projectName: string;
+  startDate: Date;
+  completionDate: Date;
+  duration: number;
+  totalBudget: number;
+  finalBudget: number;
+  teamSize: number;
+  status: string;
+  outcomes: string[];
+  keyMilestones: string[];
+  historicalNotes: string;
 }
 
 export interface AccessRequest {
-  id: string
-  projectId: string
-  requestedBy: string
-  requestDate: Date
-  accessLevel: "view" | "download" | "extract"
-  purpose: string
-  status: "pending" | "approved" | "denied"
-  approvedBy?: string
-  expirationDate?: Date
+  id: string;
+  projectId: string;
+  requestedBy: string;
+  requestDate: Date;
+  accessLevel: "view" | "download" | "extract";
+  purpose: string;
+  status: "pending" | "approved" | "denied";
+  approvedBy?: string;
+  expirationDate?: Date;
 }
 
 export class ProjectArchiveManager {
-  private archiveRecords: Map<string, ArchiveRecord> = new Map()
-  private projectHistory: Map<string, ProjectHistory> = new Map()
-  private accessRequests: Map<string, AccessRequest> = new Map()
+  private archiveRecords: Map<string, ArchiveRecord> = new Map();
+  private projectHistory: Map<string, ProjectHistory> = new Map();
+  private accessRequests: Map<string, AccessRequest> = new Map();
 
   constructor() {
-    logger.debug({ type: "project_archive_init" }, "Manager inicializado")
+    logger.debug({ type: "project_archive_init" }, "Manager inicializado");
   }
 
   archiveProject(
@@ -60,9 +60,9 @@ export class ProjectArchiveManager {
     archiveLocation: string,
     retentionPeriodYears: number,
     archivedBy: string,
-    description: string
+    description: string,
   ): ArchiveRecord {
-    const id = "archive_" + Date.now()
+    const id = "archive_" + Date.now();
     const record: ArchiveRecord = {
       id,
       projectId,
@@ -73,24 +73,21 @@ export class ProjectArchiveManager {
       archiveStatus: "pending",
       archivedBy,
       description,
-    }
+    };
 
-    this.archiveRecords.set(id, record)
-    logger.info(
-      { type: "project_archived", archiveId: id },
-      `Proyecto archivado: ${projectName}`
-    )
-    return record
+    this.archiveRecords.set(id, record);
+    logger.info({ type: "project_archived", archiveId: id }, `Proyecto archivado: ${projectName}`);
+    return record;
   }
 
   completeArchive(archiveId: string): ArchiveRecord | null {
-    const record = this.archiveRecords.get(archiveId)
-    if (!record) return null
+    const record = this.archiveRecords.get(archiveId);
+    if (!record) return null;
 
-    record.archiveStatus = "completed"
-    this.archiveRecords.set(archiveId, record)
-    logger.info({ type: "archive_completed", archiveId }, `Archivado completado`)
-    return record
+    record.archiveStatus = "completed";
+    this.archiveRecords.set(archiveId, record);
+    logger.info({ type: "archive_completed", archiveId }, `Archivado completado`);
+    return record;
   }
 
   createProjectHistory(
@@ -104,12 +101,12 @@ export class ProjectArchiveManager {
     status: string,
     outcomes: string[],
     keyMilestones: string[],
-    historicalNotes: string
+    historicalNotes: string,
   ): ProjectHistory {
-    const id = "history_" + Date.now()
+    const id = "history_" + Date.now();
     const duration = Math.ceil(
-      (completionDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
-    )
+      (completionDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24),
+    );
 
     const history: ProjectHistory = {
       id,
@@ -125,23 +122,23 @@ export class ProjectArchiveManager {
       outcomes,
       keyMilestones,
       historicalNotes,
-    }
+    };
 
-    this.projectHistory.set(projectId, history)
+    this.projectHistory.set(projectId, history);
     logger.info(
       { type: "project_history_recorded", historyId: id },
-      `Historial del proyecto registrado: ${projectName}`
-    )
-    return history
+      `Historial del proyecto registrado: ${projectName}`,
+    );
+    return history;
   }
 
   requestArchiveAccess(
     projectId: string,
     requestedBy: string,
     accessLevel: "view" | "download" | "extract",
-    purpose: string
+    purpose: string,
   ): AccessRequest {
-    const id = "request_" + Date.now()
+    const id = "request_" + Date.now();
     const request: AccessRequest = {
       id,
       projectId,
@@ -150,55 +147,51 @@ export class ProjectArchiveManager {
       accessLevel,
       purpose,
       status: "pending",
-    }
+    };
 
-    this.accessRequests.set(id, request)
+    this.accessRequests.set(id, request);
     logger.info(
       { type: "archive_access_requested", requestId: id },
-      `Solicitud de acceso a archivo: ${projectId}`
-    )
-    return request
+      `Solicitud de acceso a archivo: ${projectId}`,
+    );
+    return request;
   }
 
   approveAccessRequest(
     requestId: string,
     approvedBy: string,
-    expirationDate: Date
+    expirationDate: Date,
   ): AccessRequest | null {
-    const request = this.accessRequests.get(requestId)
-    if (!request) return null
+    const request = this.accessRequests.get(requestId);
+    if (!request) return null;
 
-    request.status = "approved"
-    request.approvedBy = approvedBy
-    request.expirationDate = expirationDate
+    request.status = "approved";
+    request.approvedBy = approvedBy;
+    request.expirationDate = expirationDate;
 
-    this.accessRequests.set(requestId, request)
-    logger.info({ type: "access_request_approved", requestId }, `Solicitud aprobada`)
-    return request
+    this.accessRequests.set(requestId, request);
+    logger.info({ type: "access_request_approved", requestId }, `Solicitud aprobada`);
+    return request;
   }
 
   getProjectHistory(projectId: string): ProjectHistory | null {
-    return this.projectHistory.get(projectId) || null
+    return this.projectHistory.get(projectId) || null;
   }
 
-  getArchiveRecordsByRetention(
-    retentionPeriodYears: number
-  ): ArchiveRecord[] {
+  getArchiveRecordsByRetention(retentionPeriodYears: number): ArchiveRecord[] {
     return Array.from(this.archiveRecords.values()).filter(
-      (r) => r.retentionPeriodYears === retentionPeriodYears
-    )
+      (r) => r.retentionPeriodYears === retentionPeriodYears,
+    );
   }
 
-  getAccessRequestsByStatus(
-    status: "pending" | "approved" | "denied"
-  ): AccessRequest[] {
-    return Array.from(this.accessRequests.values()).filter((r) => r.status === status)
+  getAccessRequestsByStatus(status: "pending" | "approved" | "denied"): AccessRequest[] {
+    return Array.from(this.accessRequests.values()).filter((r) => r.status === status);
   }
 
-  getStatistics(): Record<string, unknown> {
-    const archives = Array.from(this.archiveRecords.values())
-    const histories = Array.from(this.projectHistory.values())
-    const requests = Array.from(this.accessRequests.values())
+  getStatistics(): Record<string, any> {
+    const archives = Array.from(this.archiveRecords.values());
+    const histories = Array.from(this.projectHistory.values());
+    const requests = Array.from(this.accessRequests.values());
 
     return {
       totalArchiveRecords: archives.length,
@@ -218,20 +211,20 @@ export class ProjectArchiveManager {
         histories.length > 0
           ? histories.reduce((sum, h) => sum + h.duration, 0) / histories.length
           : 0,
-    }
+    };
   }
 
   generateArchiveReport(): string {
-    const stats = this.getStatistics()
-    return `Project Archive Report\nTotal Archives: ${stats.totalArchiveRecords}\nCompleted: ${stats.archivesByStatus.completed}\nProject Histories: ${stats.totalProjectHistories}\nAccess Requests: ${stats.totalAccessRequests}`
+    const stats = this.getStatistics();
+    return `Project Archive Report\nTotal Archives: ${stats.totalArchiveRecords}\nCompleted: ${stats.archivesByStatus.completed}\nProject Histories: ${stats.totalProjectHistories}\nAccess Requests: ${stats.totalAccessRequests}`;
   }
 }
 
-let globalProjectArchiveManager: ProjectArchiveManager | null = null
+let globalProjectArchiveManager: ProjectArchiveManager | null = null;
 
 export function getProjectArchiveManager(): ProjectArchiveManager {
   if (!globalProjectArchiveManager) {
-    globalProjectArchiveManager = new ProjectArchiveManager()
+    globalProjectArchiveManager = new ProjectArchiveManager();
   }
-  return globalProjectArchiveManager
+  return globalProjectArchiveManager;
 }

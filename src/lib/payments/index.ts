@@ -220,10 +220,7 @@ export function getEnabledPaymentMethods(): PaymentMethod[] {
 }
 
 // Check if amount is valid for payment method
-export function isAmountValidForMethod(
-  amount: number,
-  methodId: string,
-): boolean {
+export function isAmountValidForMethod(amount: number, methodId: string): boolean {
   const method = getPaymentMethod(methodId);
   if (!method) return false;
 
@@ -252,3 +249,17 @@ export const PAYMENT_STATUS_COLORS: Record<PaymentStatus, string> = {
   cancelled: "muted",
   refunded: "info",
 };
+
+// Re-export order management
+export {
+  getAdvancedOrderManager,
+  initializeAdvancedOrderManager,
+  type Order,
+  type OrderItem,
+  type OrderStatus,
+} from "./advanced-order-management";
+
+// Re-export payment orchestration and fraud detection
+export { getPaymentOrchestrator } from "./payment-gateway-orchestrator";
+export { getAdvancedFraudDetector } from "./advanced-fraud-detection";
+export { generateInvoice, sendInvoiceEmail, type InvoiceData } from "./invoice-generator";

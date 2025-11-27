@@ -37,7 +37,7 @@ export interface AuditEntry {
   action: AuditAction;
   resource: AuditResource;
   resourceId?: string;
-  details?: Record<string, unknown>;
+  details?: Record<string, any>;
   metadata?: {
     ip?: string;
     userAgent?: string;
@@ -48,7 +48,7 @@ export interface AuditEntry {
 
 export interface AuditOptions {
   resourceId?: string;
-  details?: Record<string, unknown>;
+  details?: Record<string, any>;
   metadata?: {
     ip?: string;
     userAgent?: string;
@@ -100,7 +100,7 @@ export async function getAuditLogs(
     offset?: number;
   },
 ): Promise<{ entries: AuditEntry[]; total: number }> {
-  const where: Record<string, unknown> = { tenantId };
+  const where: Record<string, any> = { tenantId };
 
   if (options?.userId) where.userId = options.userId;
   if (options?.action) where.action = options.action;
@@ -136,7 +136,7 @@ export async function getAuditLogs(
       action: e.action as AuditAction,
       resource: e.resource as AuditResource,
       resourceId: e.resourceId || undefined,
-      details: e.details as Record<string, unknown> | undefined,
+      details: e.details as Record<string, any> | undefined,
       metadata: {
         ip: e.ip || undefined,
         userAgent: e.userAgent || undefined,
@@ -193,7 +193,7 @@ export const audit = {
     userId: string,
     email: string,
     productId: string,
-    details?: Record<string, unknown>,
+    details?: Record<string, any>,
   ) =>
     logAudit(tenantId, userId, email, "create", "product", {
       resourceId: productId,
@@ -205,19 +205,14 @@ export const audit = {
     userId: string,
     email: string,
     productId: string,
-    details?: Record<string, unknown>,
+    details?: Record<string, any>,
   ) =>
     logAudit(tenantId, userId, email, "update", "product", {
       resourceId: productId,
       details,
     }),
 
-  productDeleted: (
-    tenantId: string,
-    userId: string,
-    email: string,
-    productId: string,
-  ) =>
+  productDeleted: (tenantId: string, userId: string, email: string, productId: string) =>
     logAudit(tenantId, userId, email, "delete", "product", {
       resourceId: productId,
     }),
@@ -227,7 +222,7 @@ export const audit = {
     userId: string,
     email: string,
     orderId: string,
-    details?: Record<string, unknown>,
+    details?: Record<string, any>,
   ) =>
     logAudit(tenantId, userId, email, "create", "order", {
       resourceId: orderId,
@@ -239,7 +234,7 @@ export const audit = {
     userId: string,
     email: string,
     orderId: string,
-    details?: Record<string, unknown>,
+    details?: Record<string, any>,
   ) =>
     logAudit(tenantId, userId, email, "update", "order", {
       resourceId: orderId,
@@ -250,7 +245,7 @@ export const audit = {
     tenantId: string,
     userId: string,
     email: string,
-    details?: Record<string, unknown>,
+    details?: Record<string, any>,
   ) =>
     logAudit(tenantId, userId, email, "settings_change", "settings", {
       details,
@@ -261,6 +256,6 @@ export const audit = {
     userId: string,
     email: string,
     resource: AuditResource,
-    details?: Record<string, unknown>,
+    details?: Record<string, any>,
   ) => logAudit(tenantId, userId, email, "export", resource, { details }),
 };

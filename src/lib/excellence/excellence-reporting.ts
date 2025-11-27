@@ -3,23 +3,23 @@
  * Semana 55, Tarea 55.12: Excellence Reporting & Performance Analysis
  */
 
-import { logger } from "@/lib/monitoring"
+import { logger } from "@/lib/monitoring";
 
 export interface ExcellenceReport {
-  id: string
-  reportDate: Date
-  reportingPeriod: string
-  metricsAchieved: string[]
-  improvementsImplemented: number
-  qualityScore: number
-  recommendations: string[]
+  id: string;
+  reportDate: Date;
+  reportingPeriod: string;
+  metricsAchieved: string[];
+  improvementsImplemented: number;
+  qualityScore: number;
+  recommendations: string[];
 }
 
 export class ExcellenceReportingManager {
-  private reports: Map<string, ExcellenceReport> = new Map()
+  private reports: Map<string, ExcellenceReport> = new Map();
 
   constructor() {
-    logger.debug({ type: "excellence_reporting_init" }, "Manager inicializado")
+    logger.debug({ type: "excellence_reporting_init" }, "Manager inicializado");
   }
 
   generateExcellenceReport(
@@ -27,9 +27,9 @@ export class ExcellenceReportingManager {
     metricsAchieved: string[],
     improvementsImplemented: number,
     qualityScore: number,
-    recommendations: string[]
+    recommendations: string[],
   ): ExcellenceReport {
-    const id = "report_" + Date.now()
+    const id = "report_" + Date.now();
 
     const report: ExcellenceReport = {
       id,
@@ -39,15 +39,18 @@ export class ExcellenceReportingManager {
       improvementsImplemented,
       qualityScore,
       recommendations,
-    }
+    };
 
-    this.reports.set(id, report)
-    logger.info({ type: "excellence_report_generated", reportId: id }, `Reporte de excelencia generado`)
-    return report
+    this.reports.set(id, report);
+    logger.info(
+      { type: "excellence_report_generated", reportId: id },
+      `Reporte de excelencia generado`,
+    );
+    return report;
   }
 
-  getStatistics(): Record<string, unknown> {
-    const reports = Array.from(this.reports.values())
+  getStatistics(): Record<string, any> {
+    const reports = Array.from(this.reports.values());
 
     return {
       totalReports: reports.length,
@@ -56,20 +59,20 @@ export class ExcellenceReportingManager {
           ? reports.reduce((sum, r) => sum + r.qualityScore, 0) / reports.length
           : 0,
       totalImprovements: reports.reduce((sum, r) => sum + r.improvementsImplemented, 0),
-    }
+    };
   }
 
   generateFinalReport(): string {
-    const stats = this.getStatistics()
-    return `Continuous Excellence Report\nReports: ${stats.totalReports}\nAvg Quality Score: ${stats.averageQualityScore.toFixed(2)}\nTotal Improvements: ${stats.totalImprovements}`
+    const stats = this.getStatistics();
+    return `Continuous Excellence Report\nReports: ${stats.totalReports}\nAvg Quality Score: ${stats.averageQualityScore.toFixed(2)}\nTotal Improvements: ${stats.totalImprovements}`;
   }
 }
 
-let globalExcellenceReportingManager: ExcellenceReportingManager | null = null
+let globalExcellenceReportingManager: ExcellenceReportingManager | null = null;
 
 export function getExcellenceReportingManager(): ExcellenceReportingManager {
   if (!globalExcellenceReportingManager) {
-    globalExcellenceReportingManager = new ExcellenceReportingManager()
+    globalExcellenceReportingManager = new ExcellenceReportingManager();
   }
-  return globalExcellenceReportingManager
+  return globalExcellenceReportingManager;
 }

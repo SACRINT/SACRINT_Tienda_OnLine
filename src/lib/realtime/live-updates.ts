@@ -2,13 +2,7 @@
 // Real-time inventory, prices, and order updates
 
 import { wsClient } from "./websocket";
-import {
-  eventBus,
-  Events,
-  StockUpdateEvent,
-  PriceUpdateEvent,
-  OrderStatusEvent,
-} from "./events";
+import { eventBus, Events, StockUpdateEvent, PriceUpdateEvent, OrderStatusEvent } from "./events";
 import { REALTIME_EVENTS } from "./config";
 
 class LiveUpdatesManager {
@@ -118,7 +112,7 @@ class LiveUpdatesManager {
     wsClient.on(REALTIME_EVENTS.PRODUCT_UPDATE, (message) => {
       const data = message.payload as {
         productId: string;
-        updates: Record<string, unknown>;
+        updates: Record<string, any>;
       };
       eventBus.emit("product:update", data);
     });

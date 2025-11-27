@@ -5,7 +5,7 @@ import { ReportResult } from "./generator";
 
 // Convert report to CSV
 export function toCSV(report: ReportResult): string {
-  const data = report.data as Record<string, unknown>[];
+  const data = report.data as Record<string, any>[];
   if (!Array.isArray(data) || data.length === 0) {
     return "";
   }
@@ -55,7 +55,7 @@ export function toJSON(report: ReportResult): string {
 
 // Generate PDF content (returns HTML for PDF generation)
 export function toPDFHTML(report: ReportResult): string {
-  const data = report.data as Record<string, unknown>[];
+  const data = report.data as Record<string, any>[];
 
   let html = "<!DOCTYPE html><html><head>";
   html += '<meta charset="UTF-8">';
@@ -85,12 +85,7 @@ export function toPDFHTML(report: ReportResult): string {
   html += '<div class="summary">';
   html += "<h2>Resumen</h2>";
   for (const [key, value] of Object.entries(report.summary)) {
-    html +=
-      '<div class="summary-item"><strong>' +
-      key +
-      ":</strong> " +
-      value +
-      "</div>";
+    html += '<div class="summary-item"><strong>' + key + ":</strong> " + value + "</div>";
   }
   html += "</div>";
 
@@ -128,7 +123,7 @@ export function toPDFHTML(report: ReportResult): string {
 
 // Generate Excel XML (simplified)
 export function toExcelXML(report: ReportResult): string {
-  const data = report.data as Record<string, unknown>[];
+  const data = report.data as Record<string, any>[];
 
   let xml = '<?xml version="1.0"?>';
   xml += '<?mso-application progid="Excel.Sheet"?>';
@@ -138,10 +133,7 @@ export function toExcelXML(report: ReportResult): string {
   // Summary sheet
   xml += '<Worksheet ss:Name="Resumen">';
   xml += "<Table>";
-  xml +=
-    '<Row><Cell><Data ss:Type="String">' +
-    report.title +
-    "</Data></Cell></Row>";
+  xml += '<Row><Cell><Data ss:Type="String">' + report.title + "</Data></Cell></Row>";
   xml += '<Row><Cell><Data ss:Type="String">Período</Data></Cell>';
   xml +=
     '<Cell><Data ss:Type="String">' +
@@ -169,10 +161,7 @@ export function toExcelXML(report: ReportResult): string {
     // Headers
     xml += "<Row>";
     for (const header of headers) {
-      xml +=
-        '<Cell><Data ss:Type="String">' +
-        formatHeader(header) +
-        "</Data></Cell>";
+      xml += '<Cell><Data ss:Type="String">' + formatHeader(header) + "</Data></Cell>";
     }
     xml += "</Row>";
 
@@ -183,11 +172,7 @@ export function toExcelXML(report: ReportResult): string {
         const value = row[header];
         const type = typeof value === "number" ? "Number" : "String";
         xml +=
-          '<Cell><Data ss:Type="' +
-          type +
-          '">' +
-          escapeXML(formatValue(value)) +
-          "</Data></Cell>";
+          '<Cell><Data ss:Type="' + type + '">' + escapeXML(formatValue(value)) + "</Data></Cell>";
       }
       xml += "</Row>";
     }

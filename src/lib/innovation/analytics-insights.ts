@@ -3,36 +3,36 @@
  * Semana 54, Tarea 54.3: Advanced Analytics & Business Intelligence
  */
 
-import { logger } from "@/lib/monitoring"
+import { logger } from "@/lib/monitoring";
 
 export interface DataInsight {
-  id: string
-  insightType: "trend" | "anomaly" | "correlation" | "forecast"
-  title: string
-  description: string
-  dataSource: string
-  confidence: number
-  actionableItems: string[]
-  discoveredDate: Date
-  status: "new" | "reviewed" | "acted-upon"
+  id: string;
+  insightType: "trend" | "anomaly" | "correlation" | "forecast";
+  title: string;
+  description: string;
+  dataSource: string;
+  confidence: number;
+  actionableItems: string[];
+  discoveredDate: Date;
+  status: "new" | "reviewed" | "acted-upon";
 }
 
 export interface CustomDashboard {
-  id: string
-  dashboardName: string
-  metrics: string[]
-  filters: Record<string, unknown>
-  refreshInterval: number
-  owner: string
-  status: "active" | "archived"
+  id: string;
+  dashboardName: string;
+  metrics: string[];
+  filters: Record<string, any>;
+  refreshInterval: number;
+  owner: string;
+  status: "active" | "archived";
 }
 
 export class AnalyticsInsightsManager {
-  private insights: Map<string, DataInsight> = new Map()
-  private dashboards: Map<string, CustomDashboard> = new Map()
+  private insights: Map<string, DataInsight> = new Map();
+  private dashboards: Map<string, CustomDashboard> = new Map();
 
   constructor() {
-    logger.debug({ type: "analytics_insights_init" }, "Manager inicializado")
+    logger.debug({ type: "analytics_insights_init" }, "Manager inicializado");
   }
 
   generateInsight(
@@ -41,9 +41,9 @@ export class AnalyticsInsightsManager {
     description: string,
     dataSource: string,
     confidence: number,
-    actionableItems: string[]
+    actionableItems: string[],
   ): DataInsight {
-    const id = "insight_" + Date.now()
+    const id = "insight_" + Date.now();
     const insight: DataInsight = {
       id,
       insightType,
@@ -54,24 +54,21 @@ export class AnalyticsInsightsManager {
       actionableItems,
       discoveredDate: new Date(),
       status: "new",
-    }
+    };
 
-    this.insights.set(id, insight)
-    logger.info(
-      { type: "insight_generated", insightId: id },
-      `Insight generado: ${title}`
-    )
-    return insight
+    this.insights.set(id, insight);
+    logger.info({ type: "insight_generated", insightId: id }, `Insight generado: ${title}`);
+    return insight;
   }
 
   createCustomDashboard(
     dashboardName: string,
     metrics: string[],
-    filters: Record<string, unknown>,
+    filters: Record<string, any>,
     refreshInterval: number,
-    owner: string
+    owner: string,
   ): CustomDashboard {
-    const id = "dashboard_" + Date.now()
+    const id = "dashboard_" + Date.now();
     const dashboard: CustomDashboard = {
       id,
       dashboardName,
@@ -80,18 +77,18 @@ export class AnalyticsInsightsManager {
       refreshInterval,
       owner,
       status: "active",
-    }
+    };
 
-    this.dashboards.set(id, dashboard)
+    this.dashboards.set(id, dashboard);
     logger.info(
       { type: "custom_dashboard_created", dashboardId: id },
-      `Dashboard personalizado creado: ${dashboardName}`
-    )
-    return dashboard
+      `Dashboard personalizado creado: ${dashboardName}`,
+    );
+    return dashboard;
   }
 
-  getStatistics(): Record<string, unknown> {
-    const allInsights = Array.from(this.insights.values())
+  getStatistics(): Record<string, any> {
+    const allInsights = Array.from(this.insights.values());
 
     return {
       totalInsights: allInsights.length,
@@ -106,20 +103,20 @@ export class AnalyticsInsightsManager {
         allInsights.length > 0
           ? allInsights.reduce((sum, i) => sum + i.confidence, 0) / allInsights.length
           : 0,
-    }
+    };
   }
 
   generateAnalyticsReport(): string {
-    const stats = this.getStatistics()
-    return `Analytics & Insights Report\nInsights: ${stats.totalInsights}\nDashboards: ${stats.totalDashboards}\nAvg Confidence: ${stats.averageConfidence.toFixed(2)}%`
+    const stats = this.getStatistics();
+    return `Analytics & Insights Report\nInsights: ${stats.totalInsights}\nDashboards: ${stats.totalDashboards}\nAvg Confidence: ${stats.averageConfidence.toFixed(2)}%`;
   }
 }
 
-let globalAnalyticsInsightsManager: AnalyticsInsightsManager | null = null
+let globalAnalyticsInsightsManager: AnalyticsInsightsManager | null = null;
 
 export function getAnalyticsInsightsManager(): AnalyticsInsightsManager {
   if (!globalAnalyticsInsightsManager) {
-    globalAnalyticsInsightsManager = new AnalyticsInsightsManager()
+    globalAnalyticsInsightsManager = new AnalyticsInsightsManager();
   }
-  return globalAnalyticsInsightsManager
+  return globalAnalyticsInsightsManager;
 }

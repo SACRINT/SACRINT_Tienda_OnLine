@@ -3,49 +3,49 @@
  * Semana 52, Tarea 52.5: Lessons Learned & Continuous Improvement
  */
 
-import { logger } from "@/lib/monitoring"
+import { logger } from "@/lib/monitoring";
 
 export interface Lesson {
-  id: string
-  title: string
-  description: string
-  category: "success" | "improvement" | "challenge" | "best-practice"
-  phase: string
-  impact: "high" | "medium" | "low"
-  recommendedAction: string
-  owner: string
-  status: "documented" | "shared" | "implemented"
-  dateRecorded: Date
+  id: string;
+  title: string;
+  description: string;
+  category: "success" | "improvement" | "challenge" | "best-practice";
+  phase: string;
+  impact: "high" | "medium" | "low";
+  recommendedAction: string;
+  owner: string;
+  status: "documented" | "shared" | "implemented";
+  dateRecorded: Date;
 }
 
 export interface RetroSession {
-  id: string
-  projectName: string
-  facilitator: string
-  date: Date
-  participants: string[]
-  whatWentWell: string[]
-  whatCouldImprove: string[]
-  actionItems: ActionItem[]
-  status: "scheduled" | "completed"
+  id: string;
+  projectName: string;
+  facilitator: string;
+  date: Date;
+  participants: string[];
+  whatWentWell: string[];
+  whatCouldImprove: string[];
+  actionItems: ActionItem[];
+  status: "scheduled" | "completed";
 }
 
 export interface ActionItem {
-  id: string
-  description: string
-  owner: string
-  dueDate: Date
-  status: "open" | "in-progress" | "completed"
-  priority: "high" | "medium" | "low"
+  id: string;
+  description: string;
+  owner: string;
+  dueDate: Date;
+  status: "open" | "in-progress" | "completed";
+  priority: "high" | "medium" | "low";
 }
 
 export class LessonsLearnedManager {
-  private lessons: Map<string, Lesson> = new Map()
-  private retroSessions: Map<string, RetroSession> = new Map()
-  private knowledgeRepository: Map<string, Lesson[]> = new Map()
+  private lessons: Map<string, Lesson> = new Map();
+  private retroSessions: Map<string, RetroSession> = new Map();
+  private knowledgeRepository: Map<string, Lesson[]> = new Map();
 
   constructor() {
-    logger.debug({ type: "lessons_learned_init" }, "Manager inicializado")
+    logger.debug({ type: "lessons_learned_init" }, "Manager inicializado");
   }
 
   documentLesson(
@@ -55,9 +55,9 @@ export class LessonsLearnedManager {
     phase: string,
     impact: "high" | "medium" | "low",
     recommendedAction: string,
-    owner: string
+    owner: string,
   ): Lesson {
-    const id = "lesson_" + Date.now()
+    const id = "lesson_" + Date.now();
     const lesson: Lesson = {
       id,
       title,
@@ -69,38 +69,35 @@ export class LessonsLearnedManager {
       owner,
       status: "documented",
       dateRecorded: new Date(),
-    }
+    };
 
-    this.lessons.set(id, lesson)
+    this.lessons.set(id, lesson);
 
-    const categoryLessons = this.knowledgeRepository.get(category) || []
-    categoryLessons.push(lesson)
-    this.knowledgeRepository.set(category, categoryLessons)
+    const categoryLessons = this.knowledgeRepository.get(category) || [];
+    categoryLessons.push(lesson);
+    this.knowledgeRepository.set(category, categoryLessons);
 
-    logger.info(
-      { type: "lesson_documented", lessonId: id },
-      `Lección documentada: ${title}`
-    )
-    return lesson
+    logger.info({ type: "lesson_documented", lessonId: id }, `Lección documentada: ${title}`);
+    return lesson;
   }
 
   shareLesson(lessonId: string): Lesson | null {
-    const lesson = this.lessons.get(lessonId)
-    if (!lesson) return null
+    const lesson = this.lessons.get(lessonId);
+    if (!lesson) return null;
 
-    lesson.status = "shared"
-    this.lessons.set(lessonId, lesson)
-    logger.info({ type: "lesson_shared", lessonId }, `Lección compartida`)
-    return lesson
+    lesson.status = "shared";
+    this.lessons.set(lessonId, lesson);
+    logger.info({ type: "lesson_shared", lessonId }, `Lección compartida`);
+    return lesson;
   }
 
   scheduleRetroSession(
     projectName: string,
     facilitator: string,
     date: Date,
-    participants: string[]
+    participants: string[],
   ): RetroSession {
-    const id = "retro_" + Date.now()
+    const id = "retro_" + Date.now();
     const session: RetroSession = {
       id,
       projectName,
@@ -111,34 +108,31 @@ export class LessonsLearnedManager {
       whatCouldImprove: [],
       actionItems: [],
       status: "scheduled",
-    }
+    };
 
-    this.retroSessions.set(id, session)
+    this.retroSessions.set(id, session);
     logger.info(
       { type: "retro_session_scheduled", sessionId: id },
-      `Sesión retro programada: ${projectName}`
-    )
-    return session
+      `Sesión retro programada: ${projectName}`,
+    );
+    return session;
   }
 
   recordRetroFeedback(
     sessionId: string,
     whatWentWell: string[],
-    whatCouldImprove: string[]
+    whatCouldImprove: string[],
   ): RetroSession | null {
-    const session = this.retroSessions.get(sessionId)
-    if (!session) return null
+    const session = this.retroSessions.get(sessionId);
+    if (!session) return null;
 
-    session.whatWentWell = whatWentWell
-    session.whatCouldImprove = whatCouldImprove
-    session.status = "completed"
+    session.whatWentWell = whatWentWell;
+    session.whatCouldImprove = whatCouldImprove;
+    session.status = "completed";
 
-    this.retroSessions.set(sessionId, session)
-    logger.info(
-      { type: "retro_feedback_recorded", sessionId },
-      `Feedback de retro registrado`
-    )
-    return session
+    this.retroSessions.set(sessionId, session);
+    logger.info({ type: "retro_feedback_recorded", sessionId }, `Feedback de retro registrado`);
+    return session;
   }
 
   addActionItem(
@@ -146,10 +140,10 @@ export class LessonsLearnedManager {
     description: string,
     owner: string,
     dueDate: Date,
-    priority: "high" | "medium" | "low"
+    priority: "high" | "medium" | "low",
   ): ActionItem | null {
-    const session = this.retroSessions.get(sessionId)
-    if (!session) return null
+    const session = this.retroSessions.get(sessionId);
+    if (!session) return null;
 
     const actionItem: ActionItem = {
       id: "action_" + Date.now(),
@@ -158,30 +152,27 @@ export class LessonsLearnedManager {
       dueDate,
       status: "open",
       priority,
-    }
+    };
 
-    session.actionItems.push(actionItem)
-    this.retroSessions.set(sessionId, session)
-    logger.info(
-      { type: "action_item_added", sessionId },
-      `Elemento de acción agregado`
-    )
-    return actionItem
+    session.actionItems.push(actionItem);
+    this.retroSessions.set(sessionId, session);
+    logger.info({ type: "action_item_added", sessionId }, `Elemento de acción agregado`);
+    return actionItem;
   }
 
   getLessonsByCategory(
-    category: "success" | "improvement" | "challenge" | "best-practice"
+    category: "success" | "improvement" | "challenge" | "best-practice",
   ): Lesson[] {
-    return this.knowledgeRepository.get(category) || []
+    return this.knowledgeRepository.get(category) || [];
   }
 
   getLessonsByImpact(impact: "high" | "medium" | "low"): Lesson[] {
-    return Array.from(this.lessons.values()).filter((l) => l.impact === impact)
+    return Array.from(this.lessons.values()).filter((l) => l.impact === impact);
   }
 
-  getStatistics(): Record<string, unknown> {
-    const lessons = Array.from(this.lessons.values())
-    const sessions = Array.from(this.retroSessions.values())
+  getStatistics(): Record<string, any> {
+    const lessons = Array.from(this.lessons.values());
+    const sessions = Array.from(this.retroSessions.values());
 
     return {
       totalLessons: lessons.length,
@@ -189,8 +180,7 @@ export class LessonsLearnedManager {
         success: lessons.filter((l) => l.category === "success").length,
         improvement: lessons.filter((l) => l.category === "improvement").length,
         challenge: lessons.filter((l) => l.category === "challenge").length,
-        bestPractice: lessons.filter((l) => l.category === "best-practice")
-          .length,
+        bestPractice: lessons.filter((l) => l.category === "best-practice").length,
       },
       lessonsByStatus: {
         documented: lessons.filter((l) => l.status === "documented").length,
@@ -201,22 +191,22 @@ export class LessonsLearnedManager {
       totalActionItems: sessions.reduce((sum, s) => sum + s.actionItems.length, 0),
       openActionItems: sessions.reduce(
         (sum, s) => sum + s.actionItems.filter((a) => a.status === "open").length,
-        0
+        0,
       ),
-    }
+    };
   }
 
   generateLessonsReport(): string {
-    const stats = this.getStatistics()
-    return `Lessons Learned Report\nTotal Lessons: ${stats.totalLessons}\nRetro Sessions: ${stats.totalRetroSessions}\nAction Items: ${stats.totalActionItems}`
+    const stats = this.getStatistics();
+    return `Lessons Learned Report\nTotal Lessons: ${stats.totalLessons}\nRetro Sessions: ${stats.totalRetroSessions}\nAction Items: ${stats.totalActionItems}`;
   }
 }
 
-let globalLessonsLearnedManager: LessonsLearnedManager | null = null
+let globalLessonsLearnedManager: LessonsLearnedManager | null = null;
 
 export function getLessonsLearnedManager(): LessonsLearnedManager {
   if (!globalLessonsLearnedManager) {
-    globalLessonsLearnedManager = new LessonsLearnedManager()
+    globalLessonsLearnedManager = new LessonsLearnedManager();
   }
-  return globalLessonsLearnedManager
+  return globalLessonsLearnedManager;
 }

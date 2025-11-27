@@ -1,5 +1,5 @@
 export * from "./config";
-export * from "./translations";
+export { formatCurrency as formatCurrencyTranslation } from "./translations";
 // Re-export formatting functions with explicit names to avoid conflicts
 export {
   formatCurrency as formatCurrencyUtil,

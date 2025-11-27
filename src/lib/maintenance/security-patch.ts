@@ -136,7 +136,7 @@ export class SecurityPatchManager {
     );
   }
 
-  getStatistics(): Record<string, unknown> {
+  getStatistics(): Record<string, any> {
     const vulns = Array.from(this.vulnerabilities.values());
     const patches = Array.from(this.securityPatches.values());
 

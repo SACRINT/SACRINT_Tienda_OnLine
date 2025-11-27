@@ -128,7 +128,7 @@ export function sanitizeInput(
 }
 
 // Sanitize object recursively
-export function sanitizeObject<T extends Record<string, unknown>>(
+export function sanitizeObject<T extends Record<string, any>>(
   obj: T,
   options?: {
     maxLength?: number;
@@ -139,22 +139,22 @@ export function sanitizeObject<T extends Record<string, unknown>>(
 
   for (const [key, value] of Object.entries(obj)) {
     if (typeof value === "string") {
-      (sanitized as Record<string, unknown>)[key] = sanitizeInput(value, options);
+      (sanitized as Record<string, any>)[key] = sanitizeInput(value, options);
     } else if (value && typeof value === "object" && !Array.isArray(value)) {
-      (sanitized as Record<string, unknown>)[key] = sanitizeObject(
-        value as Record<string, unknown>,
+      (sanitized as Record<string, any>)[key] = sanitizeObject(
+        value as Record<string, any>,
         options,
       );
     } else if (Array.isArray(value)) {
-      (sanitized as Record<string, unknown>)[key] = value.map((item) =>
+      (sanitized as Record<string, any>)[key] = value.map((item) =>
         typeof item === "string"
           ? sanitizeInput(item, options)
           : item && typeof item === "object"
-            ? sanitizeObject(item as Record<string, unknown>, options)
+            ? sanitizeObject(item as Record<string, any>, options)
             : item,
       );
     } else {
-      (sanitized as Record<string, unknown>)[key] = value;
+      (sanitized as Record<string, any>)[key] = value;
     }
   }
 

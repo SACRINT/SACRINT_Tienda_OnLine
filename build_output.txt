@@ -2,13 +2,14 @@
 > tienda-online-2025@0.1.0 build
 > prisma generate && next build
 
+Environment variables loaded from .env
 Prisma schema loaded from prisma\schema.prisma
 
-✔ Generated Prisma Client (v6.19.0) to .\node_modules\@prisma\client in 280ms
+✔ Generated Prisma Client (v6.19.0) to .\node_modules\@prisma\client in 284ms
 
 Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
 
-Tip: Need your database queries to be 1000x faster? Accelerate offers you that and more: https://pris.ly/tip-2-accelerate
+Tip: Interested in query caching in just a few lines of code? Try Accelerate today! https://pris.ly/tip-3-accelerate
 
   ▲ Next.js 14.2.33
   - Environments: .env.local, .env
@@ -17,4 +18,700 @@ Tip: Need your database queries to be 1000x faster? Accelerate offers you that a
     · scrollRestoration
 
    Creating an optimized production build ...
+ ⚠ Compiled with warnings
+
+./node_modules/@prisma/instrumentation/node_modules/@opentelemetry/instrumentation/build/esm/platform/node/instrumentation.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/@prisma/instrumentation/node_modules/@opentelemetry/instrumentation/build/esm/platform/node/instrumentation.js
+./node_modules/@prisma/instrumentation/node_modules/@opentelemetry/instrumentation/build/esm/platform/node/index.js
+./node_modules/@prisma/instrumentation/node_modules/@opentelemetry/instrumentation/build/esm/platform/index.js
+./node_modules/@prisma/instrumentation/node_modules/@opentelemetry/instrumentation/build/esm/index.js
+./node_modules/@prisma/instrumentation/dist/index.js
+./node_modules/@sentry/node/build/cjs/integrations/tracing/prisma.js
+./node_modules/@sentry/node/build/cjs/index.js
+./node_modules/@sentry/nextjs/build/cjs/index.server.js
+./src/lib/monitoring/sentry.ts
+./src/lib/monitoring/index.ts
+./src/lib/payments/advanced-order-management.ts
+./src/lib/payments/index.ts
+./src/app/api/payments/create/route.ts
+
+./node_modules/require-in-the-middle/index.js
+Critical dependency: require function is used in a way in which dependencies cannot be statically extracted
+
+Import trace for requested module:
+./node_modules/require-in-the-middle/index.js
+./node_modules/@opentelemetry/instrumentation/build/esm/platform/node/instrumentation.js
+./node_modules/@opentelemetry/instrumentation/build/esm/platform/node/index.js
+./node_modules/@opentelemetry/instrumentation/build/esm/platform/index.js
+./node_modules/@opentelemetry/instrumentation/build/esm/index.js
+./node_modules/@sentry/node/build/cjs/integrations/tracing/postgresjs.js
+./node_modules/@sentry/node/build/cjs/index.js
+./node_modules/@sentry/nextjs/build/cjs/index.server.js
+./src/lib/monitoring/sentry.ts
+./src/lib/monitoring/index.ts
+./src/lib/payments/advanced-order-management.ts
+./src/lib/payments/index.ts
+./src/app/api/payments/create/route.ts
+
    Linting and checking validity of types ...
+
+./src/app/(dashboard)/dashboard/[storeId]/returns/page.tsx
+41:6  Warning: React Hook useEffect has a missing dependency: 'loadReturns'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/(dashboard)/dashboard/[storeId]/shipping/settings/page.tsx
+68:6  Warning: React Hook useEffect has a missing dependency: 'loadSettings'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/(shop)/shop/shop-client.tsx
+248:25  Warning: Unexpected console statement.  no-console
+
+./src/app/(store)/account/wishlist/page.tsx
+125:5  Warning: Unexpected console statement.  no-console
+
+./src/app/(store)/products/[id]/page.tsx
+167:5  Warning: Unexpected console statement.  no-console
+
+./src/app/api/analytics/vitals/route.ts
+44:7  Warning: Unexpected console statement.  no-console
+
+./src/app/api/cart/items/[itemId]/route.ts
+57:7  Warning: Unexpected console statement.  no-console
+126:7  Warning: Unexpected console statement.  no-console
+
+./src/app/api/cart/route.ts
+143:7  Warning: Unexpected console statement.  no-console
+
+./src/app/api/categories/route.ts
+155:5  Warning: Unexpected console statement.  no-console
+
+./src/app/api/categories/[id]/route.ts
+177:5  Warning: Unexpected console statement.  no-console
+264:5  Warning: Unexpected console statement.  no-console
+
+./src/app/api/checkout/route.ts
+107:9  Warning: Unexpected console statement.  no-console
+124:9  Warning: Unexpected console statement.  no-console
+134:9  Warning: Unexpected console statement.  no-console
+156:13  Warning: Unexpected console statement.  no-console
+207:7  Warning: Unexpected console statement.  no-console
+224:7  Warning: Unexpected console statement.  no-console
+232:7  Warning: Unexpected console statement.  no-console
+248:11  Warning: Unexpected console statement.  no-console
+
+./src/app/api/coupons/route.ts
+153:5  Warning: Unexpected console statement.  no-console
+
+./src/app/api/inventory/confirm/route.ts
+69:7  Warning: Unexpected console statement.  no-console
+
+./src/app/api/inventory/reserve/route.ts
+102:7  Warning: Unexpected console statement.  no-console
+
+./src/app/api/orders/[id]/refund/route.ts
+116:5  Warning: Unexpected console statement.  no-console
+
+./src/app/api/orders/[id]/return/route.ts
+189:5  Warning: Unexpected console statement.  no-console
+
+./src/app/api/orders/[id]/return-label/route.ts
+188:3  Warning: Unexpected console statement.  no-console
+213:3  Warning: Unexpected console statement.  no-console
+
+./src/app/api/orders/[id]/return-request/route.ts
+167:5  Warning: Unexpected console statement.  no-console
+
+./src/app/api/orders/[id]/status/route.ts
+85:5  Warning: Unexpected console statement.  no-console
+
+./src/app/api/products/bulk/route.ts
+166:5  Warning: Unexpected console statement.  no-console
+
+./src/app/api/products/route.ts
+262:5  Warning: Unexpected console statement.  no-console
+
+./src/app/api/products/stock/route.ts
+159:5  Warning: Unexpected console statement.  no-console
+
+./src/app/api/products/[id]/images/route.ts
+93:5  Warning: Unexpected console statement.  no-console
+174:5  Warning: Unexpected console statement.  no-console
+251:5  Warning: Unexpected console statement.  no-console
+
+./src/app/api/products/[id]/reviews/route.ts
+225:5  Warning: Unexpected console statement.  no-console
+
+./src/app/api/products/[id]/route.ts
+114:5  Warning: Unexpected console statement.  no-console
+211:5  Warning: Unexpected console statement.  no-console
+268:5  Warning: Unexpected console statement.  no-console
+
+./src/app/api/return-requests/[id]/approve/route.ts
+90:5  Warning: Unexpected console statement.  no-console
+
+./src/app/api/return-requests/[id]/refund/route.ts
+58:7  Warning: Unexpected console statement.  no-console
+64:7  Warning: Unexpected console statement.  no-console
+100:5  Warning: Unexpected console statement.  no-console
+
+./src/app/api/return-requests/[id]/reject/route.ts
+61:5  Warning: Unexpected console statement.  no-console
+
+./src/app/api/settings/route.ts
+139:5  Warning: Unexpected console statement.  no-console
+
+./src/app/api/shipping/bulk-labels/route.ts
+235:3  Warning: Unexpected console statement.  no-console
+236:3  Warning: Unexpected console statement.  no-console
+237:3  Warning: Unexpected console statement.  no-console
+
+./src/app/api/tenants/route.ts
+172:5  Warning: Unexpected console statement.  no-console
+
+./src/app/api/upload/image/route.ts
+76:5  Warning: Unexpected console statement.  no-console
+
+./src/app/api/upload/images/route.ts
+121:5  Warning: Unexpected console statement.  no-console
+
+./src/app/api/users/addresses/route.ts
+159:5  Warning: Unexpected console statement.  no-console
+
+./src/app/api/users/addresses/[id]/route.ts
+145:5  Warning: Unexpected console statement.  no-console
+215:5  Warning: Unexpected console statement.  no-console
+
+./src/app/api/users/profile/route.ts
+138:5  Warning: Unexpected console statement.  no-console
+
+./src/app/api/users/wishlist/route.ts
+209:5  Warning: Unexpected console statement.  no-console
+
+./src/app/api/users/wishlist/[id]/route.ts
+67:5  Warning: Unexpected console statement.  no-console
+
+./src/app/api/webhooks/mercado-pago/route.ts
+32:5  Warning: Unexpected console statement.  no-console
+54:7  Warning: Unexpected console statement.  no-console
+73:9  Warning: Unexpected console statement.  no-console
+103:3  Warning: Unexpected console statement.  no-console
+148:3  Warning: Unexpected console statement.  no-console
+165:3  Warning: Unexpected console statement.  no-console
+191:3  Warning: Unexpected console statement.  no-console
+198:3  Warning: Unexpected console statement.  no-console
+235:5  Warning: Unexpected console statement.  no-console
+284:5  Warning: Unexpected console statement.  no-console
+
+./src/app/api/webhooks/stripe/route.ts
+11:5  Warning: Unexpected console statement.  no-console
+91:7  Warning: Unexpected console statement.  no-console
+
+./src/app/components/shop/ReviewsSection.tsx
+91:5  Warning: Unexpected console statement.  no-console
+
+./src/app/components/shop/WishlistButton.tsx
+28:7  Warning: Unexpected console statement.  no-console
+31:7  Warning: Unexpected console statement.  no-console
+
+./src/app/dashboard/admin/activity/page.tsx
+71:6  Warning: React Hook useEffect has a missing dependency: 'fetchLogs'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/dashboard/admin/customers/page.tsx
+32:6  Warning: React Hook useEffect has a missing dependency: 'fetchCustomers'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/dashboard/admin/customers/[id]/page.tsx
+78:6  Warning: React Hook useEffect has a missing dependency: 'fetchCustomer'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/dashboard/admin/settings/page.tsx
+80:6  Warning: React Hook useEffect has a missing dependency: 'fetchSettings'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/dashboard/admin/stock/page.tsx
+120:6  Warning: React Hook useEffect has a missing dependency: 'fetchStockData'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/dashboard/analytics/customers/page.tsx
+41:6  Warning: React Hook useEffect has a missing dependency: 'fetchCustomerData'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/dashboard/analytics/page.tsx
+46:6  Warning: React Hook useEffect has a missing dependency: 'fetchAnalytics'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/dashboard/analytics/reports/page.tsx
+48:6  Warning: React Hook useEffect has a missing dependency: 'fetchReportsData'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/dashboard/analytics/sales/page.tsx
+41:6  Warning: React Hook useEffect has a missing dependency: 'fetchSalesData'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/dashboard/coupons/page.tsx
+111:6  Warning: React Hook useEffect has a missing dependency: 'fetchCoupons'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/dashboard/[storeId]/analytics/products/page.tsx
+456:27  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./src/app/layout.tsx
+70:9  Warning: Custom fonts not added in `pages/_document.js` will only load for a single page. This is discouraged. See: https://nextjs.org/docs/messages/no-page-custom-font  @next/next/no-page-custom-font
+
+./src/components/a11y/AccessibleImage.tsx
+38:7  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./src/components/analytics/CohortRetentionChart.tsx
+67:6  Warning: React Hook useEffect has a missing dependency: 'fetchCohortData'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/components/analytics/filters/DateRangePicker.tsx
+129:19  Warning: Unexpected console statement.  no-console
+
+./src/components/analytics/RFMSegmentation.tsx
+131:6  Warning: React Hook useEffect has a missing dependency: 'fetchRFMData'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/components/auth/LoginForm.tsx
+50:7  Warning: Unexpected console statement.  no-console
+
+./src/components/auth/SignupForm.tsx
+72:7  Warning: Unexpected console statement.  no-console
+
+./src/components/dashboard/categories/CategoriesTable.tsx
+67:27  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./src/components/dashboard/profile/PersonalInfoForm.tsx
+121:13  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./src/components/dashboard/settings/StoreInfoForm.tsx
+188:13  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./src/components/dashboard/Sidebar.tsx
+131:13  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./src/components/dashboard/TopNav.tsx
+141:15  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./src/components/image/ImageGallery.tsx
+51:6  Warning: React Hook React.useEffect has missing dependencies: 'handleNext' and 'handlePrevious'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/components/product/ProductGallery.tsx
+150:6  Warning: React Hook useEffect has missing dependencies: 'goToNext' and 'goToPrevious'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/components/pwa/InstallPrompt.tsx
+35:7  Warning: Unexpected console statement.  no-console
+40:7  Warning: Unexpected console statement.  no-console
+68:9  Warning: Unexpected console statement.  no-console
+70:9  Warning: Unexpected console statement.  no-console
+
+./src/components/pwa/PWAInstallPrompt.tsx
+54:7  Warning: Unexpected console statement.  no-console
+56:7  Warning: Unexpected console statement.  no-console
+
+./src/components/pwa/ServiceWorkerRegister.tsx
+43:7  Warning: Unexpected console statement.  no-console
+53:15  Warning: Unexpected console statement.  no-console
+193:5  Warning: Unexpected console statement.  no-console
+233:5  Warning: Unexpected console statement.  no-console
+
+./src/components/reviews/ReviewsSection.tsx
+83:6  Warning: React Hook useEffect has a missing dependency: 'fetchReviews'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/components/search/SearchBar.tsx
+51:6  Warning: React Hook useEffect has a missing dependency: 'fetchSuggestions'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/components/shared/PWAInstallPrompt.tsx
+75:7  Warning: Unexpected console statement.  no-console
+77:7  Warning: Unexpected console statement.  no-console
+
+./src/components/shared/ServiceWorkerRegistration.tsx
+16:11  Warning: Unexpected console statement.  no-console
+58:9  Warning: Unexpected console statement.  no-console
+63:9  Warning: Unexpected console statement.  no-console
+67:11  Warning: Unexpected console statement.  no-console
+
+./src/hooks/useNotifications.ts
+66:7  Warning: Unexpected console statement.  no-console
+70:7  Warning: Unexpected console statement.  no-console
+74:7  Warning: Unexpected console statement.  no-console
+81:7  Warning: Unexpected console statement.  no-console
+
+./src/hooks/usePWA.ts
+66:7  Warning: Unexpected console statement.  no-console
+81:13  Warning: Unexpected console statement.  no-console
+126:7  Warning: Unexpected console statement.  no-console
+
+./src/lib/a11y/audit.ts
+52:5  Warning: Unexpected console statement.  no-console
+
+./src/lib/a11y/keyboard-nav.tsx
+189:5  Warning: Unexpected console statement.  no-console
+
+./src/lib/admin/export-utils.ts
+202:1  Warning: Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+./src/lib/analytics/events.ts
+18:5  Warning: Unexpected console statement.  no-console
+27:5  Warning: Unexpected console statement.  no-console
+40:5  Warning: Unexpected console statement.  no-console
+54:5  Warning: Unexpected console statement.  no-console
+68:5  Warning: Unexpected console statement.  no-console
+72:5  Warning: Unexpected console statement.  no-console
+76:5  Warning: Unexpected console statement.  no-console
+87:5  Warning: Unexpected console statement.  no-console
+98:5  Warning: Unexpected console statement.  no-console
+102:5  Warning: Unexpected console statement.  no-console
+106:5  Warning: Unexpected console statement.  no-console
+110:5  Warning: Unexpected console statement.  no-console
+114:5  Warning: Unexpected console statement.  no-console
+127:5  Warning: Unexpected console statement.  no-console
+131:5  Warning: Unexpected console statement.  no-console
+135:5  Warning: Unexpected console statement.  no-console
+151:5  Warning: Unexpected console statement.  no-console
+155:5  Warning: Unexpected console statement.  no-console
+159:5  Warning: Unexpected console statement.  no-console
+163:5  Warning: Unexpected console statement.  no-console
+
+./src/lib/analytics/google-analytics.ts
+19:5  Warning: Unexpected console statement.  no-console
+406:1  Warning: Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+./src/lib/cdn/image-optimizer.ts
+225:1  Warning: Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+./src/lib/compliance/audits.ts
+3:3  Warning: Unexpected console statement.  no-console
+
+./src/lib/compliance/gdpr-compliance.ts
+47:3  Warning: Unexpected console statement.  no-console
+
+./src/lib/config/production.ts
+140:3  Warning: Unexpected console statement.  no-console
+141:3  Warning: Unexpected console statement.  no-console
+142:3  Warning: Unexpected console statement.  no-console
+143:3  Warning: Unexpected console statement.  no-console
+144:3  Warning: Unexpected console statement.  no-console
+145:3  Warning: Unexpected console statement.  no-console
+146:3  Warning: Unexpected console statement.  no-console
+
+./src/lib/cron/update-tracking.ts
+17:3  Warning: Unexpected console statement.  no-console
+47:5  Warning: Unexpected console statement.  no-console
+111:5  Warning: Unexpected console statement.  no-console
+121:3  Warning: Unexpected console statement.  no-console
+128:3  Warning: Unexpected console statement.  no-console
+134:3  Warning: Unexpected console statement.  no-console
+
+./src/lib/db/connection.ts
+70:5  Warning: Unexpected console statement.  no-console
+
+./src/lib/db/inventory.ts
+197:3  Warning: Unexpected console statement.  no-console
+246:3  Warning: Unexpected console statement.  no-console
+321:3  Warning: Unexpected console statement.  no-console
+
+./src/lib/db/orders.ts
+541:3  Warning: Unexpected console statement.  no-console
+595:3  Warning: Unexpected console statement.  no-console
+
+./src/lib/db/products.ts
+707:3  Warning: Unexpected console statement.  no-console
+
+./src/lib/db/search.ts
+365:3  Warning: Unexpected console statement.  no-console
+
+./src/lib/deployment/environment.ts
+213:3  Warning: Unexpected console statement.  no-console
+214:3  Warning: Unexpected console statement.  no-console
+215:3  Warning: Unexpected console statement.  no-console
+218:5  Warning: Unexpected console statement.  no-console
+219:38  Warning: Unexpected console statement.  no-console
+223:5  Warning: Unexpected console statement.  no-console
+224:40  Warning: Unexpected console statement.  no-console
+227:3  Warning: Unexpected console statement.  no-console
+
+./src/lib/email/index.ts
+149:3  Warning: Unexpected console statement.  no-console
+
+./src/lib/email/templates.ts
+567:1  Warning: Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+./src/lib/i18n/config.ts
+217:1  Warning: Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+./src/lib/i18n/translations.ts
+175:1  Warning: Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+./src/lib/integration/ab-testing.ts
+132:5  Warning: Unexpected console statement.  no-console
+216:5  Warning: Unexpected console statement.  no-console
+
+./src/lib/integrations/analytics.ts
+244:5  Warning: Unexpected console statement.  no-console
+248:5  Warning: Unexpected console statement.  no-console
+252:5  Warning: Unexpected console statement.  no-console
+256:5  Warning: Unexpected console statement.  no-console
+260:5  Warning: Unexpected console statement.  no-console
+
+./src/lib/integrations/email.ts
+206:5  Warning: Unexpected console statement.  no-console
+218:5  Warning: Unexpected console statement.  no-console
+
+./src/lib/integrations/notifications.ts
+336:5  Warning: Unexpected console statement.  no-console
+347:5  Warning: Unexpected console statement.  no-console
+361:5  Warning: Unexpected console statement.  no-console
+384:5  Warning: Unexpected console statement.  no-console
+390:5  Warning: Unexpected console statement.  no-console
+417:5  Warning: Unexpected console statement.  no-console
+
+./src/lib/integrations/payments.ts
+450:5  Warning: Unexpected console statement.  no-console
+462:5  Warning: Unexpected console statement.  no-console
+474:5  Warning: Unexpected console statement.  no-console
+479:5  Warning: Unexpected console statement.  no-console
+493:5  Warning: Unexpected console statement.  no-console
+537:5  Warning: Unexpected console statement.  no-console
+545:9  Warning: Unexpected console statement.  no-console
+559:5  Warning: Unexpected console statement.  no-console
+
+./src/lib/integrations/search.ts
+333:5  Warning: Unexpected console statement.  no-console
+342:5  Warning: Unexpected console statement.  no-console
+520:5  Warning: Unexpected console statement.  no-console
+529:5  Warning: Unexpected console statement.  no-console
+
+./src/lib/integrations/storage.ts
+293:5  Warning: Unexpected console statement.  no-console
+300:5  Warning: Unexpected console statement.  no-console
+
+./src/lib/inventory/stock.ts
+115:7  Warning: Unexpected console statement.  no-console
+
+./src/lib/mobile/device-features.ts
+27:5  Warning: Unexpected console statement.  no-console
+102:5  Warning: Unexpected console statement.  no-console
+177:5  Warning: Unexpected console statement.  no-console
+
+./src/lib/monitoring/sentry.ts
+74:3  Warning: Unexpected console statement.  no-console
+113:7  Warning: Unexpected console statement.  no-console
+145:7  Warning: Unexpected console statement.  no-console
+149:7  Warning: Unexpected console statement.  no-console
+153:7  Warning: Unexpected console statement.  no-console
+167:3  Warning: Unexpected console statement.  no-console
+174:3  Warning: Unexpected console statement.  no-console
+183:3  Warning: Unexpected console statement.  no-console
+201:5  Warning: Unexpected console statement.  no-console
+211:3  Warning: Unexpected console statement.  no-console
+
+./src/lib/notifications/push-service.ts
+35:5  Warning: Unexpected console statement.  no-console
+39:7  Warning: Unexpected console statement.  no-console
+
+./src/lib/payment/stripe.ts
+58:5  Warning: Unexpected console statement.  no-console
+157:5  Warning: Unexpected console statement.  no-console
+203:5  Warning: Unexpected console statement.  no-console
+226:7  Warning: Unexpected console statement.  no-console
+250:7  Warning: Unexpected console statement.  no-console
+256:7  Warning: Unexpected console statement.  no-console
+
+./src/lib/payments/invoice-generator.ts
+88:3  Warning: Unexpected console statement.  no-console
+
+./src/lib/payments/mercado-pago-marketplace.ts
+284:3  Warning: Unexpected console statement.  no-console
+
+./src/lib/payments/webhooks.ts
+157:5  Warning: Unexpected console statement.  no-console
+189:9  Warning: Unexpected console statement.  no-console
+
+./src/lib/performance/dynamic-import.tsx
+166:5  Warning: Unexpected console statement.  no-console
+
+./src/lib/performance/web-vitals.ts
+44:7  Warning: Unexpected console statement.  no-console
+
+./src/lib/pwa/install.ts
+24:5  Warning: Unexpected console statement.  no-console
+52:5  Warning: Unexpected console statement.  no-console
+60:5  Warning: Unexpected console statement.  no-console
+
+./src/lib/pwa/metrics.ts
+50:5  Warning: Unexpected console statement.  no-console
+76:5  Warning: Unexpected console statement.  no-console
+98:3  Warning: Unexpected console statement.  no-console
+109:3  Warning: Unexpected console statement.  no-console
+120:3  Warning: Unexpected console statement.  no-console
+131:3  Warning: Unexpected console statement.  no-console
+223:5  Warning: Unexpected console statement.  no-console
+246:3  Warning: Unexpected console statement.  no-console
+
+./src/lib/pwa/offline-products.ts
+40:3  Warning: Unexpected console statement.  no-console
+128:5  Warning: Unexpected console statement.  no-console
+
+./src/lib/pwa/offline.ts
+238:7  Warning: Unexpected console statement.  no-console
+292:7  Warning: Unexpected console statement.  no-console
+
+./src/lib/pwa/performance.ts
+95:3  Warning: Unexpected console statement.  no-console
+110:3  Warning: Unexpected console statement.  no-console
+124:7  Warning: Unexpected console statement.  no-console
+150:5  Warning: Unexpected console statement.  no-console
+267:3  Warning: Unexpected console statement.  no-console
+282:3  Warning: Unexpected console statement.  no-console
+286:5  Warning: Unexpected console statement.  no-console
+
+./src/lib/pwa/push-notifications.ts
+50:5  Warning: Unexpected console statement.  no-console
+84:5  Warning: Unexpected console statement.  no-console
+122:5  Warning: Unexpected console statement.  no-console
+153:5  Warning: Unexpected console statement.  no-console
+
+./src/lib/pwa/push.ts
+35:5  Warning: Unexpected console statement.  no-console
+41:5  Warning: Unexpected console statement.  no-console
+61:5  Warning: Unexpected console statement.  no-console
+77:7  Warning: Unexpected console statement.  no-console
+105:5  Warning: Unexpected console statement.  no-console
+
+./src/lib/pwa/service-worker-config.ts
+190:5  Warning: Unexpected console statement.  no-console
+199:11  Warning: Unexpected console statement.  no-console
+221:5  Warning: Unexpected console statement.  no-console
+260:1  Warning: Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+./src/lib/pwa/service-worker.ts
+20:5  Warning: Unexpected console statement.  no-console
+29:5  Warning: Unexpected console statement.  no-console
+123:5  Warning: Unexpected console statement.  no-console
+
+./src/lib/pwa/sw-register.tsx
+36:5  Warning: Unexpected console statement.  no-console
+42:5  Warning: Unexpected console statement.  no-console
+72:3  Warning: Unexpected console statement.  no-console
+77:7  Warning: Unexpected console statement.  no-console
+91:7  Warning: Unexpected console statement.  no-console
+177:5  Warning: Unexpected console statement.  no-console
+219:7  Warning: Unexpected console statement.  no-console
+236:3  Warning: Unexpected console statement.  no-console
+248:5  Warning: Unexpected console statement.  no-console
+267:5  Warning: Unexpected console statement.  no-console
+
+./src/lib/pwa/theme.ts
+44:5  Warning: Unexpected console statement.  no-console
+84:3  Warning: Unexpected console statement.  no-console
+197:3  Warning: Unexpected console statement.  no-console
+
+./src/lib/realtime/websocket.ts
+135:7  Warning: Unexpected console statement.  no-console
+144:7  Warning: Unexpected console statement.  no-console
+227:5  Warning: Unexpected console statement.  no-console
+
+./src/lib/returns/return-processing.ts
+42:3  Warning: Unexpected console statement.  no-console
+77:3  Warning: Unexpected console statement.  no-console
+135:7  Warning: Unexpected console statement.  no-console
+
+./src/lib/search/cache.ts
+195:5  Warning: Unexpected console statement.  no-console
+199:3  Warning: Unexpected console statement.  no-console
+
+./src/lib/search/engine.ts
+7:5  Warning: Unexpected console statement.  no-console
+13:5  Warning: Unexpected console statement.  no-console
+
+./src/lib/search/search-engine.ts
+358:7  Warning: Unexpected console statement.  no-console
+374:5  Warning: Unexpected console statement.  no-console
+
+./src/lib/search/search-service.ts
+217:3  Warning: Unexpected console statement.  no-console
+
+./src/lib/search/__tests__/search-performance.test.ts
+61:7  Warning: Unexpected console statement.  no-console
+75:7  Warning: Unexpected console statement.  no-console
+96:7  Warning: Unexpected console statement.  no-console
+112:7  Warning: Unexpected console statement.  no-console
+123:7  Warning: Unexpected console statement.  no-console
+132:7  Warning: Unexpected console statement.  no-console
+145:7  Warning: Unexpected console statement.  no-console
+159:7  Warning: Unexpected console statement.  no-console
+184:7  Warning: Unexpected console statement.  no-console
+224:7  Warning: Unexpected console statement.  no-console
+252:9  Warning: Unexpected console statement.  no-console
+264:3  Warning: Unexpected console statement.  no-console
+265:3  Warning: Unexpected console statement.  no-console
+303:5  Warning: Unexpected console statement.  no-console
+308:3  Warning: Unexpected console statement.  no-console
+
+./src/lib/security/audit-logger.ts
+88:7  Warning: Unexpected console statement.  no-console
+
+./src/lib/security/headers.ts
+125:1  Warning: Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+./src/lib/security/input-sanitizer.ts
+185:1  Warning: Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+./src/lib/seo/meta-generator.ts
+275:1  Warning: Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+./src/lib/seo/sitemap-generator.ts
+175:1  Warning: Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+./src/lib/seo/structured-data.ts
+441:1  Warning: Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+./src/lib/shipping/exception-handler.ts
+119:3  Warning: Unexpected console statement.  no-console
+179:3  Warning: Unexpected console statement.  no-console
+196:3  Warning: Unexpected console statement.  no-console
+200:3  Warning: Unexpected console statement.  no-console
+212:3  Warning: Unexpected console statement.  no-console
+
+./src/lib/shipping/providers/base.ts
+67:5  Warning: Unexpected console statement.  no-console
+
+./src/lib/shipping/providers/mercado-envios.ts
+35:5  Warning: Unexpected console statement.  no-console
+
+./src/lib/shipping/rates-cache.ts
+119:3  Warning: Unexpected console statement.  no-console
+138:3  Warning: Unexpected console statement.  no-console
+153:3  Warning: Unexpected console statement.  no-console
+
+./src/lib/testing/test-helpers.ts
+22:3  Warning: Unexpected console statement.  no-console
+26:3  Warning: Unexpected console statement.  no-console
+
+./src/lib/upload/image.ts
+126:3  Warning: Unexpected console statement.  no-console
+153:5  Warning: Unexpected console statement.  no-console
+
+./src/lib/websocket/client.ts
+37:5  Warning: Unexpected console statement.  no-console
+41:5  Warning: Unexpected console statement.  no-console
+71:3  Warning: Unexpected console statement.  no-console
+83:3  Warning: Unexpected console statement.  no-console
+117:5  Warning: Unexpected console statement.  no-console
+
+./src/__tests__/performance/bundle.test.ts
+32:9  Warning: Unexpected console statement.  no-console
+52:9  Warning: Unexpected console statement.  no-console
+74:7  Warning: Unexpected console statement.  no-console
+96:7  Warning: Unexpected console statement.  no-console
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/basic-features/eslint#disabling-rules
+Failed to compile.
+
+./src/lib/email/campaigns.ts:255:20
+Type error: No overload matches this call.
+  Overload 1 of 2, '(timeout: string | number | Timeout | undefined): void', gave the following error.
+    Argument of type 'Timer' is not assignable to parameter of type 'string | number | Timeout | undefined'.
+      Type 'Timer' is missing the following properties from type 'Timeout': close, _onTimeout, [Symbol.dispose]
+  Overload 2 of 2, '(id: number | undefined): void', gave the following error.
+    Argument of type 'Timer' is not assignable to parameter of type 'number'.
+
+[0m [90m 253 |[39m     [36mconst[39m timer [33m=[39m [36mthis[39m[33m.[39mcampaignSchedules[33m.[39m[36mget[39m(campaignId)[0m
+[0m [90m 254 |[39m     [36mif[39m (timer) {[0m
+[0m[31m[1m>[22m[39m[90m 255 |[39m       clearTimeout(timer)[0m
+[0m [90m     |[39m                    [31m[1m^[22m[39m[0m
+[0m [90m 256 |[39m       [36mthis[39m[33m.[39mcampaignSchedules[33m.[39m[36mdelete[39m(campaignId)[0m
+[0m [90m 257 |[39m     }[0m
+[0m [90m 258 |[39m[0m
+Next.js build worker exited with code: 1 and signal: null

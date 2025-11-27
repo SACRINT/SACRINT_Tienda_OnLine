@@ -3,41 +3,41 @@
  * Semana 54, Tarea 54.11: Product Sustainability & Long-term Viability
  */
 
-import { logger } from "@/lib/monitoring"
+import { logger } from "@/lib/monitoring";
 
 export interface SustainabilityGoal {
-  id: string
-  goalName: string
-  category: "environmental" | "social" | "economic"
-  target: string
-  status: "in-progress" | "achieved" | "pending"
-  progressPercent: number
+  id: string;
+  goalName: string;
+  category: "environmental" | "social" | "economic";
+  target: string;
+  status: "in-progress" | "achieved" | "pending";
+  progressPercent: number;
 }
 
 export interface LongTermViabilityPlan {
-  id: string
-  planName: string
-  timeHorizon: number
-  objectives: string[]
-  successMetrics: string[]
-  risks: string[]
-  status: "planning" | "execution" | "monitoring"
+  id: string;
+  planName: string;
+  timeHorizon: number;
+  objectives: string[];
+  successMetrics: string[];
+  risks: string[];
+  status: "planning" | "execution" | "monitoring";
 }
 
 export class SustainabilityManager {
-  private sustainabilityGoals: Map<string, SustainabilityGoal> = new Map()
-  private viabilityPlans: Map<string, LongTermViabilityPlan> = new Map()
+  private sustainabilityGoals: Map<string, SustainabilityGoal> = new Map();
+  private viabilityPlans: Map<string, LongTermViabilityPlan> = new Map();
 
   constructor() {
-    logger.debug({ type: "sustainability_init" }, "Manager inicializado")
+    logger.debug({ type: "sustainability_init" }, "Manager inicializado");
   }
 
   setSustainabilityGoal(
     goalName: string,
     category: "environmental" | "social" | "economic",
-    target: string
+    target: string,
   ): SustainabilityGoal {
-    const id = "goal_" + Date.now()
+    const id = "goal_" + Date.now();
     const goal: SustainabilityGoal = {
       id,
       goalName,
@@ -45,14 +45,14 @@ export class SustainabilityManager {
       target,
       status: "in-progress",
       progressPercent: 0,
-    }
+    };
 
-    this.sustainabilityGoals.set(id, goal)
+    this.sustainabilityGoals.set(id, goal);
     logger.info(
       { type: "sustainability_goal_set", goalId: id },
-      `Objetivo de sostenibilidad establecido: ${goalName}`
-    )
-    return goal
+      `Objetivo de sostenibilidad establecido: ${goalName}`,
+    );
+    return goal;
   }
 
   createLongTermViabilityPlan(
@@ -60,9 +60,9 @@ export class SustainabilityManager {
     timeHorizon: number,
     objectives: string[],
     successMetrics: string[],
-    risks: string[]
+    risks: string[],
   ): LongTermViabilityPlan {
-    const id = "plan_" + Date.now()
+    const id = "plan_" + Date.now();
     const plan: LongTermViabilityPlan = {
       id,
       planName,
@@ -71,18 +71,18 @@ export class SustainabilityManager {
       successMetrics,
       risks,
       status: "planning",
-    }
+    };
 
-    this.viabilityPlans.set(id, plan)
+    this.viabilityPlans.set(id, plan);
     logger.info(
       { type: "viability_plan_created", planId: id },
-      `Plan de viabilidad a largo plazo creado`
-    )
-    return plan
+      `Plan de viabilidad a largo plazo creado`,
+    );
+    return plan;
   }
 
-  getStatistics(): Record<string, unknown> {
-    const goals = Array.from(this.sustainabilityGoals.values())
+  getStatistics(): Record<string, any> {
+    const goals = Array.from(this.sustainabilityGoals.values());
 
     return {
       totalSustainabilityGoals: goals.length,
@@ -92,20 +92,20 @@ export class SustainabilityManager {
         economic: goals.filter((g) => g.category === "economic").length,
       },
       totalViabilityPlans: this.viabilityPlans.size,
-    }
+    };
   }
 
   generateSustainabilityReport(): string {
-    const stats = this.getStatistics()
-    return `Sustainability Report\nGoals: ${stats.totalSustainabilityGoals}\nViability Plans: ${stats.totalViabilityPlans}`
+    const stats = this.getStatistics();
+    return `Sustainability Report\nGoals: ${stats.totalSustainabilityGoals}\nViability Plans: ${stats.totalViabilityPlans}`;
   }
 }
 
-let globalSustainabilityManager: SustainabilityManager | null = null
+let globalSustainabilityManager: SustainabilityManager | null = null;
 
 export function getSustainabilityManager(): SustainabilityManager {
   if (!globalSustainabilityManager) {
-    globalSustainabilityManager = new SustainabilityManager()
+    globalSustainabilityManager = new SustainabilityManager();
   }
-  return globalSustainabilityManager
+  return globalSustainabilityManager;
 }

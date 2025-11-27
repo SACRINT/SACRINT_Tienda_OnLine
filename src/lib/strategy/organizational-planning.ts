@@ -3,39 +3,39 @@
  * Semana 51, Tarea 51.11: Organizational Structure & Development Planning
  */
 
-import { logger } from "@/lib/monitoring"
+import { logger } from "@/lib/monitoring";
 
 export interface OrganizationalUnit {
-  id: string
-  name: string
-  type: "department" | "team" | "division" | "group"
-  parentUnitId?: string
-  childUnitIds: string[]
-  headCount: number
-  budget: number
-  responsibilities: string[]
-  manager: string
-  createdAt: Date
+  id: string;
+  name: string;
+  type: "department" | "team" | "division" | "group";
+  parentUnitId?: string;
+  childUnitIds: string[];
+  headCount: number;
+  budget: number;
+  responsibilities: string[];
+  manager: string;
+  createdAt: Date;
 }
 
 export interface DevelopmentPlan {
-  id: string
-  employeeId: string
-  goals: string[]
-  trainingPrograms: string[]
-  mentorId?: string
-  timeframe: string
-  status: "draft" | "active" | "completed"
-  evaluationDate: Date
+  id: string;
+  employeeId: string;
+  goals: string[];
+  trainingPrograms: string[];
+  mentorId?: string;
+  timeframe: string;
+  status: "draft" | "active" | "completed";
+  evaluationDate: Date;
 }
 
 export class OrganizationalPlanningManager {
-  private units: Map<string, OrganizationalUnit> = new Map()
-  private developmentPlans: Map<string, DevelopmentPlan> = new Map()
-  private organizationChart: string = ""
+  private units: Map<string, OrganizationalUnit> = new Map();
+  private developmentPlans: Map<string, DevelopmentPlan> = new Map();
+  private organizationChart: string = "";
 
   constructor() {
-    logger.debug({ type: "organizational_planning_init" }, "Manager inicializado")
+    logger.debug({ type: "organizational_planning_init" }, "Manager inicializado");
   }
 
   createOrganizationalUnit(
@@ -45,9 +45,9 @@ export class OrganizationalPlanningManager {
     budget: number,
     responsibilities: string[],
     manager: string,
-    parentUnitId?: string
+    parentUnitId?: string,
   ): OrganizationalUnit {
-    const id = "unit_" + Date.now()
+    const id = "unit_" + Date.now();
     const unit: OrganizationalUnit = {
       id,
       name,
@@ -59,23 +59,23 @@ export class OrganizationalPlanningManager {
       responsibilities,
       manager,
       createdAt: new Date(),
-    }
+    };
 
-    this.units.set(id, unit)
+    this.units.set(id, unit);
 
     if (parentUnitId) {
-      const parentUnit = this.units.get(parentUnitId)
+      const parentUnit = this.units.get(parentUnitId);
       if (parentUnit) {
-        parentUnit.childUnitIds.push(id)
-        this.units.set(parentUnitId, parentUnit)
+        parentUnit.childUnitIds.push(id);
+        this.units.set(parentUnitId, parentUnit);
       }
     }
 
     logger.info(
       { type: "organizational_unit_created", unitId: id },
-      `Unidad organizacional creada: ${name}`
-    )
-    return unit
+      `Unidad organizacional creada: ${name}`,
+    );
+    return unit;
   }
 
   createDevelopmentPlan(
@@ -83,9 +83,9 @@ export class OrganizationalPlanningManager {
     goals: string[],
     trainingPrograms: string[],
     timeframe: string,
-    mentorId?: string
+    mentorId?: string,
   ): DevelopmentPlan {
-    const id = "devplan_" + Date.now()
+    const id = "devplan_" + Date.now();
     const plan: DevelopmentPlan = {
       id,
       employeeId,
@@ -95,65 +95,55 @@ export class OrganizationalPlanningManager {
       timeframe,
       status: "draft",
       evaluationDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
-    }
+    };
 
-    this.developmentPlans.set(id, plan)
+    this.developmentPlans.set(id, plan);
     logger.info(
       { type: "development_plan_created", planId: id },
-      `Plan de desarrollo creado para empleado`
-    )
-    return plan
+      `Plan de desarrollo creado para empleado`,
+    );
+    return plan;
   }
 
   activateDevelopmentPlan(planId: string): DevelopmentPlan | null {
-    const plan = this.developmentPlans.get(planId)
-    if (!plan) return null
-    plan.status = "active"
-    this.developmentPlans.set(planId, plan)
-    return plan
+    const plan = this.developmentPlans.get(planId);
+    if (!plan) return null;
+    plan.status = "active";
+    this.developmentPlans.set(planId, plan);
+    return plan;
   }
 
   completeDevelopmentPlan(planId: string): DevelopmentPlan | null {
-    const plan = this.developmentPlans.get(planId)
-    if (!plan) return null
-    plan.status = "completed"
-    this.developmentPlans.set(planId, plan)
-    return plan
+    const plan = this.developmentPlans.get(planId);
+    if (!plan) return null;
+    plan.status = "completed";
+    this.developmentPlans.set(planId, plan);
+    return plan;
   }
 
   getUnitsHierarchy(): OrganizationalUnit[] {
-    return Array.from(this.units.values()).filter((u) => !u.parentUnitId)
+    return Array.from(this.units.values()).filter((u) => !u.parentUnitId);
   }
 
   getUnitByManager(manager: string): OrganizationalUnit | null {
-    return (
-      Array.from(this.units.values()).find((u) => u.manager === manager) || null
-    )
+    return Array.from(this.units.values()).find((u) => u.manager === manager) || null;
   }
 
   getEmployeeDevelopmentPlans(employeeId: string): DevelopmentPlan[] {
-    return Array.from(this.developmentPlans.values()).filter(
-      (p) => p.employeeId === employeeId
-    )
+    return Array.from(this.developmentPlans.values()).filter((p) => p.employeeId === employeeId);
   }
 
   calculateTotalHeadCount(): number {
-    return Array.from(this.units.values()).reduce(
-      (sum, u) => sum + u.headCount,
-      0
-    )
+    return Array.from(this.units.values()).reduce((sum, u) => sum + u.headCount, 0);
   }
 
   calculateTotalBudget(): number {
-    return Array.from(this.units.values()).reduce(
-      (sum, u) => sum + u.budget,
-      0
-    )
+    return Array.from(this.units.values()).reduce((sum, u) => sum + u.budget, 0);
   }
 
-  getStatistics(): Record<string, unknown> {
-    const units = Array.from(this.units.values())
-    const plans = Array.from(this.developmentPlans.values())
+  getStatistics(): Record<string, any> {
+    const units = Array.from(this.units.values());
+    const plans = Array.from(this.developmentPlans.values());
 
     return {
       totalUnits: units.length,
@@ -171,21 +161,20 @@ export class OrganizationalPlanningManager {
         active: plans.filter((p) => p.status === "active").length,
         completed: plans.filter((p) => p.status === "completed").length,
       },
-    }
+    };
   }
 
   generateOrganizationalReport(): string {
-    const stats = this.getStatistics()
-    return `Organizational Planning Report\nTotal Units: ${stats.totalUnits}\nTotal Head Count: ${stats.totalHeadCount}\nTotal Budget: ${stats.totalBudget}\nDevelopment Plans: ${stats.totalDevelopmentPlans}`
+    const stats = this.getStatistics();
+    return `Organizational Planning Report\nTotal Units: ${stats.totalUnits}\nTotal Head Count: ${stats.totalHeadCount}\nTotal Budget: ${stats.totalBudget}\nDevelopment Plans: ${stats.totalDevelopmentPlans}`;
   }
 }
 
-let globalOrganizationalPlanningManager: OrganizationalPlanningManager | null =
-  null
+let globalOrganizationalPlanningManager: OrganizationalPlanningManager | null = null;
 
 export function getOrganizationalPlanningManager(): OrganizationalPlanningManager {
   if (!globalOrganizationalPlanningManager) {
-    globalOrganizationalPlanningManager = new OrganizationalPlanningManager()
+    globalOrganizationalPlanningManager = new OrganizationalPlanningManager();
   }
-  return globalOrganizationalPlanningManager
+  return globalOrganizationalPlanningManager;
 }

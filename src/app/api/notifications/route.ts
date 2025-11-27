@@ -6,10 +6,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/auth";
-import {
-  getUserNotifications,
-  createNotification,
-} from "@/lib/notifications/notification-service";
+import { getUserNotifications, createNotification } from "@/lib/notifications/notification-service";
 import { z } from "zod";
 import { NotificationType } from "@/lib/db/enums";
 
@@ -20,7 +17,7 @@ const createNotificationSchema = z.object({
   title: z.string().min(1).max(200),
   message: z.string().min(1),
   actionUrl: z.string().url().optional(),
-  metadata: z.record(z.string(), z.any()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 // Force dynamic rendering for this API route
@@ -47,10 +44,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(result);
   } catch (error: any) {
     console.error("[Notifications API] GET error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
@@ -82,9 +76,6 @@ export async function POST(req: NextRequest) {
       );
     }
     console.error("[Notifications API] POST error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

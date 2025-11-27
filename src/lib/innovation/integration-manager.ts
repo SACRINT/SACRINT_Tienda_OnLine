@@ -3,25 +3,25 @@
  * Semana 54, Tarea 54.4: External Integrations & API Management
  */
 
-import { logger } from "@/lib/monitoring"
+import { logger } from "@/lib/monitoring";
 
 export interface Integration {
-  id: string
-  integrationName: string
-  provider: string
-  type: "webhook" | "api" | "polling" | "direct"
-  status: "active" | "inactive" | "deprecated"
-  apiKey?: string
-  lastSyncDate: Date
-  errorCount: number
-  description: string
+  id: string;
+  integrationName: string;
+  provider: string;
+  type: "webhook" | "api" | "polling" | "direct";
+  status: "active" | "inactive" | "deprecated";
+  apiKey?: string;
+  lastSyncDate: Date;
+  errorCount: number;
+  description: string;
 }
 
 export class IntegrationManager {
-  private integrations: Map<string, Integration> = new Map()
+  private integrations: Map<string, Integration> = new Map();
 
   constructor() {
-    logger.debug({ type: "integration_manager_init" }, "Manager inicializado")
+    logger.debug({ type: "integration_manager_init" }, "Manager inicializado");
   }
 
   setupIntegration(
@@ -29,9 +29,9 @@ export class IntegrationManager {
     provider: string,
     integrationType: "webhook" | "api" | "polling" | "direct",
     description: string,
-    apiKey?: string
+    apiKey?: string,
   ): Integration {
-    const id = "int_" + Date.now()
+    const id = "int_" + Date.now();
     const integration: Integration = {
       id,
       integrationName,
@@ -42,27 +42,27 @@ export class IntegrationManager {
       lastSyncDate: new Date(),
       errorCount: 0,
       description,
-    }
+    };
 
-    this.integrations.set(id, integration)
+    this.integrations.set(id, integration);
     logger.info(
       { type: "integration_setup", integrationId: id },
-      `Integración configurada: ${integrationName}`
-    )
-    return integration
+      `Integración configurada: ${integrationName}`,
+    );
+    return integration;
   }
 
   recordSyncError(integrationId: string): Integration | null {
-    const integration = this.integrations.get(integrationId)
-    if (!integration) return null
+    const integration = this.integrations.get(integrationId);
+    if (!integration) return null;
 
-    integration.errorCount++
-    logger.warn({ type: "sync_error_recorded", integrationId }, `Error de sincronización`)
-    return integration
+    integration.errorCount++;
+    logger.warn({ type: "sync_error_recorded", integrationId }, `Error de sincronización`);
+    return integration;
   }
 
-  getStatistics(): Record<string, unknown> {
-    const integrations = Array.from(this.integrations.values())
+  getStatistics(): Record<string, any> {
+    const integrations = Array.from(this.integrations.values());
 
     return {
       totalIntegrations: integrations.length,
@@ -77,20 +77,20 @@ export class IntegrationManager {
         polling: integrations.filter((i) => i.type === "polling").length,
         direct: integrations.filter((i) => i.type === "direct").length,
       },
-    }
+    };
   }
 
   generateIntegrationReport(): string {
-    const stats = this.getStatistics()
-    return `Integration Report\nTotal: ${stats.totalIntegrations}\nActive: ${stats.byStatus.active}`
+    const stats = this.getStatistics();
+    return `Integration Report\nTotal: ${stats.totalIntegrations}\nActive: ${stats.byStatus.active}`;
   }
 }
 
-let globalIntegrationManager: IntegrationManager | null = null
+let globalIntegrationManager: IntegrationManager | null = null;
 
 export function getIntegrationManager(): IntegrationManager {
   if (!globalIntegrationManager) {
-    globalIntegrationManager = new IntegrationManager()
+    globalIntegrationManager = new IntegrationManager();
   }
-  return globalIntegrationManager
+  return globalIntegrationManager;
 }

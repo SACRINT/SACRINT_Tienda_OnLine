@@ -126,7 +126,7 @@ export class MaintenanceReportingManager {
     );
   }
 
-  getStatistics(): Record<string, unknown> {
+  getStatistics(): Record<string, any> {
     const reports = Array.from(this.maintenanceReports.values());
     const activities = Array.from(this.activities.values());
 

@@ -6,7 +6,7 @@ import { z } from "zod";
 // Search schemas
 export const SearchQuerySchema = z.object({
   query: z.string().min(1),
-  filters: z.record(z.union([z.string(), z.array(z.string())])).optional(),
+  filters: z.record(z.string(), z.union([z.string(), z.array(z.string())])).optional(),
   sort: z
     .object({
       field: z.string(),
@@ -74,24 +74,12 @@ export interface SearchService {
   clearIndex(tenantId?: string): Promise<void>;
 
   // Searching
-  search(
-    tenantId: string,
-    query: SearchQuery,
-  ): Promise<SearchResult<ProductSearchData>>;
+  search(tenantId: string, query: SearchQuery): Promise<SearchResult<ProductSearchData>>;
   suggest(tenantId: string, query: string, limit?: number): Promise<string[]>;
 
   // Analytics
-  trackSearch(
-    tenantId: string,
-    query: string,
-    resultCount: number,
-  ): Promise<void>;
-  trackClick(
-    tenantId: string,
-    query: string,
-    productId: string,
-    position: number,
-  ): Promise<void>;
+  trackSearch(tenantId: string, query: string, resultCount: number): Promise<void>;
+  trackClick(tenantId: string, query: string, productId: string, position: number): Promise<void>;
   getPopularSearches(tenantId: string, limit?: number): Promise<string[]>;
 }
 
@@ -119,23 +107,20 @@ export class AlgoliaSearchService implements SearchService {
       ...p,
     }));
 
-    const response = await fetch(
-      `${this.baseUrl}/1/indexes/${this.indexName}/batch`,
-      {
-        method: "POST",
-        headers: {
-          "X-Algolia-Application-Id": this.appId,
-          "X-Algolia-API-Key": this.apiKey,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          requests: objects.map((obj) => ({
-            action: "updateObject",
-            body: obj,
-          })),
-        }),
+    const response = await fetch(`${this.baseUrl}/1/indexes/${this.indexName}/batch`, {
+      method: "POST",
+      headers: {
+        "X-Algolia-Application-Id": this.appId,
+        "X-Algolia-API-Key": this.apiKey,
+        "Content-Type": "application/json",
       },
-    );
+      body: JSON.stringify({
+        requests: objects.map((obj) => ({
+          action: "updateObject",
+          body: obj,
+        })),
+      }),
+    });
 
     if (!response.ok) {
       const error = await response.json();
@@ -143,22 +128,16 @@ export class AlgoliaSearchService implements SearchService {
     }
   }
 
-  async updateProduct(
-    id: string,
-    product: Partial<ProductSearchData>,
-  ): Promise<void> {
-    const response = await fetch(
-      `${this.baseUrl}/1/indexes/${this.indexName}/${id}/partial`,
-      {
-        method: "POST",
-        headers: {
-          "X-Algolia-Application-Id": this.appId,
-          "X-Algolia-API-Key": this.apiKey,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(product),
+  async updateProduct(id: string, product: Partial<ProductSearchData>): Promise<void> {
+    const response = await fetch(`${this.baseUrl}/1/indexes/${this.indexName}/${id}/partial`, {
+      method: "POST",
+      headers: {
+        "X-Algolia-Application-Id": this.appId,
+        "X-Algolia-API-Key": this.apiKey,
+        "Content-Type": "application/json",
       },
-    );
+      body: JSON.stringify(product),
+    });
 
     if (!response.ok) {
       const error = await response.json();
@@ -167,16 +146,13 @@ export class AlgoliaSearchService implements SearchService {
   }
 
   async deleteProduct(id: string): Promise<void> {
-    const response = await fetch(
-      `${this.baseUrl}/1/indexes/${this.indexName}/${id}`,
-      {
-        method: "DELETE",
-        headers: {
-          "X-Algolia-Application-Id": this.appId,
-          "X-Algolia-API-Key": this.apiKey,
-        },
+    const response = await fetch(`${this.baseUrl}/1/indexes/${this.indexName}/${id}`, {
+      method: "DELETE",
+      headers: {
+        "X-Algolia-Application-Id": this.appId,
+        "X-Algolia-API-Key": this.apiKey,
       },
-    );
+    });
 
     if (!response.ok) {
       const error = await response.json();
@@ -187,36 +163,30 @@ export class AlgoliaSearchService implements SearchService {
   async clearIndex(tenantId?: string): Promise<void> {
     if (tenantId) {
       // Delete by query for specific tenant
-      const response = await fetch(
-        `${this.baseUrl}/1/indexes/${this.indexName}/deleteByQuery`,
-        {
-          method: "POST",
-          headers: {
-            "X-Algolia-Application-Id": this.appId,
-            "X-Algolia-API-Key": this.apiKey,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            filters: `tenantId:${tenantId}`,
-          }),
+      const response = await fetch(`${this.baseUrl}/1/indexes/${this.indexName}/deleteByQuery`, {
+        method: "POST",
+        headers: {
+          "X-Algolia-Application-Id": this.appId,
+          "X-Algolia-API-Key": this.apiKey,
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify({
+          filters: `tenantId:${tenantId}`,
+        }),
+      });
 
       if (!response.ok) {
         throw new Error("Clear tenant index failed");
       }
     } else {
       // Clear entire index
-      const response = await fetch(
-        `${this.baseUrl}/1/indexes/${this.indexName}/clear`,
-        {
-          method: "POST",
-          headers: {
-            "X-Algolia-Application-Id": this.appId,
-            "X-Algolia-API-Key": this.apiKey,
-          },
+      const response = await fetch(`${this.baseUrl}/1/indexes/${this.indexName}/clear`, {
+        method: "POST",
+        headers: {
+          "X-Algolia-Application-Id": this.appId,
+          "X-Algolia-API-Key": this.apiKey,
         },
-      );
+      });
 
       if (!response.ok) {
         throw new Error("Clear index failed");
@@ -224,10 +194,7 @@ export class AlgoliaSearchService implements SearchService {
     }
   }
 
-  async search(
-    tenantId: string,
-    query: SearchQuery,
-  ): Promise<SearchResult<ProductSearchData>> {
+  async search(tenantId: string, query: SearchQuery): Promise<SearchResult<ProductSearchData>> {
     const validated = SearchQuerySchema.parse(query);
 
     const params: any = {
@@ -240,14 +207,12 @@ export class AlgoliaSearchService implements SearchService {
 
     // Add filters
     if (validated.filters) {
-      const filterStrings = Object.entries(validated.filters).map(
-        ([key, value]) => {
-          if (Array.isArray(value)) {
-            return `(${value.map((v) => `${key}:${v}`).join(" OR ")})`;
-          }
-          return `${key}:${value}`;
-        },
-      );
+      const filterStrings = Object.entries(validated.filters).map(([key, value]) => {
+        if (Array.isArray(value)) {
+          return `(${value.map((v) => `${key}:${v}`).join(" OR ")})`;
+        }
+        return `${key}:${value}`;
+      });
       params.filters += ` AND ${filterStrings.join(" AND ")}`;
     }
 
@@ -256,18 +221,15 @@ export class AlgoliaSearchService implements SearchService {
       params.facets = validated.facets;
     }
 
-    const response = await fetch(
-      `${this.baseUrl}/1/indexes/${this.indexName}/query`,
-      {
-        method: "POST",
-        headers: {
-          "X-Algolia-Application-Id": this.appId,
-          "X-Algolia-API-Key": this.apiKey,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(params),
+    const response = await fetch(`${this.baseUrl}/1/indexes/${this.indexName}/query`, {
+      method: "POST",
+      headers: {
+        "X-Algolia-Application-Id": this.appId,
+        "X-Algolia-API-Key": this.apiKey,
+        "Content-Type": "application/json",
       },
-    );
+      body: JSON.stringify(params),
+    });
 
     if (!response.ok) {
       const error = await response.json();
@@ -283,9 +245,10 @@ export class AlgoliaSearchService implements SearchService {
         data: hit as ProductSearchData,
         highlights: hit._highlightResult
           ? Object.fromEntries(
-              Object.entries(hit._highlightResult).map(
-                ([key, value]: [string, any]) => [key, [value.value]],
-              ),
+              Object.entries(hit._highlightResult).map(([key, value]: [string, any]) => [
+                key,
+                [value.value],
+              ]),
             )
           : undefined,
       })),
@@ -295,26 +258,20 @@ export class AlgoliaSearchService implements SearchService {
       totalPages: result.nbPages,
       facets: result.facets
         ? Object.fromEntries(
-            Object.entries(result.facets).map(
-              ([key, values]: [string, any]) => [
-                key,
-                Object.entries(values).map(([value, count]) => ({
-                  value,
-                  count: count as number,
-                })),
-              ],
-            ),
+            Object.entries(result.facets).map(([key, values]: [string, any]) => [
+              key,
+              Object.entries(values).map(([value, count]) => ({
+                value,
+                count: count as number,
+              })),
+            ]),
           )
         : undefined,
       processingTimeMs: result.processingTimeMS,
     };
   }
 
-  async suggest(
-    tenantId: string,
-    query: string,
-    limit: number = 10,
-  ): Promise<string[]> {
+  async suggest(tenantId: string, query: string, limit: number = 10): Promise<string[]> {
     const result = await this.search(tenantId, {
       query,
       page: 1,
@@ -324,11 +281,7 @@ export class AlgoliaSearchService implements SearchService {
     return result.hits.map((hit) => hit.data.name);
   }
 
-  async trackSearch(
-    tenantId: string,
-    query: string,
-    resultCount: number,
-  ): Promise<void> {
+  async trackSearch(tenantId: string, query: string, resultCount: number): Promise<void> {
     // Analytics would be sent to Algolia Insights API
     console.log("Search tracked:", { tenantId, query, resultCount });
   }
@@ -342,10 +295,7 @@ export class AlgoliaSearchService implements SearchService {
     console.log("Click tracked:", { tenantId, query, productId, position });
   }
 
-  async getPopularSearches(
-    tenantId: string,
-    limit: number = 10,
-  ): Promise<string[]> {
+  async getPopularSearches(tenantId: string, limit: number = 10): Promise<string[]> {
     // Would fetch from Algolia Analytics
     return [];
   }
@@ -370,10 +320,7 @@ export class InMemorySearchService implements SearchService {
     }
   }
 
-  async updateProduct(
-    id: string,
-    product: Partial<ProductSearchData>,
-  ): Promise<void> {
+  async updateProduct(id: string, product: Partial<ProductSearchData>): Promise<void> {
     const existing = this.products.get(id);
     if (existing) {
       this.products.set(id, { ...existing, ...product });
@@ -396,17 +343,12 @@ export class InMemorySearchService implements SearchService {
     }
   }
 
-  async search(
-    tenantId: string,
-    query: SearchQuery,
-  ): Promise<SearchResult<ProductSearchData>> {
+  async search(tenantId: string, query: SearchQuery): Promise<SearchResult<ProductSearchData>> {
     const startTime = Date.now();
     const validated = SearchQuerySchema.parse(query);
 
     // Filter by tenant
-    let results = Array.from(this.products.values()).filter(
-      (p) => p.tenantId === tenantId,
-    );
+    let results = Array.from(this.products.values()).filter((p) => p.tenantId === tenantId);
 
     // Text search
     const searchTerms = validated.query.toLowerCase().split(" ");
@@ -497,11 +439,7 @@ export class InMemorySearchService implements SearchService {
     return result;
   }
 
-  async suggest(
-    tenantId: string,
-    query: string,
-    limit: number = 10,
-  ): Promise<string[]> {
+  async suggest(tenantId: string, query: string, limit: number = 10): Promise<string[]> {
     const results = await this.search(tenantId, {
       query,
       page: 1,
@@ -511,11 +449,7 @@ export class InMemorySearchService implements SearchService {
     return results.hits.map((hit) => hit.data.name);
   }
 
-  async trackSearch(
-    tenantId: string,
-    query: string,
-    resultCount: number,
-  ): Promise<void> {
+  async trackSearch(tenantId: string, query: string, resultCount: number): Promise<void> {
     this.searchHistory.push({ tenantId, query, count: resultCount });
     console.log("Mock search tracked:", { tenantId, query, resultCount });
   }
@@ -534,10 +468,7 @@ export class InMemorySearchService implements SearchService {
     });
   }
 
-  async getPopularSearches(
-    tenantId: string,
-    limit: number = 10,
-  ): Promise<string[]> {
+  async getPopularSearches(tenantId: string, limit: number = 10): Promise<string[]> {
     const searches = this.searchHistory
       .filter((s) => s.tenantId === tenantId)
       .reduce((acc, s) => {

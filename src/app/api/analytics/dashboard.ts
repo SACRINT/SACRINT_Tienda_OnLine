@@ -81,13 +81,14 @@ export async function POST(request: NextRequest) {
 
     const dashboard = getDashboardManager();
     const newDashboard = dashboard.createDashboard(tenantId, {
+      tenantId,
       name: name || "New Dashboard",
       description: body.description,
       type: body.type || "analytics",
-      widgets: [],
-      defaultMetrics: [],
+      widgets: [] as any,
+      defaultMetrics: [] as any,
       isDefault: false,
-    });
+    } as any);
 
     if (widgets && Array.isArray(widgets)) {
       widgets.forEach((widget) => {

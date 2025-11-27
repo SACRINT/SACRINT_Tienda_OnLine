@@ -8,7 +8,7 @@ import { db } from "@/lib/db";
 
 const twilioClient = twilio(
   process.env.TWILIO_ACCOUNT_SID || "test_sid",
-  process.env.TWILIO_AUTH_TOKEN || "test_token"
+  process.env.TWILIO_AUTH_TOKEN || "test_token",
 );
 
 export type SMSType = "order_update" | "verification" | "promotion" | "delivery_reminder";
@@ -16,7 +16,7 @@ export type SMSType = "order_update" | "verification" | "promotion" | "delivery_
 export async function sendSMS(
   phoneNumber: string,
   message: string,
-  type: SMSType
+  type: SMSType,
 ): Promise<{ sid: string }> {
   try {
     const result = await twilioClient.messages.create({
@@ -26,16 +26,19 @@ export async function sendSMS(
     });
 
     // Log en base de datos
-    await db.smsLog.create({
-      data: {
-        to: phoneNumber,
-        message,
-        type,
-        messageId: result.sid,
-        status: "SENT",
-        sentAt: new Date(),
-      },
-    }).catch(err => console.error("Error logging SMS:", err));
+    // Note: SMS log model not yet implemented in schema
+    // TODO: Implement smsLog model and uncomment below
+    // await db.smsLog.create({
+    //   data: {
+    //     to: phoneNumber,
+    //     message,
+    //     type,
+    //     messageId: result.sid,
+    //     status: "SENT",
+    //     sentAt: new Date(),
+    //   },
+    // }).catch(err => console.error("Error logging SMS:", err));
+    console.log(`SMS sent to ${phoneNumber}: ${message} (SID: ${result.sid})`);
 
     return { sid: result.sid };
   } catch (error) {
@@ -45,11 +48,15 @@ export async function sendSMS(
 }
 
 // Funciones helper para casos comunes
-export async function sendOrderShippedSMS(phoneNumber: string, orderNumber: string, trackingNumber: string) {
+export async function sendOrderShippedSMS(
+  phoneNumber: string,
+  orderNumber: string,
+  trackingNumber: string,
+) {
   return sendSMS(
     phoneNumber,
     `Tu orden #${orderNumber} está en camino. Rastreo: ${trackingNumber}`,
-    "order_update"
+    "order_update",
   );
 }
 
@@ -57,16 +64,12 @@ export async function sendDeliveryReminderSMS(phoneNumber: string, orderNumber: 
   return sendSMS(
     phoneNumber,
     `¡Tu pedido #${orderNumber} será entregado hoy!`,
-    "delivery_reminder"
+    "delivery_reminder",
   );
 }
 
 export async function sendVerificationCodeSMS(phoneNumber: string, code: string) {
-  return sendSMS(
-    phoneNumber,
-    `Tu código de verificación es: ${code}`,
-    "verification"
-  );
+  return sendSMS(phoneNumber, `Tu código de verificación es: ${code}`, "verification");
 }
 
 // Modelo Prisma necesario

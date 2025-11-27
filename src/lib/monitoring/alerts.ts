@@ -12,7 +12,7 @@ interface Alert {
   title: string;
   message: string;
   severity: AlertSeverity;
-  metadata?: Record<string, unknown>;
+  metadata?: Record<string, any>;
   channels?: AlertChannel[];
 }
 

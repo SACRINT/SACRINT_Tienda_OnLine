@@ -154,7 +154,7 @@ export class FeatureRequestManager {
     return releaseNote;
   }
 
-  getStatistics(): Record<string, unknown> {
+  getStatistics(): Record<string, any> {
     const features = Array.from(this.featureRequests.values());
 
     return {

@@ -5,6 +5,7 @@ import { z } from "zod";
 
 // Event schemas
 export const EventPropertiesSchema = z.record(
+  z.string(),
   z.union([z.string(), z.number(), z.boolean(), z.null()]),
 );
 
@@ -73,10 +74,7 @@ export interface EcommerceEvent {
 
 // Analytics service interface
 export interface AnalyticsService {
-  track<K extends keyof EcommerceEvent>(
-    eventName: K,
-    properties: EcommerceEvent[K],
-  ): void;
+  track<K extends keyof EcommerceEvent>(eventName: K, properties: EcommerceEvent[K]): void;
   trackCustom(event: TrackEvent): void;
   page(view: PageView): void;
   identify(userId: string, traits?: Record<string, any>): void;
@@ -91,10 +89,7 @@ export class GoogleAnalyticsService implements AnalyticsService {
     this.measurementId = measurementId;
   }
 
-  track<K extends keyof EcommerceEvent>(
-    eventName: K,
-    properties: EcommerceEvent[K],
-  ): void {
+  track<K extends keyof EcommerceEvent>(eventName: K, properties: EcommerceEvent[K]): void {
     if (typeof window === "undefined") return;
 
     // Map to GA4 events
@@ -168,10 +163,7 @@ export class ServerAnalyticsService implements AnalyticsService {
     this.baseUrl = baseUrl;
   }
 
-  track<K extends keyof EcommerceEvent>(
-    eventName: K,
-    properties: EcommerceEvent[K],
-  ): void {
+  track<K extends keyof EcommerceEvent>(eventName: K, properties: EcommerceEvent[K]): void {
     this.sendEvent({
       name: eventName,
       properties: properties as EventProperties,
@@ -236,10 +228,7 @@ export function createAnalyticsService(): AnalyticsService {
 
 // Mock service for development
 class MockAnalyticsService implements AnalyticsService {
-  track<K extends keyof EcommerceEvent>(
-    eventName: K,
-    properties: EcommerceEvent[K],
-  ): void {
+  track<K extends keyof EcommerceEvent>(eventName: K, properties: EcommerceEvent[K]): void {
     console.log("Mock analytics track:", eventName, properties);
   }
 

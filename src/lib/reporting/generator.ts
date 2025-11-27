@@ -5,13 +5,7 @@
 import { db } from "@/lib/db";
 import { getDashboardMetrics } from "@/lib/analytics/metrics";
 
-export type ReportType =
-  | "sales"
-  | "inventory"
-  | "customers"
-  | "products"
-  | "orders"
-  | "financial";
+export type ReportType = "sales" | "inventory" | "customers" | "products" | "orders" | "financial";
 
 export type ReportFormat = "json" | "csv" | "pdf" | "xlsx";
 
@@ -21,7 +15,7 @@ export interface ReportConfig {
   startDate: Date;
   endDate: Date;
   format: ReportFormat;
-  filters?: Record<string, unknown>;
+  filters?: Record<string, any>;
   includeCharts?: boolean;
 }
 
@@ -37,9 +31,7 @@ export interface ReportResult {
 }
 
 // Generate report
-export async function generateReport(
-  config: ReportConfig,
-): Promise<ReportResult> {
+export async function generateReport(config: ReportConfig): Promise<ReportResult> {
   const { type, tenantId, startDate, endDate, format } = config;
 
   let data: unknown;
@@ -48,42 +40,22 @@ export async function generateReport(
 
   switch (type) {
     case "sales":
-      ({ data, summary, title } = await generateSalesReport(
-        tenantId,
-        startDate,
-        endDate,
-      ));
+      ({ data, summary, title } = await generateSalesReport(tenantId, startDate, endDate));
       break;
     case "inventory":
       ({ data, summary, title } = await generateInventoryReport(tenantId));
       break;
     case "customers":
-      ({ data, summary, title } = await generateCustomerReport(
-        tenantId,
-        startDate,
-        endDate,
-      ));
+      ({ data, summary, title } = await generateCustomerReport(tenantId, startDate, endDate));
       break;
     case "products":
-      ({ data, summary, title } = await generateProductReport(
-        tenantId,
-        startDate,
-        endDate,
-      ));
+      ({ data, summary, title } = await generateProductReport(tenantId, startDate, endDate));
       break;
     case "orders":
-      ({ data, summary, title } = await generateOrderReport(
-        tenantId,
-        startDate,
-        endDate,
-      ));
+      ({ data, summary, title } = await generateOrderReport(tenantId, startDate, endDate));
       break;
     case "financial":
-      ({ data, summary, title } = await generateFinancialReport(
-        tenantId,
-        startDate,
-        endDate,
-      ));
+      ({ data, summary, title } = await generateFinancialReport(tenantId, startDate, endDate));
       break;
   }
 
@@ -172,10 +144,7 @@ async function generateInventoryReport(tenantId: string): Promise<{
 
   const totalProducts = products.length;
   const totalStock = products.reduce((sum, p) => sum + p.stock, 0);
-  const totalValue = products.reduce(
-    (sum, p) => sum + p.stock * p.basePrice,
-    0,
-  );
+  const totalValue = products.reduce((sum, p) => sum + p.stock * p.basePrice, 0);
   const outOfStock = products.filter((p) => p.stock === 0).length;
 
   return {
@@ -233,8 +202,7 @@ async function generateCustomerReport(
     joinDate: c.createdAt,
     totalOrders: c.orders.length,
     totalSpent: c.orders.reduce((sum, o) => sum + o.total, 0),
-    lastOrder:
-      c.orders.length > 0 ? c.orders[c.orders.length - 1].createdAt : null,
+    lastOrder: c.orders.length > 0 ? c.orders[c.orders.length - 1].createdAt : null,
   }));
 
   return {
@@ -280,10 +248,7 @@ async function generateProductReport(
 
   const data = products.map((p) => {
     const soldQuantity = p.orderItems.reduce((sum, i) => sum + i.quantity, 0);
-    const revenue = p.orderItems.reduce(
-      (sum, i) => sum + i.price * i.quantity,
-      0,
-    );
+    const revenue = p.orderItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
 
     return {
       productId: p.id,

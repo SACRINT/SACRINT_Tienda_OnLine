@@ -101,7 +101,7 @@ export function exportOrdersToCSV(
   const data = orders.map((order) => ({
     "Order Number": order.orderNumber,
     Date: new Date(order.createdAt).toLocaleDateString(),
-    Customer: order.user?.name || order.customerEmail || "N/A",
+    Customer: order.user?.name || order.user?.email || "N/A",
     Total: `$${Number(order.total).toFixed(2)}`,
     Status: order.status,
     "Payment Status": order.paymentStatus,

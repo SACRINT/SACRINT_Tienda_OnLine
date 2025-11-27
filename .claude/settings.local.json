@@ -24,7 +24,9 @@
       "Bash(curl:*)",
       "Bash(tasklist:*)",
       "Bash(node generate-icons.js:*)",
-      "Bash(node generate-additional-icons.js:*)"
+      "Bash(node generate-additional-icons.js:*)",
+      "Bash(timeout 120 npx vercel:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []

@@ -14,7 +14,7 @@ export const SessionSchema = z.object({
   lastActivityAt: z.date(),
   ip: z.string().optional(),
   userAgent: z.string().optional(),
-  data: z.record(z.any()).optional(),
+  data: z.record(z.string(), z.unknown()).optional(),
 });
 
 export type Session = z.infer<typeof SessionSchema>;
@@ -104,9 +104,7 @@ export class InMemorySessionStore implements SessionStore {
   }
 
   async listByUserId(userId: string): Promise<Session[]> {
-    return Array.from(this.sessions.values()).filter(
-      (s) => s.userId === userId,
-    );
+    return Array.from(this.sessions.values()).filter((s) => s.userId === userId);
   }
 }
 
@@ -232,9 +230,7 @@ export class SessionManager {
     if (!cookieHeader) return null;
 
     const cookies = cookieHeader.split(";").map((c) => c.trim());
-    const sessionCookie = cookies.find((c) =>
-      c.startsWith(`${this.config.cookieName}=`),
-    );
+    const sessionCookie = cookies.find((c) => c.startsWith(`${this.config.cookieName}=`));
 
     if (!sessionCookie) return null;
 

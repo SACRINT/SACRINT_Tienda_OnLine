@@ -116,7 +116,7 @@ export class CustomerSuccessManager {
     return Array.from(this.customerAccounts.values()).filter((c) => c.churnRisk === "high");
   }
 
-  getStatistics(): Record<string, unknown> {
+  getStatistics(): Record<string, any> {
     const accounts = Array.from(this.customerAccounts.values());
 
     return {

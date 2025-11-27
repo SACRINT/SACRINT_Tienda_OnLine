@@ -24,7 +24,7 @@ export interface SecurityEvent {
   ipAddress: string;
   userAgent: string;
   timestamp: Date;
-  details: Record<string, unknown>;
+  details: Record<string, any>;
   severity: "low" | "medium" | "high" | "critical";
 }
 
@@ -37,9 +37,7 @@ function generateEventId(): string {
 }
 
 // Log security event
-export function logSecurityEvent(
-  event: Omit<SecurityEvent, "id" | "timestamp">,
-): SecurityEvent {
+export function logSecurityEvent(event: Omit<SecurityEvent, "id" | "timestamp">): SecurityEvent {
   const fullEvent: SecurityEvent = {
     ...event,
     id: generateEventId(),
@@ -117,8 +115,7 @@ export function getRequestInfo(request: Request): {
   const realIp = request.headers.get("x-real-ip");
   const cfConnectingIp = request.headers.get("cf-connecting-ip");
 
-  const ipAddress =
-    cfConnectingIp || realIp || forwarded?.split(",")[0].trim() || "unknown";
+  const ipAddress = cfConnectingIp || realIp || forwarded?.split(",")[0].trim() || "unknown";
 
   const userAgent = request.headers.get("user-agent") || "unknown";
 
@@ -127,11 +124,7 @@ export function getRequestInfo(request: Request): {
 
 // Pre-built event loggers
 export const securityAudit = {
-  authSuccess: (
-    request: Request,
-    userId: string,
-    details?: Record<string, unknown>,
-  ) => {
+  authSuccess: (request: Request, userId: string, details?: Record<string, any>) => {
     const { ipAddress, userAgent } = getRequestInfo(request);
     return logSecurityEvent({
       type: "auth_success",
@@ -194,11 +187,7 @@ export const securityAudit = {
     });
   },
 
-  suspiciousActivity: (
-    request: Request,
-    description: string,
-    details?: Record<string, unknown>,
-  ) => {
+  suspiciousActivity: (request: Request, description: string, details?: Record<string, any>) => {
     const { ipAddress, userAgent } = getRequestInfo(request);
     return logSecurityEvent({
       type: "suspicious_activity",
@@ -209,12 +198,7 @@ export const securityAudit = {
     });
   },
 
-  paymentAttempt: (
-    request: Request,
-    userId: string,
-    amount: number,
-    method: string,
-  ) => {
+  paymentAttempt: (request: Request, userId: string, amount: number, method: string) => {
     const { ipAddress, userAgent } = getRequestInfo(request);
     return logSecurityEvent({
       type: "payment_attempt",
@@ -226,12 +210,7 @@ export const securityAudit = {
     });
   },
 
-  paymentSuccess: (
-    request: Request,
-    userId: string,
-    orderId: string,
-    amount: number,
-  ) => {
+  paymentSuccess: (request: Request, userId: string, orderId: string, amount: number) => {
     const { ipAddress, userAgent } = getRequestInfo(request);
     return logSecurityEvent({
       type: "payment_success",
@@ -243,12 +222,7 @@ export const securityAudit = {
     });
   },
 
-  paymentFailure: (
-    request: Request,
-    userId: string,
-    reason: string,
-    amount: number,
-  ) => {
+  paymentFailure: (request: Request, userId: string, reason: string, amount: number) => {
     const { ipAddress, userAgent } = getRequestInfo(request);
     return logSecurityEvent({
       type: "payment_failure",
@@ -260,12 +234,7 @@ export const securityAudit = {
     });
   },
 
-  adminAction: (
-    request: Request,
-    userId: string,
-    action: string,
-    target: string,
-  ) => {
+  adminAction: (request: Request, userId: string, action: string, target: string) => {
     const { ipAddress, userAgent } = getRequestInfo(request);
     return logSecurityEvent({
       type: "admin_action",
@@ -312,17 +281,11 @@ export function detectSuspiciousPatterns(
   const now = new Date();
   const cutoff = new Date(now.getTime() - windowMs);
 
-  const recentEvents = auditLogs.filter(
-    (e) => e.ipAddress === ipAddress && e.timestamp >= cutoff,
-  );
+  const recentEvents = auditLogs.filter((e) => e.ipAddress === ipAddress && e.timestamp >= cutoff);
 
-  const authFailures = recentEvents.filter(
-    (e) => e.type === "auth_failure",
-  ).length;
+  const authFailures = recentEvents.filter((e) => e.type === "auth_failure").length;
 
-  const rateLimitHits = recentEvents.filter(
-    (e) => e.type === "rate_limit_exceeded",
-  ).length;
+  const rateLimitHits = recentEvents.filter((e) => e.type === "rate_limit_exceeded").length;
 
   // Consider suspicious if too many failures
   const isSuspicious = authFailures >= 5 || rateLimitHits >= 10;

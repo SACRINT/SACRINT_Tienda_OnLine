@@ -3,66 +3,66 @@
  * Semana 35, Tarea 35.5: Checkout Component & UI
  */
 
-'use client'
+"use client";
 
-import React, { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 
 interface CheckoutFormProps {
-  orderId: string
-  amount: number
-  currency: string
-  customerId: string
+  orderId: string;
+  amount: number;
+  currency: string;
+  customerId: string;
 }
 
 interface FormData {
-  cardNumber: string
-  expiryDate: string
-  cvc: string
-  cardholderName: string
-  email: string
-  country: string
-  state: string
-  zipCode: string
+  cardNumber: string;
+  expiryDate: string;
+  cvc: string;
+  cardholderName: string;
+  email: string;
+  country: string;
+  state: string;
+  zipCode: string;
 }
 
 export function CheckoutForm({ orderId, amount, currency, customerId }: CheckoutFormProps) {
-  const router = useRouter()
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState(false)
-  const [fraudWarning, setFraudWarning] = useState(false)
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+  const [fraudWarning, setFraudWarning] = useState(false);
 
   const [formData, setFormData] = useState<FormData>({
-    cardNumber: '',
-    expiryDate: '',
-    cvc: '',
-    cardholderName: '',
-    email: '',
-    country: '',
-    state: '',
-    zipCode: '',
-  })
+    cardNumber: "",
+    expiryDate: "",
+    cvc: "",
+    cardholderName: "",
+    email: "",
+    country: "",
+    state: "",
+    zipCode: "",
+  });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError(null)
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
 
     try {
-      const response = await fetch('/api/payments/charge', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/payments/charge", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           orderId,
           amount,
           currency,
-          paymentMethod: 'card',
+          paymentMethod: "card",
           customerId,
           metadata: {
             cardholderName: formData.cardholderName,
@@ -70,28 +70,28 @@ export function CheckoutForm({ orderId, amount, currency, customerId }: Checkout
             email: formData.email,
           },
         }),
-      })
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (!response.ok) {
-        setError(data.error || 'Payment processing failed')
-        return
+        setError(data.error || "Payment processing failed");
+        return;
       }
 
-      if (data.fraudScore?.riskLevel === 'high' || data.fraudScore?.riskLevel === 'medium') {
-        setFraudWarning(true)
+      if (data.fraudScore?.riskLevel === "high" || data.fraudScore?.riskLevel === "medium") {
+        setFraudWarning(true);
       }
 
-      setSuccess(true)
-      router.push(`/orders/${orderId}/confirmation`)
+      setSuccess(true);
+      router.push(`/orders/${orderId}/confirmation`);
     } catch (err) {
-      setError('An error occurred during payment processing')
-      console.error('Checkout error:', err)
+      setError("An error occurred during payment processing");
+      console.error("Checkout error:", err);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   if (success) {
     return (
@@ -99,7 +99,7 @@ export function CheckoutForm({ orderId, amount, currency, customerId }: Checkout
         <h3 className="text-lg font-semibold text-green-900">Payment Successful</h3>
         <p className="mt-2 text-green-700">Your order has been processed successfully.</p>
       </div>
-    )
+    );
   }
 
   return (
@@ -118,7 +118,9 @@ export function CheckoutForm({ orderId, amount, currency, customerId }: Checkout
       {/* Fraud Warning */}
       {fraudWarning && (
         <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4">
-          <p className="text-sm text-yellow-700">This transaction is being reviewed for verification purposes.</p>
+          <p className="text-sm text-yellow-700">
+            This transaction is being reviewed for verification purposes.
+          </p>
         </div>
       )}
 
@@ -169,7 +171,7 @@ export function CheckoutForm({ orderId, amount, currency, customerId }: Checkout
             required
             className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
             placeholder="4242 4242 4242 4242"
-            maxLength="19"
+            maxLength={19}
           />
         </div>
 
@@ -184,7 +186,7 @@ export function CheckoutForm({ orderId, amount, currency, customerId }: Checkout
               required
               className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
               placeholder="MM/YY"
-              maxLength="5"
+              maxLength={5}
             />
           </div>
           <div>
@@ -197,7 +199,7 @@ export function CheckoutForm({ orderId, amount, currency, customerId }: Checkout
               required
               className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
               placeholder="123"
-              maxLength="4"
+              maxLength={4}
             />
           </div>
         </div>
@@ -224,11 +226,11 @@ export function CheckoutForm({ orderId, amount, currency, customerId }: Checkout
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-md bg-blue-600 px-4 py-2 text-white font-medium hover:bg-blue-700 disabled:opacity-50"
+          className="w-full rounded-md bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700 disabled:opacity-50"
         >
-          {loading ? 'Processing...' : `Pay ${amount} ${currency}`}
+          {loading ? "Processing..." : `Pay ${amount} ${currency}`}
         </button>
       </form>
     </div>
-  )
+  );
 }

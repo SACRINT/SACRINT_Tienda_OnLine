@@ -3,75 +3,75 @@
  * Semana 31, Tarea 31.9: Sistema de alertas basado en umbrales y patrones
  */
 
-import { logger } from './logger'
-import { captureMessage } from './sentry'
+import { logger } from "./logger";
+import { captureMessage } from "./sentry";
 
 /**
  * Severidad de alerta
  */
-export type AlertSeverity = 'info' | 'warning' | 'critical'
+export type AlertSeverity = "info" | "warning" | "critical";
 
 /**
  * Tipo de condición
  */
-export type ConditionType = 'threshold' | 'change' | 'pattern' | 'custom'
+export type ConditionType = "threshold" | "change" | "pattern" | "custom";
 
 /**
  * Canales de envío
  */
-export type AlertChannel = 'log' | 'email' | 'slack' | 'sms' | 'webhook'
+export type AlertChannel = "log" | "email" | "slack" | "sms" | "webhook";
 
 /**
  * Alerta disparada
  */
 export interface Alert {
-  id: string
-  ruleId: string
-  severity: AlertSeverity
-  title: string
-  message: string
-  timestamp: number
-  resolved?: boolean
-  resolvedAt?: number
-  metadata?: Record<string, any>
+  id: string;
+  ruleId: string;
+  severity: AlertSeverity;
+  title: string;
+  message: string;
+  timestamp: number;
+  resolved?: boolean;
+  resolvedAt?: number;
+  metadata?: Record<string, any>;
 }
 
 /**
  * Regla de alerta
  */
 export interface AlertRule {
-  id: string
-  name: string
-  description?: string
-  enabled: boolean
-  severity: AlertSeverity
+  id: string;
+  name: string;
+  description?: string;
+  enabled: boolean;
+  severity: AlertSeverity;
   condition: {
-    type: ConditionType
-    metric: string
-    threshold?: number
-    operator?: '>' | '<' | '==' | '!=' | '>=' | '<='
-    windowMs?: number // Ventana de tiempo para análisis
-  }
-  channels: AlertChannel[]
-  cooldownMs?: number // Evitar alertas duplicadas
+    type: ConditionType;
+    metric: string;
+    threshold?: number;
+    operator?: ">" | "<" | "==" | "!=" | ">=" | "<=";
+    windowMs?: number; // Ventana de tiempo para análisis
+  };
+  channels: AlertChannel[];
+  cooldownMs?: number; // Evitar alertas duplicadas
   actions?: Array<{
-    type: 'notify' | 'auto_recover' | 'log' | 'webhook'
-    config: Record<string, any>
-  }>
+    type: "notify" | "auto_recover" | "log" | "webhook";
+    config: Record<string, any>;
+  }>;
 }
 
 /**
  * Monitor de alertas
  */
 export class AlertingSystem {
-  private rules: Map<string, AlertRule> = new Map()
-  private alerts: Alert[] = []
-  private lastAlertTime: Map<string, number> = new Map()
-  private handlers: Map<string, (alert: Alert) => Promise<void>> = new Map()
-  private maxAlertHistory = 1000
+  private rules: Map<string, AlertRule> = new Map();
+  private alerts: Alert[] = [];
+  private lastAlertTime: Map<string, number> = new Map();
+  private handlers: Map<string, (alert: Alert) => Promise<void>> = new Map();
+  private maxAlertHistory = 1000;
 
   constructor() {
-    logger.debug({ type: 'alerting_system_init' }, 'Alerting System inicializado')
+    logger.debug({ type: "alerting_system_init" }, "Alerting System inicializado");
   }
 
   /**
@@ -81,163 +81,142 @@ export class AlertingSystem {
     this.rules.set(rule.id, {
       ...rule,
       enabled: true,
-    })
+    });
 
     logger.debug(
       {
-        type: 'alert_rule_registered',
+        type: "alert_rule_registered",
         ruleId: rule.id,
         severity: rule.severity,
       },
       `Regla de alerta registrada: ${rule.name}`,
-    )
+    );
   }
 
   /**
    * Habilitar/deshabilitar regla
    */
   setRuleEnabled(ruleId: string, enabled: boolean): void {
-    const rule = this.rules.get(ruleId)
+    const rule = this.rules.get(ruleId);
     if (rule) {
-      rule.enabled = enabled
+      rule.enabled = enabled;
       logger.debug(
-        { type: 'alert_rule_toggled', ruleId, enabled },
-        `Regla ${ruleId} ${enabled ? 'habilitada' : 'deshabilitada'}`,
-      )
+        { type: "alert_rule_toggled", ruleId, enabled },
+        `Regla ${ruleId} ${enabled ? "habilitada" : "deshabilitada"}`,
+      );
     }
   }
 
   /**
    * Evaluar una condición y disparar alerta si es necesario
    */
-  async evaluateCondition(
-    ruleId: string,
-    currentValue: number,
-  ): Promise<Alert | null> {
-    const rule = this.rules.get(ruleId)
+  async evaluateCondition(ruleId: string, currentValue: number): Promise<Alert | null> {
+    const rule = this.rules.get(ruleId);
     if (!rule || !rule.enabled) {
-      return null
+      return null;
     }
 
     // Verificar cooldown
-    const lastAlert = this.lastAlertTime.get(ruleId)
-    if (
-      lastAlert &&
-      Date.now() - lastAlert < (rule.cooldownMs || 0)
-    ) {
-      return null
+    const lastAlert = this.lastAlertTime.get(ruleId);
+    if (lastAlert && Date.now() - lastAlert < (rule.cooldownMs || 0)) {
+      return null;
     }
 
     // Evaluar condición
-    let shouldAlert = false
+    let shouldAlert = false;
 
-    if (rule.condition.type === 'threshold') {
-      const operator = rule.condition.operator || '>'
-      const threshold = rule.condition.threshold || 0
+    if (rule.condition.type === "threshold") {
+      const operator = rule.condition.operator || ">";
+      const threshold = rule.condition.threshold || 0;
 
-      shouldAlert = this.evaluateThreshold(
-        currentValue,
-        threshold,
-        operator,
-      )
-    } else if (rule.condition.type === 'custom') {
+      shouldAlert = this.evaluateThreshold(currentValue, threshold, operator);
+    } else if (rule.condition.type === "custom") {
       // Se maneja externamente con triggerAlert
-      return null
+      return null;
     }
 
     if (shouldAlert) {
-      return await this.triggerAlert(ruleId, rule, currentValue)
+      return await this.triggerAlert(ruleId, rule, currentValue);
     }
 
-    return null
+    return null;
   }
 
   /**
    * Evaluar umbral
    */
-  private evaluateThreshold(
-    value: number,
-    threshold: number,
-    operator: string,
-  ): boolean {
+  private evaluateThreshold(value: number, threshold: number, operator: string): boolean {
     switch (operator) {
-      case '>':
-        return value > threshold
-      case '<':
-        return value < threshold
-      case '>=':
-        return value >= threshold
-      case '<=':
-        return value <= threshold
-      case '==':
-        return value === threshold
-      case '!=':
-        return value !== threshold
+      case ">":
+        return value > threshold;
+      case "<":
+        return value < threshold;
+      case ">=":
+        return value >= threshold;
+      case "<=":
+        return value <= threshold;
+      case "==":
+        return value === threshold;
+      case "!=":
+        return value !== threshold;
       default:
-        return false
+        return false;
     }
   }
 
   /**
    * Disparar alerta manualmente
    */
-  async triggerAlert(
-    ruleId: string,
-    rule: AlertRule,
-    value?: number,
-  ): Promise<Alert> {
+  async triggerAlert(ruleId: string, rule: AlertRule, value?: number): Promise<Alert> {
     const alert: Alert = {
       id: `${ruleId}-${Date.now()}-${Math.random().toString(36).substring(7)}`,
       ruleId,
       severity: rule.severity,
       title: rule.name,
-      message: `Alert triggered: ${rule.description || rule.name}${value !== undefined ? ` (value: ${value})` : ''}`,
+      message: `Alert triggered: ${rule.description || rule.name}${value !== undefined ? ` (value: ${value})` : ""}`,
       timestamp: Date.now(),
       metadata: { ruleId, value },
-    }
+    };
 
     // Guardar alerta
-    this.alerts.push(alert)
+    this.alerts.push(alert);
     if (this.alerts.length > this.maxAlertHistory) {
-      this.alerts.shift()
+      this.alerts.shift();
     }
 
     // Actualizar cooldown
-    this.lastAlertTime.set(ruleId, Date.now())
+    this.lastAlertTime.set(ruleId, Date.now());
 
     // Loguear
     logger.warn(
       {
-        type: 'alert_triggered',
+        type: "alert_triggered",
         alertId: alert.id,
         ruleId,
         severity: rule.severity,
       },
       `ALERT [${rule.severity.toUpperCase()}]: ${rule.name}`,
-    )
+    );
 
     // Enviar a Sentry si es crítico
-    if (rule.severity === 'critical') {
-      captureMessage(
-        `Critical Alert: ${rule.name}`,
-        'error',
-      )
+    if (rule.severity === "critical") {
+      captureMessage(`Critical Alert: ${rule.name}`, "error");
     }
 
     // Ejecutar canales
     for (const channel of rule.channels) {
       try {
-        await this.sendAlert(alert, channel, rule)
+        await this.sendAlert(alert, channel, rule);
       } catch (error) {
         logger.error(
           {
-            type: 'alert_channel_error',
+            type: "alert_channel_error",
             channel,
             error,
             alertId: alert.id,
           },
           `Error enviando alerta por ${channel}`,
-        )
+        );
       }
     }
 
@@ -245,78 +224,74 @@ export class AlertingSystem {
     if (rule.actions) {
       for (const action of rule.actions) {
         try {
-          await this.executeAction(alert, action)
+          await this.executeAction(alert, action);
         } catch (error) {
           logger.error(
             {
-              type: 'alert_action_error',
+              type: "alert_action_error",
               action: action.type,
               error,
             },
             `Error ejecutando acción de alerta: ${action.type}`,
-          )
+          );
         }
       }
     }
 
-    return alert
+    return alert;
   }
 
   /**
    * Enviar alerta por canal específico
    */
-  private async sendAlert(
-    alert: Alert,
-    channel: AlertChannel,
-    rule: AlertRule,
-  ): Promise<void> {
-    const handler = this.handlers.get(channel)
+  private async sendAlert(alert: Alert, channel: AlertChannel, rule: AlertRule): Promise<void> {
+    const handler = this.handlers.get(channel);
 
     if (handler) {
-      await handler(alert)
-      return
+      await handler(alert);
+      return;
     }
 
     // Implementaciones predefinidas
     switch (channel) {
-      case 'log':
-        logger[alert.severity === 'critical' ? 'error' : 'warn'](
-          { type: 'alert', alertId: alert.id },
+      case "log":
+        logger[alert.severity === "critical" ? "error" : "warn"](
+          { type: "alert", alertId: alert.id },
           alert.message,
-        )
-        break
+        );
+        break;
 
-      case 'email':
+      case "email":
         // Implementación de envío de email
         logger.debug(
-          { type: 'alert_email_sent', alertId: alert.id },
+          { type: "alert_email_sent", alertId: alert.id },
           `Email enviado para alerta: ${alert.title}`,
-        )
-        break
+        );
+        break;
 
-      case 'slack':
+      case "slack":
         // Implementación de Slack
         logger.debug(
-          { type: 'alert_slack_sent', alertId: alert.id },
+          { type: "alert_slack_sent", alertId: alert.id },
           `Mensaje Slack enviado para alerta: ${alert.title}`,
-        )
-        break
+        );
+        break;
 
-      case 'sms':
+      case "sms":
         // Implementación de SMS
         logger.debug(
-          { type: 'alert_sms_sent', alertId: alert.id },
+          { type: "alert_sms_sent", alertId: alert.id },
           `SMS enviado para alerta: ${alert.title}`,
-        )
-        break
+        );
+        break;
 
-      case 'webhook':
+      case "webhook":
         // Implementación de webhook
         logger.debug(
-          { type: 'alert_webhook_sent', alertId: alert.id },
+          { type: "alert_webhook_sent", alertId: alert.id },
           `Webhook enviado para alerta: ${alert.title}`,
-        )
-        break
+        );
+        break;
     }
   }
 
@@ -325,41 +300,41 @@ export class AlertingSystem {
    */
   private async executeAction(
     alert: Alert,
-    action: AlertRule['actions'][number],
+    action: NonNullable<AlertRule["actions"]>[number],
   ): Promise<void> {
     switch (action.type) {
-      case 'notify':
+      case "notify":
         logger.warn(
-          { type: 'alert_action_notify', alertId: alert.id },
+          { type: "alert_action_notify", alertId: alert.id },
           `Notificación de alerta: ${action.config.message || alert.message}`,
-        )
-        break
+        );
+        break;
 
-      case 'auto_recover':
+      case "auto_recover":
         logger.info(
-          { type: 'alert_action_auto_recover', alertId: alert.id },
+          { type: "alert_action_auto_recover", alertId: alert.id },
           `Intento de auto-recuperación: ${action.config.action}`,
-        )
-        break
+        );
+        break;
 
-      case 'log':
+      case "log":
         logger.error(
-          { type: 'alert_action_log', alertId: alert.id, ...action.config },
-          'Alert action logged',
-        )
-        break
+          { type: "alert_action_log", alertId: alert.id, ...action.config },
+          "Alert action logged",
+        );
+        break;
 
-      case 'webhook':
+      case "webhook":
         // Enviar a webhook
-        const webhookUrl = action.config.url
+        const webhookUrl = action.config.url;
         if (webhookUrl) {
           await fetch(webhookUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(alert),
-          })
+          });
         }
-        break
+        break;
     }
   }
 
@@ -367,97 +342,87 @@ export class AlertingSystem {
    * Resolver alerta
    */
   resolveAlert(alertId: string): void {
-    const alert = this.alerts.find((a) => a.id === alertId)
+    const alert = this.alerts.find((a) => a.id === alertId);
     if (alert) {
-      alert.resolved = true
-      alert.resolvedAt = Date.now()
+      alert.resolved = true;
+      alert.resolvedAt = Date.now();
 
-      logger.info(
-        { type: 'alert_resolved', alertId },
-        `Alerta resuelta: ${alert.title}`,
-      )
+      logger.info({ type: "alert_resolved", alertId }, `Alerta resuelta: ${alert.title}`);
     }
   }
 
   /**
    * Registrar handler personalizado
    */
-  registerHandler(
-    channel: AlertChannel,
-    handler: (alert: Alert) => Promise<void>,
-  ): void {
-    this.handlers.set(channel, handler)
+  registerHandler(channel: AlertChannel, handler: (alert: Alert) => Promise<void>): void {
+    this.handlers.set(channel, handler);
     logger.debug(
-      { type: 'alert_handler_registered', channel },
+      { type: "alert_handler_registered", channel },
       `Handler de alerta registrado: ${channel}`,
-    )
+    );
   }
 
   /**
    * Obtener alertas activas
    */
   getActiveAlerts(): Alert[] {
-    return this.alerts.filter((a) => !a.resolved).slice(-100)
+    return this.alerts.filter((a) => !a.resolved).slice(-100);
   }
 
   /**
    * Obtener alertas por severidad
    */
   getAlertsBySeverity(severity: AlertSeverity): Alert[] {
-    return this.alerts
-      .filter((a) => a.severity === severity && !a.resolved)
-      .slice(-50)
+    return this.alerts.filter((a) => a.severity === severity && !a.resolved).slice(-50);
   }
 
   /**
    * Obtener historial de alertas
    */
   getAlertHistory(limit: number = 100): Alert[] {
-    return this.alerts.slice(-limit).reverse()
+    return this.alerts.slice(-limit).reverse();
   }
 
   /**
    * Generar reporte
    */
   generateReport(): string {
-    const active = this.getActiveAlerts()
-    const critical = this.getAlertsBySeverity('critical')
-    const warning = this.getAlertsBySeverity('warning')
+    const active = this.getActiveAlerts();
+    const critical = this.getAlertsBySeverity("critical");
+    const warning = this.getAlertsBySeverity("warning");
 
-    let report = 'Alert System Report\n'
-    report += '===================\n\n'
+    let report = "Alert System Report\n";
+    report += "===================\n\n";
 
-    report += `Total Rules: ${this.rules.size}\n`
-    report += `Active Alerts: ${active.length}\n`
-    report += `Critical: ${critical.length} | Warning: ${warning.length}\n\n`
+    report += `Total Rules: ${this.rules.size}\n`;
+    report += `Active Alerts: ${active.length}\n`;
+    report += `Critical: ${critical.length} | Warning: ${warning.length}\n\n`;
 
     if (active.length > 0) {
-      report += 'Active Alerts:\n'
+      report += "Active Alerts:\n";
       for (const alert of active.slice(0, 10)) {
-        const duration = Math.round(
-          (Date.now() - alert.timestamp) / 1000 / 60,
-        )
-        report += `  [${alert.severity.toUpperCase()}] ${alert.title} (${duration}min ago)\n`
+        const duration = Math.round((Date.now() - alert.timestamp) / 1000 / 60);
+        report += `  [${alert.severity.toUpperCase()}] ${alert.title} (${duration}min ago)\n`;
       }
     }
 
-    return report
+    return report;
   }
 }
 
 /**
  * Instancia global
  */
-let globalSystem: AlertingSystem | null = null
+let globalSystem: AlertingSystem | null = null;
 
 /**
  * Inicializar globalmente
  */
 export function initializeAlertingSystem(): AlertingSystem {
   if (!globalSystem) {
-    globalSystem = new AlertingSystem()
+    globalSystem = new AlertingSystem();
   }
-  return globalSystem
+  return globalSystem;
 }
 
 /**
@@ -465,9 +430,9 @@ export function initializeAlertingSystem(): AlertingSystem {
  */
 export function getAlertingSystem(): AlertingSystem {
   if (!globalSystem) {
-    return initializeAlertingSystem()
+    return initializeAlertingSystem();
   }
-  return globalSystem
+  return globalSystem;
 }
 
 /**
@@ -478,19 +443,19 @@ export const CommonAlertRules = {
    * Alerta de tasa de error alta
    */
   highErrorRate: (): AlertRule => ({
-    id: 'high-error-rate',
-    name: 'High Error Rate',
-    description: 'Tasa de errores superior al 5%',
+    id: "high-error-rate",
+    name: "High Error Rate",
+    description: "Tasa de errores superior al 5%",
     enabled: true,
-    severity: 'critical',
+    severity: "critical",
     condition: {
-      type: 'threshold',
-      metric: 'error_rate',
+      type: "threshold",
+      metric: "error_rate",
       threshold: 5,
-      operator: '>',
+      operator: ">",
       windowMs: 5 * 60 * 1000,
     },
-    channels: ['log', 'email', 'slack'],
+    channels: ["log", "email", "slack"],
     cooldownMs: 10 * 60 * 1000,
   }),
 
@@ -498,19 +463,19 @@ export const CommonAlertRules = {
    * Alerta de latencia alta
    */
   highLatency: (): AlertRule => ({
-    id: 'high-latency',
-    name: 'High API Latency',
-    description: 'Latencia promedio superior a 2000ms',
+    id: "high-latency",
+    name: "High API Latency",
+    description: "Latencia promedio superior a 2000ms",
     enabled: true,
-    severity: 'warning',
+    severity: "warning",
     condition: {
-      type: 'threshold',
-      metric: 'api_latency',
+      type: "threshold",
+      metric: "api_latency",
       threshold: 2000,
-      operator: '>',
+      operator: ">",
       windowMs: 5 * 60 * 1000,
     },
-    channels: ['log'],
+    channels: ["log"],
     cooldownMs: 10 * 60 * 1000,
   }),
 
@@ -518,19 +483,19 @@ export const CommonAlertRules = {
    * Alerta de base de datos lenta
    */
   slowDatabase: (): AlertRule => ({
-    id: 'slow-database',
-    name: 'Slow Database Queries',
-    description: 'Queries lentas detectadas',
+    id: "slow-database",
+    name: "Slow Database Queries",
+    description: "Queries lentas detectadas",
     enabled: true,
-    severity: 'warning',
+    severity: "warning",
     condition: {
-      type: 'threshold',
-      metric: 'slow_queries',
+      type: "threshold",
+      metric: "slow_queries",
       threshold: 10,
-      operator: '>',
+      operator: ">",
       windowMs: 5 * 60 * 1000,
     },
-    channels: ['log'],
+    channels: ["log"],
     cooldownMs: 15 * 60 * 1000,
   }),
 
@@ -538,18 +503,18 @@ export const CommonAlertRules = {
    * Alerta de memoria alta
    */
   highMemory: (): AlertRule => ({
-    id: 'high-memory',
-    name: 'High Memory Usage',
-    description: 'Uso de memoria superior al 85%',
+    id: "high-memory",
+    name: "High Memory Usage",
+    description: "Uso de memoria superior al 85%",
     enabled: true,
-    severity: 'warning',
+    severity: "warning",
     condition: {
-      type: 'threshold',
-      metric: 'memory_usage_percent',
+      type: "threshold",
+      metric: "memory_usage_percent",
       threshold: 85,
-      operator: '>',
+      operator: ">",
     },
-    channels: ['log'],
+    channels: ["log"],
     cooldownMs: 10 * 60 * 1000,
   }),
 
@@ -557,22 +522,22 @@ export const CommonAlertRules = {
    * Alerta de servicio crítico caído
    */
   serviceCriticalDown: (): AlertRule => ({
-    id: 'service-critical-down',
-    name: 'Critical Service Down',
-    description: 'Servicio crítico no disponible',
+    id: "service-critical-down",
+    name: "Critical Service Down",
+    description: "Servicio crítico no disponible",
     enabled: true,
-    severity: 'critical',
+    severity: "critical",
     condition: {
-      type: 'custom',
-      metric: 'service_health',
+      type: "custom",
+      metric: "service_health",
     },
-    channels: ['log', 'email', 'slack', 'sms'],
+    channels: ["log", "email", "slack", "sms"],
     cooldownMs: 5 * 60 * 1000,
     actions: [
       {
-        type: 'notify',
-        config: { message: 'Critical service is down' },
+        type: "notify",
+        config: { message: "Critical service is down" },
       },
     ],
   }),
-}
+};

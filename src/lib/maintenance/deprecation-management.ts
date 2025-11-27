@@ -3,45 +3,45 @@
  * Semana 53, Tarea 53.6: Deprecation & Legacy Code Management
  */
 
-import { logger } from "@/lib/monitoring"
+import { logger } from "@/lib/monitoring";
 
 export interface DeprecatedComponent {
-  id: string
-  componentName: string
-  type: "api" | "feature" | "library" | "function"
-  deprecatedSince: Date
-  replacementComponent?: string
-  removalTarget: Date
-  status: "deprecation-notice" | "deprecated" | "legacy" | "removed"
-  usageCount: number
-  migratingUsers: string[]
-  notes: string
+  id: string;
+  componentName: string;
+  type: "api" | "feature" | "library" | "function";
+  deprecatedSince: Date;
+  replacementComponent?: string;
+  removalTarget: Date;
+  status: "deprecation-notice" | "deprecated" | "legacy" | "removed";
+  usageCount: number;
+  migratingUsers: string[];
+  notes: string;
 }
 
 export interface DeprecationPlan {
-  id: string
-  componentId: string
-  migrationType: "direct-replacement" | "gradual-migration" | "feature-parity"
-  phases: DeprecationPhase[]
-  estimatedCompletionDate: Date
-  status: "planned" | "in-progress" | "completed"
+  id: string;
+  componentId: string;
+  migrationType: "direct-replacement" | "gradual-migration" | "feature-parity";
+  phases: DeprecationPhase[];
+  estimatedCompletionDate: Date;
+  status: "planned" | "in-progress" | "completed";
 }
 
 export interface DeprecationPhase {
-  id: string
-  phaseName: string
-  targetDate: Date
-  usersToMigrate: number
-  completionPercentage: number
-  status: "pending" | "active" | "completed"
+  id: string;
+  phaseName: string;
+  targetDate: Date;
+  usersToMigrate: number;
+  completionPercentage: number;
+  status: "pending" | "active" | "completed";
 }
 
 export class DeprecationManager {
-  private deprecatedComponents: Map<string, DeprecatedComponent> = new Map()
-  private deprecationPlans: Map<string, DeprecationPlan> = new Map()
+  private deprecatedComponents: Map<string, DeprecatedComponent> = new Map();
+  private deprecationPlans: Map<string, DeprecationPlan> = new Map();
 
   constructor() {
-    logger.debug({ type: "deprecation_management_init" }, "Manager inicializado")
+    logger.debug({ type: "deprecation_management_init" }, "Manager inicializado");
   }
 
   deprecateComponent(
@@ -49,9 +49,9 @@ export class DeprecationManager {
     type: "api" | "feature" | "library" | "function",
     replacementComponent: string | undefined,
     removalTarget: Date,
-    notes: string
+    notes: string,
   ): DeprecatedComponent {
-    const id = "dep_" + Date.now()
+    const id = "dep_" + Date.now();
     const component: DeprecatedComponent = {
       id,
       componentName,
@@ -63,35 +63,35 @@ export class DeprecationManager {
       usageCount: 0,
       migratingUsers: [],
       notes,
-    }
+    };
 
-    this.deprecatedComponents.set(id, component)
+    this.deprecatedComponents.set(id, component);
     logger.info(
       { type: "component_deprecated", componentId: id },
-      `Componente deprecado: ${componentName}`
-    )
-    return component
+      `Componente deprecado: ${componentName}`,
+    );
+    return component;
   }
 
   updateUsageCount(componentId: string, count: number): DeprecatedComponent | null {
-    const component = this.deprecatedComponents.get(componentId)
-    if (!component) return null
+    const component = this.deprecatedComponents.get(componentId);
+    if (!component) return null;
 
-    component.usageCount = count
-    this.deprecatedComponents.set(componentId, component)
-    return component
+    component.usageCount = count;
+    this.deprecatedComponents.set(componentId, component);
+    return component;
   }
 
   createDeprecationPlan(
     componentId: string,
     migrationType: "direct-replacement" | "gradual-migration" | "feature-parity",
     phases: Array<{ phaseName: string; targetDate: Date; usersToMigrate: number }>,
-    estimatedCompletionDate: Date
+    estimatedCompletionDate: Date,
   ): DeprecationPlan | null {
-    const component = this.deprecatedComponents.get(componentId)
-    if (!component) return null
+    const component = this.deprecatedComponents.get(componentId);
+    if (!component) return null;
 
-    const id = "plan_" + Date.now()
+    const id = "plan_" + Date.now();
     const deprecationPhases: DeprecationPhase[] = phases.map((p) => ({
       id: "phase_" + Date.now(),
       phaseName: p.phaseName,
@@ -99,7 +99,7 @@ export class DeprecationManager {
       usersToMigrate: p.usersToMigrate,
       completionPercentage: 0,
       status: "pending",
-    }))
+    }));
 
     const plan: DeprecationPlan = {
       id,
@@ -108,61 +108,57 @@ export class DeprecationManager {
       phases: deprecationPhases,
       estimatedCompletionDate,
       status: "planned",
-    }
+    };
 
-    this.deprecationPlans.set(id, plan)
-    logger.info(
-      { type: "deprecation_plan_created", planId: id },
-      `Plan de deprecación creado`
-    )
-    return plan
+    this.deprecationPlans.set(id, plan);
+    logger.info({ type: "deprecation_plan_created", planId: id }, `Plan de deprecación creado`);
+    return plan;
   }
 
   updatePhaseProgress(
     planId: string,
     phaseId: string,
-    completionPercentage: number
+    completionPercentage: number,
   ): DeprecationPhase | null {
-    const plan = this.deprecationPlans.get(planId)
-    if (!plan) return null
+    const plan = this.deprecationPlans.get(planId);
+    if (!plan) return null;
 
-    const phase = plan.phases.find((p) => p.id === phaseId)
-    if (!phase) return null
+    const phase = plan.phases.find((p) => p.id === phaseId);
+    if (!phase) return null;
 
-    phase.completionPercentage = completionPercentage
+    phase.completionPercentage = completionPercentage;
     if (completionPercentage === 100) {
-      phase.status = "completed"
+      phase.status = "completed";
     } else if (completionPercentage > 0) {
-      phase.status = "active"
+      phase.status = "active";
     }
 
-    this.deprecationPlans.set(planId, plan)
-    return phase
+    this.deprecationPlans.set(planId, plan);
+    return phase;
   }
 
   markAsLegacy(componentId: string): DeprecatedComponent | null {
-    const component = this.deprecatedComponents.get(componentId)
-    if (!component) return null
+    const component = this.deprecatedComponents.get(componentId);
+    if (!component) return null;
 
-    component.status = "legacy"
-    this.deprecatedComponents.set(componentId, component)
-    logger.info({ type: "component_marked_legacy", componentId }, `Componente marcado como legacy`)
-    return component
+    component.status = "legacy";
+    this.deprecatedComponents.set(componentId, component);
+    logger.info({ type: "component_marked_legacy", componentId }, `Componente marcado como legacy`);
+    return component;
   }
 
   getDeprecatedByType(type: "api" | "feature" | "library" | "function"): DeprecatedComponent[] {
-    return Array.from(this.deprecatedComponents.values()).filter((c) => c.type === type)
+    return Array.from(this.deprecatedComponents.values()).filter((c) => c.type === type);
   }
 
-  getStatistics(): Record<string, unknown> {
-    const components = Array.from(this.deprecatedComponents.values())
-    const plans = Array.from(this.deprecationPlans.values())
+  getStatistics(): Record<string, any> {
+    const components = Array.from(this.deprecatedComponents.values());
+    const plans = Array.from(this.deprecationPlans.values());
 
     return {
       totalDeprecated: components.length,
       byStatus: {
-        deprecationNotice: components.filter((c) => c.status === "deprecation-notice")
-          .length,
+        deprecationNotice: components.filter((c) => c.status === "deprecation-notice").length,
         deprecated: components.filter((c) => c.status === "deprecated").length,
         legacy: components.filter((c) => c.status === "legacy").length,
         removed: components.filter((c) => c.status === "removed").length,
@@ -179,20 +175,20 @@ export class DeprecationManager {
         inProgress: plans.filter((p) => p.status === "in-progress").length,
         completed: plans.filter((p) => p.status === "completed").length,
       },
-    }
+    };
   }
 
   generateDeprecationReport(): string {
-    const stats = this.getStatistics()
-    return `Deprecation Management Report\nTotal Deprecated: ${stats.totalDeprecated}\nPlans: ${stats.totalDeprecationPlans}\nCompleted: ${stats.plansByStatus.completed}`
+    const stats = this.getStatistics();
+    return `Deprecation Management Report\nTotal Deprecated: ${stats.totalDeprecated}\nPlans: ${stats.totalDeprecationPlans}\nCompleted: ${stats.plansByStatus.completed}`;
   }
 }
 
-let globalDeprecationManager: DeprecationManager | null = null
+let globalDeprecationManager: DeprecationManager | null = null;
 
 export function getDeprecationManager(): DeprecationManager {
   if (!globalDeprecationManager) {
-    globalDeprecationManager = new DeprecationManager()
+    globalDeprecationManager = new DeprecationManager();
   }
-  return globalDeprecationManager
+  return globalDeprecationManager;
 }

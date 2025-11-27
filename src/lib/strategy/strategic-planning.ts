@@ -3,29 +3,29 @@
  * Semana 51, Tarea 51.1: Strategic Planning & Leadership Direction
  */
 
-import { logger } from "@/lib/monitoring"
+import { logger } from "@/lib/monitoring";
 
 export interface StrategicGoal {
-  id: string
-  title: string
-  description: string
-  timeframe: "1-year" | "3-year" | "5-year"
-  category: "growth" | "efficiency" | "innovation" | "market"
-  objectives: string[]
-  kpis: string[]
-  owner: string
-  status: "draft" | "approved" | "executing" | "completed" | "archived"
-  createdAt: Date
-  updatedAt: Date
+  id: string;
+  title: string;
+  description: string;
+  timeframe: "1-year" | "3-year" | "5-year";
+  category: "growth" | "efficiency" | "innovation" | "market";
+  objectives: string[];
+  kpis: string[];
+  owner: string;
+  status: "draft" | "approved" | "executing" | "completed" | "archived";
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export class StrategicPlanningManager {
-  private strategicGoals: Map<string, StrategicGoal> = new Map()
-  private visionStatement: string = ""
-  private missionStatement: string = ""
+  private strategicGoals: Map<string, StrategicGoal> = new Map();
+  private visionStatement: string = "";
+  private missionStatement: string = "";
 
   constructor() {
-    logger.debug({ type: "strategic_planning_init" }, "Manager inicializado")
+    logger.debug({ type: "strategic_planning_init" }, "Manager inicializado");
   }
 
   defineStrategicGoal(
@@ -35,9 +35,9 @@ export class StrategicPlanningManager {
     category: "growth" | "efficiency" | "innovation" | "market",
     objectives: string[],
     kpis: string[],
-    owner: string
+    owner: string,
   ): StrategicGoal {
-    const id = "goal_" + Date.now()
+    const id = "goal_" + Date.now();
     const goal: StrategicGoal = {
       id,
       title,
@@ -50,68 +50,60 @@ export class StrategicPlanningManager {
       status: "draft",
       createdAt: new Date(),
       updatedAt: new Date(),
-    }
-    this.strategicGoals.set(id, goal)
+    };
+    this.strategicGoals.set(id, goal);
     logger.info(
       { type: "strategic_goal_defined", goalId: id },
-      `Objetivo estratégico definido: ${title}`
-    )
-    return goal
+      `Objetivo estratégico definido: ${title}`,
+    );
+    return goal;
   }
 
   approveGoal(goalId: string): StrategicGoal | null {
-    const goal = this.strategicGoals.get(goalId)
+    const goal = this.strategicGoals.get(goalId);
     if (!goal) {
-      logger.warn({ type: "goal_not_found", goalId }, "Objetivo no encontrado")
-      return null
+      logger.warn({ type: "goal_not_found", goalId }, "Objetivo no encontrado");
+      return null;
     }
-    goal.status = "approved"
-    goal.updatedAt = new Date()
-    this.strategicGoals.set(goalId, goal)
-    logger.info({ type: "goal_approved", goalId }, "Objetivo aprobado")
-    return goal
+    goal.status = "approved";
+    goal.updatedAt = new Date();
+    this.strategicGoals.set(goalId, goal);
+    logger.info({ type: "goal_approved", goalId }, "Objetivo aprobado");
+    return goal;
   }
 
   setVisionStatement(vision: string): void {
-    this.visionStatement = vision
-    logger.info({ type: "vision_statement_set" }, "Visión establecida")
+    this.visionStatement = vision;
+    logger.info({ type: "vision_statement_set" }, "Visión establecida");
   }
 
   setMissionStatement(mission: string): void {
-    this.missionStatement = mission
-    logger.info({ type: "mission_statement_set" }, "Misión establecida")
+    this.missionStatement = mission;
+    logger.info({ type: "mission_statement_set" }, "Misión establecida");
   }
 
-  getGoalsByTimeframe(
-    timeframe: "1-year" | "3-year" | "5-year"
-  ): StrategicGoal[] {
-    return Array.from(this.strategicGoals.values()).filter(
-      (g) => g.timeframe === timeframe
-    )
+  getGoalsByTimeframe(timeframe: "1-year" | "3-year" | "5-year"): StrategicGoal[] {
+    return Array.from(this.strategicGoals.values()).filter((g) => g.timeframe === timeframe);
   }
 
-  getGoalsByCategory(
-    category: "growth" | "efficiency" | "innovation" | "market"
-  ): StrategicGoal[] {
-    return Array.from(this.strategicGoals.values()).filter(
-      (g) => g.category === category
-    )
+  getGoalsByCategory(category: "growth" | "efficiency" | "innovation" | "market"): StrategicGoal[] {
+    return Array.from(this.strategicGoals.values()).filter((g) => g.category === category);
   }
 
   updateGoalStatus(
     goalId: string,
-    status: "draft" | "approved" | "executing" | "completed" | "archived"
+    status: "draft" | "approved" | "executing" | "completed" | "archived",
   ): StrategicGoal | null {
-    const goal = this.strategicGoals.get(goalId)
-    if (!goal) return null
-    goal.status = status
-    goal.updatedAt = new Date()
-    this.strategicGoals.set(goalId, goal)
-    return goal
+    const goal = this.strategicGoals.get(goalId);
+    if (!goal) return null;
+    goal.status = status;
+    goal.updatedAt = new Date();
+    this.strategicGoals.set(goalId, goal);
+    return goal;
   }
 
-  getStatistics(): Record<string, unknown> {
-    const goals = Array.from(this.strategicGoals.values())
+  getStatistics(): Record<string, any> {
+    const goals = Array.from(this.strategicGoals.values());
     return {
       totalGoals: goals.length,
       byStatus: {
@@ -132,21 +124,21 @@ export class StrategicPlanningManager {
         innovation: goals.filter((g) => g.category === "innovation").length,
         market: goals.filter((g) => g.category === "market").length,
       },
-    }
+    };
   }
 
   generateStrategicReport(): string {
-    const stats = this.getStatistics()
-    const statusSummary = JSON.stringify(stats.byStatus, null, 2)
-    return `Strategic Planning Report\nVision: ${this.visionStatement}\nMission: ${this.missionStatement}\nTotal Goals: ${stats.totalGoals}\nStatus Breakdown: ${statusSummary}`
+    const stats = this.getStatistics();
+    const statusSummary = JSON.stringify(stats.byStatus, null, 2);
+    return `Strategic Planning Report\nVision: ${this.visionStatement}\nMission: ${this.missionStatement}\nTotal Goals: ${stats.totalGoals}\nStatus Breakdown: ${statusSummary}`;
   }
 }
 
-let globalStrategicPlanningManager: StrategicPlanningManager | null = null
+let globalStrategicPlanningManager: StrategicPlanningManager | null = null;
 
 export function getStrategicPlanningManager(): StrategicPlanningManager {
   if (!globalStrategicPlanningManager) {
-    globalStrategicPlanningManager = new StrategicPlanningManager()
+    globalStrategicPlanningManager = new StrategicPlanningManager();
   }
-  return globalStrategicPlanningManager
+  return globalStrategicPlanningManager;
 }

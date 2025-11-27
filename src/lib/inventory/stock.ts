@@ -175,12 +175,10 @@ export async function bulkUpdateStock(
   let failed = 0;
 
   for (const update of updates) {
-    const result = await updateStock(
-      update.productId,
-      update.quantity,
-      update.type,
-      { reason: update.reason, createdBy },
-    );
+    const result = await updateStock(update.productId, update.quantity, update.type, {
+      reason: update.reason,
+      createdBy,
+    });
 
     if (result.success) {
       success++;
@@ -201,7 +199,7 @@ export async function getStockLevels(
     search?: string;
   },
 ): Promise<StockLevel[]> {
-  const where: Record<string, unknown> = { tenantId };
+  const where: Record<string, any> = { tenantId };
 
   if (options?.categoryId) {
     where.categoryId = options.categoryId;
@@ -269,7 +267,7 @@ export async function getStockMovements(
     limit?: number;
   },
 ): Promise<StockMovement[]> {
-  const where: Record<string, unknown> = { productId };
+  const where: Record<string, any> = { productId };
 
   if (options?.type) {
     where.type = options.type;

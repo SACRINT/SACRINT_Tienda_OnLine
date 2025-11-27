@@ -11,10 +11,19 @@ export {
   startTransaction,
   setUser,
   setContext,
-} from './sentry'
+} from "./sentry";
 
 // Logger - Structured Logging
-export { logger, logRequest, logResponse, logAuth, logPayment, logError, logPerformance, PerfTimer } from './logger'
+export {
+  logger,
+  logRequest,
+  logResponse,
+  logAuth,
+  logPayment,
+  logError,
+  logPerformance,
+  PerfTimer,
+} from "./logger";
 
 // Web Vitals - Performance Monitoring
 export {
@@ -27,7 +36,7 @@ export {
   getMemoryMetrics,
   exportMetrics,
   type VitalMetric,
-} from './web-vitals'
+} from "./web-vitals";
 
 // Database Monitor - Query Monitoring
 export {
@@ -40,7 +49,7 @@ export {
   detectNPlusOne,
   type QueryInfo,
   type QueryMonitorConfig,
-} from './db-monitor'
+} from "./db-monitor";
 
 // API Monitor - API Response Time Monitoring
 export {
@@ -53,7 +62,7 @@ export {
   getAllEndpointStats,
   type APIMetrics,
   type EndpointStats,
-} from './api-monitor'
+} from "./api-monitor";
 
 // Error Monitor - Error Rate Monitoring
 export {
@@ -66,7 +75,7 @@ export {
   isCriticalErrorRate,
   type ErrorRecord,
   type ErrorStats,
-} from './error-monitor'
+} from "./error-monitor";
 
 // Health Checks
 export {
@@ -78,7 +87,7 @@ export {
   type HealthCheckResult,
   type HealthCheckConfig,
   type HealthCheckSummary,
-} from './health-checks'
+} from "./health-checks";
 
 // Custom Metrics
 export {
@@ -89,7 +98,7 @@ export {
   type MetricType,
   type CustomMetric,
   type MetricStats,
-} from './custom-metrics'
+} from "./custom-metrics";
 
 // Alerting System
 export {
@@ -100,23 +109,15 @@ export {
   type AlertSeverity,
   type Alert,
   type AlertRule,
-} from './alerting'
+} from "./alerting";
 
 // Distributed Tracing
 export {
-  DistributedTracer,
-  initializeDistributedTracer,
-  getDistributedTracer,
-  withTracing,
-  withTracingSync,
-  getTraceHeaders,
-  extractTraceContext,
-  getCurrentTraceContext,
-  setTraceContext,
-  type TraceID,
-  type Span,
+  DistributedTracingManager,
+  getDistributedTracingManager,
   type Trace,
-} from './distributed-tracing'
+  type Span,
+} from "./distributed-tracing";
 
 // Uptime Monitoring
 export {
@@ -127,7 +128,7 @@ export {
   type UptimeEvent,
   type SLAStats,
   type TimePeriod,
-} from './uptime-monitor'
+} from "./uptime-monitor";
 
 // Reporting & Dashboard
 export {
@@ -137,68 +138,68 @@ export {
   type DashboardData,
   type ReportPeriod,
   type ReportType,
-} from './reporting'
+} from "./reporting";
 
 /**
  * Función auxiliar para inicializar todo el sistema de monitoreo
  */
 export function initializeMonitoringSystem(config?: {
-  serviceName?: string
-  sentryDSN?: string
-  enableHealthChecks?: boolean
-  enableAutoReporting?: boolean
+  serviceName?: string;
+  sentryDSN?: string;
+  enableHealthChecks?: boolean;
+  enableAutoReporting?: boolean;
 }) {
-  const { logger } = require('./logger')
-  const { initializeDistributedTracer, getDistributedTracer } = require('./distributed-tracing')
-  const { initializeDatabaseMonitor } = require('./db-monitor')
-  const { initializeAPIMonitor } = require('./api-monitor')
-  const { initializeErrorMonitor } = require('./error-monitor')
-  const { initializeCustomMetricsMonitor } = require('./custom-metrics')
-  const { initializeAlertingSystem } = require('./alerting')
-  const { initializeUptimeMonitor } = require('./uptime-monitor')
-  const { initializeHealthCheckMonitor } = require('./health-checks')
-  const { getReportingService } = require('./reporting')
+  const { logger } = require("./logger");
+  const { initializeDistributedTracer, getDistributedTracer } = require("./distributed-tracing");
+  const { initializeDatabaseMonitor } = require("./db-monitor");
+  const { initializeAPIMonitor } = require("./api-monitor");
+  const { initializeErrorMonitor } = require("./error-monitor");
+  const { initializeCustomMetricsMonitor } = require("./custom-metrics");
+  const { initializeAlertingSystem } = require("./alerting");
+  const { initializeUptimeMonitor } = require("./uptime-monitor");
+  const { initializeHealthCheckMonitor } = require("./health-checks");
+  const { getReportingService } = require("./reporting");
 
-  const serviceName = config?.serviceName || 'unknown'
+  const serviceName = config?.serviceName || "unknown";
 
   // Inicializar componentes principales
-  initializeDistributedTracer(serviceName)
-  initializeDatabaseMonitor({ slowQueryThreshold: 1000, enableLogging: true })
-  initializeAPIMonitor({ warning: 1000, critical: 5000 })
-  initializeErrorMonitor({ criticalErrorRate: 5, highErrorRate: 10 })
-  initializeCustomMetricsMonitor()
-  initializeAlertingSystem()
-  initializeUptimeMonitor()
+  initializeDistributedTracer(serviceName);
+  initializeDatabaseMonitor({ slowQueryThreshold: 1000, enableLogging: true });
+  initializeAPIMonitor({ warning: 1000, critical: 5000 });
+  initializeErrorMonitor({ criticalErrorRate: 5, highErrorRate: 10 });
+  initializeCustomMetricsMonitor();
+  initializeAlertingSystem();
+  initializeUptimeMonitor();
 
   // Inicializar health checks si está habilitado
   if (config?.enableHealthChecks) {
-    const healthMonitor = initializeHealthCheckMonitor()
-    healthMonitor.startMonitoring()
+    const healthMonitor = initializeHealthCheckMonitor();
+    healthMonitor.startMonitoring();
   }
 
   // Programar reportes automáticos si está habilitado
   if (config?.enableAutoReporting) {
-    const reporting = getReportingService()
-    reporting.scheduleAutomaticReports(6 * 60 * 60 * 1000) // Cada 6 horas
+    const reporting = getReportingService();
+    reporting.scheduleAutomaticReports(6 * 60 * 60 * 1000); // Cada 6 horas
   }
 
   logger.info(
-    { type: 'monitoring_system_initialized', service: serviceName },
+    { type: "monitoring_system_initialized", service: serviceName },
     `Monitoring system inicializado para ${serviceName}`,
-  )
+  );
 
   return {
-    sentry: 'initialized',
-    logger: 'initialized',
-    webVitals: 'client-side',
-    database: 'initialized',
-    api: 'initialized',
-    errors: 'initialized',
-    health: config?.enableHealthChecks ? 'initialized' : 'disabled',
-    metrics: 'initialized',
-    alerting: 'initialized',
-    tracing: 'initialized',
-    uptime: 'initialized',
-    reporting: config?.enableAutoReporting ? 'initialized' : 'ready',
-  }
+    sentry: "initialized",
+    logger: "initialized",
+    webVitals: "client-side",
+    database: "initialized",
+    api: "initialized",
+    errors: "initialized",
+    health: config?.enableHealthChecks ? "initialized" : "disabled",
+    metrics: "initialized",
+    alerting: "initialized",
+    tracing: "initialized",
+    uptime: "initialized",
+    reporting: config?.enableAutoReporting ? "initialized" : "ready",
+  };
 }

@@ -252,7 +252,7 @@ export function logSecurity(event: {
   type: "suspicious_activity" | "rate_limit" | "ip_blocked" | "invalid_token";
   userId?: string;
   ip?: string;
-  details?: Record<string, unknown>;
+  details?: Record<string, any>;
 }) {
   logger.warn(
     {
@@ -269,7 +269,7 @@ export function logSecurity(event: {
 /**
  * Log application error
  */
-export function logError(error: Error, context?: Record<string, unknown>) {
+export function logError(error: Error, context?: Record<string, any>) {
   logger.error(
     {
       type: "application_error",
@@ -286,7 +286,7 @@ export function logError(error: Error, context?: Record<string, unknown>) {
 export function logPerformance(perf: {
   operation: string;
   duration: number;
-  metadata?: Record<string, unknown>;
+  metadata?: Record<string, any>;
 }) {
   logger.info(
     {
@@ -325,7 +325,7 @@ export class PerfTimer {
     this.startTime = Date.now();
   }
 
-  end(metadata?: Record<string, unknown>): number {
+  end(metadata?: Record<string, any>): number {
     const duration = Date.now() - this.startTime;
     logPerformance({
       operation: this.operation,

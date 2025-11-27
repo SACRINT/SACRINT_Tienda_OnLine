@@ -168,7 +168,7 @@ export function addTag(key: string, value: string) {
 }
 
 // Agregar contexto personalizado
-export function addContext(key: string, context: Record<string, unknown>) {
+export function addContext(key: string, context: Record<string, any>) {
   if (!Sentry) return;
   Sentry.setContext(key, context);
   console.log("[Sentry] Contexto agregado:", { key, context });
@@ -212,6 +212,6 @@ export function addBreadcrumb(message: string, data?: Record<string, any>) {
 }
 
 // Alias for addContext - setContext
-export function setContext(key: string, context: Record<string, unknown>) {
+export function setContext(key: string, context: Record<string, any>) {
   return addContext(key, context);
 }

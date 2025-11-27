@@ -3,46 +3,46 @@
  * Semana 56, Tarea 56.10: Market Positioning & Competitive Strategy
  */
 
-import { logger } from "@/lib/monitoring"
+import { logger } from "@/lib/monitoring";
 
 export interface MarketPosition {
-  id: string
-  marketSegment: string
-  positionStatement: string
-  targetDemographic: string
-  uniqueValueProposition: string[]
-  competitiveAdvantages: string[]
-  pricePositioning: "premium" | "value" | "budget"
-  marketShare: number
-  reportDate: Date
+  id: string;
+  marketSegment: string;
+  positionStatement: string;
+  targetDemographic: string;
+  uniqueValueProposition: string[];
+  competitiveAdvantages: string[];
+  pricePositioning: "premium" | "value" | "budget";
+  marketShare: number;
+  reportDate: Date;
 }
 
 export interface CompetitiveAnalysis {
-  id: string
-  analysisDate: Date
-  competitors: CompetitorProfile[]
-  marketTrends: string[]
-  opportunityGaps: string[]
-  threatAssessment: string[]
-  strategicRecommendations: string[]
+  id: string;
+  analysisDate: Date;
+  competitors: CompetitorProfile[];
+  marketTrends: string[];
+  opportunityGaps: string[];
+  threatAssessment: string[];
+  strategicRecommendations: string[];
 }
 
 export interface CompetitorProfile {
-  id: string
-  competitorName: string
-  marketShare: number
-  strengths: string[]
-  weaknesses: string[]
-  recentMoves: string[]
-  threatLevel: "low" | "medium" | "high"
+  id: string;
+  competitorName: string;
+  marketShare: number;
+  strengths: string[];
+  weaknesses: string[];
+  recentMoves: string[];
+  threatLevel: "low" | "medium" | "high";
 }
 
 export class MarketPositioningManager {
-  private marketPositions: Map<string, MarketPosition> = new Map()
-  private competitiveAnalyses: Map<string, CompetitiveAnalysis> = new Map()
+  private marketPositions: Map<string, MarketPosition> = new Map();
+  private competitiveAnalyses: Map<string, CompetitiveAnalysis> = new Map();
 
   constructor() {
-    logger.debug({ type: "market_positioning_init" }, "Manager inicializado")
+    logger.debug({ type: "market_positioning_init" }, "Manager inicializado");
   }
 
   defineMarketPosition(
@@ -52,9 +52,9 @@ export class MarketPositioningManager {
     uniqueValueProposition: string[],
     competitiveAdvantages: string[],
     pricePositioning: "premium" | "value" | "budget",
-    marketShare: number
+    marketShare: number,
   ): MarketPosition {
-    const id = "position_" + Date.now()
+    const id = "position_" + Date.now();
     const position: MarketPosition = {
       id,
       marketSegment,
@@ -65,31 +65,31 @@ export class MarketPositioningManager {
       pricePositioning,
       marketShare,
       reportDate: new Date(),
-    }
+    };
 
-    this.marketPositions.set(id, position)
+    this.marketPositions.set(id, position);
     logger.info(
       { type: "market_position_defined", positionId: id },
-      `Posición de mercado definida: ${marketSegment}`
-    )
-    return position
+      `Posición de mercado definida: ${marketSegment}`,
+    );
+    return position;
   }
 
   conductCompetitiveAnalysis(
     competitors: Array<{
-      competitorName: string
-      marketShare: number
-      strengths: string[]
-      weaknesses: string[]
-      recentMoves: string[]
-      threatLevel: "low" | "medium" | "high"
+      competitorName: string;
+      marketShare: number;
+      strengths: string[];
+      weaknesses: string[];
+      recentMoves: string[];
+      threatLevel: "low" | "medium" | "high";
     }>,
     marketTrends: string[],
     opportunityGaps: string[],
     threatAssessment: string[],
-    strategicRecommendations: string[]
+    strategicRecommendations: string[],
   ): CompetitiveAnalysis {
-    const id = "analysis_" + Date.now()
+    const id = "analysis_" + Date.now();
     const competitorProfiles: CompetitorProfile[] = competitors.map((c) => ({
       id: "competitor_" + Date.now(),
       competitorName: c.competitorName,
@@ -98,7 +98,7 @@ export class MarketPositioningManager {
       weaknesses: c.weaknesses,
       recentMoves: c.recentMoves,
       threatLevel: c.threatLevel,
-    }))
+    }));
 
     const analysis: CompetitiveAnalysis = {
       id,
@@ -108,34 +108,32 @@ export class MarketPositioningManager {
       opportunityGaps,
       threatAssessment,
       strategicRecommendations,
-    }
+    };
 
-    this.competitiveAnalyses.set(id, analysis)
+    this.competitiveAnalyses.set(id, analysis);
     logger.info(
       { type: "competitive_analysis_conducted", analysisId: id },
-      `Análisis competitivo realizado`
-    )
-    return analysis
+      `Análisis competitivo realizado`,
+    );
+    return analysis;
   }
 
-  getStatistics(): Record<string, unknown> {
-    const positions = Array.from(this.marketPositions.values())
-    const analyses = Array.from(this.competitiveAnalyses.values())
+  getStatistics(): Record<string, any> {
+    const positions = Array.from(this.marketPositions.values());
+    const analyses = Array.from(this.competitiveAnalyses.values());
 
-    const allCompetitors = analyses.flatMap((a) => a.competitors)
+    const allCompetitors = analyses.flatMap((a) => a.competitors);
 
     return {
       totalMarketPositions: positions.length,
       positionsByPricing: {
-        premium: positions.filter((p) => p.pricePositioning === "premium")
-          .length,
+        premium: positions.filter((p) => p.pricePositioning === "premium").length,
         value: positions.filter((p) => p.pricePositioning === "value").length,
         budget: positions.filter((p) => p.pricePositioning === "budget").length,
       },
       averageMarketShare:
         positions.length > 0
-          ? positions.reduce((sum, p) => sum + p.marketShare, 0) /
-            positions.length
+          ? positions.reduce((sum, p) => sum + p.marketShare, 0) / positions.length
           : 0,
       totalCompetitiveAnalyses: analyses.length,
       totalCompetitorsAnalyzed: allCompetitors.length,
@@ -146,23 +144,22 @@ export class MarketPositioningManager {
       },
       averageCompetitorMarketShare:
         allCompetitors.length > 0
-          ? allCompetitors.reduce((sum, c) => sum + c.marketShare, 0) /
-            allCompetitors.length
+          ? allCompetitors.reduce((sum, c) => sum + c.marketShare, 0) / allCompetitors.length
           : 0,
-    }
+    };
   }
 
   generatePositioningReport(): string {
-    const stats = this.getStatistics()
-    return `Market Positioning Report\nPositions: ${stats.totalMarketPositions}\nAnalyses: ${stats.totalCompetitiveAnalyses}\nCompetitors: ${stats.totalCompetitorsAnalyzed}`
+    const stats = this.getStatistics();
+    return `Market Positioning Report\nPositions: ${stats.totalMarketPositions}\nAnalyses: ${stats.totalCompetitiveAnalyses}\nCompetitors: ${stats.totalCompetitorsAnalyzed}`;
   }
 }
 
-let globalMarketPositioningManager: MarketPositioningManager | null = null
+let globalMarketPositioningManager: MarketPositioningManager | null = null;
 
 export function getMarketPositioningManager(): MarketPositioningManager {
   if (!globalMarketPositioningManager) {
-    globalMarketPositioningManager = new MarketPositioningManager()
+    globalMarketPositioningManager = new MarketPositioningManager();
   }
-  return globalMarketPositioningManager
+  return globalMarketPositioningManager;
 }

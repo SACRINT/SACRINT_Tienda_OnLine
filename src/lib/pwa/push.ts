@@ -4,11 +4,7 @@ import { PUSH_CONFIG } from "./config";
 
 // Check if push is supported
 export function isPushSupported(): boolean {
-  return (
-    "serviceWorker" in navigator &&
-    "PushManager" in window &&
-    "Notification" in window
-  );
+  return "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
 }
 
 // Get current notification permission
@@ -137,13 +133,11 @@ export interface AppNotification {
   body: string;
   url?: string;
   image?: string;
-  data?: Record<string, unknown>;
+  data?: Record<string, any>;
 }
 
 // Show app-specific notification
-export async function showAppNotification(
-  notification: AppNotification,
-): Promise<void> {
+export async function showAppNotification(notification: AppNotification): Promise<void> {
   const options: NotificationOptions = {
     body: notification.body,
     icon: PUSH_CONFIG.defaultIcon,

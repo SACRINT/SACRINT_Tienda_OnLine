@@ -16,7 +16,7 @@ export interface Variant {
   id: string;
   name: string;
   weight: number; // Relative weight for distribution
-  data?: Record<string, unknown>;
+  data?: Record<string, any>;
 }
 
 export interface ExperimentAssignment {
@@ -101,9 +101,7 @@ class ABTestingService {
   }
 
   // Get all active experiments for user
-  getActiveExperiments(
-    userId: string,
-  ): Array<{ experiment: Experiment; variant: Variant }> {
+  getActiveExperiments(userId: string): Array<{ experiment: Experiment; variant: Variant }> {
     const results: Array<{ experiment: Experiment; variant: Variant }> = [];
 
     experiments.forEach((experiment) => {
@@ -117,12 +115,7 @@ class ABTestingService {
   }
 
   // Track conversion for experiment
-  trackConversion(
-    experimentId: string,
-    userId: string,
-    metric: string,
-    value: number = 1,
-  ): void {
+  trackConversion(experimentId: string, userId: string, metric: string, value: number = 1): void {
     const userAssignments = assignments.get(userId);
     const variantId = userAssignments?.get(experimentId);
 
@@ -165,10 +158,7 @@ class ABTestingService {
     }
 
     // In production, fetch from analytics
-    const variantStats: Record<
-      string,
-      { participants: number; conversions: number }
-    > = {};
+    const variantStats: Record<string, { participants: number; conversions: number }> = {};
     experiment.variants.forEach((variant) => {
       variantStats[variant.id] = {
         participants: 0,
@@ -181,10 +171,7 @@ class ABTestingService {
 
   // Private methods
   private selectVariant(experiment: Experiment, odUserId: string): Variant {
-    const totalWeight = experiment.variants.reduce(
-      (sum, v) => sum + v.weight,
-      0,
-    );
+    const totalWeight = experiment.variants.reduce((sum, v) => sum + v.weight, 0);
     const hash = this.hash(experiment.id + odUserId) % totalWeight;
 
     let cumulative = 0;
@@ -208,11 +195,7 @@ class ABTestingService {
     return Math.abs(hash);
   }
 
-  private trackAssignment(
-    experimentId: string,
-    variantId: string,
-    userId: string,
-  ): void {
+  private trackAssignment(experimentId: string, variantId: string, userId: string): void {
     console.log("A/B Assignment:", {
       experimentId,
       variantId,
@@ -228,9 +211,6 @@ class ABTestingService {
 export const abTesting = new ABTestingService();
 
 // React hook
-export function useExperiment(
-  experimentId: string,
-  userId: string,
-): Variant | null {
+export function useExperiment(experimentId: string, userId: string): Variant | null {
   return abTesting.getVariant(experimentId, userId);
 }

@@ -3,55 +3,55 @@
  * Semana 53, Tarea 53.2: Patch & Update Management
  */
 
-import { logger } from "@/lib/monitoring"
+import { logger } from "@/lib/monitoring";
 
 export interface Patch {
-  id: string
-  patchNumber: string
-  version: string
-  releaseDate: Date
-  type: "security" | "bug-fix" | "enhancement" | "performance"
-  description: string
-  affectedComponents: string[]
-  deploymentStage: "dev" | "staging" | "production"
-  rolloutPercentage: number
-  status: "development" | "testing" | "approved" | "deployed" | "rolled-back"
-  createdBy: string
-  testResults: string[]
+  id: string;
+  patchNumber: string;
+  version: string;
+  releaseDate: Date;
+  type: "security" | "bug-fix" | "enhancement" | "performance";
+  description: string;
+  affectedComponents: string[];
+  deploymentStage: "dev" | "staging" | "production";
+  rolloutPercentage: number;
+  status: "development" | "testing" | "approved" | "deployed" | "rolled-back";
+  createdBy: string;
+  testResults: string[];
 }
 
 export interface RolloutPlan {
-  id: string
-  patchId: string
-  stages: RolloutStage[]
-  estimatedDuration: number
-  rollbackPlan: string
-  status: "planned" | "in-progress" | "completed"
+  id: string;
+  patchId: string;
+  stages: RolloutStage[];
+  estimatedDuration: number;
+  rollbackPlan: string;
+  status: "planned" | "in-progress" | "completed";
 }
 
 export interface RolloutStage {
-  id: string
-  stageName: string
-  targetPercentage: number
-  startDate: Date
-  endDate?: Date
-  healthChecks: HealthCheck[]
-  status: "pending" | "active" | "completed"
+  id: string;
+  stageName: string;
+  targetPercentage: number;
+  startDate: Date;
+  endDate?: Date;
+  healthChecks: HealthCheck[];
+  status: "pending" | "active" | "completed";
 }
 
 export interface HealthCheck {
-  id: string
-  checkName: string
-  status: "passed" | "failed" | "warning"
-  checkedAt: Date
+  id: string;
+  checkName: string;
+  status: "passed" | "failed" | "warning";
+  checkedAt: Date;
 }
 
 export class PatchManagementManager {
-  private patches: Map<string, Patch> = new Map()
-  private rolloutPlans: Map<string, RolloutPlan> = new Map()
+  private patches: Map<string, Patch> = new Map();
+  private rolloutPlans: Map<string, RolloutPlan> = new Map();
 
   constructor() {
-    logger.debug({ type: "patch_management_init" }, "Manager inicializado")
+    logger.debug({ type: "patch_management_init" }, "Manager inicializado");
   }
 
   createPatch(
@@ -59,10 +59,10 @@ export class PatchManagementManager {
     type: "security" | "bug-fix" | "enhancement" | "performance",
     description: string,
     affectedComponents: string[],
-    createdBy: string
+    createdBy: string,
   ): Patch {
-    const id = "patch_" + Date.now()
-    const patchNumber = `v${version}`
+    const id = "patch_" + Date.now();
+    const patchNumber = `v${version}`;
 
     const patch: Patch = {
       id,
@@ -77,36 +77,33 @@ export class PatchManagementManager {
       status: "development",
       createdBy,
       testResults: [],
-    }
+    };
 
-    this.patches.set(id, patch)
-    logger.info(
-      { type: "patch_created", patchId: id },
-      `Parche creado: ${patchNumber}`
-    )
-    return patch
+    this.patches.set(id, patch);
+    logger.info({ type: "patch_created", patchId: id }, `Parche creado: ${patchNumber}`);
+    return patch;
   }
 
   approvePatch(patchId: string): Patch | null {
-    const patch = this.patches.get(patchId)
-    if (!patch) return null
+    const patch = this.patches.get(patchId);
+    if (!patch) return null;
 
-    patch.status = "approved"
-    this.patches.set(patchId, patch)
-    logger.info({ type: "patch_approved", patchId }, `Parche aprobado`)
-    return patch
+    patch.status = "approved";
+    this.patches.set(patchId, patch);
+    logger.info({ type: "patch_approved", patchId }, `Parche aprobado`);
+    return patch;
   }
 
   createRolloutPlan(
     patchId: string,
     stages: Array<{ stageName: string; targetPercentage: number }>,
     estimatedDuration: number,
-    rollbackPlan: string
+    rollbackPlan: string,
   ): RolloutPlan | null {
-    const patch = this.patches.get(patchId)
-    if (!patch) return null
+    const patch = this.patches.get(patchId);
+    if (!patch) return null;
 
-    const id = "rollout_" + Date.now()
+    const id = "rollout_" + Date.now();
     const rolloutStages: RolloutStage[] = stages.map((s, index) => ({
       id: "stage_" + Date.now() + index,
       stageName: s.stageName,
@@ -114,7 +111,7 @@ export class PatchManagementManager {
       startDate: new Date(Date.now() + index * 24 * 60 * 60 * 1000),
       healthChecks: [],
       status: "pending",
-    }))
+    }));
 
     const plan: RolloutPlan = {
       id,
@@ -123,57 +120,51 @@ export class PatchManagementManager {
       estimatedDuration,
       rollbackPlan,
       status: "planned",
-    }
+    };
 
-    this.rolloutPlans.set(id, plan)
-    logger.info(
-      { type: "rollout_plan_created", planId: id },
-      `Plan de despliegue creado`
-    )
-    return plan
+    this.rolloutPlans.set(id, plan);
+    logger.info({ type: "rollout_plan_created", planId: id }, `Plan de despliegue creado`);
+    return plan;
   }
 
   recordHealthCheck(
     planId: string,
     stageId: string,
     checkName: string,
-    status: "passed" | "failed" | "warning"
+    status: "passed" | "failed" | "warning",
   ): HealthCheck | null {
-    const plan = this.rolloutPlans.get(planId)
-    if (!plan) return null
+    const plan = this.rolloutPlans.get(planId);
+    if (!plan) return null;
 
-    const stage = plan.stages.find((s) => s.id === stageId)
-    if (!stage) return null
+    const stage = plan.stages.find((s) => s.id === stageId);
+    if (!stage) return null;
 
     const check: HealthCheck = {
       id: "check_" + Date.now(),
       checkName,
       status,
       checkedAt: new Date(),
-    }
+    };
 
-    stage.healthChecks.push(check)
-    logger.info(
-      { type: "health_check_recorded", stageId },
-      `Health check registrado: ${status}`
-    )
-    return check
+    stage.healthChecks.push(check);
+    logger.info({ type: "health_check_recorded", stageId }, `Health check registrado: ${status}`);
+    return check;
   }
 
   deployPatch(patchId: string, deploymentStage: "dev" | "staging" | "production"): Patch | null {
-    const patch = this.patches.get(patchId)
-    if (!patch) return null
+    const patch = this.patches.get(patchId);
+    if (!patch) return null;
 
-    patch.deploymentStage = deploymentStage
-    patch.status = "deployed"
-    this.patches.set(patchId, patch)
-    logger.info({ type: "patch_deployed", patchId }, `Parche desplegado a ${deploymentStage}`)
-    return patch
+    patch.deploymentStage = deploymentStage;
+    patch.status = "deployed";
+    this.patches.set(patchId, patch);
+    logger.info({ type: "patch_deployed", patchId }, `Parche desplegado a ${deploymentStage}`);
+    return patch;
   }
 
-  getStatistics(): Record<string, unknown> {
-    const patches = Array.from(this.patches.values())
-    const plans = Array.from(this.rolloutPlans.values())
+  getStatistics(): Record<string, any> {
+    const patches = Array.from(this.patches.values());
+    const plans = Array.from(this.rolloutPlans.values());
 
     return {
       totalPatches: patches.length,
@@ -190,20 +181,20 @@ export class PatchManagementManager {
         deployed: patches.filter((p) => p.status === "deployed").length,
       },
       totalRolloutPlans: plans.length,
-    }
+    };
   }
 
   generatePatchReport(): string {
-    const stats = this.getStatistics()
-    return `Patch Management Report\nTotal Patches: ${stats.totalPatches}\nDeployed: ${stats.patchesByStatus.deployed}\nRollout Plans: ${stats.totalRolloutPlans}`
+    const stats = this.getStatistics();
+    return `Patch Management Report\nTotal Patches: ${stats.totalPatches}\nDeployed: ${stats.patchesByStatus.deployed}\nRollout Plans: ${stats.totalRolloutPlans}`;
   }
 }
 
-let globalPatchManagementManager: PatchManagementManager | null = null
+let globalPatchManagementManager: PatchManagementManager | null = null;
 
 export function getPatchManagementManager(): PatchManagementManager {
   if (!globalPatchManagementManager) {
-    globalPatchManagementManager = new PatchManagementManager()
+    globalPatchManagementManager = new PatchManagementManager();
   }
-  return globalPatchManagementManager
+  return globalPatchManagementManager;
 }

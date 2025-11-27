@@ -3,42 +3,42 @@
  * Semana 54, Tarea 54.10: Revenue Optimization & Monetization
  */
 
-import { logger } from "@/lib/monitoring"
+import { logger } from "@/lib/monitoring";
 
 export interface RevenueStream {
-  id: string
-  streamName: string
-  type: "subscription" | "transaction" | "licensing" | "advertising"
-  monthlyRevenue: number
-  yearlyRevenue: number
-  growthRate: number
-  status: "active" | "inactive"
+  id: string;
+  streamName: string;
+  type: "subscription" | "transaction" | "licensing" | "advertising";
+  monthlyRevenue: number;
+  yearlyRevenue: number;
+  growthRate: number;
+  status: "active" | "inactive";
 }
 
 export interface MonetizationStrategy {
-  id: string
-  strategyName: string
-  targetSegment: string
-  expectedRevenue: number
-  implementationDate: Date
-  status: "planning" | "implementation" | "active" | "completed"
+  id: string;
+  strategyName: string;
+  targetSegment: string;
+  expectedRevenue: number;
+  implementationDate: Date;
+  status: "planning" | "implementation" | "active" | "completed";
 }
 
 export class RevenueOptimizationManager {
-  private revenueStreams: Map<string, RevenueStream> = new Map()
-  private monetizationStrategies: Map<string, MonetizationStrategy> = new Map()
-  private totalRevenue: number = 0
+  private revenueStreams: Map<string, RevenueStream> = new Map();
+  private monetizationStrategies: Map<string, MonetizationStrategy> = new Map();
+  private totalRevenue: number = 0;
 
   constructor() {
-    logger.debug({ type: "revenue_optimization_init" }, "Manager inicializado")
+    logger.debug({ type: "revenue_optimization_init" }, "Manager inicializado");
   }
 
   recordRevenueStream(
     streamName: string,
     streamType: "subscription" | "transaction" | "licensing" | "advertising",
-    monthlyRevenue: number
+    monthlyRevenue: number,
   ): RevenueStream {
-    const id = "stream_" + Date.now()
+    const id = "stream_" + Date.now();
     const stream: RevenueStream = {
       id,
       streamName,
@@ -47,24 +47,24 @@ export class RevenueOptimizationManager {
       yearlyRevenue: monthlyRevenue * 12,
       growthRate: 0,
       status: "active",
-    }
+    };
 
-    this.revenueStreams.set(id, stream)
-    this.totalRevenue += monthlyRevenue
+    this.revenueStreams.set(id, stream);
+    this.totalRevenue += monthlyRevenue;
     logger.info(
       { type: "revenue_stream_recorded", streamId: id },
-      `Flujo de ingresos registrado: ${streamName}`
-    )
-    return stream
+      `Flujo de ingresos registrado: ${streamName}`,
+    );
+    return stream;
   }
 
   createMonetizationStrategy(
     strategyName: string,
     targetSegment: string,
     expectedRevenue: number,
-    implementationDate: Date
+    implementationDate: Date,
   ): MonetizationStrategy {
-    const id = "strategy_" + Date.now()
+    const id = "strategy_" + Date.now();
     const strategy: MonetizationStrategy = {
       id,
       strategyName,
@@ -72,19 +72,19 @@ export class RevenueOptimizationManager {
       expectedRevenue,
       implementationDate,
       status: "planning",
-    }
+    };
 
-    this.monetizationStrategies.set(id, strategy)
+    this.monetizationStrategies.set(id, strategy);
     logger.info(
       { type: "monetization_strategy_created", strategyId: id },
-      `Estrategia de monetización creada: ${strategyName}`
-    )
-    return strategy
+      `Estrategia de monetización creada: ${strategyName}`,
+    );
+    return strategy;
   }
 
-  getStatistics(): Record<string, unknown> {
-    const streams = Array.from(this.revenueStreams.values())
-    const strategies = Array.from(this.monetizationStrategies.values())
+  getStatistics(): Record<string, any> {
+    const streams = Array.from(this.revenueStreams.values());
+    const strategies = Array.from(this.monetizationStrategies.values());
 
     return {
       totalRevenueStreams: streams.length,
@@ -97,20 +97,20 @@ export class RevenueOptimizationManager {
         advertising: streams.filter((s) => s.type === "advertising").length,
       },
       totalMonetizationStrategies: strategies.length,
-    }
+    };
   }
 
   generateRevenueReport(): string {
-    const stats = this.getStatistics()
-    return `Revenue Optimization Report\nStreams: ${stats.totalRevenueStreams}\nMonthly Revenue: ${stats.totalMonthlyRevenue}\nStrategies: ${stats.totalMonetizationStrategies}`
+    const stats = this.getStatistics();
+    return `Revenue Optimization Report\nStreams: ${stats.totalRevenueStreams}\nMonthly Revenue: ${stats.totalMonthlyRevenue}\nStrategies: ${stats.totalMonetizationStrategies}`;
   }
 }
 
-let globalRevenueOptimizationManager: RevenueOptimizationManager | null = null
+let globalRevenueOptimizationManager: RevenueOptimizationManager | null = null;
 
 export function getRevenueOptimizationManager(): RevenueOptimizationManager {
   if (!globalRevenueOptimizationManager) {
-    globalRevenueOptimizationManager = new RevenueOptimizationManager()
+    globalRevenueOptimizationManager = new RevenueOptimizationManager();
   }
-  return globalRevenueOptimizationManager
+  return globalRevenueOptimizationManager;
 }

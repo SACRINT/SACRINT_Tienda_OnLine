@@ -9,7 +9,7 @@ export interface UserPresence {
   userId: string;
   status: "online" | "away" | "offline";
   lastSeen: Date;
-  metadata?: Record<string, unknown>;
+  metadata?: Record<string, any>;
 }
 
 class PresenceManager {
@@ -78,9 +78,7 @@ class PresenceManager {
 
   // Get all online users
   getOnlineUsers(): UserPresence[] {
-    return Array.from(this.presenceMap.values()).filter(
-      (p) => p.status === "online",
-    );
+    return Array.from(this.presenceMap.values()).filter((p) => p.status === "online");
   }
 
   // Get all users with presence
@@ -196,10 +194,7 @@ class PresenceManager {
     const timeout = REALTIME_CONFIG.presence.timeout;
 
     this.presenceMap.forEach((presence, odUserId) => {
-      if (
-        presence.status === "offline" &&
-        now - presence.lastSeen.getTime() > timeout
-      ) {
+      if (presence.status === "offline" && now - presence.lastSeen.getTime() > timeout) {
         this.presenceMap.delete(odUserId);
       }
     });

@@ -3,41 +3,38 @@
  * Semana 56, Tarea 56.9: Thought Leadership & Industry Influence
  */
 
-import { logger } from "@/lib/monitoring"
+import { logger } from "@/lib/monitoring";
 
 export interface ThoughtLeadershipInitiative {
-  id: string
-  initiativeName: string
-  topic: string
-  format: "article" | "speaking" | "research" | "publication"
-  targetAudience: string
-  channel: string
-  publishDate: Date
-  reachMetrics: Record<string, number>
-  influenceScore: number
+  id: string;
+  initiativeName: string;
+  topic: string;
+  format: "article" | "speaking" | "research" | "publication";
+  targetAudience: string;
+  channel: string;
+  publishDate: Date;
+  reachMetrics: Record<string, number>;
+  influenceScore: number;
 }
 
 export interface PublishedInsight {
-  id: string
-  insightTitle: string
-  insightArea: string
-  authorName: string
-  publishDate: Date
-  viewCount: number
-  shareCount: number
-  citationCount: number
-  credibility: number
+  id: string;
+  insightTitle: string;
+  insightArea: string;
+  authorName: string;
+  publishDate: Date;
+  viewCount: number;
+  shareCount: number;
+  citationCount: number;
+  credibility: number;
 }
 
 export class ThoughtLeadershipManager {
-  private initiatives: Map<string, ThoughtLeadershipInitiative> = new Map()
-  private publishedInsights: Map<string, PublishedInsight> = new Map()
+  private initiatives: Map<string, ThoughtLeadershipInitiative> = new Map();
+  private publishedInsights: Map<string, PublishedInsight> = new Map();
 
   constructor() {
-    logger.debug(
-      { type: "thought_leadership_init" },
-      "Manager inicializado"
-    )
+    logger.debug({ type: "thought_leadership_init" }, "Manager inicializado");
   }
 
   launchThoughtLeadershipInitiative(
@@ -47,9 +44,9 @@ export class ThoughtLeadershipManager {
     targetAudience: string,
     channel: string,
     reachMetrics: Record<string, number>,
-    influenceScore: number
+    influenceScore: number,
   ): ThoughtLeadershipInitiative {
-    const id = "initiative_" + Date.now()
+    const id = "initiative_" + Date.now();
     const initiative: ThoughtLeadershipInitiative = {
       id,
       initiativeName,
@@ -60,23 +57,23 @@ export class ThoughtLeadershipManager {
       publishDate: new Date(),
       reachMetrics,
       influenceScore,
-    }
+    };
 
-    this.initiatives.set(id, initiative)
+    this.initiatives.set(id, initiative);
     logger.info(
       { type: "thought_leadership_initiative_launched", initiativeId: id },
-      `Iniciativa de liderazgo de pensamiento lanzada: ${initiativeName}`
-    )
-    return initiative
+      `Iniciativa de liderazgo de pensamiento lanzada: ${initiativeName}`,
+    );
+    return initiative;
   }
 
   publishInsight(
     insightTitle: string,
     insightArea: string,
     authorName: string,
-    credibility: number
+    credibility: number,
   ): PublishedInsight {
-    const id = "insight_" + Date.now()
+    const id = "insight_" + Date.now();
     const insight: PublishedInsight = {
       id,
       insightTitle,
@@ -87,42 +84,36 @@ export class ThoughtLeadershipManager {
       shareCount: 0,
       citationCount: 0,
       credibility,
-    }
+    };
 
-    this.publishedInsights.set(id, insight)
-    logger.info(
-      { type: "insight_published", insightId: id },
-      `Insight publicado: ${insightTitle}`
-    )
-    return insight
+    this.publishedInsights.set(id, insight);
+    logger.info({ type: "insight_published", insightId: id }, `Insight publicado: ${insightTitle}`);
+    return insight;
   }
 
   recordInsightMetrics(
     insightId: string,
     viewCount: number,
     shareCount: number,
-    citationCount: number
+    citationCount: number,
   ): PublishedInsight | null {
-    const insight = this.publishedInsights.get(insightId)
-    if (!insight) return null
+    const insight = this.publishedInsights.get(insightId);
+    if (!insight) return null;
 
-    insight.viewCount += viewCount
-    insight.shareCount += shareCount
-    insight.citationCount += citationCount
+    insight.viewCount += viewCount;
+    insight.shareCount += shareCount;
+    insight.citationCount += citationCount;
 
-    return insight
+    return insight;
   }
 
-  getStatistics(): Record<string, unknown> {
-    const initiatives = Array.from(this.initiatives.values())
-    const insights = Array.from(this.publishedInsights.values())
+  getStatistics(): Record<string, any> {
+    const initiatives = Array.from(this.initiatives.values());
+    const insights = Array.from(this.publishedInsights.values());
 
     const totalReach = initiatives.reduce((sum, init) => {
-      return (
-        sum +
-        Object.values(init.reachMetrics).reduce((a, b) => a + (b as number), 0)
-      )
-    }, 0)
+      return sum + Object.values(init.reachMetrics).reduce((a, b) => a + (b as number), 0);
+    }, 0);
 
     return {
       totalThoughtLeadershipInitiatives: initiatives.length,
@@ -130,14 +121,12 @@ export class ThoughtLeadershipManager {
         article: initiatives.filter((i) => i.format === "article").length,
         speaking: initiatives.filter((i) => i.format === "speaking").length,
         research: initiatives.filter((i) => i.format === "research").length,
-        publication: initiatives.filter((i) => i.format === "publication")
-          .length,
+        publication: initiatives.filter((i) => i.format === "publication").length,
       },
       totalReach,
       averageInfluenceScore:
         initiatives.length > 0
-          ? initiatives.reduce((sum, i) => sum + i.influenceScore, 0) /
-            initiatives.length
+          ? initiatives.reduce((sum, i) => sum + i.influenceScore, 0) / initiatives.length
           : 0,
       totalPublishedInsights: insights.length,
       totalViews: insights.reduce((sum, i) => sum + i.viewCount, 0),
@@ -147,20 +136,20 @@ export class ThoughtLeadershipManager {
         insights.length > 0
           ? insights.reduce((sum, i) => sum + i.credibility, 0) / insights.length
           : 0,
-    }
+    };
   }
 
   generateThoughtLeadershipReport(): string {
-    const stats = this.getStatistics()
-    return `Thought Leadership Report\nInitiatives: ${stats.totalThoughtLeadershipInitiatives}\nInsights: ${stats.totalPublishedInsights}\nTotal Reach: ${stats.totalReach.toLocaleString()}`
+    const stats = this.getStatistics();
+    return `Thought Leadership Report\nInitiatives: ${stats.totalThoughtLeadershipInitiatives}\nInsights: ${stats.totalPublishedInsights}\nTotal Reach: ${stats.totalReach.toLocaleString()}`;
   }
 }
 
-let globalThoughtLeadershipManager: ThoughtLeadershipManager | null = null
+let globalThoughtLeadershipManager: ThoughtLeadershipManager | null = null;
 
 export function getThoughtLeadershipManager(): ThoughtLeadershipManager {
   if (!globalThoughtLeadershipManager) {
-    globalThoughtLeadershipManager = new ThoughtLeadershipManager()
+    globalThoughtLeadershipManager = new ThoughtLeadershipManager();
   }
-  return globalThoughtLeadershipManager
+  return globalThoughtLeadershipManager;
 }

@@ -3,48 +3,48 @@
  * Semana 52, Tarea 52.6: Final Project Documentation & Archival
  */
 
-import { logger } from "@/lib/monitoring"
+import { logger } from "@/lib/monitoring";
 
 export interface ProjectDocument {
-  id: string
-  title: string
-  type: "technical" | "business" | "operational" | "management"
-  content: string
-  author: string
-  createdDate: Date
-  lastUpdated: Date
-  status: "draft" | "review" | "approved" | "archived"
-  version: string
-  tags: string[]
+  id: string;
+  title: string;
+  type: "technical" | "business" | "operational" | "management";
+  content: string;
+  author: string;
+  createdDate: Date;
+  lastUpdated: Date;
+  status: "draft" | "review" | "approved" | "archived";
+  version: string;
+  tags: string[];
 }
 
 export interface DocumentationIndex {
-  id: string
-  projectName: string
-  projectId: string
-  createdDate: Date
-  documents: DocumentReference[]
-  totalPages: number
-  completeness: number
-  lastReviewed: Date
+  id: string;
+  projectName: string;
+  projectId: string;
+  createdDate: Date;
+  documents: DocumentReference[];
+  totalPages: number;
+  completeness: number;
+  lastReviewed: Date;
 }
 
 export interface DocumentReference {
-  id: string
-  title: string
-  type: string
-  location: string
-  status: string
-  owner: string
+  id: string;
+  title: string;
+  type: string;
+  location: string;
+  status: string;
+  owner: string;
 }
 
 export class ProjectDocumentationManager {
-  private documents: Map<string, ProjectDocument> = new Map()
-  private documentationIndexes: Map<string, DocumentationIndex> = new Map()
-  private documentationArchive: Map<string, ProjectDocument[]> = new Map()
+  private documents: Map<string, ProjectDocument> = new Map();
+  private documentationIndexes: Map<string, DocumentationIndex> = new Map();
+  private documentationArchive: Map<string, ProjectDocument[]> = new Map();
 
   constructor() {
-    logger.debug({ type: "project_documentation_init" }, "Manager inicializado")
+    logger.debug({ type: "project_documentation_init" }, "Manager inicializado");
   }
 
   createDocument(
@@ -52,9 +52,9 @@ export class ProjectDocumentationManager {
     type: "technical" | "business" | "operational" | "management",
     content: string,
     author: string,
-    tags: string[] = []
+    tags: string[] = [],
   ): ProjectDocument {
-    const id = "doc_" + Date.now()
+    const id = "doc_" + Date.now();
     const document: ProjectDocument = {
       id,
       title,
@@ -66,59 +66,52 @@ export class ProjectDocumentationManager {
       status: "draft",
       version: "1.0",
       tags,
-    }
+    };
 
-    this.documents.set(id, document)
-    logger.info(
-      { type: "project_document_created", docId: id },
-      `Documento creado: ${title}`
-    )
-    return document
+    this.documents.set(id, document);
+    logger.info({ type: "project_document_created", docId: id }, `Documento creado: ${title}`);
+    return document;
   }
 
-  updateDocument(
-    docId: string,
-    content: string,
-    version: string
-  ): ProjectDocument | null {
-    const document = this.documents.get(docId)
-    if (!document) return null
+  updateDocument(docId: string, content: string, version: string): ProjectDocument | null {
+    const document = this.documents.get(docId);
+    if (!document) return null;
 
-    document.content = content
-    document.lastUpdated = new Date()
-    document.version = version
+    document.content = content;
+    document.lastUpdated = new Date();
+    document.version = version;
 
-    this.documents.set(docId, document)
-    logger.info({ type: "document_updated", docId }, `Documento actualizado v${version}`)
-    return document
+    this.documents.set(docId, document);
+    logger.info({ type: "document_updated", docId }, `Documento actualizado v${version}`);
+    return document;
   }
 
   approveDocument(docId: string): ProjectDocument | null {
-    const document = this.documents.get(docId)
-    if (!document) return null
+    const document = this.documents.get(docId);
+    if (!document) return null;
 
-    document.status = "approved"
-    this.documents.set(docId, document)
-    logger.info({ type: "document_approved", docId }, `Documento aprobado`)
-    return document
+    document.status = "approved";
+    this.documents.set(docId, document);
+    logger.info({ type: "document_approved", docId }, `Documento aprobado`);
+    return document;
   }
 
   archiveDocument(docId: string): ProjectDocument | null {
-    const document = this.documents.get(docId)
-    if (!document) return null
+    const document = this.documents.get(docId);
+    if (!document) return null;
 
-    document.status = "archived"
-    this.documents.set(docId, document)
-    logger.info({ type: "document_archived", docId }, `Documento archivado`)
-    return document
+    document.status = "archived";
+    this.documents.set(docId, document);
+    logger.info({ type: "document_archived", docId }, `Documento archivado`);
+    return document;
   }
 
   createDocumentationIndex(
     projectName: string,
     projectId: string,
-    documents: DocumentReference[]
+    documents: DocumentReference[],
   ): DocumentationIndex {
-    const id = "index_" + Date.now()
+    const id = "index_" + Date.now();
     const index: DocumentationIndex = {
       id,
       projectName,
@@ -128,26 +121,26 @@ export class ProjectDocumentationManager {
       totalPages: documents.length * 10,
       completeness: 100,
       lastReviewed: new Date(),
-    }
+    };
 
-    this.documentationIndexes.set(id, index)
-    this.documentationArchive.set(projectId, Array.from(this.documents.values()))
+    this.documentationIndexes.set(id, index);
+    this.documentationArchive.set(projectId, Array.from(this.documents.values()));
 
     logger.info(
       { type: "documentation_index_created", indexId: id },
-      `Índice de documentación creado: ${projectName}`
-    )
-    return index
+      `Índice de documentación creado: ${projectName}`,
+    );
+    return index;
   }
 
   getDocumentsByType(
-    type: "technical" | "business" | "operational" | "management"
+    type: "technical" | "business" | "operational" | "management",
   ): ProjectDocument[] {
-    return Array.from(this.documents.values()).filter((d) => d.type === type)
+    return Array.from(this.documents.values()).filter((d) => d.type === type);
   }
 
   getDocumentsByAuthor(author: string): ProjectDocument[] {
-    return Array.from(this.documents.values()).filter((d) => d.author === author)
+    return Array.from(this.documents.values()).filter((d) => d.author === author);
   }
 
   searchDocuments(keyword: string): ProjectDocument[] {
@@ -155,13 +148,13 @@ export class ProjectDocumentationManager {
       (d) =>
         d.title.toLowerCase().includes(keyword.toLowerCase()) ||
         d.content.toLowerCase().includes(keyword.toLowerCase()) ||
-        d.tags.some((t) => t.toLowerCase().includes(keyword.toLowerCase()))
-    )
+        d.tags.some((t) => t.toLowerCase().includes(keyword.toLowerCase())),
+    );
   }
 
-  getStatistics(): Record<string, unknown> {
-    const documents = Array.from(this.documents.values())
-    const indexes = Array.from(this.documentationIndexes.values())
+  getStatistics(): Record<string, any> {
+    const documents = Array.from(this.documents.values());
+    const indexes = Array.from(this.documentationIndexes.values());
 
     return {
       totalDocuments: documents.length,
@@ -179,20 +172,20 @@ export class ProjectDocumentationManager {
       },
       totalDocumentationIndexes: indexes.length,
       totalPages: documents.reduce((sum, d) => sum + (d.content.split("\n").length || 0), 0),
-    }
+    };
   }
 
   generateDocumentationReport(): string {
-    const stats = this.getStatistics()
-    return `Project Documentation Report\nTotal Documents: ${stats.totalDocuments}\nDocumentation Indexes: ${stats.totalDocumentationIndexes}\nTotal Pages: ${stats.totalPages}`
+    const stats = this.getStatistics();
+    return `Project Documentation Report\nTotal Documents: ${stats.totalDocuments}\nDocumentation Indexes: ${stats.totalDocumentationIndexes}\nTotal Pages: ${stats.totalPages}`;
   }
 }
 
-let globalProjectDocumentationManager: ProjectDocumentationManager | null = null
+let globalProjectDocumentationManager: ProjectDocumentationManager | null = null;
 
 export function getProjectDocumentationManager(): ProjectDocumentationManager {
   if (!globalProjectDocumentationManager) {
-    globalProjectDocumentationManager = new ProjectDocumentationManager()
+    globalProjectDocumentationManager = new ProjectDocumentationManager();
   }
-  return globalProjectDocumentationManager
+  return globalProjectDocumentationManager;
 }

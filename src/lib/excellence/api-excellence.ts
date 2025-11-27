@@ -3,22 +3,22 @@
  * Semana 55, Tarea 55.6: API Quality & Excellence Standards
  */
 
-import { logger } from "@/lib/monitoring"
+import { logger } from "@/lib/monitoring";
 
 export interface APIMetric {
-  id: string
-  apiName: string
-  responseTime: number
-  errorRate: number
-  uptime: number
-  documentationScore: number
+  id: string;
+  apiName: string;
+  responseTime: number;
+  errorRate: number;
+  uptime: number;
+  documentationScore: number;
 }
 
 export class APIExcellenceManager {
-  private metrics: Map<string, APIMetric> = new Map()
+  private metrics: Map<string, APIMetric> = new Map();
 
   constructor() {
-    logger.debug({ type: "api_excellence_init" }, "Manager inicializado")
+    logger.debug({ type: "api_excellence_init" }, "Manager inicializado");
   }
 
   assessAPIQuality(
@@ -26,9 +26,9 @@ export class APIExcellenceManager {
     responseTime: number,
     errorRate: number,
     uptime: number,
-    documentationScore: number
+    documentationScore: number,
   ): APIMetric {
-    const id = "api_" + Date.now()
+    const id = "api_" + Date.now();
 
     const metric: APIMetric = {
       id,
@@ -37,15 +37,15 @@ export class APIExcellenceManager {
       errorRate,
       uptime,
       documentationScore,
-    }
+    };
 
-    this.metrics.set(id, metric)
-    logger.info({ type: "api_assessed", metricId: id }, `API evaluada: ${apiName}`)
-    return metric
+    this.metrics.set(id, metric);
+    logger.info({ type: "api_assessed", metricId: id }, `API evaluada: ${apiName}`);
+    return metric;
   }
 
-  getStatistics(): Record<string, unknown> {
-    const metrics = Array.from(this.metrics.values())
+  getStatistics(): Record<string, any> {
+    const metrics = Array.from(this.metrics.values());
 
     return {
       totalAPIs: metrics.length,
@@ -54,23 +54,21 @@ export class APIExcellenceManager {
           ? metrics.reduce((sum, m) => sum + m.responseTime, 0) / metrics.length
           : 0,
       averageUptime:
-        metrics.length > 0
-          ? metrics.reduce((sum, m) => sum + m.uptime, 0) / metrics.length
-          : 0,
-    }
+        metrics.length > 0 ? metrics.reduce((sum, m) => sum + m.uptime, 0) / metrics.length : 0,
+    };
   }
 
   generateAPIReport(): string {
-    const stats = this.getStatistics()
-    return `API Excellence Report\nAPIs: ${stats.totalAPIs}\nAvg Uptime: ${stats.averageUptime.toFixed(2)}%`
+    const stats = this.getStatistics();
+    return `API Excellence Report\nAPIs: ${stats.totalAPIs}\nAvg Uptime: ${stats.averageUptime.toFixed(2)}%`;
   }
 }
 
-let globalAPIExcellenceManager: APIExcellenceManager | null = null
+let globalAPIExcellenceManager: APIExcellenceManager | null = null;
 
 export function getAPIExcellenceManager(): APIExcellenceManager {
   if (!globalAPIExcellenceManager) {
-    globalAPIExcellenceManager = new APIExcellenceManager()
+    globalAPIExcellenceManager = new APIExcellenceManager();
   }
-  return globalAPIExcellenceManager
+  return globalAPIExcellenceManager;
 }

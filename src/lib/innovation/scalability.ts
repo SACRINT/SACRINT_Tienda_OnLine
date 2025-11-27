@@ -3,25 +3,25 @@
  * Semana 54, Tarea 54.7: Scalability Planning & Infrastructure Growth
  */
 
-import { logger } from "@/lib/monitoring"
+import { logger } from "@/lib/monitoring";
 
 export interface ScalabilityPlan {
-  id: string
-  planName: string
-  targetScale: number
-  metric: string
-  currentCapacity: number
-  requiredCapacity: number
-  timeline: string
-  status: "planning" | "implementation" | "completed"
-  components: string[]
+  id: string;
+  planName: string;
+  targetScale: number;
+  metric: string;
+  currentCapacity: number;
+  requiredCapacity: number;
+  timeline: string;
+  status: "planning" | "implementation" | "completed";
+  components: string[];
 }
 
 export class ScalabilityManager {
-  private plans: Map<string, ScalabilityPlan> = new Map()
+  private plans: Map<string, ScalabilityPlan> = new Map();
 
   constructor() {
-    logger.debug({ type: "scalability_init" }, "Manager inicializado")
+    logger.debug({ type: "scalability_init" }, "Manager inicializado");
   }
 
   createScalabilityPlan(
@@ -30,9 +30,9 @@ export class ScalabilityManager {
     metric: string,
     currentCapacity: number,
     timeline: string,
-    components: string[]
+    components: string[],
   ): ScalabilityPlan {
-    const id = "scale_" + Date.now()
+    const id = "scale_" + Date.now();
     const plan: ScalabilityPlan = {
       id,
       planName,
@@ -43,18 +43,18 @@ export class ScalabilityManager {
       timeline,
       status: "planning",
       components,
-    }
+    };
 
-    this.plans.set(id, plan)
+    this.plans.set(id, plan);
     logger.info(
       { type: "scalability_plan_created", planId: id },
-      `Plan de escalabilidad creado: ${planName}`
-    )
-    return plan
+      `Plan de escalabilidad creado: ${planName}`,
+    );
+    return plan;
   }
 
-  getStatistics(): Record<string, unknown> {
-    const plans = Array.from(this.plans.values())
+  getStatistics(): Record<string, any> {
+    const plans = Array.from(this.plans.values());
 
     return {
       totalPlans: plans.length,
@@ -63,20 +63,20 @@ export class ScalabilityManager {
         implementation: plans.filter((p) => p.status === "implementation").length,
         completed: plans.filter((p) => p.status === "completed").length,
       },
-    }
+    };
   }
 
   generateScalabilityReport(): string {
-    const stats = this.getStatistics()
-    return `Scalability Report\nTotal Plans: ${stats.totalPlans}\nCompleted: ${stats.byStatus.completed}`
+    const stats = this.getStatistics();
+    return `Scalability Report\nTotal Plans: ${stats.totalPlans}\nCompleted: ${stats.byStatus.completed}`;
   }
 }
 
-let globalScalabilityManager: ScalabilityManager | null = null
+let globalScalabilityManager: ScalabilityManager | null = null;
 
 export function getScalabilityManager(): ScalabilityManager {
   if (!globalScalabilityManager) {
-    globalScalabilityManager = new ScalabilityManager()
+    globalScalabilityManager = new ScalabilityManager();
   }
-  return globalScalabilityManager
+  return globalScalabilityManager;
 }

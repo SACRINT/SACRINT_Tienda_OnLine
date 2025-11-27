@@ -14,7 +14,7 @@ const campaignSchema = z.object({
   htmlContent: z.string().min(1, "HTML content is required"),
   textContent: z.string().optional(),
   scheduledFor: z.string().datetime().optional(),
-  segmentRules: z.record(z.string(), z.any()).optional(),
+  segmentRules: z.record(z.string(), z.unknown()).optional(),
   subjectVariants: z.array(z.string()).optional(),
 });
 
@@ -111,7 +111,7 @@ export async function POST(req: NextRequest) {
         ...validatedData,
         tenantId: user.tenantId,
         scheduledFor: validatedData.scheduledFor ? new Date(validatedData.scheduledFor) : null,
-        segmentRules: validatedData.segmentRules || {},
+        segmentRules: (validatedData.segmentRules || {}) as any,
         subjectVariants: validatedData.subjectVariants || [],
       },
     });

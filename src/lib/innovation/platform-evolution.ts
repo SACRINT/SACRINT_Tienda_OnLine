@@ -3,25 +3,25 @@
  * Semana 54, Tarea 54.8: Platform Architecture Evolution
  */
 
-import { logger } from "@/lib/monitoring"
+import { logger } from "@/lib/monitoring";
 
 export interface ArchitectureUpgrade {
-  id: string
-  upgradeName: string
-  currentArchitecture: string
-  targetArchitecture: string
-  benefits: string[]
-  risks: string[]
-  timeline: number
-  estimatedEffort: string
-  status: "planning" | "design" | "implementation" | "deployment" | "completed"
+  id: string;
+  upgradeName: string;
+  currentArchitecture: string;
+  targetArchitecture: string;
+  benefits: string[];
+  risks: string[];
+  timeline: number;
+  estimatedEffort: string;
+  status: "planning" | "design" | "implementation" | "deployment" | "completed";
 }
 
 export class PlatformEvolutionManager {
-  private upgrades: Map<string, ArchitectureUpgrade> = new Map()
+  private upgrades: Map<string, ArchitectureUpgrade> = new Map();
 
   constructor() {
-    logger.debug({ type: "platform_evolution_init" }, "Manager inicializado")
+    logger.debug({ type: "platform_evolution_init" }, "Manager inicializado");
   }
 
   planArchitectureUpgrade(
@@ -31,9 +31,9 @@ export class PlatformEvolutionManager {
     benefits: string[],
     risks: string[],
     timeline: number,
-    estimatedEffort: string
+    estimatedEffort: string,
   ): ArchitectureUpgrade {
-    const id = "arch_" + Date.now()
+    const id = "arch_" + Date.now();
     const upgrade: ArchitectureUpgrade = {
       id,
       upgradeName,
@@ -44,18 +44,18 @@ export class PlatformEvolutionManager {
       timeline,
       estimatedEffort,
       status: "planning",
-    }
+    };
 
-    this.upgrades.set(id, upgrade)
+    this.upgrades.set(id, upgrade);
     logger.info(
       { type: "architecture_upgrade_planned", upgradeId: id },
-      `Actualización planeada: ${upgradeName}`
-    )
-    return upgrade
+      `Actualización planeada: ${upgradeName}`,
+    );
+    return upgrade;
   }
 
-  getStatistics(): Record<string, unknown> {
-    const upgrades = Array.from(this.upgrades.values())
+  getStatistics(): Record<string, any> {
+    const upgrades = Array.from(this.upgrades.values());
 
     return {
       totalUpgrades: upgrades.length,
@@ -66,20 +66,20 @@ export class PlatformEvolutionManager {
         deployment: upgrades.filter((u) => u.status === "deployment").length,
         completed: upgrades.filter((u) => u.status === "completed").length,
       },
-    }
+    };
   }
 
   generateEvolutionReport(): string {
-    const stats = this.getStatistics()
-    return `Platform Evolution Report\nTotal Upgrades: ${stats.totalUpgrades}`
+    const stats = this.getStatistics();
+    return `Platform Evolution Report\nTotal Upgrades: ${stats.totalUpgrades}`;
   }
 }
 
-let globalPlatformEvolutionManager: PlatformEvolutionManager | null = null
+let globalPlatformEvolutionManager: PlatformEvolutionManager | null = null;
 
 export function getPlatformEvolutionManager(): PlatformEvolutionManager {
   if (!globalPlatformEvolutionManager) {
-    globalPlatformEvolutionManager = new PlatformEvolutionManager()
+    globalPlatformEvolutionManager = new PlatformEvolutionManager();
   }
-  return globalPlatformEvolutionManager
+  return globalPlatformEvolutionManager;
 }
