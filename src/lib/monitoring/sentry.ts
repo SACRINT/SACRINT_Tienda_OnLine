@@ -189,3 +189,29 @@ export function captureMessage(
     }
   }
 }
+
+// Alias for captureError - matches Sentry API
+export function captureException(error: Error, context?: Record<string, any>) {
+  return captureError(error, context);
+}
+
+// Add breadcrumb for error tracking
+export function addBreadcrumb(message: string, data?: Record<string, any>) {
+  if (!Sentry) {
+    console.log("[Sentry] Breadcrumb (Sentry not available):", message, data);
+    return;
+  }
+
+  Sentry.addBreadcrumb({
+    message,
+    level: "info",
+    data,
+    timestamp: new Date().getTime() / 1000,
+  });
+  console.log("[Sentry] Breadcrumb agregado:", message, data);
+}
+
+// Alias for addContext - setContext
+export function setContext(key: string, context: Record<string, unknown>) {
+  return addContext(key, context);
+}

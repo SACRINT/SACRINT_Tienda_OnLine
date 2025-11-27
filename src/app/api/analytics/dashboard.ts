@@ -81,8 +81,12 @@ export async function POST(request: NextRequest) {
 
     const dashboard = getDashboardManager();
     const newDashboard = dashboard.createDashboard(tenantId, {
-      name,
-      layout,
+      name: name || "New Dashboard",
+      description: body.description,
+      type: body.type || "analytics",
+      widgets: [],
+      defaultMetrics: [],
+      isDefault: false,
     });
 
     if (widgets && Array.isArray(widgets)) {
