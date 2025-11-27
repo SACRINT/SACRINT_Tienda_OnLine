@@ -39,12 +39,11 @@ export async function GET(request: NextRequest) {
     }
 
     // Obtener datos para dashboards por defecto
-    const paymentAnalytics = getPaymentAnalytics();
+    const paymentMetrics = await getPaymentAnalytics(tenantId);
     const campaignAnalytics = getCampaignAnalytics();
 
-    const metrics = paymentAnalytics.getPaymentMetrics(tenantId);
-    const dailyRevenue = paymentAnalytics.getDailyRevenue(tenantId, 30);
-    const monthlyRevenue = paymentAnalytics.getMonthlyRevenue(tenantId, 12);
+    // Usar los metrics obtenidos directamente
+    const metrics = paymentMetrics;
 
     logger.info(
       { type: "analytics_dashboard_fetched", tenantId },
@@ -55,8 +54,6 @@ export async function GET(request: NextRequest) {
       success: true,
       metrics: {
         payment: metrics,
-        dailyRevenue,
-        monthlyRevenue,
       },
     });
   } catch (error) {
