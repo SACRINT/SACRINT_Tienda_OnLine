@@ -67,6 +67,10 @@
   "trailingSlash": false,
   "github": {
     "silent": false,
-    "autoJobCancelation": true
+    "autoJobCancelation": true,
+    "enabled": true
+  },
+  "buildCache": {
+    "enable": false
   }
 }
