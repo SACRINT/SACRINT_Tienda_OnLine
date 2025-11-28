@@ -10,9 +10,40 @@ import { UserRole } from "@/lib/db/enums";
 /**
  * Permissions for each role
  */
-export const ROLE_PERMISSIONS = {
+type RolePermissionsMap = {
+  [key in UserRole]: {
+    canEditStore: boolean;
+    canDeleteStore: boolean;
+    canManageUsers: boolean;
+    canManageAllStores: boolean;
+    canAccessAnalytics: boolean;
+    canAccessGlobalAnalytics: boolean;
+    canExportData: boolean;
+    canAccessPayments: boolean;
+    canConfigurePayments: boolean;
+    canProcessRefunds: boolean;
+    canManageProducts: boolean;
+    canManageCategories: boolean;
+    canManageInventory: boolean;
+    canViewOrders: boolean;
+    canEditOrders: boolean;
+    canCancelOrders: boolean;
+    canProcessOrders: boolean;
+    canViewCustomers: boolean;
+    canEditCustomers: boolean;
+    canDeleteCustomers: boolean;
+    canManageCoupons: boolean;
+    canManageEmailCampaigns: boolean;
+    canManageAutomations: boolean;
+    canAccessSettings: boolean;
+    canManageRoles: boolean;
+    canViewLogs: boolean;
+  };
+};
+
+export const ROLE_PERMISSIONS: RolePermissionsMap = {
   // Super Admin - Full system access
-  SUPER_ADMIN: {
+  ADMIN: {
     // Store Management
     canEditStore: true,
     canDeleteStore: true,
@@ -102,7 +133,7 @@ export const ROLE_PERMISSIONS = {
   },
 
   // Customer - Limited access
-  CUSTOMER: {
+  USER: {
     // Store Management
     canEditStore: false,
     canDeleteStore: false,
@@ -125,7 +156,7 @@ export const ROLE_PERMISSIONS = {
     canManageInventory: false,
 
     // Orders
-    canViewOrders: false, // Only their own orders
+    canViewOrders: true, // Only their own orders
     canEditOrders: false,
     canCancelOrders: false,
     canProcessOrders: false,
@@ -145,9 +176,54 @@ export const ROLE_PERMISSIONS = {
     canManageRoles: false,
     canViewLogs: false,
   },
-} as const;
 
-export type Permission = keyof typeof ROLE_PERMISSIONS.SUPER_ADMIN;
+  // Guest - No access
+  GUEST: {
+    // Store Management
+    canEditStore: false,
+    canDeleteStore: false,
+    canManageUsers: false,
+    canManageAllStores: false,
+
+    // Analytics & Reports
+    canAccessAnalytics: false,
+    canAccessGlobalAnalytics: false,
+    canExportData: false,
+
+    // Payments & Financial
+    canAccessPayments: false,
+    canConfigurePayments: false,
+    canProcessRefunds: false,
+
+    // Products & Inventory
+    canManageProducts: false,
+    canManageCategories: false,
+    canManageInventory: false,
+
+    // Orders
+    canViewOrders: false,
+    canEditOrders: false,
+    canCancelOrders: false,
+    canProcessOrders: false,
+
+    // Customers
+    canViewCustomers: false,
+    canEditCustomers: false,
+    canDeleteCustomers: false,
+
+    // Marketing
+    canManageCoupons: false,
+    canManageEmailCampaigns: false,
+    canManageAutomations: false,
+
+    // System
+    canAccessSettings: false,
+    canManageRoles: false,
+    canViewLogs: false,
+  },
+};
+
+export type Permission = keyof typeof ROLE_PERMISSIONS.ADMIN;
 
 /**
  * Check if a role has a specific permission
@@ -200,26 +276,20 @@ export function canAccess(role: UserRole, resource: string): boolean {
  * Get all permissions for a role
  */
 export function getRolePermissions(role: UserRole) {
-  return ROLE_PERMISSIONS[role] ?? ROLE_PERMISSIONS.CUSTOMER;
+  return ROLE_PERMISSIONS[role] ?? ROLE_PERMISSIONS.USER;
 }
 
 /**
  * Check multiple permissions at once
  */
-export function hasAnyPermission(
-  role: UserRole,
-  permissions: Permission[]
-): boolean {
+export function hasAnyPermission(role: UserRole, permissions: Permission[]): boolean {
   return permissions.some((permission) => hasPermission(role, permission));
 }
 
 /**
  * Check if all permissions are granted
  */
-export function hasAllPermissions(
-  role: UserRole,
-  permissions: Permission[]
-): boolean {
+export function hasAllPermissions(role: UserRole, permissions: Permission[]): boolean {
   return permissions.every((permission) => hasPermission(role, permission));
 }
 
@@ -237,9 +307,10 @@ export function requirePermission(role: UserRole, permission: Permission) {
  */
 export function getRoleName(role: UserRole): string {
   const roleNames: Record<UserRole, string> = {
-    SUPER_ADMIN: "Super Administrador",
+    ADMIN: "Super Administrador",
     STORE_OWNER: "Dueño de Tienda",
-    CUSTOMER: "Cliente",
+    USER: "Cliente",
+    GUEST: "Invitado",
   };
   return roleNames[role] ?? role;
 }
@@ -249,11 +320,10 @@ export function getRoleName(role: UserRole): string {
  */
 export function getRoleDescription(role: UserRole): string {
   const descriptions: Record<UserRole, string> = {
-    SUPER_ADMIN:
-      "Acceso completo al sistema, puede administrar todas las tiendas",
-    STORE_OWNER:
-      "Acceso completo a su tienda, puede gestionar productos, órdenes y configuración",
-    CUSTOMER: "Puede realizar compras y ver su historial de órdenes",
+    ADMIN: "Acceso completo al sistema, puede administrar todas las tiendas",
+    STORE_OWNER: "Acceso completo a su tienda, puede gestionar productos, órdenes y configuración",
+    USER: "Puede realizar compras y ver su historial de órdenes",
+    GUEST: "Acceso limitado sin cuenta de usuario",
   };
   return descriptions[role] ?? "";
 }

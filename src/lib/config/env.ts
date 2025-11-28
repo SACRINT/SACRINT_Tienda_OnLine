@@ -107,8 +107,8 @@ const envSchema = z.object({
   // ========================================
   NEXT_PUBLIC_APP_URL: z.string().url().describe("Public-facing application URL"),
 
-  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:
-    z.string()
+  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z
+    .string()
     .regex(/^pk_(test|live)_/, {
       message: "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY must start with 'pk_test_' or 'pk_live_'",
     })
@@ -117,19 +117,22 @@ const envSchema = z.object({
   // ========================================
   // LOGGING & MONITORING (Optional)
   // ========================================
-  NEXT_PUBLIC_SENTRY_DSN:
-    z.string().url().optional().describe("Sentry DSN for error tracking (optional)"),
+  NEXT_PUBLIC_SENTRY_DSN: z
+    .string()
+    .url()
+    .optional()
+    .describe("Sentry DSN for error tracking (optional)"),
 
-  LOG_LEVEL:
-    z.enum(["trace", "debug", "info", "warn", "error", "fatal"])
+  LOG_LEVEL: z
+    .enum(["trace", "debug", "info", "warn", "error", "fatal"])
     .default("info")
     .describe("Logging level (trace, debug, info, warn, error, fatal)"),
 
   // ========================================
   // NODE ENVIRONMENT
   // ========================================
-  NODE_ENV:
-    z.enum(["development", "production", "test"])
+  NODE_ENV: z
+    .enum(["development", "production", "test"])
     .default("development")
     .describe("Node.js environment"),
 });
@@ -185,7 +188,8 @@ ${missingVars.join("\n")}
 4. Restart the application
 
 💡 Tips:
-- NEXTAUTH_SECRET: Generate with 'openssl rand -base64 32'
+- NEXTAUTH_SECRET: Generate with \
+openssl rand -base64 32\
 - DATABASE_URL: Get from Neon dashboard
 - STRIPE keys: Get from Stripe dashboard
 - GOOGLE OAuth: Get from Google Cloud Console

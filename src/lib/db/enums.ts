@@ -60,3 +60,10 @@ export enum InventoryReason {
   PURCHASE = "PURCHASE",
   OTHER = "OTHER",
 }
+
+export enum UserRole {
+  ADMIN = "ADMIN",
+  USER = "USER",
+  GUEST = "GUEST",
+  STORE_OWNER = "STORE_OWNER",
+}

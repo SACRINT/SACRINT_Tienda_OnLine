@@ -105,7 +105,7 @@ export class InstitutionalKnowledgeManager {
     return {
       totalKnowledgeAssets: assets.length,
       assetsByType: {
-        process: assets.filter((a) => a.type === "process").length,
+        process: assets.filter((a) => a.assetType === "process").length,
         expertise: assets.filter((a) => a.assetType === "expertise").length,
         tool: assets.filter((a) => a.assetType === "tool").length,
         methodology: assets.filter((a) => a.assetType === "methodology").length,

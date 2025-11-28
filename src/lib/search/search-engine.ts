@@ -367,7 +367,7 @@ export async function logSearchQuery(
         resultsCount,
         userId: userId || null,
         sessionId: sessionId || null,
-        filters: null, // Can be extended to log applied filters
+        filters: undefined, // Can be extended to log applied filters
       },
     });
 
