@@ -16,13 +16,7 @@ export class MercadoPagoError extends Error {
   public readonly cause?: string;
   public readonly originalError?: any;
 
-  constructor(
-    message: string,
-    code: string,
-    status?: number,
-    cause?: string,
-    originalError?: any
-  ) {
+  constructor(message: string, code: string, status?: number, cause?: string, originalError?: any) {
     super(message);
     this.name = "MercadoPagoError";
     this.code = code;
@@ -57,7 +51,7 @@ export class MercadoPagoValidationError extends MercadoPagoError {
   constructor(
     message: string,
     validationErrors: Record<string, string[]> = {},
-    originalError?: any
+    originalError?: any,
   ) {
     super(message, "VALIDATION_ERROR", 400, "Invalid input", originalError);
     this.name = "MercadoPagoValidationError";
@@ -74,7 +68,7 @@ export class MercadoPagoPaymentError extends MercadoPagoError {
     code: string,
     paymentId?: string,
     orderId?: string,
-    originalError?: any
+    originalError?: any,
   ) {
     super(message, code, 400, "Payment processing failed", originalError);
     this.name = "MercadoPagoPaymentError";
@@ -87,12 +81,7 @@ export class MercadoPagoWebhookError extends MercadoPagoError {
   public readonly eventId?: string;
   public readonly eventType?: string;
 
-  constructor(
-    message: string,
-    eventId?: string,
-    eventType?: string,
-    originalError?: any
-  ) {
+  constructor(message: string, eventId?: string, eventType?: string, originalError?: any) {
     super(message, "WEBHOOK_ERROR", 500, "Webhook processing failed", originalError);
     this.name = "MercadoPagoWebhookError";
     this.eventId = eventId;
@@ -143,30 +132,46 @@ export const MP_ERROR_CODES = {
 export function getUserFriendlyMessage(errorCode: string): string {
   const messages: Record<string, string> = {
     // Authentication
-    [MP_ERROR_CODES.INVALID_ACCESS_TOKEN]: "Payment service is temporarily unavailable. Please try again later.",
-    [MP_ERROR_CODES.EXPIRED_ACCESS_TOKEN]: "Payment service is temporarily unavailable. Please try again later.",
-    [MP_ERROR_CODES.INVALID_CLIENT_ID]: "Payment service configuration error. Please contact support.",
+    [MP_ERROR_CODES.INVALID_ACCESS_TOKEN]:
+      "Payment service is temporarily unavailable. Please try again later.",
+    [MP_ERROR_CODES.EXPIRED_ACCESS_TOKEN]:
+      "Payment service is temporarily unavailable. Please try again later.",
+    [MP_ERROR_CODES.INVALID_CLIENT_ID]:
+      "Payment service configuration error. Please contact support.",
 
     // Card Rejections
-    [MP_ERROR_CODES.REJECTED_HIGH_RISK]: "Payment rejected due to security reasons. Please try a different payment method.",
-    [MP_ERROR_CODES.REJECTED_INSUFFICIENT_AMOUNT]: "Insufficient funds. Please use a different card or payment method.",
-    [MP_ERROR_CODES.REJECTED_BAD_FILLED_CARD_NUMBER]: "Invalid card number. Please check and try again.",
-    [MP_ERROR_CODES.REJECTED_BAD_FILLED_DATE]: "Invalid card expiration date. Please check and try again.",
-    [MP_ERROR_CODES.REJECTED_BAD_FILLED_SECURITY_CODE]: "Invalid security code (CVV). Please check and try again.",
-    [MP_ERROR_CODES.REJECTED_CALL_FOR_AUTHORIZE]: "Payment rejected. Please contact your card issuer for authorization.",
-    [MP_ERROR_CODES.REJECTED_CARD_DISABLED]: "This card is disabled. Please use a different payment method.",
-    [MP_ERROR_CODES.REJECTED_DUPLICATED_PAYMENT]: "This payment appears to be a duplicate. Please check your order history.",
-    [MP_ERROR_CODES.REJECTED_MAX_ATTEMPTS]: "Too many payment attempts. Please try again later or use a different card.",
+    [MP_ERROR_CODES.REJECTED_HIGH_RISK]:
+      "Payment rejected due to security reasons. Please try a different payment method.",
+    [MP_ERROR_CODES.REJECTED_INSUFFICIENT_AMOUNT]:
+      "Insufficient funds. Please use a different card or payment method.",
+    [MP_ERROR_CODES.REJECTED_BAD_FILLED_CARD_NUMBER]:
+      "Invalid card number. Please check and try again.",
+    [MP_ERROR_CODES.REJECTED_BAD_FILLED_DATE]:
+      "Invalid card expiration date. Please check and try again.",
+    [MP_ERROR_CODES.REJECTED_BAD_FILLED_SECURITY_CODE]:
+      "Invalid security code (CVV). Please check and try again.",
+    [MP_ERROR_CODES.REJECTED_CALL_FOR_AUTHORIZE]:
+      "Payment rejected. Please contact your card issuer for authorization.",
+    [MP_ERROR_CODES.REJECTED_CARD_DISABLED]:
+      "This card is disabled. Please use a different payment method.",
+    [MP_ERROR_CODES.REJECTED_DUPLICATED_PAYMENT]:
+      "This payment appears to be a duplicate. Please check your order history.",
+    [MP_ERROR_CODES.REJECTED_MAX_ATTEMPTS]:
+      "Too many payment attempts. Please try again later or use a different card.",
     [MP_ERROR_CODES.REJECTED_BLACKLIST]: "Payment rejected. Please contact support for assistance.",
 
     // Other
     [MP_ERROR_CODES.AMOUNT_TOO_LOW]: "Payment amount is too low. Minimum amount required.",
-    [MP_ERROR_CODES.INVALID_PARAMETER]: "Invalid payment information. Please check your details and try again.",
+    [MP_ERROR_CODES.INVALID_PARAMETER]:
+      "Invalid payment information. Please check your details and try again.",
     [MP_ERROR_CODES.NOT_FOUND]: "Payment or order not found. Please try again or contact support.",
-    [MP_ERROR_CODES.PROCESSING_ERROR]: "An error occurred while processing your payment. Please try again.",
+    [MP_ERROR_CODES.PROCESSING_ERROR]:
+      "An error occurred while processing your payment. Please try again.",
   };
 
-  return messages[errorCode] || "An unexpected error occurred. Please try again or contact support.";
+  return (
+    messages[errorCode] || "An unexpected error occurred. Please try again or contact support."
+  );
 }
 
 // ============================================================================
@@ -189,10 +194,7 @@ export function parseMercadoPagoAPIError(error: any): MercadoPagoError {
 
     // Error de autenticación
     if (status === 401 || status === 403) {
-      return new MercadoPagoAuthError(
-        data.message || "Authentication failed",
-        error
-      );
+      return new MercadoPagoAuthError(data.message || "Authentication failed", error);
     }
 
     // Error de validación
@@ -210,7 +212,7 @@ export function parseMercadoPagoAPIError(error: any): MercadoPagoError {
       return new MercadoPagoValidationError(
         data.message || "Validation failed",
         validationErrors,
-        error
+        error,
       );
     }
 
@@ -224,7 +226,7 @@ export function parseMercadoPagoAPIError(error: any): MercadoPagoError {
         code,
         data.id?.toString(),
         data.external_reference,
-        error
+        error,
       );
     }
 
@@ -233,7 +235,7 @@ export function parseMercadoPagoAPIError(error: any): MercadoPagoError {
       data.message || `API Error: ${status}`,
       status,
       data.cause?.[0]?.description,
-      error
+      error,
     );
   }
 
@@ -244,7 +246,7 @@ export function parseMercadoPagoAPIError(error: any): MercadoPagoError {
       "NETWORK_ERROR",
       0,
       "Network failure",
-      error
+      error,
     );
   }
 
@@ -254,7 +256,7 @@ export function parseMercadoPagoAPIError(error: any): MercadoPagoError {
     "UNKNOWN_ERROR",
     500,
     "Unknown error",
-    error
+    error,
   );
 }
 
@@ -294,13 +296,9 @@ export function logMercadoPagoError(error: MercadoPagoError, context?: Record<st
  * Determina si un error es crítico y requiere alerta inmediata
  */
 function isCriticalError(error: MercadoPagoError): boolean {
-  const criticalCodes = [
-    "AUTH_ERROR",
-    "WEBHOOK_ERROR",
-    "PROCESSING_ERROR",
-  ];
+  const criticalCodes = ["AUTH_ERROR", "WEBHOOK_ERROR", "PROCESSING_ERROR"];
 
-  return criticalCodes.includes(error.code) || (error.status && error.status >= 500);
+  return criticalCodes.includes(error.code) || (error.status !== undefined && error.status >= 500);
 }
 
 /**
@@ -329,7 +327,9 @@ export function isRecoverableError(error: MercadoPagoError): boolean {
     MP_ERROR_CODES.EXPIRED_ACCESS_TOKEN,
   ];
 
-  return recoverableCodes.includes(error.code) || (error.status && error.status >= 500);
+  return (
+    recoverableCodes.includes(error.code) || (error.status !== undefined && error.status >= 500)
+  );
 }
 
 /**
@@ -343,9 +343,11 @@ export function getSuggestedAction(error: MercadoPagoError): string {
       return "Try using a different payment method or check your account balance.";
     }
 
-    if (code === MP_ERROR_CODES.REJECTED_BAD_FILLED_CARD_NUMBER ||
-        code === MP_ERROR_CODES.REJECTED_BAD_FILLED_DATE ||
-        code === MP_ERROR_CODES.REJECTED_BAD_FILLED_SECURITY_CODE) {
+    if (
+      code === MP_ERROR_CODES.REJECTED_BAD_FILLED_CARD_NUMBER ||
+      code === MP_ERROR_CODES.REJECTED_BAD_FILLED_DATE ||
+      code === MP_ERROR_CODES.REJECTED_BAD_FILLED_SECURITY_CODE
+    ) {
       return "Please double-check your card details and try again.";
     }
 
@@ -389,16 +391,8 @@ export interface RetryOptions {
 /**
  * Ejecuta una función con retry automático en caso de errores recuperables
  */
-export async function withRetry<T>(
-  fn: () => Promise<T>,
-  options: RetryOptions = {}
-): Promise<T> {
-  const {
-    maxAttempts = 3,
-    initialDelay = 1000,
-    maxDelay = 10000,
-    backoffFactor = 2,
-  } = options;
+export async function withRetry<T>(fn: () => Promise<T>, options: RetryOptions = {}): Promise<T> {
+  const { maxAttempts = 3, initialDelay = 1000, maxDelay = 10000, backoffFactor = 2 } = options;
 
   let lastError: Error;
   let delay = initialDelay;

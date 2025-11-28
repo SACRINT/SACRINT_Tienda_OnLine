@@ -26,7 +26,7 @@ export const MercadoPagoPaymentSchema = z.object({
   payerName: z.string().optional(),
   paymentMethodId: z.string().optional(),
   installments: z.number().int().min(1).max(24).default(1),
-  metadata: z.record(z.string()).optional(),
+  metadata: z.record(z.string(), z.any()).optional(),
 });
 
 export type MercadoPagoPaymentInput = z.infer<typeof MercadoPagoPaymentSchema>;
@@ -56,7 +56,16 @@ export interface MercadoPagoPreference {
 
 export interface MercadoPagoPayment {
   id: number;
-  status: "pending" | "approved" | "authorized" | "in_process" | "in_mediation" | "rejected" | "cancelled" | "refunded" | "charged_back";
+  status:
+    | "pending"
+    | "approved"
+    | "authorized"
+    | "in_process"
+    | "in_mediation"
+    | "rejected"
+    | "cancelled"
+    | "refunded"
+    | "charged_back";
   status_detail: string;
   transaction_amount: number;
   description: string;
@@ -96,7 +105,7 @@ export interface MercadoPagoRefund {
 async function mpRequest<T>(
   endpoint: string,
   method: "GET" | "POST" | "PUT" | "DELETE" = "GET",
-  body?: any
+  body?: any,
 ): Promise<T> {
   const url = `${MP_BASE_URL}${endpoint}`;
 
@@ -104,16 +113,14 @@ async function mpRequest<T>(
     method,
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${MP_ACCESS_TOKEN}`,
+      Authorization: `Bearer ${MP_ACCESS_TOKEN}`,
     },
     body: body ? JSON.stringify(body) : undefined,
   });
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(
-      `Mercado Pago API Error: ${response.status} - ${JSON.stringify(error)}`
-    );
+    throw new Error(`Mercado Pago API Error: ${response.status} - ${JSON.stringify(error)}`);
   }
 
   return response.json();
@@ -123,7 +130,7 @@ async function mpRequest<T>(
  * Convierte status de MP a nuestro enum PaymentStatus
  */
 export function mapMPStatusToPaymentStatus(
-  mpStatus: MercadoPagoPayment["status"]
+  mpStatus: MercadoPagoPayment["status"],
 ): "PENDING" | "COMPLETED" | "FAILED" | "REFUNDED" {
   switch (mpStatus) {
     case "approved":
@@ -147,7 +154,7 @@ export function mapMPStatusToPaymentStatus(
  * Convierte status de MP a nuestro enum OrderStatus
  */
 export function mapMPStatusToOrderStatus(
-  mpStatus: MercadoPagoPayment["status"]
+  mpStatus: MercadoPagoPayment["status"],
 ): "PENDING" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED" | "REFUNDED" {
   switch (mpStatus) {
     case "approved":
@@ -173,7 +180,7 @@ export function mapMPStatusToOrderStatus(
  * Esto genera un link de pago donde el usuario puede pagar
  */
 export async function createPaymentPreference(
-  input: MercadoPagoPaymentInput
+  input: MercadoPagoPaymentInput,
 ): Promise<MercadoPagoPreference> {
   // Validar input
   const validated = MercadoPagoPaymentSchema.parse(input);
@@ -199,7 +206,7 @@ export async function createPaymentPreference(
     items: order.items.map((item) => ({
       title: item.product?.name || "Product",
       quantity: item.quantity,
-      unit_price: Number(item.price),
+      unit_price: Number(item.priceAtPurchase),
       currency_id: "USD", // o configurar por tenant
     })),
     payer: {
@@ -244,7 +251,7 @@ export async function createPaymentPreference(
 export async function createDirectPayment(
   input: MercadoPagoPaymentInput & {
     token: string; // Card token del frontend
-  }
+  },
 ): Promise<MercadoPagoPayment> {
   const validated = MercadoPagoPaymentSchema.parse(input);
 
@@ -322,7 +329,7 @@ export async function syncOrderWithPaymentStatus(orderId: string): Promise<void>
  */
 export async function createMPRefund(
   orderId: string,
-  amount?: number // Si no se especifica, es reembolso total
+  amount?: number, // Si no se especifica, es reembolso total
 ): Promise<MercadoPagoRefund> {
   const order = await db.order.findUnique({
     where: { id: orderId },
@@ -340,7 +347,7 @@ export async function createMPRefund(
     "POST",
     {
       amount: refundAmount,
-    }
+    },
   );
 
   // Actualizar orden
@@ -401,24 +408,20 @@ export async function createSubscription(input: {
     throw new Error("User not found");
   }
 
-  const subscription = await mpRequest<MercadoPagoSubscription>(
-    "/preapproval",
-    "POST",
-    {
-      reason: input.planName,
-      external_reference: `${input.userId}-${Date.now()}`,
-      payer_email: user.email,
-      back_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/subscriptions`,
-      auto_recurring: {
-        frequency: input.frequency,
-        frequency_type: input.frequencyType,
-        transaction_amount: input.amount,
-        currency_id: "USD",
-        start_date: input.startDate?.toISOString(),
-        end_date: input.endDate?.toISOString(),
-      },
-    }
-  );
+  const subscription = await mpRequest<MercadoPagoSubscription>("/preapproval", "POST", {
+    reason: input.planName,
+    external_reference: `${input.userId}-${Date.now()}`,
+    payer_email: user.email,
+    back_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/subscriptions`,
+    auto_recurring: {
+      frequency: input.frequency,
+      frequency_type: input.frequencyType,
+      transaction_amount: input.amount,
+      currency_id: "USD",
+      start_date: input.startDate?.toISOString(),
+      end_date: input.endDate?.toISOString(),
+    },
+  });
 
   // Guardar suscripción en BD
   await db.subscription.create({
@@ -426,6 +429,8 @@ export async function createSubscription(input: {
       userId: input.userId,
       tenantId: input.tenantId,
       stripeId: subscription.id, // Reusar campo (renombrar a `externalId` sería mejor)
+      stripeCustomerId: input.userId, // Usar userId como customer ID
+      stripePriceId: "mercado_pago", // Placeholder para MP
       status: subscription.status === "authorized" ? "active" : "incomplete",
       currentPeriodStart: new Date(),
       currentPeriodEnd: input.endDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
@@ -456,9 +461,7 @@ export async function cancelSubscription(subscriptionId: string): Promise<void> 
 /**
  * Obtiene información de una suscripción
  */
-export async function getSubscription(
-  subscriptionId: string
-): Promise<MercadoPagoSubscription> {
+export async function getSubscription(subscriptionId: string): Promise<MercadoPagoSubscription> {
   return mpRequest<MercadoPagoSubscription>(`/preapproval/${subscriptionId}`);
 }
 

@@ -8,7 +8,7 @@ import Stripe from "stripe";
 import { db } from "@/lib/db";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-11-20.acacia",
+  apiVersion: "2025-10-29.clover",
 });
 
 // ============ 13.1: REFUNDS SYSTEM ============
@@ -66,9 +66,7 @@ export interface SavedPaymentMethodData {
 
 export async function savePaymentMethod(data: SavedPaymentMethodData) {
   // Get payment method details from Stripe
-  const paymentMethod = await stripe.paymentMethods.retrieve(
-    data.stripePaymentMethodId
-  );
+  const paymentMethod = await stripe.paymentMethods.retrieve(data.stripePaymentMethodId);
 
   if (paymentMethod.type !== "card") {
     throw new Error("Only card payment methods are supported");
@@ -133,7 +131,7 @@ export async function deletePaymentMethod(id: string, userId: string) {
 export async function createPaymentIntentWithSCA(
   amount: number,
   currency: string = "usd",
-  customerId?: string
+  customerId?: string,
 ) {
   const paymentIntent = await stripe.paymentIntents.create({
     amount: Math.round(amount * 100),
@@ -153,10 +151,7 @@ export async function createPaymentIntentWithSCA(
   };
 }
 
-export async function confirmPaymentWithSCA(
-  paymentIntentId: string,
-  paymentMethodId: string
-) {
+export async function confirmPaymentWithSCA(paymentIntentId: string, paymentMethodId: string) {
   const paymentIntent = await stripe.paymentIntents.confirm(paymentIntentId, {
     payment_method: paymentMethodId,
   });
@@ -197,8 +192,8 @@ export async function createSubscription(input: SubscriptionInput) {
       stripeCustomerId: input.customerId,
       stripePriceId: input.priceId,
       status: subscription.status,
-      currentPeriodStart: new Date(subscription.current_period_start * 1000),
-      currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+      currentPeriodStart: new Date((subscription as any).current_period_start * 1000),
+      currentPeriodEnd: new Date((subscription as any).current_period_end * 1000),
     },
   });
 
@@ -221,10 +216,7 @@ export async function cancelSubscription(subscriptionId: string) {
   return subscription;
 }
 
-export async function updateSubscriptionStatus(
-  subscriptionId: string,
-  status: string
-) {
+export async function updateSubscriptionStatus(subscriptionId: string, status: string) {
   await db.subscription.updateMany({
     where: { stripeId: subscriptionId },
     data: { status },

@@ -8,7 +8,7 @@ import { db } from "@/lib/db";
 import { headers } from "next/headers";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-11-20.acacia",
+  apiVersion: "2025-10-29.clover",
 });
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
@@ -23,10 +23,7 @@ export interface WebhookEvent {
 /**
  * Verify webhook signature
  */
-export async function verifyWebhook(
-  body: string,
-  signature: string
-): Promise<Stripe.Event> {
+export async function verifyWebhook(body: string, signature: string): Promise<Stripe.Event> {
   return stripe.webhooks.constructEvent(body, signature, webhookSecret);
 }
 
@@ -132,8 +129,8 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     where: { stripeId: subscription.id },
     data: {
       status: subscription.status,
-      currentPeriodStart: new Date(subscription.current_period_start * 1000),
-      currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+      currentPeriodStart: new Date((subscription as any).current_period_start * 1000),
+      currentPeriodEnd: new Date((subscription as any).current_period_end * 1000),
     },
   });
 }

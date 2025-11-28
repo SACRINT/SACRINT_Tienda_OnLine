@@ -204,7 +204,7 @@ export async function executeTransitionLogic(
 
     case "CANCELLED":
       // Restaurar stock si la orden se cancela
-      if (fromStatus === "PROCESSING" || fromStatus === "PROCESSING") {
+      if (fromStatus === "PENDING" || fromStatus === "PAID") {
         await restoreStock(order);
       }
       break;
@@ -216,18 +216,20 @@ export async function executeTransitionLogic(
 
     case "SHIPPED":
       // Registrar fecha de envío
-      await db.order.update({
-        where: { id: orderId },
-        data: { shippedAt: new Date() },
-      });
+      // Note: shippedAt field not yet implemented in Order schema
+      // await db.order.update({
+      //   where: { id: orderId },
+      //   data: { shippedAt: new Date() },
+      // });
       break;
 
     case "DELIVERED":
       // Registrar fecha de entrega
-      await db.order.update({
-        where: { id: orderId },
-        data: { deliveredAt: new Date() },
-      });
+      // Note: deliveredAt field not yet implemented in Order schema
+      // await db.order.update({
+      //   where: { id: orderId },
+      //   data: { deliveredAt: new Date() },
+      // });
       break;
   }
 }

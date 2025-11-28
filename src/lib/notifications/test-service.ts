@@ -3,13 +3,14 @@
  */
 import { sendEmail } from "../email/email-service";
 import { sendSMS } from "./sms-service";
-import { OrderConfirmationTemplate } from "../email/templates";
+import { EmailTemplate } from "@/lib/db/enums";
 
 export async function sendTestEmail(email: string) {
   return sendEmail({
     to: email,
     subject: "Test Email from Tienda Online",
-    react: OrderConfirmationTemplate({ orderNumber: "TEST-001", total: 99.99 }),
+    template: EmailTemplate.ORDER_CONFIRMATION,
+    data: { orderNumber: "TEST-001", total: 99.99 },
   });
 }
 

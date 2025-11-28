@@ -10,7 +10,8 @@ import React from "react";
 /**
  * Loading component for suspended components
  */
-export const LoadingFallback = () => {
+export const LoadingFallback = ({ isLoading }: { isLoading?: boolean } = {}) => {
+  if (!isLoading) return null;
   return React.createElement(
     "div",
     { className: "flex h-64 items-center justify-center" },

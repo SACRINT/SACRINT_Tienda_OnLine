@@ -43,7 +43,7 @@ export async function generateInvoice(
       subtotal: order.subtotal,
       tax: order.tax,
       total: order.total,
-      status: "PROCESSING",
+      status: "DRAFT",
     },
   });
 
@@ -54,8 +54,8 @@ export async function generateInvoice(
     items: order.items.map((item) => ({
       description: item.product.name,
       quantity: item.quantity,
-      unitPrice: Number(item.price),
-      total: Number(item.price) * item.quantity,
+      unitPrice: Number(item.priceAtPurchase),
+      total: Number(item.priceAtPurchase) * item.quantity,
     })),
     subtotal: Number(order.subtotal),
     tax: Number(order.tax),
