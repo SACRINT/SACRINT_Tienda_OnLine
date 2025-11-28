@@ -32,7 +32,7 @@ export function createDynamicComponent<P = {}>(
   },
 ) {
   return dynamic(importFn, {
-    loading: options?.loading || LoadingFallback,
+    loading: options?.loading || (() => <LoadingFallback isLoading={true} />),
     ssr: options?.ssr ?? true,
   });
 }
