@@ -31,7 +31,7 @@ jobs:
         run: npm run lint
 
       - name: Annotate code with ESLint results
-        uses: ataylorme/eslint-annotate-action@v2
+        uses: ataylorme/eslint-annotate-action@v3
         if: always()
         with:
           repo-token: "${{ secrets.GITHUB_TOKEN }}"
